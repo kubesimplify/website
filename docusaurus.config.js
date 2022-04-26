@@ -13,8 +13,8 @@ const config = {
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  organizationName: "verma-kunal", // Usually your GitHub org/user name.
-  projectName: "kubesimplify-web", // Usually your repo name.
+  organizationName: "kubesimplify", // Usually your GitHub org/user name.
+  projectName: "website", // Usually your repo name.
   deploymentBranch: "gh-pages",
 
   presets: [
