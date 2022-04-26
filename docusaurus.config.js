@@ -13,8 +13,8 @@ const config = {
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  organizationName: "kubesimplify", // Usually your GitHub org/user name.
-  projectName: "website", // Usually your repo name.
+  organizationName: "verma-kunal", // Usually your GitHub org/user name.
+  projectName: "kubesimplify-web", // Usually your repo name.
   deploymentBranch: "gh-pages",
 
   presets: [
@@ -52,24 +52,23 @@ const config = {
   ],
 
   /* i18n support
-   i18n: {
-     defaultLocale: "en",
-     locales: ["en", "fr", "fa"],
-     localeConfigs: {
-       en: {
-         label: 'English',
-         direction: 'ltr',
-         htmlLang: 'en-US',
-       },
-       fr: {
-         label: 'Français',
-         direction: 'ltr',
-         htmlLang: 'fr-FR',
-       },
-     },
-   }, 
-  */
-
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "fr", "fa"],
+    localeConfigs: {
+      en: {
+        label: "English",
+        direction: "ltr",
+        htmlLang: "en-US",
+      },
+      fr: {
+        label: "Français",
+        direction: "ltr",
+        htmlLang: "fr-FR",
+      },
+    },
+  },
+*/
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
 
