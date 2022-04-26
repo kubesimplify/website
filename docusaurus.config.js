@@ -75,10 +75,10 @@ const config = {
 
     ({
       navbar: {
-        title: "My Site",
+        title: "Kubesimplify",
         logo: {
-          alt: "My Site Logo",
-          src: "img/logo.svg",
+          alt: "Kubesimplify Logo",
+          src: "img/color.svg",
         },
         items: [
           {
