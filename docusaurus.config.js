@@ -8,9 +8,9 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const config = {
   title: "Kubesimplify",
   tagline: "Simplifying Cloud Native for All",
-  url: "https://github.com",
-  baseUrl: "/kubesimplify/",
-  onBrokenLinks: "throw",
+  url: "https://kubesimplify.github.io",
+  baseUrl: "/website/",
+  onBrokenLinks: "ignore",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
   organizationName: "kubesimplify", // Usually your GitHub org/user name.
