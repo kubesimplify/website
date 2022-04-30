@@ -110,16 +110,16 @@ const config = {
             title: "Community",
             items: [
               {
-                label: "Stack Overflow",
-                href: "https://stackoverflow.com/questions/tagged/docusaurus",
+                label: "LinkedIn",
+                href: "https://www.linkedin.com/company/kubesimplify/",
               },
               {
                 label: "Discord",
-                href: "https://discordapp.com/invite/docusaurus",
+                href: "https://discord.gg/HpAym4xQkc",
               },
               {
                 label: "Twitter",
-                href: "https://twitter.com/docusaurus",
+                href: "https://twitter.com/kubesimplify",
               },
             ],
           },
@@ -132,7 +132,7 @@ const config = {
               },
               {
                 label: "GitHub",
-                href: "https://github.com/facebook/docusaurus",
+                href: "https://github.com/kubesimplify",
               },
             ],
           },
