@@ -10,7 +10,7 @@ const config = {
   tagline: "Simplifying Cloud Native for All",
   url: "https://kubesimplify.github.io",
   baseUrl: "/website/",
-  onBrokenLinks: "ignore",
+  onBrokenLinks: "ignore", //  We will change this to "throw" when proper setup is done
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
   organizationName: "kubesimplify", // Usually your GitHub org/user name.
