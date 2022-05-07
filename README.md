@@ -5,7 +5,7 @@
 
 Kubesimplfy's new website. This codebase is what runs on [Kubesimplify](https://kubesimplify.github.io/website/). For new developers getting started, run the following in your terminal:
 
-Fork the repo by clicking the fork button. This will create a copy of the repo in your account, changes done here will not be shown in the main repo. 
+Fork the repo by clicking the fork button. This will create a copy of the repo in your account, changes done here will be shown in the main repo. 
  
 Clone the repo to your local device:
 
@@ -13,7 +13,6 @@ Clone the repo to your local device:
 
 Install dependencies:
 
-    $ npm
     $ npm install docusaurus
 
 Start running the website on your computer:
