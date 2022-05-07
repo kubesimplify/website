@@ -290,7 +290,6 @@
 .hp_cont_3_blog {
     margin-left:2%;
 }
-
 }
 
 @media only screen and (max-width: 1200px) {
@@ -330,7 +329,6 @@
     .hp_cont_2a{
         width: 460px;
     }
-
 }
 
   @media only screen and (max-width: 1000px) {
@@ -396,7 +394,6 @@
         width: 500px;
         height: 300px;
     }
-
   } 
 
   @media only screen and (max-width: 768px) {
@@ -408,7 +405,6 @@
     .hp_cont_1_p1,.hp_cont_1_p2,.hp_cont_1_btn{
         margin-left: 10%;
     }
-
   }
   
 
@@ -435,5 +431,4 @@
         width: 500px;
         height: 300px;
     }
-
   }
