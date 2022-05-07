@@ -5,6 +5,8 @@
 
 Kubesimplfy's new website. This codebase is what runs on [Kubesimplify](https://kubesimplify.github.io/website/). For new developers getting started, run the following in your terminal:
 
+Fork the repo by clicking the fork button. This will create a copy of the repo in your account, changes done here will not be shown in the main repo. 
+ 
 Download the code to your computer:
 
     $ git clone https://kubesimplify.github.io/website/ && cd site
