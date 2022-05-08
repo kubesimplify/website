@@ -26,7 +26,7 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+            "https://github.com/kubesimplify/website",
         },
         blog: {
           showReadingTime: true,
@@ -88,7 +88,7 @@ const config = {
           },
           // { to: "/blog", label: "Blog", position: "left" },
           {
-            href: "https://github.com/facebook/docusaurus",
+            href: "https://github.com/kubesimplify/website",
             label: "GitHub",
             position: "right",
           },
