@@ -35,7 +35,7 @@ npm install
 
 ```bash
 
-git remote add upstream https://github.com/YOUR_USERNAME/website-1.git
+git remote add upstream https://github.com/kubesimplify/website.git
 
 ```
 To verify 
@@ -49,8 +49,8 @@ You will get output similar to this
 
 origin  https://github.com/<YOUR_USERNAME>/website-1.git (fetch)
 origin  https://github.com/<YOUR_USERNAME>/website-1.git (push)
-upstream         https://github.com/YOUR_USERNAME>/website-1.git (fetch)
-upstream         https://github.com/YOUR_USERNAME>/website-1.git (push)
+upstream          https://github.com/kubesimplify/website.git (fetch)
+upstream          https://github.com/kubesimplify/website.git (push)
 
 ```
 
