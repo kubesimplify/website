@@ -1,31 +1,15 @@
-// REFER TO THIS SECTION TO CONTRIBUTE TO THIS FILE
-
-// Here 
-
+//The naming convention used in this file is mentioned below :
 // 1. hp refers to Homepage
 // 2. cont refers to Container
 // 3. p refers to Paragraph
-
-// For Example :-
-
 // (hp_cont_3_btn2_content) refers to "Content present in Button number 2  of Container number 3 on Homepage"
 
-// File for homepage
-
 import React from 'react';
-
-// Imported CSS file from "./styles.module.css"
-
 import styles from './styles.module.css';
-
-// Imported all the images below
-
 import comments from './assests/Comments.png'
 import reactions from './assests/Reactions.png'
 import computer from './assests/Computer.png'
 import githubActions from './assests/github-actions.png'
-import homepageVid from './assests/Videos.png'
-import homepageBlog from './assests/Blogs.png'
 import vidIcon from './assests/Video-Icon.png'
 import blogIcon from './assests/Blog-Icon.png'
 import Link from './assests/Link.png'
