@@ -1,7 +1,7 @@
 name:  Bug Report
-	description: Report a bug encountered with Kubesimplify Website
-	title: '[Bug] <description>'
-  labels: ['triage/awaiting','bug']
+description: Report a bug encountered with Kubesimplify Website
+title: '[Bug] <description>'
+labels: ['triage/awaiting','bug']
 body:
   - type: textarea
     id: description
