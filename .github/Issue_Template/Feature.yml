@@ -1,6 +1,7 @@
-name: 💡Feature 
+name: Feature Request
+description: Suggest a/an feature/enhancement to Kubesimplify's website
 title: '[FEATURE] <description>'
-labels: ['⭐ goal: addition','triage/accepted','triage/awaiting']
+labels: ['triage/awaiting', 'enhancement']
 body:
   - type: textarea
     id: description
