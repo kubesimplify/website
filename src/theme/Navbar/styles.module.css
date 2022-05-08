@@ -1,0 +1,294 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+.navbar_logo{
+   margin-left: 7%;
+}
+.navbar_positioning{
+    display:flex;
+   margin-top: 5px;
+}
+.navbar_about_word{
+    font-family: 'Poppins';
+    font-weight:500;
+    font-style: normal;
+    color:white;
+}
+.navbar{
+    background-color: #1B2731;
+}
+.navbar_about{
+    margin-left: 25%;
+    margin-top: 20px;
+}
+.navbar_learn{
+    margin-left: 10px;
+}
+.navbar_community{
+     margin-left: -5px;
+}
+.navbar_community_word{
+    font-family: 'Poppins';
+    font-weight:500;
+    font-style: normal;
+    color:white;
+}
+.navbar_contact{
+    margin-top:20px;
+    margin-left: 28px;
+}
+.navbar_dropdown{
+    margin-top:17px;
+    width:80%;
+}
+.navbar_contact_word{
+    font-family: 'Poppins';
+    font-weight:500;
+    font-style: normal;
+    color:white;
+}
+.navbar_dropdown_content {
+    display: none;
+    position: absolute;
+    background-color: #1B2731;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+   
+  }
+  .navbar_dropdown_content a {
+    float: none;
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-family: 'Poppins';
+}
+  .navbar_dropbtn{
+      color: black;
+  }
+  .navbar_dropdown .navbar_dropbtn {
+    font-size: 1rem;
+    border: none;
+    outline: none;
+    color: white;
+    background-color: inherit;
+    font-family: 'Poppins';
+    margin: 0;
+    margin-left: 10px;
+    width: 140%;
+  }
+  .navbar_dropdown:hover .navbar_dropdown_content {
+    display: block;
+  }
+
+  .navbar_newsletter{
+      margin-top: 20px;
+  }
+  .navbar_newsletter_content{
+    font-family: 'Poppins';
+    font-weight:500;
+    font-style: normal;
+    color:white;
+  }
+  .navbar_button {
+    border-radius: 6px;
+    font-size: 20px;
+    font-family: 'Poppins';
+    /* padding: 20px 20px 20px 20px; */
+    margin-top: 15px;
+    margin-left: 18px;
+    margin-bottom : 20px;
+    border: solid 3px transparent;
+    background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), linear-gradient(95.81deg, #34EF42 -23.83%, #27C9F4 121.82%);
+    background-origin: border-box;
+    box-shadow: 2px 1000px 1px #1B2731 inset;
+  }
+  
+  .navbar_text {
+    font-weight: bold;
+    background: linear-gradient(94.9deg, #34EF42 -32.68%, #27C9F4 130.84%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  }
+  .navbar_blog_design{
+      border-top: 1px solid white;
+  }
+  .navbar_workshops_designs, .navbar_contri_designs{
+    border-top: 1px solid white;
+  }
+
+ /* Using Media Gallery for Responsive Design  */
+
+ @media only screen and (max-width: 1200px){
+    .navbar_about{
+        margin-left: 15%;
+        margin-top: 20px;
+    }
+ }
+ @media only screen and (max-width: 1045px){
+    .navbar_about{
+        margin-left: 10%;
+        margin-top: 20px;
+    }
+    .navbar_logo{
+        margin-left: 2%;
+     }
+ }
+ @media only screen and (max-width: 930px){
+    .navbar_about{
+        margin-left: 5%;
+        margin-top: 20px;
+    }
+    .navbar_logo{
+        margin-left: 2%;
+    }
+}
+ @media only screen and (max-width: 889px){
+    .navbar_about{
+        margin-left: 2%;
+        margin-top: 20px;
+    }
+    .navbar_logo{
+        margin-left: 1%;
+    }
+     .navbar_positioning{
+        display:flex;
+       margin-top: 5px;
+    }
+   .logo {
+       width:120px;
+}
+ }
+ @media only screen and (max-width: 600px) {
+    .navbar_logo{
+        margin-left: 1%;
+     }
+     .logo {
+        width:100px;
+        margin-top: 5px;
+ }
+     .navbar_positioning{
+         display:flex;
+        margin-top: 5px;
+     }
+     .navbar_about_word{
+         font-family: 'Poppins';
+         font-weight:300;
+         font-style: normal;
+         color:white;
+         font-size: 12px;
+     }
+     .navbar{
+         background-color: #1B2731;
+     }
+     .navbar_about{
+         margin-left: 5%;
+         margin-top: 27px;
+     }
+     .navbar_learn{
+         margin-left: 10px;
+     }
+     .navbar_community{
+          margin-left: -5px;
+     }
+     .navbar_community_word{
+         font-family: 'Poppins';
+         font-weight:300;
+         font-style: normal;
+         color:white;
+         font-size: 12px;
+     }
+     .navbar_contact{
+         margin-top:27px;
+         margin-left: 28px;
+     }
+     .navbar_dropdown{
+         margin-top:20px;
+         width:80%;
+     }
+     .navbar_contact_word{
+         font-family: 'Poppins';
+         font-weight:300;
+         font-style: normal;
+         color:white;
+         font-size: 12px;
+     }
+     .navbar_dropdown_content {
+         display: none;
+         position: absolute;
+         background-color: #1B2731;
+         min-width: 160px;
+         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+         z-index: 1;
+         border-radius: 5px;
+        
+       }
+       .navbar_dropdown_content a {
+         float: none;
+         color: white;
+         padding: 12px 16px;
+         text-decoration: none;
+         display: block;
+         font-family: 'Poppins';
+     }
+       .navbar_dropbtn{
+           color: black;
+       }
+       .navbar_dropdown .navbar_dropbtn {
+         font-size: 12px;
+         border: none;
+         outline: none;
+         color: white;
+         background-color: inherit;
+         font-weight: 200;
+         font-family: 'Poppins';
+         margin: 0;
+         margin-left: 10px;
+         width: 140%;
+       }
+       .navbar_dropdown:hover .navbar_dropdown_content {
+         display: block;
+       }
+     
+       .navbar_newsletter{
+           margin-top: 20px;
+       }
+       .navbar_newsletter_content{
+         font-family: 'Poppins';
+         font-weight:300;
+         font-style: normal;
+         color:white;
+       }
+       .navbar_button {
+         border-radius: 6px;
+         font-size: 10px;
+         font-family: 'Poppins';
+         /* padding: 20px 20px 20px 20px; */
+         margin-top: 15px;
+         margin-left: 18px;
+         margin-bottom : 20px;
+         border: solid 3px transparent;
+         background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), linear-gradient(95.81deg, #34EF42 -23.83%, #27C9F4 121.82%);
+         background-origin: border-box;
+         box-shadow: 2px 1000px 1px #1B2731 inset;
+       }
+       
+       .navbar_text {
+         font-weight: bold;
+         background: linear-gradient(94.9deg, #34EF42 -32.68%, #27C9F4 130.84%);
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       
+       }
+       .navbar_blog_design{
+           border-top: 1px solid white;
+       }
+       .navbar_workshops_designs, .navbar_contri_designs{
+         border-top: 1px solid white;
+       }
+ }
+  
+  
+ 
+ 
