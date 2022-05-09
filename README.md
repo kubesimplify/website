@@ -19,7 +19,7 @@ Clone the repo to your local device:
 ```
 Install dependencies:
 ```bash
-    $ npm install docusaurus
+    $ npm install 
 ```
 To run the website on your computer:
 ```bash
