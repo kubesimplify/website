@@ -9,7 +9,7 @@ const config = {
   title: "Kubesimplify",
   tagline: "Simplifying Cloud Native for All",
   url: "https://kubesimplify.github.io",
-  baseUrl: "/website/",
+  baseUrl: "/",
   onBrokenLinks: "ignore", //  We will change this to "throw" when proper setup is done
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
