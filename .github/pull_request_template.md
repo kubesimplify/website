@@ -18,6 +18,9 @@
 [ ] - Not correct; marked as **not** done
 -->
 
+## Screenshots
+
+<!-- Add all the screenshots which support your changes -->
 
 ## Note to reviewers
 
