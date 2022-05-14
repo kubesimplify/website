@@ -11,7 +11,7 @@
     font-size: 36px;
     line-height: 56px;
     letter-spacing: -0.02em;
-    margin-left: 10%;
+    margin-left: 8%;
     margin-top: 50px; 
     max-width: fit-content;
 }
@@ -19,7 +19,7 @@
 .hp_cont_1_p2{
     font-size: 18px;
     line-height: 28px;
-    margin-left: 10%;
+    margin-left: 8%;
     margin-top: 30px; ;
     letter-spacing: -0.02em;
     max-width: fit-content;
@@ -33,18 +33,19 @@
 
 .hp_cont_1_img1{
     position: absolute;
-    width:380px;
-    height:230px;
-    margin-left:40%;
-    margin-top:-320px;
+    width:343px;
+    height:205px;
+    margin-left:45%;
+    margin-top:-345px;
     border-radius: 5px;
+      
 }
 
 .hp_cont_1_img2{
-    width:380px;
-    height:230px;
-    margin-left: 25%;
-    margin-top:-240px;
+    width:341px;
+    height:210px;
+    margin-left: 20%;
+    margin-top:-255px;
     border-radius: 5px;
 }
 
@@ -55,19 +56,19 @@
     height: 130.05px;
     margin-left:22%;
     margin-right: 50px;
-    margin-top:-320px;
+    margin-top:-330px;
 }
 
 .hp_cont_1_img4{
     position: absolute;
     width: 156.78px;
     height: 117.1px;
-    margin-left:4%;
+    margin-left:6%;
     margin-top:-30px;
 }
 
 .hp_cont_1_btn{
-    margin-left:10%;
+    margin-left:8%;
     margin-top:50px;
     background: linear-gradient(94.34deg, #5CFF68 0%, #05CAFF 100%);
     border-radius: 5px;
@@ -95,12 +96,12 @@
 }
 
 .hp_cont_2_1{
-    margin-left:10%;
+    margin-left:5%;
     margin-top: 50px;
 }
 
 .hp_cont_2_2{
-    margin-left:12%;
+    margin-left:20%;
     margin-top: 50px;
 }
 
@@ -156,7 +157,7 @@
 .hp_cont_2a_input::placeholder {
     opacity: 1; /* Firefox */
     position: absolute;
-    margin-left: 5%;
+    margin-left: 20%;
     font-family: 'Poppins';
     font-style: normal;
     font-size: 18px;
@@ -197,7 +198,7 @@
 }
 
 .hp_cont_3_vid {
-    margin-left: 10%;
+    margin-left: 4%;
     width: 540px;
     height: 300px;
     left: 170px;
@@ -209,7 +210,7 @@
 .hp_cont_3_blog {
     width: 540px;
     height: 300px;
-    margin-left: 5%;
+    margin-left: 12%;
     background: -webkit-linear-gradient(rgba(27, 39, 49, 0.9), rgba(27, 39, 49, 0.9)), url("./assests/Blogs.png");
     border-radius: 5px;
 }
