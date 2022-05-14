@@ -128,7 +128,7 @@ const config = {
             items: [
               {
                 label: "Blog",
-                to: "/blog",
+                href: "https://kubesimplify.com/",
               },
               {
                 label: "GitHub",
