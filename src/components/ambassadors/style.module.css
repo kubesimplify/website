@@ -183,27 +183,28 @@
 }
 
 .benifits_flex {
+    margin: 0 6rem;
+    
     display: flex;
-    margin: 0 12rem;
     flex-direction: row;
-    color: #1B2731;
-
     align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
+    justify-content: center;
 
+    color: #1B2731;
     position: relative;
     top: 80px;
 }
 
 .benifits_items {
     flex: 0 0 33.333333%;
-    margin: 1rem 2rem;
+    margin: 1rem 3rem;
     max-width: 240px;
 
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
 }
 
 .benifits_items_img {
