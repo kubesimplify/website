@@ -1,0 +1,248 @@
+.footer {
+    position: relative;
+    height: 572px;
+    left: 0px;
+    top: 2919px;
+    
+    background: #1B2731;
+}
+
+.title {
+    position: absolute;
+    width: 30%;
+    height: 10%;
+    left: 10%;
+    right: 70.05%;
+    top: 14.37%;
+    bottom: 74.95%;
+    border: solid;
+    border-width: 0px 0px 2px 0px;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 200%;
+    line-height: 90%;
+/* identical to box height, or 124% */
+
+    letter-spacing: -0.01em;
+
+    color: #FFFFFF;
+}
+
+.sponsors_content {
+    position: absolute;
+    width: 60%;
+    height: 10%;
+    left: 10%;
+    top: 179px;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 200;
+    font-size: 130%;
+    line-height: 130%;
+    /* or 183% */
+
+    letter-spacing: -2%;
+
+    color: #FFFFFF;
+}
+
+.sponsors_card {
+    position: absolute;
+    align-items: center;
+    left: 72%;
+    right: 10%;
+    top: 14%;
+    bottom: 25%;
+
+    background: #FFFFFF;
+    border-radius: 10px;
+}
+
+.sponsors_card_title {
+    position: absolute;
+    width: 80%;
+    height: 40%;
+    left: 10%;
+    right: 10%;
+    top: 10%;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 38px;
+    /* or 136% */
+
+    text-align: center;
+    letter-spacing: -0.01em;
+
+    color: #1B2731;
+}
+
+.sponsor_hashnode {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 39.84%;
+    bottom: 47%;
+
+    background: #2962FF;
+    border-radius: 10px;
+}
+
+.sponsor_hashnode_logo {
+    position: absolute;
+    left: 10%;
+    right: 60%;
+    top: 30%;
+    bottom: 25%;
+    border-width: 0ch;
+
+    background: transparent;
+}
+
+.logo {
+    width: 100%;
+    height: 100%;
+}
+
+.button_name {
+    position: absolute;
+    left: 80%;
+    top: 46.2%;
+    bottom: 53.8%;
+    
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 150%;
+    line-height: 0px;
+    /* identical to box height, or 0% */
+    
+    letter-spacing: -0.01em;
+    
+    color: #FFFFFF;    
+}
+
+.sponsors_or {
+    position: absolute;
+    width: 29px;
+    height: 35px;
+    left: 43%;
+    right: 43%;
+    top: 55%;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 35px;
+    /* identical to box height, or 125% */
+
+    text-align: center;
+    letter-spacing: -0.01em;
+
+    color: #1B2731;
+
+}
+
+.sponsor_coffee {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 68%;
+    bottom: 20%;
+
+    background: #FFDD00;
+    border-radius: 10px;
+}
+
+.coffee {
+    width: 100%;
+    height: 100%;
+}
+
+.hr {
+    position: relative;
+    height: 1px;
+    margin-left: 10%;
+    margin-right: 10%;
+    top: 85%;
+
+    background: #FFFFFF;
+}
+
+
+.end_first {
+    position: absolute;
+    left: 10%;
+    top: 95%;
+    width: 20%;
+    
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 100%;
+    line-height: 10%;
+    /* identical to box height, or 130% */
+
+    align-items: center;
+    letter-spacing: -0.01em;
+    
+    color: #FFFFFF;
+    
+}
+
+.mail_logo {
+    position: absolute;
+    width: 23px;
+    height: 20px;
+    left: 42.5%;
+    top: 93%;
+    background: #FFFFFF;
+}
+
+.mail_title {
+    position: absolute;
+    width: 284px;
+    height: 30px;
+    left: 45%;
+    top: 92%;
+    
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 100%;
+    line-height: 30px;
+    /* identical to box height, or 150% */
+    
+    text-align: justify;
+    letter-spacing: -0.01em;
+    
+    color: #FFFFFF;
+}
+
+.group_logo {
+    position: relative;
+    width: 13%;
+    left: 75%;
+    top: 84%;
+}
+
+.social {
+    position: static;
+    width: 24px;
+    height: 24px;
+    left: 170px;
+    top: 0px;
+    
+    /* Inside auto layout */
+    
+    flex: none;
+    order: 5;
+    flex-grow: 0;
+    margin: 0px 1%;    
+}
