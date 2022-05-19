@@ -30,8 +30,7 @@ communityContent: (
     <>
     <div className={styles.navbar_dropdown}>
           <button className={styles.navbar_dropbtn}>
-          Community 
-          <navbarLogo.arrow.Svg className={styles.navbar_arrow_trying} role="img" />
+          Community <navbarLogo.arrow.Svg className={styles.navbar_arrow_trying} role="img" />
           </button>
                <div className={styles.navbar_dropdown_content} >
                {/* Links for respective webpage will add when new webpages are formed */}
