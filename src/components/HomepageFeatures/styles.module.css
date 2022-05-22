@@ -20,6 +20,7 @@
     font-size: 18px;
     line-height: 28px;
     margin-left: 8%;
+    margin-right: 8%;
     margin-top: 30px; ;
     letter-spacing: -0.02em;
     max-width: fit-content;
@@ -35,7 +36,8 @@
     position: absolute;
     width:343px;
     height:205px;
-    margin-left:45%;
+    margin-left:46%;
+    margin-right: 46%;
     margin-top:-345px;
     border-radius: 5px;
       
@@ -45,6 +47,7 @@
     width:341px;
     height:210px;
     margin-left: 20%;
+    margin-right: 2%;
     margin-top:-255px;
     border-radius: 5px;
 }
@@ -55,7 +58,7 @@
     width: 206.63px;
     height: 130.05px;
     margin-left:22%;
-    margin-right: 50px;
+    margin-right: 3%;
     margin-top:-330px;
 }
 
@@ -63,7 +66,8 @@
     position: absolute;
     width: 156.78px;
     height: 117.1px;
-    margin-left:6%;
+    margin-left:7%;
+    margin-right: 3%;
     margin-top:-30px;
 }
 
@@ -97,10 +101,12 @@
 
 .hp_cont_2_1{
     margin-left:5%;
+    margin-left: 5%;
     margin-top: 50px;
 }
 
 .hp_cont_2_2{
+    margin-left:20%;
     margin-left:20%;
     margin-top: 50px;
 }
