@@ -161,7 +161,7 @@
     font-style: normal;
     font-size: 18px;
     letter-spacing: _0.01em;
-    color: rgba(255, 255, 255, 0.9);
+    color:  rgb(27, 39, 49);
   }
   
   :_ms_input_placeholder { /* Internet Explorer 10_11 */
@@ -187,7 +187,7 @@
     font-style: normal;
     font-size: 15px;
     letter-spacing: _0.01em;
-    color: #FFFFFF;
+    color:  #1B2731;
 }
 
 .hp_cont_3{
