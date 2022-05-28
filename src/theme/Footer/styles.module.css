@@ -1,15 +1,16 @@
 .footer {
     position: relative;
-    height: 572px;
+    height: 450px;
     left: 0px;
     top: 2919px;
+
     
     background: #1B2731;
 }
 
 .title {
     position: absolute;
-    width: 30%;
+    width: 23.5%;
     height: 10%;
     left: 10%;
     right: 70.05%;
@@ -21,8 +22,9 @@
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 400;
-    font-size: 200%;
+    font-size: 205%;
     line-height: 90%;
+    margin-top: -0.5%;
 /* identical to box height, or 124% */
 
     letter-spacing: -0.01em;
@@ -32,33 +34,33 @@
 
 .sponsors_content {
     position: absolute;
-    width: 60%;
+    width: 52%;
     height: 10%;
     left: 10%;
-    top: 179px;
+    margin-top: 9%;
 
     font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 200;
-    font-size: 130%;
-    line-height: 130%;
+    font-size: 1.2rem;
+    font-weight: lighter;
+    line-height: 2.4rem;
     /* or 183% */
 
-    letter-spacing: -2%;
-
-    color: #FFFFFF;
+    color: white;
 }
 
 .sponsors_card {
     position: absolute;
     align-items: center;
-    left: 72%;
+    left: 69.7%;
     right: 10%;
     top: 14%;
     bottom: 25%;
 
     background: #FFFFFF;
     border-radius: 10px;
+    margin-top: -0.8%;
+    height: 17.5rem;
+    width: 19.2rem;
 }
 
 .sponsors_card_title {
@@ -70,32 +72,38 @@
     top: 10%;
 
     font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 28px;
-    line-height: 38px;
+    font-style: bolder;
+    font-weight: lighter;
+    font-size: 1.5rem;
+    line-height: 30px;
     /* or 136% */
 
     text-align: center;
     letter-spacing: -0.01em;
 
     color: #1B2731;
+    margin-top: -2.5%;
 }
 
 .sponsor_hashnode {
     position: absolute;
-    left: 12%;
+    left: 9%;
     right: 12%;
-    top: 39.84%;
-    bottom: 47%;
+    bottom: 48%;
 
     background: #2962FF;
     border-radius: 10px;
+    border: none;
+
+    height: 3.2rem;
+    width: 15.6rem;
+    margin-top: -3%;
+    cursor: pointer;
 }
 
 .sponsor_hashnode_logo {
     position: absolute;
-    left: 10%;
+    left: 20%;
     right: 60%;
     top: 30%;
     bottom: 25%;
@@ -105,24 +113,24 @@
 }
 
 .logo {
-    width: 100%;
+    width: 102%;
     height: 100%;
 }
 
 .button_name {
     position: absolute;
-    left: 80%;
+    left: 90%;
     top: 46.2%;
     bottom: 53.8%;
     
     font-family: 'Poppins';
     font-style: normal;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 150%;
     line-height: 0px;
     /* identical to box height, or 0% */
     
-    letter-spacing: -0.01em;
+    /* letter-spacing: -0.01em; */
     
     color: #FFFFFF;    
 }
@@ -133,12 +141,12 @@
     height: 35px;
     left: 43%;
     right: 43%;
-    top: 55%;
+    top: 54%;
 
     font-family: 'Poppins';
     font-style: normal;
-    font-weight: 500;
-    font-size: 28px;
+    font-weight: lighter;
+    font-size: 1.5rem;
     line-height: 35px;
     /* identical to box height, or 125% */
 
@@ -151,13 +159,18 @@
 
 .sponsor_coffee {
     position: absolute;
-    left: 12%;
+    left: 9%;
     right: 12%;
     top: 68%;
     bottom: 20%;
 
     background: #FFDD00;
     border-radius: 10px;
+    border: none;
+    height: 3.2rem;
+    width: 15.6rem;
+    margin-top: 1%;
+    cursor: pointer;
 }
 
 .coffee {
@@ -170,16 +183,16 @@
     height: 1px;
     margin-left: 10%;
     margin-right: 10%;
-    top: 85%;
+    top: 79.5%;
 
-    background: #FFFFFF;
+    background: white;
 }
 
 
 .end_first {
     position: absolute;
     left: 10%;
-    top: 95%;
+    top: 91.8%;
     width: 20%;
     
     font-family: 'Poppins';
@@ -199,18 +212,19 @@
 .mail_logo {
     position: absolute;
     width: 23px;
-    height: 20px;
-    left: 42.5%;
-    top: 93%;
-    background: #FFFFFF;
+    height: 23px;
+    left: 43.5%;
+    top: 89.8%;
+    color: white;
+    cursor: pointer;
 }
 
 .mail_title {
     position: absolute;
     width: 284px;
     height: 30px;
-    left: 45%;
-    top: 92%;
+    left: 45.7%;
+    top: 89%;
     
     font-family: 'Poppins';
     font-style: normal;
@@ -223,19 +237,20 @@
     letter-spacing: -0.01em;
     
     color: #FFFFFF;
+    cursor: pointer;
 }
 
 .group_logo {
     position: relative;
     width: 13%;
-    left: 75%;
-    top: 84%;
+    left: 79.2%;
+    top: 78.8%;
 }
 
 .social {
     position: static;
-    width: 24px;
-    height: 24px;
+    width: 21px;
+    height: 21px;
     left: 170px;
     top: 0px;
     
@@ -244,5 +259,49 @@
     flex: none;
     order: 5;
     flex-grow: 0;
-    margin: 0px 1%;    
+    margin: 0px 1%;  
+    color: #1B2731;
+    background: white;
+    border-radius: 11px;
 }
+
+.social1{
+    width: 20px;
+    height: 20px;
+    color: #1B2731;
+    background: white;
+    border-radius: 11px;
+    margin-right: 0px;
+}
+.social2{
+    width: 20px;
+    height: 20px;
+    color: #1B2731;
+    background: white;
+    border-radius: 11px;
+    margin-left: 9px;
+}
+.social3{
+    width: 21px;
+    height: 21px;
+    color: white;
+    margin-left: 8px;
+}
+
+/* Hover color on social icons if needed */
+
+/* .social1:hover{
+    color: #2e8555;
+}
+.social2:hover{
+    color: #2e8555;
+}
+.social3:hover{
+    color: #2e8555;
+}
+.mail_logo:hover{
+    color: #2e8555;
+}
+.mail_title:hover{
+    color: #2e8555;
+} */
