@@ -252,6 +252,7 @@
     width: 150px;
     border:none;
     margin-left: 35px;
+    cursor: pointer;
 }
 
 .hp_cont_3_btn1_content,.hp_cont_3_btn2_content{
