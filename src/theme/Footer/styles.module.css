@@ -91,6 +91,7 @@
 
     background: #2962FF;
     border-radius: 10px;
+    transform: translateY(28px);
 }
 
 .sponsor_hashnode_logo {
@@ -133,7 +134,7 @@
     height: 35px;
     left: 43%;
     right: 43%;
-    top: 55%;
+    top: 63%;
 
     font-family: 'Poppins';
     font-style: normal;
@@ -158,6 +159,7 @@
 
     background: #FFDD00;
     border-radius: 10px;
+    transform: translateY(28px);
 }
 
 .coffee {
