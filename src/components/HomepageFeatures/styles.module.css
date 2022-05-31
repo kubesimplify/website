@@ -70,17 +70,24 @@
     margin-left:10%;
     margin-top:50px;
     background: linear-gradient(94.34deg, #5CFF68 0%, #05CAFF 100%);
-    border-radius: 5px;
+    border-radius: 30px;
     height: 38px;
     width: 200px;
     border:none;
+    transition: background 0.5s;
+    padding-top: 4px;
+    text-decoration: none;
+}
+
+.hp_cont_1_btn:hover{
+    background: linear-gradient(94.34deg, #18b923 0%, #099dc3 100%);
 }
 
 .hp_cont_1_btn_content{
     font-family: 'Poppins';
     font-style: normal;
-    font-weight: 600;
-    font-size: 23px;
+    font-weight: 560;
+    font-size: 20px;
     color: #FFFFFF;
 }
 
