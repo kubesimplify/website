@@ -46,7 +46,7 @@ const benifits = [
 const Benifits = () => {
     return (
         <div className={Styles.benifits_containner}>
-            <h2 className={Styles.benifits_title}>Benifits</h2>
+            <h2 className={Styles.benifits_title}>Benefits</h2>
             <div className={Styles.benifits_underline}></div>
 
             <div className={Styles.benifits_flex}>
