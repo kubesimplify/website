@@ -1,0 +1,243 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.hero_containner {
+    position: absolute;
+    width: 100%;
+    height: 420px;
+    left: 0px;
+    top: 105px;
+    background: rgba(27, 39, 49, 0.02);
+}
+
+.box {
+    position: relative;
+    width: 430px;
+    height: 150px;
+    margin: auto;
+    padding:2.5rem;
+    top: 40px;
+    background: #1B2731;
+    border-radius: 10px;
+
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo{
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.box span {
+    position: relative;
+
+    font-style: normal;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 50px;
+
+    text-align: center;
+    letter-spacing: -0.02em;
+
+    color: #FFFFFF;
+}
+
+.hero_para {
+    margin: 5rem auto;
+    width: 65%;
+
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 42px;
+
+    display: flex;
+    align-items: center;
+    text-align: center;
+    letter-spacing: -0.01em;
+
+    color: #1B2731;
+
+}
+
+/* =================================================================================================== */
+
+/* CRETERIA SECTION  */
+.criteria_containner {
+    position: absolute;
+    width: 100%;
+    height: 360px;
+    left: 0px;
+    top: 540px;
+    z-index: -1;
+    background: #1B2731;
+    padding: 2.5rem 4rem;
+    text-align: center;
+}
+
+.criteria_title {
+    position: relative;
+
+    font-style: normal;
+    font-weight: 400;
+    font-size: 38px;
+    line-height: 48px;
+
+    color: #ffffff;
+}
+
+.criteria_underline {
+    background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
+    width: 180px;
+    height:2px;
+    margin: auto;
+}
+
+.criteria_flex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.criteria_items {
+    display: inline-block;
+    position: relative;
+    top: 40px;
+
+    height: 140px;
+    width: 240px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.criteria_items_img {
+    position: relative;
+    width: 40px;
+    height: 30px;
+    margin: 10px 0;
+}
+
+.criteria_items_heading {
+
+    font-style: normal;
+    font-weight: 400;
+    font-size: 28px;
+    text-transform: capitalize;
+
+    color: #FFFFFF;
+}
+
+.criteria_items_para {
+    position: relative;
+    top: -10px;
+
+    font-style: normal;
+    font-size: 16px;
+
+    color: #FFFFFF;
+}
+
+/* =================================================================================================== */
+
+/* BENIFITS SECTION  */
+.benifits_containner {
+    position: absolute;
+    width: 100%;
+    height: 540px;
+    left: 0px;
+    top: 900px;
+
+    background: rgba(27, 39, 49, 0.02);
+}
+
+
+.benifits_title {
+    position: relative;
+    top: 30px;
+    text-align: center;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 48px;
+
+    color: #1B2731;
+}
+
+.benifits_underline {
+    position: relative;
+    top: 20px;
+
+    background-image:linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
+    width: 180px;
+    height:2px;
+    margin: auto;
+}
+
+.benifits_flex {
+    margin: 0 6rem;
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    color: #1B2731;
+    position: relative;
+    top: 80px;
+}
+
+.benifits_items {
+    flex: 0 0 33.333333%;
+    margin: 1rem 3rem;
+    max-width: 240px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.benifits_items_img {
+    height: 40px;
+}
+
+.benifits_items_heading {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 40px;
+    text-transform: capitalize;
+
+    color: #1B2731;
+}
+
+.benifits_items_para {
+    position: relative;
+    top: -10px;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 20px;
+
+    display: flex;
+    text-align: center;
+    letter-spacing: -0.025em;
+
+    color: #1B2731;
+}
+
+
+/* =================================================================================================== */
