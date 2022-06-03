@@ -43,7 +43,8 @@ communityContent: (
   ),
 aboutContent: (
     <>
-      <a className={styles.navbar_contact_word} href="/website/about" target="blank">About</a>
+      <a className={styles.navbar_contact_word} href="/website/about">About</a>
+      {/* <a className={styles.navbar_contact_word} href="/website/about" target="blank">About</a> */}
     </>
     ),
 }
