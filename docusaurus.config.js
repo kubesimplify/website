@@ -8,9 +8,9 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const config = {
   title: "Kubesimplify",
   tagline: "Simplifying Cloud Native for All",
-  url: "https://github.com",
-  baseUrl: "/kubesimplify/",
-  onBrokenLinks: "throw",
+  url: "https://kubesimplify.github.io",
+  baseUrl: "/website/",
+  onBrokenLinks: "ignore", //  We will change this to "throw" when proper setup is done
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
   organizationName: "kubesimplify", // Usually your GitHub org/user name.
@@ -26,7 +26,7 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+           "https://github.com/kubesimplify/website",
         },
         blog: {
           showReadingTime: true,
@@ -88,7 +88,7 @@ const config = {
           },
           // { to: "/blog", label: "Blog", position: "left" },
           {
-            href: "https://github.com/facebook/docusaurus",
+            href: "https://github.com/kubesimplify/website",
             label: "GitHub",
             position: "right",
           },
@@ -110,16 +110,16 @@ const config = {
             title: "Community",
             items: [
               {
-                label: "Stack Overflow",
-                href: "https://stackoverflow.com/questions/tagged/docusaurus",
+                label: "LinkedIn",
+                href: "https://www.linkedin.com/company/kubesimplify/",
               },
               {
                 label: "Discord",
-                href: "https://discordapp.com/invite/docusaurus",
+                href: "https://discord.gg/HpAym4xQkc",
               },
               {
                 label: "Twitter",
-                href: "https://twitter.com/docusaurus",
+                href: "https://twitter.com/kubesimplify",
               },
             ],
           },
@@ -132,7 +132,7 @@ const config = {
               },
               {
                 label: "GitHub",
-                href: "https://github.com/facebook/docusaurus",
+                href: "https://github.com/kubesimplify",
               },
             ],
           },
