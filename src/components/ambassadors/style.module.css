@@ -256,7 +256,7 @@
     background: rgba(27, 39, 49, 0.02);
 }
 
-.application_containner_mini{
+.application_containner_mini {
     position: relative;
     background-color: rgba(27, 39, 49, 1);
     height: 220px;
@@ -279,7 +279,7 @@
     color: #FFFFFF;
 }
 
-.application_containner_mini_para{
+.application_containner_mini_para {
     position: relative;
     width: 70%;
 
@@ -292,7 +292,7 @@
     color: #FFFFFF;
 }
 
-.application_containner_mini_button{
+.application_containner_mini_button {
     position: relative;
     bottom: 124px;
 
@@ -307,16 +307,86 @@
     font-style: normal;
     font-size: 16px;
     line-height: 0px;
-    color:#FFFFFF;;
+    color: #FFFFFF;
+    ;
 }
-.application_qr_code{
+
+.application_qr_code {
     position: relative;
-    height:150px;
-    width:150px; 
+    height: 150px;
+    width: 150px;
     left: 320px;
     bottom: 120px;
 }
+
 .application_containner_img {
     height: 200px;
     margin-left: 1.5rem;
+}
+
+/* =================================================================================================== */
+/* FAQs SECTION  */
+.FAQs_containner {
+    position: absolute;
+    top: 1750px;
+
+    height: 400px;
+
+    margin: 0rem 0.5rem 0rem 8rem;
+}
+
+.FAQs_title {
+    position: relative;
+    top: 10px;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 48px;
+
+    color: #1B2731;
+}
+
+.FAQs_underline {
+    position: relative;
+    top: 2px;
+
+    background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
+    width: 160px;
+    height: 2px;
+}
+
+.FAQs_flex {
+    margin-top: 1rem;
+    height: 300px;
+    width: 70%;
+}
+
+.FAQs_question {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: bolder;
+    font-size: 20px;
+    line-height: 18px;
+    
+    letter-spacing: -0.01em;
+
+    color: #1B2731;
+}
+
+.FAQs_answer {
+    position: relative;
+    left:26px;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 18px;
+
+    letter-spacing: -0.01em;
+
+    color: #1B2731;
+    margin-bottom: 2rem;
 }
