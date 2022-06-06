@@ -166,7 +166,7 @@
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 38px;
+    font-size: 36px;
     line-height: 48px;
 
     color: #1B2731;
@@ -183,7 +183,7 @@
 }
 
 .benifits_flex {
-    margin: 0 6rem;
+    margin: 0 5rem;
     
     display: flex;
     flex-direction: row;
@@ -193,7 +193,7 @@
 
     color: #1B2731;
     position: relative;
-    top: 80px;
+    top: 70px;
 }
 
 .benifits_items {
@@ -215,7 +215,7 @@
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 30px;
+    font-size: 24px;
     line-height: 40px;
     text-transform: capitalize;
 
@@ -229,7 +229,7 @@
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 20px;
 
     display: flex;
