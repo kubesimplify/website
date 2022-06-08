@@ -104,7 +104,7 @@ This will run a local webserver with "live reload" conveniently enabled at `loca
 **10.** Track your changes.
 
 ```
-git add .
+git add  <file_name>
 ```
 
 **11.** Commit your changes. To contribute to this project, you must agree to the [Developer Certificate of Origin (DCO)](https://github.com/dcoapp/app#how-it-works) for each commit you make.
