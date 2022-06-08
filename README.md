@@ -3,7 +3,7 @@
 
 This repository contains the assets required to build the Kubesimplify website and documentation. We're glad that you want to contribute! 
 
-- [Code of Conduct ](code-of-conduct.md)
+- [Code of Conduct](code-of-conduct.md)
 
 <h1>Contributing Guidelines: </h1>
 
