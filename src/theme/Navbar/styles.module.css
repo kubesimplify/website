@@ -20,15 +20,13 @@
 }
 .navbar_about{
     margin-left: 38%;
-    margin-top: 18px;
-    cursor: pointer;
+    margin-top: 20px;
 }
 .navbar_learn{
     margin-left: 10px;
 }
 .navbar_community{
-     margin-left: 4px;
-     cursor: pointer;
+     margin-left: -5px;
 }
 .navbar_community_word{
     font-family: 'Poppins';
@@ -39,7 +37,6 @@
 .navbar_contact{
     margin-top:19px;
     margin-left: 28px;
-    cursor: pointer;
 }
 .navbar_dropdown{
     margin-top:17px;
@@ -108,8 +105,6 @@
     background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), linear-gradient(95.81deg, #34EF42 -23.83%, #27C9F4 121.82%);
     background-origin: border-box;
     box-shadow: 2px 1000px 1px #1B2731 inset;
-    padding: 0 5px;
-    cursor: pointer;
   }
   
   .navbar_text {
@@ -213,7 +208,7 @@
     text-decoration: none;
     display: block;
     font-family: 'Poppins';
-  }
+}
   .navbar_dropbtn{
       color: black;
   }
