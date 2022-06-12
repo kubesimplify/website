@@ -17,6 +17,7 @@ Make sure to adhere to the prompted submission guidelines while opening an issue
 
 ### How to find something to work on
 Kubesimplify is Fresh starting Community so there is a lot to do. Be in touch with [Discord Server](https://discord.gg/uFBC8MyeeU), Twitter and [official youtube Channel](https://www.youtube.com/c/saiyam911). There are a lot of ongoing projects and you can contribute to them.  
+
 ### How to open a pull request
 We recommend open an issue before editing and Pulling request. If you don't know "How to open a Pull request" We refer you to [this resource](https://opensource.com/article/19/7/create-pull-request-github)
 
