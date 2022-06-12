@@ -74,12 +74,19 @@
     height: 38px;
     width: 200px;
     border:none;
+    transition: 0.3s;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.hp_cont_1_btn:hover{
+    box-shadow: inset 0em 0em 0em 10em rgba(0, 0, 0, 0.1);
 }
 
 .hp_cont_1_btn_content{
     font-family: 'Poppins';
     font-style: normal;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 23px;
     color: #FFFFFF;
 }
