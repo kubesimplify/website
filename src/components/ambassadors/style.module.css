@@ -197,6 +197,7 @@
 }
 
 .benifits_items {
+    height: 10rem;
     flex: 0 0 33.333333%;
     margin: 1rem 3rem;
     max-width: 240px;
