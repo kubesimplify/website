@@ -22,7 +22,7 @@ We recommend open an issue before editing and Pulling request. If you don't know
 
 
 ## Prerequisites
-To use this repository and to Run Kubesimplify's website on your computer, you need the installed dependencies locally:
+To use this repository and to Run Kubesimplify's website on your local device, follow the below steps:
 
 Before you start, install the dependencies. Clone the repository and navigate to the directory:
 Clone the repo to your local device: 
