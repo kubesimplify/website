@@ -45,7 +45,7 @@ And then open up your web browser and go to [localhost:3000](http://localhost:30
 
 ## Find something to work on
 
-The first step to getting starting contributing to Kubesimplify is to find something to work on. Help is always welcome, and no contribution is too small!
+The first step to getting started contributing to Kubesimplify is to find something to work on. Help is always welcome, and no contribution is too small!
 Become a part of the Kubesimplify community by contributing. All types of contributions are allowed (code contributions, docs contributions, and community contributions too).
 
 Here are some things you can do today to get started contributing:
