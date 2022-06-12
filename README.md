@@ -6,7 +6,7 @@ This repository contains the assets required to build the Kubesimplify website a
 
 ## Contribute
 We're glad that you want to contribute! 
-A first step to contributing is to start with something you think you can add value in te Community. Start attending Kubesimplify meetings, join the [Discord channels](https://discord.gg/uFBC8MyeeU) and subscribe to the [official youtube Channel](https://www.youtube.com/c/saiyam911). Ask in community, We always Welcome new Contributors.
+A first step to contributing is to start with something you think you can add value in the community. Start attending Kubesimplify meetings, join the [Discord channels](https://discord.gg/uFBC8MyeeU) and subscribe to the [official youtube Channel](https://www.youtube.com/c/saiyam911). Ask in community, We always Welcome new Contributors.
 
 The Contributor Guide provides detailed instruction on how to get your ideas and bug fixes seen and accepted, including:
 - [Code of Conduct](code-of-conduct.md)
