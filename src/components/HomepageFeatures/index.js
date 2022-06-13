@@ -40,7 +40,7 @@ export default function HomepageFeatures() {
           <button className={styles.hp_cont_1_btn}>
 
             <p className={styles.hp_cont_1_btn_content}> 
-              Start learning
+              Start Learning Now
             </p>
 
           </button>
