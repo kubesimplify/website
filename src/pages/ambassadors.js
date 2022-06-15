@@ -5,6 +5,7 @@ import Hero from '../components/ambassadors/Hero'
 import Application from '../components/ambassadors/Application'
 import FAQs from '../components/ambassadors/FAQs'
 import Navbar from '../theme/Navbar'
+import Footer from '../theme/Footer'
 
 const Ambassdors = () => {
   return (
@@ -15,6 +16,7 @@ const Ambassdors = () => {
       <Benifits />
       <Application />
       <FAQs />
+      <Footer />
     </>
   )
 }
