@@ -25,7 +25,7 @@ To run the website on your computer:
 ```bash
     $ npm start
 ```
-And then open up your web browser and go to [localhost:3000](http://localhost:3000).
+And then open up your web browser and go to [localhost:3000](http://localhost:3000/).
 
 ## <h1>Code of conduct</h1>
 Participation in the Kubesimplify community is governed by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
