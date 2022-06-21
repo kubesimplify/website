@@ -1,8 +1,14 @@
-#FROM node:18-alpine3.15 as dev
+FROM node:18-alpine3.15 as dev
 
-#LABEL MAINTAINER="<>"
+LABEL MAINTAINER="<>"
 
-#EXPOSE 3000
+WORKDIR /app
+
+#RUN npm run clear
+
+#RUN npm install && npm run build
+
+EXPOSE 3000
 
 
 

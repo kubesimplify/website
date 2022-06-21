@@ -17,6 +17,8 @@ Clone the repo to your local device:
    git clone https://kubesimplify.github.io/website/ 
    cd website
 ```
+
+## Local Runner
 Install dependencies:
 ```bash
     $ npm install 
@@ -25,6 +27,18 @@ To run the website on your computer:
 ```bash
     $ npm start
 ```
+
+## Docker based Runner
+```sh
+# Production environment
+docker build --target=prod -t kubesimplify:website . --no-cache
+docker run --rm -d -p 3000:3000 kubesimplify:website
+# Dev testing environment
+docker build --target=dev -t kubesimplify:website . --no-cache
+docker run --rm -it -v $(pwd):/app -p 3000:3000 kubesimplify:website sh
+```
+
+
 And then open up your web browser and go to [localhost:3000](http://localhost:3000).
 
 ## <h1>Code of conduct</h1>
