@@ -34,7 +34,7 @@ communityContent: (
           </button>
                <div className={styles.navbar_dropdown_content} >
                {/* Links for respective webpage will add when new webpages are formed */}
-                  <a  href="#">Student Ambassador</a>                                                                   
+                  <a  href="/website/ambassadors">Student Ambassador</a>                                                                   
                   <a className={styles.navbar_workshops_designs} href="#">Workshops</a>
                   <a  className={styles.navbar_contri_designs} href="#">Contributors</a>
               </div>
