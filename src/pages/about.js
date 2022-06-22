@@ -28,11 +28,11 @@
 //   );
 // }
 import React from 'react';
-import Mission from '../components/Aboutpage/Mission';
-import Reach from '../components/Aboutpage/Reach';
-import Navbar from '../theme/Navbar/index';
-import Founder from '../components/AboutPage/Founder';
-import Newsletter from '../components/AboutPage/Newsletter';
+import Mission from '@site/src/components/Aboutpage/Mission';
+import Reach from '@site/src/components/Aboutpage/Reach';
+import Founder from '@site/src/components/AboutPage/Founder';
+import Newsletter from '@site/src/components/AboutPage/Newsletter';
+
 
 export default function Home() {
   return (
