@@ -1,6 +1,6 @@
 import React from 'react'
 import styles from './styles.module.css';
-import Saiyam from './images/Saiyam.png';
+import Saiyam from '@site/src/components/Aboutpage/images/Saiyam.png';
 
 
 

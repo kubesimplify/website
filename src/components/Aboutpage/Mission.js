@@ -3,11 +3,11 @@ import styles from './styles.module.css';
 
 
 //  Using this image in .ap_cont_2_box
-const mission = {
-   box: {
-    Svg: require('./images/opportunity.svg').default
-  }
-};
+// const mission = {
+//    box: {
+//     Svg: require('/images/opportunity.svg').default
+//   }
+// };
  // Function for Mission start
 const AboutpageFeatures = () => {
 
@@ -38,7 +38,7 @@ const AboutpageFeatures = () => {
 
        <div className={styles.ap_cont_2}>
        <div className={styles.ap_cont_2_box}>
-       <mission.box.Svg className={styles.ap_cont_2_box_image} role="img" />
+       {/* <mission.box.Svg className={styles.ap_cont_2_box_image} role="img" /> */}
       </div>
       </div>
 
