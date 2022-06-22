@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import styles from './styles.module.css'; // CSS modules 
-import { BsInstagram } from "react-icons/bs";
 import { AiOutlineTwitter } from "react-icons/ai";
 import { AiFillYoutube } from "react-icons/ai";
 import { FaDiscord } from "react-icons/fa";
@@ -36,27 +35,7 @@ const logo = {
   coffee : {
     Svg: require('@site/static/img/coffee.svg').default
   },
-  mail: {
-    Svg: require('@site/static/img/mail.svg').default
-  },
-  instagram: {
-    Svg: require('@site/static/img/Instagram.svg').default
-  },
-  twitter: {
-    Svg: require('@site/static/img/Twitter.svg').default
-  },
-  github: {
-    Svg: require('@site/static/img/GitHub.svg').default
-  },
-  youtube: {
-    Svg: require('@site/static/img/YouTube.svg').default
-  },
-  discord: {
-    Svg: require('@site/static/img/Discord.svg').default
-  },
-  linkedin: {
-    Svg: require('@site/static/img/LinkedIn.svg').default
-  }
+
 }
 
 function Footer() {
@@ -90,12 +69,6 @@ function Footer() {
         <a target="_blank" href="https://www.linkedin.com/company/kubesimplify/"><TiSocialLinkedin row="img" className={styles.social2}/></a>
         <a target="_blank" href="https://www.instagram.com/saiyampathak/"><AiOutlineInstagram row="img" className={styles.social2}/></a>
         <a target="_blank" href="https://github.com/kubesimplify"><AiFillGithub row="img" className={styles.social3}/></a>
-        {/* <a href="#"><logo.instagram.Svg row="img" className={styles.social} /></a>
-        <a href="#"><logo.twitter.Svg row="img" className={styles.social} /></a>
-        <a href="#"><logo.github.Svg row="img" className={styles.social} /></a>
-        <a href="#"><logo.linkedin.Svg row="img" className={styles.social} /></a>
-        <a href="#"><logo.youtube.Svg row="img" className={styles.social} /> </a>
-        <a href="#"><logo.discord.Svg row="img" className={styles.social} /></a>         */}
       </div> 
     </section>
   );

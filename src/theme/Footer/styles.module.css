@@ -1,6 +1,6 @@
 .footer {
     position: relative;
-    height: 450px;
+    height: 440px;
     left: 0px;
     top: 2919px;
 
@@ -9,36 +9,29 @@
 }
 
 .title {
-    position: absolute;
+    position: relative;
     width: 23.5%;
     height: 10%;
     left: 10%;
     right: 70.05%;
-    top: 14.37%;
-    bottom: 74.95%;
     border: solid;
     border-width: 0px 0px 2px 0px;
-
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 400;
     font-size: 205%;
     line-height: 90%;
-    margin-top: -0.5%;
+    margin-top: 4.3%;
 /* identical to box height, or 124% */
-
     letter-spacing: -0.01em;
-
     color: #FFFFFF;
 }
 
 .sponsors_content {
-    position: absolute;
+    position: relative;
     width: 52%;
-    height: 10%;
     left: 10%;
-    margin-top: 9%;
-
+    margin-top: 3%;
     font-family: 'Poppins';
     font-size: 1.2rem;
     font-weight: lighter;
@@ -49,27 +42,25 @@
 }
 
 .sponsors_card {
-    position: absolute;
+    position: relative;
     align-items: center;
     left: 69.7%;
     right: 10%;
-    top: 14%;
-    bottom: 25%;
 
     background: #FFFFFF;
     border-radius: 10px;
-    margin-top: -0.8%;
+    margin-top: -13.5%;
     height: 17.5rem;
     width: 19.2rem;
 }
 
 .sponsors_card_title {
-    position: absolute;
+    position: relative;
     width: 80%;
-    height: 40%;
+    height: 30%;
     left: 10%;
     right: 10%;
-    top: 10%;
+    top: 7%;
 
     font-family: 'Poppins';
     font-style: bolder;
@@ -82,14 +73,12 @@
     letter-spacing: -0.01em;
 
     color: #1B2731;
-    margin-top: -2.5%;
 }
 
 .sponsor_hashnode {
-    position: absolute;
+    position: relative;
     left: 9%;
     right: 12%;
-    bottom: 48%;
 
     background: #2962FF;
     border-radius: 10px;
@@ -97,32 +86,25 @@
 
     height: 3.2rem;
     width: 15.6rem;
-    margin-top: -3%;
+    margin-top: 3.6%;
     cursor: pointer;
 }
 
 .sponsor_hashnode_logo {
-    position: absolute;
-    left: 20%;
-    right: 60%;
-    top: 30%;
-    bottom: 25%;
-    border-width: 0ch;
-
     background: transparent;
 }
 
 .logo {
-    width: 102%;
-    height: 100%;
+    width: 10%;
+    height: 10%;
+    margin-right: 40%;
+    margin-top: -5%;
 }
 
 .button_name {
-    position: absolute;
-    left: 90%;
-    top: 46.2%;
-    bottom: 53.8%;
-    
+    left: 10%;
+    margin-top: -7%;
+    margin-left: 14%;
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
@@ -136,12 +118,12 @@
 }
 
 .sponsors_or {
-    position: absolute;
+    position: relative;
     width: 29px;
     height: 35px;
     left: 43%;
     right: 43%;
-    top: 54%;
+    top: 1.7%;
 
     font-family: 'Poppins';
     font-style: normal;
@@ -158,10 +140,10 @@
 }
 
 .sponsor_coffee {
-    position: absolute;
+    position: relative;
     left: 9%;
     right: 12%;
-    top: 68%;
+    top: 3%;
     bottom: 20%;
 
     background: #FFDD00;
@@ -183,48 +165,44 @@
     height: 1px;
     margin-left: 10%;
     margin-right: 10%;
-    top: 79.5%;
+    top: 5%;
 
     background: white;
 }
 
 
 .end_first {
-    position: absolute;
+    position: relative;
     left: 10%;
-    top: 91.8%;
+    top: 6.2%;
     width: 20%;
-    
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
     font-size: 100%;
     line-height: 10%;
     /* identical to box height, or 130% */
-
     align-items: center;
     letter-spacing: -0.01em;
-    
     color: #FFFFFF;
-    
 }
 
 .mail_logo {
-    position: absolute;
+    position: relative;
     width: 23px;
     height: 23px;
     left: 43.5%;
-    top: 89.8%;
+    top: 4%;
     color: white;
     cursor: pointer;
 }
 
 .mail_title {
-    position: absolute;
+    position: relative;
     width: 284px;
     height: 30px;
-    left: 45.7%;
-    top: 89%;
+    left: 46.1%;
+    top: -3.5%;
     
     font-family: 'Poppins';
     font-style: normal;
@@ -244,27 +222,8 @@
     position: relative;
     width: 13%;
     left: 79.2%;
-    top: 78.8%;
+    top: -9%;
 }
-
-.social {
-    position: static;
-    width: 21px;
-    height: 21px;
-    left: 170px;
-    top: 0px;
-    
-    /* Inside auto layout */
-    
-    flex: none;
-    order: 5;
-    flex-grow: 0;
-    margin: 0px 1%;  
-    color: #1B2731;
-    background: white;
-    border-radius: 11px;
-}
-
 .social1{
     width: 20px;
     height: 20px;
@@ -272,6 +231,7 @@
     background: white;
     border-radius: 11px;
     margin-right: 0px;
+    margin-top: -10%;
 }
 .social2{
     width: 20px;
