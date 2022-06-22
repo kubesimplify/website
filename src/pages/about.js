@@ -30,8 +30,8 @@
 import React from 'react';
 import Mission from '@site/src/components/Aboutpage/Mission';
 import Reach from '@site/src/components/Aboutpage/Reach';
-import Founder from '@site/src/components/AboutPage/Founder';
-import Newsletter from '@site/src/components/AboutPage/Newsletter';
+import Founder from '@site/src/components/Aboutpage/Founder';
+import Newsletter from '@site/src/components/Aboutpage/Newsletter';
 
 
 export default function Home() {
