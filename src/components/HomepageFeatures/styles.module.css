@@ -152,7 +152,7 @@
     width:356px;
     height:32px;
     background: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
-    border-radius: 5px;
+    border-radius: 4px;
     font-family: 'Poppins';
     font-style: normal;
     color: #FFFFFF;
@@ -186,6 +186,7 @@
     height:30px;
     border: none;
     margin-left: 10px;
+    cursor: pointer;
 }
 
 .hp_cont_2a_btn_content{
