@@ -175,6 +175,7 @@
     font-style: normal;
     color:white;
     font-size: 15px;
+    text-decoration: none!important;
      }
    .navbar_community_word{
     font-family: 'Poppins';
@@ -197,6 +198,7 @@
     font-style: normal;
     color:white;
     font-size: 15px;
+    
 }
 .navbar_dropdown_content {
     display: none;
