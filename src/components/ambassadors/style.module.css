@@ -63,7 +63,12 @@
     letter-spacing: -0.01em;
 
     color: #1B2731;
+}
 
+@media only screen and (max-width : 1300px){
+    .hero_para{
+        width: 75%;
+    }
 }
 
 /* =================================================================================================== */
@@ -145,6 +150,19 @@
     font-size: 14px;
 
     color: #FFFFFF;
+}
+
+@media only screen and (max-width:1300px){
+    .criteria_flex{
+        padding:0rem 0rem;
+    }
+    .criteria_items_heading{
+        font-size: 22px;
+    }
+    .criteria_items_para{
+        font-size: 14px;
+        width:80%
+    }
 }
 
 /* =================================================================================================== */
@@ -327,6 +345,34 @@
     margin-left: 1.5rem;
 }
 
+@media only screen and (max-width:1300px){
+    .application_containner{
+        top:1600px;
+        width:1200px;
+    }
+
+    .application_containner_mini_para{
+        width:70%;
+    }
+
+    .application_qr_code{
+        height:160px;
+        width:160px;
+
+        position: relative;
+        top: -130px;
+        left:240px;
+    }
+
+    .application_containner_mini_button {
+        top: -140px
+    }
+
+    .application_containner_img {
+        visibility: hidden;
+    }
+}
+
 /* =================================================================================================== */
 /* FAQs SECTION  */
 .FAQs_containner {
@@ -392,4 +438,9 @@
 
     color: #1B2731;
     margin-bottom: 2rem;
+}
+@media only screen and (max-width:1300px){
+    .FAQs_containner{
+        top:1900px;
+    }
 }
