@@ -20,13 +20,16 @@
 }
 .navbar_about{
     margin-left: 38%;
-    margin-top: 20px;
+    margin-top: 18px;
+    cursor: pointer;
 }
 .navbar_learn{
-    margin-left: 10px;
+    margin-left: 16px;
+    margin-top: 0px;
 }
 .navbar_community{
-     margin-left: -5px;
+     margin-left: 16px;
+     margin-top: 0px;
 }
 .navbar_community_word{
     font-family: 'Poppins';
@@ -35,8 +38,9 @@
     color:white;
 }
 .navbar_contact{
-    margin-top:19px;
-    margin-left: 28px;
+    margin-top: 18px;
+    margin-left: 39px;
+    cursor: pointer;
 }
 .navbar_dropdown{
     margin-top:17px;
@@ -98,13 +102,16 @@
     font-size: 15px;
     font-family: 'Poppins';
     /* padding: 20px 20px 20px 20px; */
-    margin-top: 15px;
-    margin-left: 18px;
+    margin-top: 16px;
+    margin-left: 24px;
     margin-bottom : 20px;
     border: solid 3px transparent;
     background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), linear-gradient(95.81deg, #34EF42 -23.83%, #27C9F4 121.82%);
     background-origin: border-box;
     box-shadow: 2px 1000px 1px #1B2731 inset;
+    padding: 0 5px;
+    transform: translateY(-4px);
+    cursor: pointer;
   }
   
   .navbar_text {
@@ -168,6 +175,7 @@
     font-style: normal;
     color:white;
     font-size: 15px;
+    text-decoration: none!important;
      }
    .navbar_community_word{
     font-family: 'Poppins';
@@ -190,6 +198,7 @@
     font-style: normal;
     color:white;
     font-size: 15px;
+    
 }
 .navbar_dropdown_content {
     display: none;
@@ -208,7 +217,7 @@
     text-decoration: none;
     display: block;
     font-family: 'Poppins';
-}
+  }
   .navbar_dropbtn{
       color: black;
   }

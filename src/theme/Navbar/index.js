@@ -42,6 +42,12 @@ communityContent: (
      </div>
     </>
   ),
+aboutContent: (
+    <>
+      <a className={styles.navbar_about_word} href="/website/about">About</a>
+      {/* <a className={styles.navbar_contact_word} href="/website/about" target="blank">About</a> */}
+    </>
+    ),
 }
  function Navbar() {
   
@@ -53,7 +59,7 @@ communityContent: (
                    <navbarLogo.logo.Svg className={styles.logo} role="img" />
                </div>
                <div className={styles.navbar_about}>
-                  <p className={styles.navbar_about_word}> About </p>
+                {navbarContent.aboutContent}
                 </div>
                 <div className={styles.navbar_learn}>
                  {navbarContent.learn}
