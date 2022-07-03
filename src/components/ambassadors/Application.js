@@ -11,10 +11,10 @@ const Application = () => {
             <h4 className={Styles.application_containner_mini_title}>Application</h4>
             <p className={Styles.application_containner_mini_para}>Apply for the Kubesimplify Ambassador Program now if you want to be a part of this mission!</p>
             <button className={Styles.application_containner_mini_button}>Apply Now</button>
-            <img className={Styles.application_qr_code} src={qr_code} alt=""/>
+            <img className={Styles.application_qr_code} src={qr_code} alt="qr code"/>
         </div>
 
-        <img className={Styles.application_containner_img} src={application_illustration} alt="" />
+        <img className={Styles.application_containner_img} src={application_illustration} alt="img not found" />
             
 
     </div>
