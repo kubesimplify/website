@@ -6,6 +6,14 @@
  */
 import React from 'react';
 import styles from './styles.module.css'; // CSS modules 
+import { AiOutlineTwitter } from "react-icons/ai";
+import { AiFillYoutube } from "react-icons/ai";
+import { FaDiscord } from "react-icons/fa";
+import { TiSocialLinkedin } from "react-icons/ti";
+import { AiOutlineInstagram } from "react-icons/ai";
+import { AiFillGithub } from "react-icons/ai";
+import { IoMdMail } from "react-icons/io";
+
 
 // This file is generated automatically using the `npm run swizzle @docusaurus/theme-classic Footer` command 
 // This is done to modify the default footer 
@@ -27,27 +35,7 @@ const logo = {
   coffee : {
     Svg: require('@site/static/img/coffee.svg').default
   },
-  mail: {
-    Svg: require('@site/static/img/mail.svg').default
-  },
-  instagram: {
-    Svg: require('@site/static/img/Instagram.svg').default
-  },
-  twitter: {
-    Svg: require('@site/static/img/Twitter.svg').default
-  },
-  github: {
-    Svg: require('@site/static/img/GitHub.svg').default
-  },
-  youtube: {
-    Svg: require('@site/static/img/YouTube.svg').default
-  },
-  discord: {
-    Svg: require('@site/static/img/Discord.svg').default
-  },
-  linkedin: {
-    Svg: require('@site/static/img/LinkedIn.svg').default
-  }
+
 }
 
 function Footer() {
@@ -72,16 +60,16 @@ function Footer() {
       </div>
       <hr className={styles.hr}></hr>
       <div className={styles.end_first}>© 2022 Kubesimplify</div>
-      <logo.mail.Svg className={styles.mail_logo} row="img" />
+      <IoMdMail className={styles.mail_logo} row="img" />
       <div className={styles.mail_title}>example@kubesimplify.com</div>
       <div className={styles.group_logo}>
-        <a href="#"><logo.instagram.Svg row="img" className={styles.social}/></a>
-        <a href="#"><logo.twitter.Svg row="img" className={styles.social} /></a>
-        <a href="#"><logo.github.Svg row="img" className={styles.social} /></a>
-        <a href="#"><logo.linkedin.Svg row="img" className={styles.social} /></a>
-        <a href="#"><logo.youtube.Svg row="img" className={styles.social} /> </a>
-        <a href="#"><logo.discord.Svg row="img" className={styles.social} /></a>        
-      </div>   
+        <a target="_blank" href="https://www.youtube.com/c/saiyam911"><AiFillYoutube row="img" className={styles.social1}/></a>
+        <a target="_blank" href="https://discord.gg/eEEFPVMr"><FaDiscord row="img" className={styles.social2}/></a>
+        <a target="_blank" href="https://twitter.com/kubesimplify"><AiOutlineTwitter row="img" className={styles.social2}/></a>
+        <a target="_blank" href="https://www.linkedin.com/company/kubesimplify/"><TiSocialLinkedin row="img" className={styles.social2}/></a>
+        <a target="_blank" href="https://www.instagram.com/saiyampathak/"><AiOutlineInstagram row="img" className={styles.social2}/></a>
+        <a target="_blank" href="https://github.com/kubesimplify"><AiFillGithub row="img" className={styles.social3}/></a>
+      </div> 
     </section>
   );
 }
