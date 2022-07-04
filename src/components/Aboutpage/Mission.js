@@ -1,30 +1,20 @@
 import React from 'react'
 import styles from './styles.module.css';
-
-
-//  Using this image in .ap_cont_2_box
-// const mission = {
-//    box: {
-//     Svg: require('/images/opportunity.svg').default
-//   }
-// };
+import Opportunity from './images/Opportunity.png'
  // Function for Mission start
 const AboutpageFeatures = () => {
 
   return (
+  // About Page starts
+  <section className={styles.about_features}>
 
-    // About Page starts
-
-    <section className={styles.about_features}>
-
-     {/* Heading Starts */}
-
+  {/* Heading Starts */}
         <div className={styles.ap_cont_1}>
         <p className={styles.ap_cont_1_heading}> About us </p>
         <hr className={styles.ap_cont_1_heading_line}/>
         </div>
 
-      {/* Mission starts */}
+{/* Mission starts */}
 
         <div className={styles.ap_cont_1_mission}>
         <p className={styles.ap_cont_1_mission_content}> On a mission to teach  
@@ -34,11 +24,11 @@ const AboutpageFeatures = () => {
         <p className={styles.ap_cont_1_mission_content_para_check}> can learn, get good jobs and earn more! </p>
          </div>
    
-       {/* Our Objective summarize in image */}
+{/* Our Objective summarize in image */}
 
        <div className={styles.ap_cont_2}>
        <div className={styles.ap_cont_2_box}>
-       {/* <mission.box.Svg className={styles.ap_cont_2_box_image} role="img" /> */}
+       <img src={Opportunity} alt="Opportunities" />
       </div>
       </div>
 

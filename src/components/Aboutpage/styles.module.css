@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100&display=swap');
 body{
     overflow-x: hidden;
+    height: 200px;
 }
 .ap_cont_1_heading{
     margin-top: 20px;
@@ -65,9 +66,7 @@ body{
     font-weight: 600;
 }
 .ap_cont_3_picture{
-    width:1200px;
-    height: 694px;
-    margin-left: 12%;
+  margin-top: 100px;
 }
 .ap_cont_4_founder{
     background: #1B2731;

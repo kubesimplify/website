@@ -1,18 +1,12 @@
 import React from 'react'
 import styles from './styles.module.css';
-
-//  Representation of Reach 
-// const reaches = {
-//    reach: {
-//         Svg: require('./images/VisitorsSection.svg').default
-//       },
-// };
+import VisitorsSection from './images/VisitorsSection.png';
 
 const Reach = () => {
  return (
   // image
   <div className={styles.ap_cont_3}>
-   {/* <reaches.reach.Svg className={styles.ap_cont_3_picture} role="img" /> */}
+  <img src={VisitorsSection}  className={styles.ap_cont_3_picture} alt="Visitors"/> 
   </div>
 )}
 export default Reach

@@ -32,17 +32,17 @@ import Mission from '@site/src/components/Aboutpage/Mission';
 import Reach from '@site/src/components/Aboutpage/Reach';
 import Founder from '@site/src/components/Aboutpage/Founder';
 import Newsletter from '@site/src/components/Aboutpage/Newsletter';
-
-
+import Navbar from '@site/src/theme/Navbar';
+import Footer from '@site/src/theme/Footer';
+import index from './index.module.css'
 export default function Home() {
   return (
     <>
-  
+    <Navbar />
     <Mission/>
     <Reach />
     <Founder />
-    <Newsletter />
-   
-    </>
+    <Footer />
+  </>
   );
 }
