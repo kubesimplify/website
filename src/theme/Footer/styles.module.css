@@ -1,6 +1,6 @@
 .footer {
     position: relative;
-    height: 440px;
+    /* height: 440px; */
     left: 0px;
     /* top: 2919px; */
     background: #1B2731;
@@ -171,8 +171,8 @@
 
 .end_first {
     position: relative;
+    top: 2em;
     left: 10%;
-    top: 6.2%;
     width: 20%;
     font-family: 'Poppins';
     font-style: normal;
@@ -190,7 +190,7 @@
     width: 23px;
     height: 23px;
     left: 43.5%;
-    top: 4%;
+    bottom: -1em;
     color: white;
     cursor: pointer;
 }
@@ -200,7 +200,7 @@
     width: 284px;
     height: 30px;
     left: 46.1%;
-    top: -3.5%;
+    bottom: 1em;
     
     font-family: 'Poppins';
     font-style: normal;
@@ -220,7 +220,7 @@
     position: relative;
     width: 13%;
     left: 79.2%;
-    top: -9%;
+    bottom: 2.5em;
 }
 .social1{
     width: 20px;
