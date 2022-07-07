@@ -13,6 +13,8 @@ import githubActions from './assests/github-actions.png'
 import vidIcon from './assests/Video-Icon.png'
 import blogIcon from './assests/Blog-Icon.png'
 import Link from './assests/Link.png'
+import BlogsContribute from './assests/BlogsContribute.png'
+import Ambassador from './assests/Ambassadors.png'
 
 export default function HomepageFeatures() {
 
@@ -149,17 +151,83 @@ export default function HomepageFeatures() {
                    View Blogs 
                   <img className={styles.hp_cont_3_linkIcon} src={Link} alt="link" />
                 </p>
-
               </button>
 
             </a>
 
           </div>
 
-        </div>
-
        </div>
 
+      
+      
+
+       {/* Workshop container start */}
+        <div className={styles.hp_cont_4}>
+         <div className={styles.hp_cont_4_workshop}>
+           <p className={styles.hp_cont_4_p1}>
+            Workshops
+          </p>
+           <p className={styles.hp_cont_4_p2}>
+          We regularly organize workshops on various topics like <span className={styles.hp_cont_4_kubernetes}> kubernetes and cloud native. </span>These workshops give you insights into the best <span className={styles.hp_cont_4_projects}> projects and technologies </span> that are useful in the field of cloud native.
+           </p>
+           <button className={styles.hp_cont_4_btn1}>
+           <p className={styles.hp_cont_4_btn1_content}> 
+             Learn more
+            </p>
+           </button>
+          </div>
+        </div>
+        {/* Workshop container end */}
+
+        {/*   Wanna contribute to Blog , container start  */}
+        <div className={styles.hp_cont_5}>
+         <div className={styles.hp_cont_5_blog_contributor}>
+
+           <p className={styles.hp_cont_5_blog_p1}>
+           Want to write a blog for Kubesimplify? Become a
+            <span className={styles.hp_cont_5_blog_kube}>  Kubesimplify Blog Contributor </span>
+           </p>
+
+           <p className={styles.hp_cont_5_blog_p2}>
+           If you have an idea for a blog and want to get it published on Kubesimplify, then reach out to us. We will publish the blog with your name! ✍🏻
+           </p>
+
+           <button className={styles.hp_cont_5_btn1}>
+            <p className={styles.hp_cont_5_btn1_content}> 
+              Contribute
+            </p>
+            </button>
+
+         </div>
+         <img className={styles.hp_cont_5_blog_image} src={BlogsContribute} alt="Blog" />
+        </div>
+        {/*   Wanna contribute to Blog , container end  */}
+
+        {/* Want to apply, container start */}
+        <div className={styles.hp_cont_6}>
+         <img className={styles.hp_cont_6_ambassador_image}  src={Ambassador} alt="Blog" />
+         <div className={styles.hp_cont_6_ambassadors}>
+
+            <p className={styles.hp_cont_6_ambassador_p1}>
+           Want to be a part of this mission? Join us as a
+            <span className={styles.hp_cont_6_ambassador_kube}> Kubesimplify Ambassador </span>
+            </p>
+
+            <p className={styles.hp_cont_6_ambassador_p2}>
+            There are some requirements that you have to meet in order to apply for our Ambassador Program (there are perks too 🎉)
+            </p>
+
+            <button className={styles.hp_cont_6_btn1}>
+            <p className={styles.hp_cont_6_btn1_content}> 
+              Apply now
+            </p>
+            </button>
+
+         </div>
+        </div>
+         {/* Want to apply, container end*/}
+</div>
     </section>
 
   );
