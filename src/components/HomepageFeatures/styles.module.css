@@ -158,6 +158,7 @@
     color: #0d0d0d;
     outline: none;
     border: none;
+    padding: 0 10px;
 }
 
 .hp_cont_2a_input::placeholder {
