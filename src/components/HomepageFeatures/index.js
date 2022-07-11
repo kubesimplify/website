@@ -76,17 +76,17 @@ export default function HomepageFeatures() {
                 <p className={styles.hp_cont_2a_p}>
                   Join the mailing list :
                 </p>
+                <form action="https://www.getrevue.co/profile/saiyampathak/add_subscriber" method="post" id="revue-form" name="revue-form"  target="_blank">
+                  <input className={styles.hp_cont_2a_input} type="email" name="member[email]" id="member_email" placeholder="Email Address"/>
 
-                <input className={styles.hp_cont_2a_input} type="email" placeholder="Email Address"/>
+                  <button type="submit" name="member[subscribe]" id="member_submit" className={styles.hp_cont_2a_btn}>
 
-                <button className={styles.hp_cont_2a_btn}>
+                    <p className={styles.hp_cont_2a_btn_content}>
+                      Subscribe 📨
+                    </p>
 
-                  <p className={styles.hp_cont_2a_btn_content}>
-                    Subscribe 📨
-                  </p>
-
-                </button>
-
+                  </button>
+                </form>
                </div>
 
              </div>
