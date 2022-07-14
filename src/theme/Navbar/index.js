@@ -38,9 +38,14 @@ communityContent: (
 
 
                   <a  href="/website/ambassadors">Student Ambassador</a>                                                                   
+                 
+
+                                                                                  
+                                                                  
                   
 
                                                                                     
+
 
                   <a className={styles.navbar_workshops_designs} href="https://kubesimplify.github.io/live-workshops/" target="blank">Workshops</a>
 
