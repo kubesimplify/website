@@ -36,10 +36,12 @@ communityContent: (
                <div className={styles.navbar_dropdown_content} >
                {/* Links for respective webpage will add when new webpages are formed */}
 
-                  <a  href='./ambassadors'>Student Ambassador</a>                                                                   
+
+                  <a  href="/website/ambassadors">Student Ambassador</a>                                                                   
                   
 
-                                                                                   
+                                                                                    
+
                   <a className={styles.navbar_workshops_designs} href="https://kubesimplify.github.io/live-workshops/" target="blank">Workshops</a>
 
                   <a  className={styles.navbar_contri_designs} href="#">Contributors</a>
@@ -49,8 +51,10 @@ communityContent: (
   ),
 aboutContent: (
     <>
+    <div className={styles.navbar_about_start}>
       <a className={styles.navbar_about_word} href="/website/about">About</a>
-      {/* <a className={styles.navbar_contact_word} href="/website/about" target="blank">About</a> */}
+
+    </div>
     </>
     ),
 }
