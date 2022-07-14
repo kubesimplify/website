@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
 * {
     margin: 0;
     padding: 0;
+    font-family: 'Poppins';
 }
 
 .hero_containner {
@@ -17,17 +19,17 @@
     width: 430px;
     height: 150px;
     margin: auto;
-    padding:2.5rem;
+    padding: 2.5rem;
     top: 40px;
     background: #1B2731;
     border-radius: 10px;
 
-    display:flex;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.logo{
+.logo {
     position: relative;
     width: 100px;
     height: 100px;
@@ -52,8 +54,7 @@
     width: 65%;
 
     font-style: normal;
-    font-weight: 400;
-    font-size: 24px;
+    font-size: 20px;
     line-height: 42px;
 
     display: flex;
@@ -62,7 +63,12 @@
     letter-spacing: -0.01em;
 
     color: #1B2731;
+}
 
+@media only screen and (max-width : 1300px){
+    .hero_para{
+        width: 75%;
+    }
 }
 
 /* =================================================================================================== */
@@ -71,7 +77,7 @@
 .criteria_containner {
     position: absolute;
     width: 100%;
-    height: 360px;
+    height: 340px;
     left: 0px;
     top: 540px;
     z-index: -1;
@@ -94,11 +100,13 @@
 .criteria_underline {
     background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
     width: 180px;
-    height:2px;
+    height: 2px;
     margin: auto;
 }
 
 .criteria_flex {
+    padding: 0rem 4rem;
+
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -119,29 +127,42 @@
 
 .criteria_items_img {
     position: relative;
-    width: 40px;
+    width: 30px;
     height: 30px;
     margin: 10px 0;
 }
 
 .criteria_items_heading {
-
     font-style: normal;
-    font-weight: 400;
-    font-size: 28px;
+    font-weight: 500;
+    font-size: 26px;
     text-transform: capitalize;
+    letter-spacing: 0.8px;
 
     color: #FFFFFF;
 }
 
 .criteria_items_para {
     position: relative;
-    top: -10px;
+    top: -8px;
 
     font-style: normal;
-    font-size: 16px;
+    font-size: 14px;
 
     color: #FFFFFF;
+}
+
+@media only screen and (max-width:1300px){
+    .criteria_flex{
+        padding:0rem 0rem;
+    }
+    .criteria_items_heading{
+        font-size: 22px;
+    }
+    .criteria_items_para{
+        font-size: 14px;
+        width:80%
+    }
 }
 
 /* =================================================================================================== */
@@ -163,10 +184,9 @@
     top: 30px;
     text-align: center;
 
-    font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 38px;
+    font-size: 36px;
     line-height: 48px;
 
     color: #1B2731;
@@ -176,15 +196,15 @@
     position: relative;
     top: 20px;
 
-    background-image:linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
+    background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
     width: 180px;
-    height:2px;
+    height: 2px;
     margin: auto;
 }
 
 .benifits_flex {
-    margin: 0 6rem;
-    
+    margin: 0 5rem;
+
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -193,10 +213,11 @@
 
     color: #1B2731;
     position: relative;
-    top: 80px;
+    top: 70px;
 }
 
 .benifits_items {
+    height: 10rem;
     flex: 0 0 33.333333%;
     margin: 1rem 3rem;
     max-width: 240px;
@@ -215,7 +236,7 @@
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 30px;
+    font-size: 24px;
     line-height: 40px;
     text-transform: capitalize;
 
@@ -229,7 +250,7 @@
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 20px;
 
     display: flex;
@@ -239,5 +260,187 @@
     color: #1B2731;
 }
 
+/* =================================================================================================== */
+
+/* APPLICATION SECTION  */
+.application_containner {
+    position: absolute;
+    top: 1450px;
+
+    height: 300px;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(27, 39, 49, 0.02);
+}
+
+.application_containner_mini {
+    position: relative;
+    background-color: rgba(27, 39, 49, 1);
+    height: 220px;
+    width: 50%;
+    border-radius: 5px;
+    padding: 1.4rem 3rem;
+    margin-right: 1rem;
+}
+
+.application_containner_mini_title {
+    position: relative;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 54px;
+
+    letter-spacing: -0.01em;
+    color: #FFFFFF;
+}
+
+.application_containner_mini_para {
+    position: relative;
+    width: 70%;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-size: 14px;
+    line-height: 24px;
+
+    letter-spacing: -0.01em;
+    color: #FFFFFF;
+}
+
+.application_containner_mini_button {
+    position: relative;
+    bottom: 124px;
+
+    height: 2.2rem;
+    width: 7.5rem;
+
+    background: linear-gradient(92.19deg, #5CFF68 0%, #05CAFF 100%);
+    border-radius: 6px;
+    border: none;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-size: 16px;
+    line-height: 0px;
+    color: #FFFFFF;
+    ;
+}
+
+.application_qr_code {
+    position: relative;
+    height: 150px;
+    width: 150px;
+    left: 320px;
+    bottom: 120px;
+}
+
+.application_containner_img {
+    height: 200px;
+    margin-left: 1.5rem;
+}
+
+@media only screen and (max-width:1300px){
+    .application_containner{
+        top:1600px;
+        width:1200px;
+    }
+
+    .application_containner_mini_para{
+        width:70%;
+    }
+
+    .application_qr_code{
+        height:160px;
+        width:160px;
+
+        position: relative;
+        top: -130px;
+        left:240px;
+    }
+
+    .application_containner_mini_button {
+        top: -140px
+    }
+
+    .application_containner_img {
+        visibility: hidden;
+    }
+}
 
 /* =================================================================================================== */
+/* FAQs SECTION  */
+.FAQs_containner {
+    position: absolute;
+    top: 1750px;
+
+    height: 400px;
+
+    margin: 0rem 0.5rem 0rem 8rem;
+}
+
+.FAQs_title {
+    position: relative;
+    top: 10px;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 48px;
+
+    color: #1B2731;
+}
+
+.FAQs_underline {
+    position: relative;
+    top: 2px;
+
+    background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
+    width: 160px;
+    height: 2px;
+}
+
+.FAQs_flex {
+    margin-top: 1rem;
+    height: 300px;
+    width: 70%;
+}
+
+.FAQs_question {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: bolder;
+    font-size: 20px;
+    line-height: 18px;
+    
+    letter-spacing: -0.01em;
+
+    color: #1B2731;
+}
+
+.FAQs_answer {
+    position: relative;
+    left:26px;
+
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 18px;
+
+    letter-spacing: -0.01em;
+
+    color: #1B2731;
+    margin-bottom: 2rem;
+}
+@media only screen and (max-width:1300px){
+    .FAQs_containner{
+        top:1900px;
+    }
+}
