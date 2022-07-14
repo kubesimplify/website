@@ -12,10 +12,10 @@
 
 <!-- Mark all the applicable boxes. To mark the box as done follow the following conventions -->
 <!--
-[x] - Correct; marked as done
-[X] - Correct; marked as done
+- [x] Correct OR marked as done
+- [X] Correct OR marked as done
 
-[ ] - Not correct; marked as **not** done
+[ ] - Not correct OR marked as **not** done
 -->
 
 ## Screenshots
