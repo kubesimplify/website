@@ -18,6 +18,9 @@ text-decoration: none;
     font-style: normal;
     color:white;
 }
+a.navbar_about_word_lRhf:hover {
+  color: aquamarine;
+}
 .navbar{
     background-color: #1B2731;
 }
@@ -55,6 +58,9 @@ text-decoration: none;
     font-style: normal;
     color:white;
 }
+p.navbar_contact_word_B9E2:hover {
+  color: aquamarine;
+}
 .navbar_dropdown_content {
     display: none;
     position: absolute;
@@ -72,6 +78,9 @@ text-decoration: none;
     text-decoration: none;
     display: block;
     font-family: 'Poppins';
+}
+.navbar_dropdown_content_HFwf a:hover {
+  color: aquamarine;
 }
   .navbar_dropbtn{
       color: black;
