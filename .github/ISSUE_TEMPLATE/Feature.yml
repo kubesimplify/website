@@ -1,0 +1,27 @@
+name: Feature Request
+description: Suggest a/an feature/enhancement to Kubesimplify's website
+title: '[FEATURE] <description>'
+labels: ['triage/awaiting', 'enhancement']
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A brief description of the enhancement you propose.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Please add screenshots if applicable
+    validations:
+      required: false
+  - type: textarea
+    id: extrainfo
+    attributes:
+      label: Additional information
+      description: Is there anything else we should know about this idea?
+    validations:
+      required: false
+ 
