@@ -3,6 +3,7 @@
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/black.svg" width="70%" align="center" style="margin-bottom:20px;">
   <img alt="Shows an illustrated light mode kubesimplify logo in light color mode and a dark mode kubesimplify logo dark color mode." src="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/white.svg" width="70%" align="center" style="margin-bottom:20px;">
 </picture></a><br /><br /></p>
+<p align="center">
 <a href="https://kubesimplify.com/" alt="website">
   <img src="https://img.shields.io/badge/Kubesimplify website-%3CCOLOR%3E" /></a>
 <a href="https://www.youtube.com/c/saiyam911" alt="Youtube">
@@ -13,6 +14,7 @@
   <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
   <a href="https://twitter.com/intent/follow?screen_name=kubesimplify" alt="Twitter Follow">
   <img src="https://img.shields.io/twitter/follow/kubesimplify.svg?label=Follow+kubesimplify&style=social" /></a>
+  </p>
 
 <p align="center"><i>If you like Kubesimplify, please ★ this repository to show your support! 🤩</i></p>
 
