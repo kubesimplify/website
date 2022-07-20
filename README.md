@@ -1,4 +1,8 @@
-<h1 align="center"><a href="https://kubesimplify.github.io/website/">Kubesimplify Website </a></h1>
+<p style="text-align:center;" align="center"><a href="https://kubesimplify.github.io/website/"><picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/white.svg"  width="70%" align="center" style="margin-bottom:20px;">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/black.svg" width="70%" align="center" style="margin-bottom:20px;">
+  <img alt="Shows an illustrated light mode kubesimplify logo in light color mode and a dark mode kubesimplify logo dark color mode." src="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/white.svg" width="70%" align="center" style="margin-bottom:20px;">
+</picture></a><br /><br /></p>
 <p align="center"><i>The source code for Kubesimplify.com</i></p>
 
 This repository contains the assets required to build the Kubesimplify website and documentation. We're glad that you want to contribute! 
