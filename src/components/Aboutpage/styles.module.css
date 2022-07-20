@@ -3,110 +3,139 @@ body{
     overflow-x: hidden;
     height: 200px;
 }
+
+.ap_cont_1 {
+    width: 75%;
+    margin: auto;
+    text-align: center;
+}
+
 .ap_cont_1_heading{
     margin-top: 20px;
-    margin-left: 45%;
+    border-style: solid;
+    border-width: 0px 0px 3px 0px;
     font-family: 'Poppins';
     font-size: 30px;
     color: #1B2731;
 }
-.ap_cont_1_heading_line{
-    height:2px;
-    border-width:0;
-    color:#1B2731;
-    background-color:#1B2731;
-    width: 70%;
-    margin-left: 15%;
-}
+
+
 .ap_cont_1_mission{
-    margin-top: 90px;
+    text-align: center;
+    margin-top: 50px;
 }
 .ap_cont_1_mission_content{
     font-family: 'Poppins';
     font-weight: 500;
-    font-size: 40px;
-    margin-left: 20%;
+    font-size: 3.5vw;
     color: #1B2731;
-    line-height:56px;
     letter-spacing: -2%;
 }
 .ap_cont_1_mission_content_para{
     font-family: 'Poppins';
     font-weight:400;
-    margin-left: 30%;
      color: #1B2731;
-    font-size: 25px;
-    line-height: 48px;
+    font-size: 2.7vw;
 }
+
 .ap_cont_1_mission_content_para_check{
-    margin-left: 33%;
     font-family: 'Poppins';
     font-weight:400;
      color: #1B2731;
-    font-size: 25px;
-    margin-top: -20px;
+    font-size: 2.7vw;
+    line-height: 2vw;
 }
 .ap_cont_1_cloud{
     background: -webkit-linear-gradient(111.84deg, #5CFF68 12.29%, #05CAFF 112.72%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-.ap_cont_2_box{
-    height: 128px;
-    width: 631px;
-    display:flex;
-    /* border: 2px solid #000000; */
-    box-sizing: border-box;
-    border-radius: 5px;
-    margin-left: 30%;
-    margin-top: 50px;
+
+.ap_cont_2_box {
+    text-align: center;
+    margin-top: 10%;
 }
-.ap_cont_2_video{
-    color: #1B2731;
-    font-weight: 600;
+
+
+.ap_cont_3 {
+    margin-top: 5%;
+    text-align: center;
 }
-.ap_cont_3_picture{
-  margin-top: 100px;
-}
+
+
 .ap_cont_4_founder{
     background: #1B2731;
-    height:537px;
 }
+
+.ap_cont_4_founder{
+    display: flex;
+    flex-direction: row;
+}
+
+
+.ap_cont_4_founder_description{
+    display: flex;
+    flex-direction: column;
+    padding-left: 10%;
+    padding-top: 10%;
+    width: 60%;
+}
+
 .ap_cont_4_heading{
     border-image-source: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
 }
+
+
 .ap_cont_4_heading{
-    width:250px;
-    font-size: 31px;
+    font-size: 2.5vw;
     color: #FFFFFF;
     border-bottom: 1px solid;
     border-image-slice: 1;
     font-family:  'Poppins';
     font-weight: 500;
 }
-.ap_cont_4_founder_description{
-    margin-left: 10%;
-    margin-top: 100px;
-}
+
+
 .ap_cont_4_para{
     color: #FFFFFF;
-    width: 70%;
     font-family:  'Poppins';
     font-weight: 400;
-    font-size: 17px;
+    font-size: 1.5vw;
     line-height: -1%;
 }
-.ap_cont_4_founder{
-    display:flex;
-}
+
+
 .ap_cont_4_image_block{
-margin-top: 79px;
-margin-right: 15%;
+    display: flex;
+    padding: 10% ;
+    justify-content: center;
 }
-.ap_cont_4_img{
-    width: 1700px;
-    height: 377px;
-}
+
+@media only screen and (max-width: 700px) {
+    .ap_cont_4_founder {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ap_cont_4_heading {
+        font-size: 4vw;
+    }
+
+    .ap_cont_4_para {
+        font-size: 3vw;
+    }
+
+    .ap_cont_4_image_block {
+        padding: 0;
+        padding-bottom: 8%;
+        max-width: 40%;
+    }
+
+    .ap_cont_4_founder_description {
+        padding-left: 0%;
+    }
+  }
+
 .ap_cont_6{
     display: flex;
     font-family: 'Poppins';
@@ -115,6 +144,8 @@ margin-right: 15%;
     height: 266px;
     margin-top: 100px;
 }
+
+
 
 .ap_cont_6_1{
     margin-left:10%;
@@ -212,512 +243,3 @@ margin-right: 15%;
     color:  #FFFFFF;
 }
 
- /* Using Media Gallery to make the page responsive */
- @media only screen and (max-width: 1300px){
- .ap_cont_6_1{
-    margin-left:5%;
-}
-.ap_cont_6_2{
-margin-left:8%;
-}
-}
- @media only screen and (max-width: 1200px)  {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 35px;
-        margin-left: 15%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_3_picture{
-        width:1200px;
-       margin-left:0;
-    }
-    .ap_cont_4_img{
-        width: 2000px;
-        height: 377px;
-    }
-    .ap_cont_4_image_block{
-        margin-top: 79px;
-        margin-right: 10%;
-        }
-    
- }
- @media only screen and (max-width: 1000px){
-    .ap_cont_6{
-        flex-direction: column;
-        height: 400px;
-    }
-
-    .ap_cont_6_1{
-        margin-left:10%;
-    }
-
-    .ap_cont_6_2{
-        margin-top:1%;
-        margin-left:10%;
-    }
-    .ap_cont_4_img {
-        width: 2000px;
-        height: 377px;
-    }
-
-    .ap_cont_4_image_block{
-        margin-top: 79px;
-        margin-right: 9%;
-    }
- }
- @media only screen and (max-width: 1183px)  {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 32px;
-        margin-left: 15%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_1_mission_content_para{
-        font-family: 'Poppins';
-        font-weight:400;
-        margin-left: 22%;
-         color: #1B2731;
-        font-size: 25px;
-        line-height: 48px;
-    }
-    .ap_cont_1_mission_content_para_check{
-        margin-left: 26%;
-        font-family: 'Poppins';
-        font-weight:400;
-         color: #1B2731;
-        font-size: 25px;
-        margin-top: -20px;
-    }
-    .ap_cont_3_picture{
-        width:1000px;
-       margin-left:0;
-    }
-    .ap_cont_4_img {
-        width: 2500px;
-        height: 377px;
-    }
-
-    .ap_cont_4_image_block{
-        margin-top: 79px;
-        margin-right: 9%;
-    }
- }
- @media only screen and (max-width: 1064px)  {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 32px;
-        margin-left: 15%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_1_mission_content_para{
-        font-family: 'Poppins';
-        font-weight:400;
-        margin-left: 25%;
-         color: #1B2731;
-        font-size: 22px;
-        line-height: 48px;
-    }
-    .ap_cont_1_mission_content_para_check{
-        margin-left: 33%;
-        font-family: 'Poppins';
-        font-weight:400;
-         color: #1B2731;
-        font-size: 22px;
-        margin-top: -20px;
-    }
-    .ap_cont_3_picture{
-        width:990px;
-       margin-left:0;
-    }
-}
- @media only screen and (max-width: 990px)
- {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 30px;
-        margin-left: 10%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_1_mission_content_para{
-        font-family: 'Poppins';
-        font-weight:400;
-        margin-left: 19%;
-         color: #1B2731;
-        font-size: 22px;
-        line-height: 48px;
-    }
-    .ap_cont_1_mission_content_para_check{
-        margin-left: 23%;
-        font-family: 'Poppins';
-        font-weight:400;
-         color: #1B2731;
-        font-size: 22px;
-        margin-top: -20px;
-    }
-    .ap_cont_2_box_image{
-        width: 700px;
-        
-    }
-    .ap_cont_2_box{
-        height: 128px;
-        width: 631px;
-        display:flex;
-        box-sizing: border-box;
-        border-radius: 5px;
-        margin-left: 14%;
-        margin-top: 50px;
-    }
-    .ap_cont_3_picture{
-        width:890px;
-       margin-left:0;
-    }
-    .ap_cont_4_img {
-        width: 2500px;
-        height: 377px;
-    }
-
-    .ap_cont_4_image_block{
-        margin-top: 70px;
-        margin-right: 5%;
-    }
-    .ap_cont_4_founder_description{
-        margin-left: 10%;
-        margin-top: 100px;
-        
-    }
-    .ap_cont_4_para{
-        color: #FFFFFF;
-        width: 95%;
-        font-family:  'Poppins';
-        font-weight: 400;
-        font-size: 17px;
-        line-height: -1%;
-    }
- }
- @media only screen and (max-width: 840px)
- {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 25px;
-        margin-left: 13%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_1_mission_content_para{
-        font-family: 'Poppins';
-        font-weight:400;
-        margin-left: 20%;
-         color: #1B2731;
-        font-size: 20px;
-        line-height: 48px;
-    }
-    .ap_cont_1_mission_content_para_check{
-        margin-left: 23%;
-        font-family: 'Poppins';
-        font-weight:400;
-         color: #1B2731;
-        font-size: 20px;
-        margin-top: -20px;
-    }
-    .ap_cont_2_box_image{
-        width: 650px;
-        
-    }
-    .ap_cont_2_box{
-        height: 128px;
-        width: 631px;
-        display:flex;
-        box-sizing: border-box;
-        border-radius: 5px;
-        margin-left: 14%;
-        margin-top: 50px;
-    }
-    .ap_cont_3_picture{
-        width:790px;
-       margin-left:0;
-    }
-    .ap_cont_3{
-        margin-top: -190px;
-    }
- 
-
-    
- }
- @media only screen and (max-width: 729px)
- {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 24px;
-        margin-left: 10%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_1_mission_content_para{
-        font-family: 'Poppins';
-        font-weight:400;
-        margin-left: 20%;
-         color: #1B2731;
-        font-size: 19px;
-        line-height: 48px;
-    }
-    .ap_cont_1_mission_content_para_check{
-        margin-left: 23%;
-        font-family: 'Poppins';
-        font-weight:400;
-         color: #1B2731;
-        font-size: 19px;
-        margin-top: -20px;
-    }
-    .ap_cont_2_box_image{
-        width: 550px;
-        
-    }
-    .ap_cont_2_box{
-        height: 128px;
-        width: 811px;
-        display:flex;
-        box-sizing: border-box;
-        border-radius: 5px;
-        margin-left: 14%;
-        margin-top: 50px;
-    }
-    .ap_cont_3_picture{
-        width:750px;
-       margin-left:0;
-    }
-    .ap_cont_3{
-        margin-top: -190px;
-    }
-    .ap_cont_4_img {
-        width: 4000px;
-        height: 377px;
-    }
-  
- }
- @media only screen and (max-width: 660px)
- {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 24px;
-        margin-left: 5%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_1_mission_content_para{
-        font-family: 'Poppins';
-        font-weight:400;
-        margin-left: 15%;
-         color: #1B2731;
-        font-size: 19px;
-        line-height: 48px;
-    }
-    .ap_cont_1_mission_content_para_check{
-        margin-left: 18%;
-        font-family: 'Poppins';
-        font-weight:400;
-         color: #1B2731;
-        font-size: 19px;
-        margin-top: -20px;
-    }
-    .ap_cont_2_box_image{
-        width: 500px;
-        
-    }
-    .ap_cont_2_box{
-        height: 128px;
-        width: 631px;
-        display:flex;
-        box-sizing: border-box;
-        border-radius: 5px;
-        margin-left: 14%;
-        margin-top: 50px;
-    }
-    .ap_cont_3_picture{
-        width:690px;
-       margin-left:0;
-    }
-    .ap_cont_3{
-        margin-top: -190px;
-    }
-    .ap_cont_4_founder_description{
-        margin-left: 10%;
-        margin-top: 100px;
-    }
-    .ap_cont_4_para{
-        color: #FFFFFF;
-        width: 90%;
-        font-family:  'Poppins';
-        font-weight: 400;
-        font-size: 17px;
-        line-height: -1%;
-    }
-    .ap_cont_4_founder{
-        background: #1B2731;
-        height:637px;
-    }
-    .ap_cont_4_heading{
-        border-image-source: linear-gradient(24.72deg, #5CFF68 0%, #05CAFF 100%);
-    }
-    .ap_cont_4_heading{
-        width:250px;
-        font-size: 31px;
-        color: #FFFFFF;
-        border-bottom: 1px solid;
-        border-image-slice: 1;
-        font-family:  'Poppins';
-        font-weight: 500;
-    }
-    .ap_cont_4_founder_description{
-        margin-left: 10%;
-        margin-top: 100px;
-    }
- 
-    .ap_cont_4_founder{
-        display:flex;
-    }
-    .ap_cont_4_image_block{
-    margin-top: 129px;
-      
-    }
-    .ap_cont_4_img{
-        width: 1800px;
-       
-    }
- }
- @media only screen and (max-width: 630px)
- {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 24px;
-        margin-left: 2%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_1_mission_content_para{
-        font-family: 'Poppins';
-        font-weight:400;
-        margin-left: 10%;
-         color: #1B2731;
-        font-size: 19px;
-        line-height: 48px;
-    }
-    .ap_cont_1_mission_content_para_check{
-        margin-left: 13%;
-        font-family: 'Poppins';
-        font-weight:400;
-         color: #1B2731;
-        font-size: 19px;
-        margin-top: -20px;
-    }
-    .ap_cont_2_box_image{
-        width: 450px;
- }
-    .ap_cont_2_box{
-        height: 128px;
-        width: 631px;
-        display:flex;
-        box-sizing: border-box;
-        border-radius: 5px;
-        margin-left: 14%;
-        margin-top: 50px;
-    }
-    .ap_cont_1_heading{
-        margin-top: 20px;
-        margin-left: 40%;
-        font-family: 'Poppins';
-        font-size: 30px;
-        color: #1B2731;
-    }
-    .ap_cont_3_picture{
-        width:580px;
-        margin-left: 2%;
-    }
-    .ap_cont_3{
-        margin-top: -190px;
-    }
- }
- @media only screen and (max-width: 600px)
- {
-    .ap_cont_1_mission_content{
-        font-family: 'Poppins';
-        font-weight: 500;
-        font-size: 28px;
-        margin-left: 18%;
-        width: 70%;
-        color: #1B2731;
-        line-height:56px;
-        letter-spacing: -2%;
-    }
-    .ap_cont_1_mission_content_para{
-        font-family: 'Poppins';
-        font-weight:400;
-        margin-left: 18%;
-         color: #1B2731;
-        font-size: 19px;
-        line-height: 30px;
-    }
-    .ap_cont_1_mission_content_para_check{
-        margin-left: 18%;
-        font-family: 'Poppins';
-        font-weight:400;
-         color: #1B2731;
-        font-size: 19px;
-        margin-top: -20px;
-    }
-    .ap_cont_2_box_image{
-        width: 350px;
-    }
-    .ap_cont_2_box{
-        height: 128px;
-        width: 631px;
-        display:flex;
-        box-sizing: border-box;
-        border-radius: 5px;
-        margin-left: 18%;
-        margin-top: 50px;
-    }
-    .ap_cont_1_heading{
-        margin-top: 20px;
-        margin-left: 40%;
-        font-family: 'Poppins';
-        font-size: 30px;
-        color: #1B2731;
-    }
-    .ap_cont_6_1{
-        margin-left:5%;
-    }
-
-    .ap_cont_6_2{
-        margin-top:1%;
-        margin-left:5%;
-    }
-    .ap_cont_3_picture{
-        width:550px;
-        margin-left: 2%;
-    }
-    .ap_cont_3{
-        margin-top: -190px;
-    }
-
- }
