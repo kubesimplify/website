@@ -33,6 +33,7 @@ Participation in the Kubesimplify community is governed by the [CNCF Code of Con
 
 <h1>Contributing Guidelines: </h1>
 
+We're a warm and welcoming community of open source contributors. Please join. All types of contributions are welcome. Be sure to read the Kubesimplify Contributors Welcome Guide for a tour of resources available to you and how to get started.
 Kubesimplfy's new website. This codebase is what runs on [Kubesimplify](https://kubesimplify.github.io/website/). 
 
 For new developers getting started, here are some instructions to follow:
