@@ -4,8 +4,7 @@
   <img alt="Shows an illustrated light mode kubesimplify logo in light color mode and a dark mode kubesimplify logo dark color mode." src="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/white.svg" width="70%" align="center" style="margin-bottom:20px;">
 </picture></a><br /><br /></p>
 <p align="center">
-<a href="https://kubesimplify.com/" alt="website">
-  <img src="https://img.shields.io/badge/Kubesimplify website-%3CCOLOR%3E" /></a>
+
 <a href="https://www.youtube.com/c/saiyam911" alt="Youtube">
   <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" /></a>
 <a href="https://t.co/9KuC1EMxWo" alt="Discord Invite">
@@ -13,7 +12,7 @@
 <a href="https://www.linkedin.com/company/kubesimplify/" alt="Linkedin">
   <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
   <a href="https://twitter.com/intent/follow?screen_name=kubesimplify" alt="Twitter Follow">
-  <img src="https://img.shields.io/twitter/follow/kubesimplify.svg?label=Follow+kubesimplify&style=social" /></a>
+  <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" /></a>
   </p>
 
 <p align="center"><i>If you like Kubesimplify, please ★ this repository to show your support! 🤩</i></p>
