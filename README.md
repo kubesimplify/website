@@ -22,7 +22,14 @@
 
 This repository contains the assets required to build the Kubesimplify website and documentation. We're glad that you want to contribute! 
 
-- [Code of Conduct](code-of-conduct.md)
+## <h1>Code of conduct</h1>
+   <p style="text-align:center;" align="center"><a href="https://www.cncf.io/"><picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/black/cncf-white.svg"  width="70%" align="center" style="margin-bottom:20px;">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/black/cncf-black.svg" width="70%" align="center" style="margin-bottom:20px;">
+  <img alt="Shows an illustrated light mode kubesimplify logo in light color mode and a dark mode kubesimplify logo dark color mode." src="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/white.svg" width="70%" align="center" style="margin-bottom:20px;">
+</picture></a><br /><br /></p>
+<p align="center">
+Participation in the Kubesimplify community is governed by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
 
 <h1>Contributing Guidelines: </h1>
 
@@ -46,8 +53,7 @@ To run the website on your computer:
 ```
 And then open up your web browser and go to [localhost:3000](http://localhost:3000).
 
-## <h1>Code of conduct</h1>
-Participation in the Kubesimplify community is governed by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
+
 
 ---
 <h4 align="center"> Code under MIT License, assets may not be re-used or re-distributed.
