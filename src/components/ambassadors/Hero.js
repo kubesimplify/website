@@ -9,7 +9,7 @@ const Hero = () => {
     return (
         <div className={Styles.hero_containner}>
             <div className={Styles.box}>
-                <img src={ambassador_logo} alt="" className={Styles.logo} />
+                <img src={ambassador_logo} alt="logo" className={Styles.logo} />
                 <span>Kubesimplify Ambassadors</span>
             </div>
             

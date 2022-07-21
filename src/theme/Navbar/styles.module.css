@@ -5,6 +5,9 @@
 .logo{
     width: 180px;
 }
+.navbar_about_start a{
+text-decoration: none;
+}
 .navbar_positioning{
     display:flex;
    margin-top: 5px;
@@ -175,7 +178,7 @@
     font-style: normal;
     color:white;
     font-size: 15px;
-    text-decoration: none!important;
+    text-decoration: none;
      }
    .navbar_community_word{
     font-family: 'Poppins';

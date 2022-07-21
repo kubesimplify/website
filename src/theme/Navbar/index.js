@@ -1,6 +1,7 @@
 import React  from 'react';
 import styles from './styles.module.css';
 
+
 //  Dynamic Content as it makes refactoring very easy .
 
 const navbarLogo = {
@@ -34,8 +35,20 @@ communityContent: (
           </button>
                <div className={styles.navbar_dropdown_content} >
                {/* Links for respective webpage will add when new webpages are formed */}
-                  <a  href="#">Student Ambassador</a>                                                                   
-                  <a className={styles.navbar_workshops_designs} href="#">Workshops</a>
+
+
+                  <a  href="/website/ambassadors">Student Ambassador</a>                                                                   
+                 
+
+                                                                                  
+                                                                  
+                  
+
+                                                                                    
+
+
+                  <a className={styles.navbar_workshops_designs} href="https://kubesimplify.github.io/live-workshops/" target="blank">Workshops</a>
+
                   <a  className={styles.navbar_contri_designs} href="#">Contributors</a>
               </div>
      </div>
@@ -43,8 +56,10 @@ communityContent: (
   ),
 aboutContent: (
     <>
+    <div className={styles.navbar_about_start}>
       <a className={styles.navbar_about_word} href="/website/about">About</a>
-      {/* <a className={styles.navbar_contact_word} href="/website/about" target="blank">About</a> */}
+
+    </div>
     </>
     ),
 }
