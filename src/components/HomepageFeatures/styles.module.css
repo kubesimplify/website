@@ -155,9 +155,10 @@
     border-radius: 5px;
     font-family: 'Poppins';
     font-style: normal;
-    color: #FFFFFF;
+    color: #0d0d0d;
     outline: none;
     border: none;
+    padding: 0 14px;
 }
 
 .hp_cont_2a_input::placeholder {
@@ -186,6 +187,7 @@
     height:30px;
     border: none;
     margin-left: 10px;
+    cursor: pointer;
 }
 
 .hp_cont_2a_btn_content{
