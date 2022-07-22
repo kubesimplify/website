@@ -52,10 +52,6 @@ function Footer() {
               <div className={styles.button_name}>Sponsor</div>
             </div>
           </button>
-          <div className={styles.sponsors_or}>or</div>
-          <button className={styles.sponsor_coffee}>
-              <logo.coffee.Svg className={styles.coffee} role="img" />  
-          </button>
         </div>
       </div>
       <hr className={styles.hr}></hr>
