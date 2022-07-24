@@ -20,7 +20,7 @@
   color: white;
 }
 
-a.navbar_about_word_lRhf:hover {
+.navbar_about_word:hover {
   color: aquamarine;
 }
 
@@ -65,7 +65,7 @@ a.navbar_about_word_lRhf:hover {
   color: white;
 }
 
-p.navbar_contact_word_B9E2:hover {
+.navbar_contact_word:hover {
   color: aquamarine;
 }
 
@@ -89,7 +89,7 @@ p.navbar_contact_word_B9E2:hover {
   font-family: 'Poppins';
 }
 
-.navbar_dropdown_content_HFwf a:hover {
+.navbar_dropdown_content a:hover {
   color: aquamarine;
 }
 
