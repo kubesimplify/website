@@ -1,3 +1,7 @@
+![My project-1(1)](https://user-images.githubusercontent.com/96643678/180929665-db22fafd-9348-4052-971c-e6c2b646c139.png)
+
+
+
 <h1 align="center"><a href="https://kubesimplify.github.io/website/">Kubesimplify Website </a></h1>
 <p align="center"><i>The source code for Kubesimplify.com</i></p>
 
@@ -12,20 +16,20 @@ Kubesimplfy's new website. This codebase is what runs on [Kubesimplify](https://
 For new developers getting started, here are some instructions to follow:
 Fork the repo by clicking the fork button. This will clone the repo in your account, changes done here will be shown in the main repo. 
  
-Clone the repo to your local device: 
+- Clone the repo to your local device: 
 ```bash
    git clone https://kubesimplify.github.io/website/ 
    cd website
 ```
-Install dependencies:
+- Install dependencies:
 ```bash
     $ npm install 
 ```
-To run the website on your computer:
+- To run the website on your computer:
 ```bash
     $ npm start
 ```
-And then open up your web browser and go to [localhost:3000](http://localhost:3000).
+- And then open up your web browser and go to [localhost:3000](http://localhost:3000).
 
 ## <h1>Code of conduct</h1>
 Participation in the Kubesimplify community is governed by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
