@@ -53,24 +53,24 @@ Make sure you have the following prerequisites installed on your operating syste
 
 Follow the following instructions to start contributing.
 
-**1.** Fork [this](https://github.com/kubesimplify/website) repository.
+**1.** Fork [website](https://github.com/kubesimplify/website/fork) repository to your own repositories.
 
-**2.** Clone your forked copy of the project.
+**2.**  Clone your forked copy of the project by clicking on the code button copy the HTTPS link.
 
 ```
-git clone https://github.com/<your-github-username>/kubesimplify.git
+git clone https://github.com/<your-github-username>/website.git
 ```
 
 **3.** Navigate to the project directory.
 
 ```
-cd kubesimplify
+cd website
 ```
 
 **4.** Add a reference (remote) to the original repository.
 
 ```
-git remote add upstream https://github.com/kubesimplify/website.git
+git remote add upstream https://github.com/website.git
 ```
 
 **5.** Check the remotes for this repository.
