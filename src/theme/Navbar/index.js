@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './styles.module.css';
 import { FaBars, FaTimes } from "react-icons/fa";
- 
+import BrowserOnly from "@docusaurus/BrowserOnly"
  
 const navbarLogo = {
  logo: {
@@ -73,14 +73,17 @@ const mobileViewContent = {
  ),
 }
  
- 
+  
  
 function Navbar() {
  
  const [isMobile, setIsMobile] = useState(false)
- window.addEventListener('resize', () => {
-   window.innerWidth > 680 ? setIsMobile(false) : setIsMobile(!isMobile)
- })
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      window.innerWidth > 680 ? setIsMobile(false) : setIsMobile(!isMobile)
+    })
+  })
+  
  return (
    <>
      <section className={styles.navbar}>
