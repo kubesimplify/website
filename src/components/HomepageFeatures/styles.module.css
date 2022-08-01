@@ -244,6 +244,7 @@
 }
 
 .hp_cont_3_vid_p3,.hp_cont_3_blog_p3{
+    margin: auto;
     font-size: 1.5vw;
     letter-spacing: -0.01em;
     color: #FFFFFF;
@@ -335,7 +336,7 @@
     background: #1B2731;
 }
 .hp_cont_5_blog_p1, .hp_cont_6_ambassador_p1{
-    padding: 10% 10% 5% 10%;
+    padding: 5%;
     margin: auto;
     font-family: Poppins;
     font-size: 2vw;
@@ -358,7 +359,7 @@
     font-weight: 400;
     text-align: left;
     color: #FFFFFF;
-    padding: 2%;
+    padding: 5%;
 }
 
 .cont_5_btn {
