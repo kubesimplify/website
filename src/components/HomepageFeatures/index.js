@@ -26,32 +26,33 @@ export default function HomepageFeatures() {
 
         {/* first portion(container) of the homepage */}
         <div className={styles.hp_cont_1}>
-
-          <p className={styles.hp_cont_1_p1}>
-            On a mission to <br />
-            teach <span className={styles.hp_cont_1_cloud}>cloud native</span> <br />
-            to everyone.
-          </p>
-
-          <p className={styles.hp_cont_1_p2}>
-            We breakdown complicated concepts of <br />
-            cloud native into an easy to understand <br />
-            manner through our blogs and video content.
-          </p>
-
-          <button className={styles.hp_cont_1_btn}>
-
-            <p className={styles.hp_cont_1_btn_content}>
-              Start learning
+          <div className={styles.cont_1_content}>
+            <p className={styles.hp_cont_1_p1}>
+              On a mission to <br />
+              teach <span className={styles.hp_cont_1_cloud}>cloud native</span> <br />
+              to everyone.
             </p>
 
-          </button>
+            <p className={styles.hp_cont_1_p2}>
+              We breakdown complicated concepts of <br />
+              cloud native into an easy to understand <br />
+              manner through our blogs and video content.
+            </p>
 
-          <img className={styles.hp_cont_1_img1} src={githubActions} alt="github_actions" />
-          <img className={styles.hp_cont_1_img3} src={comments} alt="comments" />
-          <img className={styles.hp_cont_1_img2} src={computer} alt="computer" />
-          <img className={styles.hp_cont_1_img4} src={reactions} alt="reactions" />
+            <button className={styles.hp_cont_1_btn}>
 
+              <p className={styles.hp_cont_1_btn_content}>
+                Start learning
+              </p>
+
+            </button>
+          </div>
+          <div className={styles.cont_1_img}>
+            <img className={styles.hp_cont_1_img3} src={comments} alt="comments" />
+            <img className={styles.hp_cont_1_img1} src={githubActions} alt="github_actions" />
+            <img className={styles.hp_cont_1_img2} src={computer} alt="computer" />
+            <img className={styles.hp_cont_1_img4} src={reactions} alt="reactions" />
+          </div>
         </div>
 
         {/* second portion(container) of the homepage */}
@@ -77,13 +78,13 @@ export default function HomepageFeatures() {
 
                 <p className={styles.hp_cont_2a_p}>
                   Join the mailing list :
-                </p>  
-                  <form action="https://www.getrevue.co/profile/saiyampathak/add_subscriber" method="post" id="revue-form" name="revue-form" target="_blank">
-                    <div className={styles.hp_cont_2a_mail}>
-                      <div className={styles.mail_inp}>
-                        <input className={styles.hp_cont_2a_input} type="email" name="member[email]" id="member_email" placeholder="Email Address" />
-                      </div>
-                      <div className={styles.mail_btn}>
+                </p>
+                <form action="https://www.getrevue.co/profile/saiyampathak/add_subscriber" method="post" id="revue-form" name="revue-form" target="_blank">
+                  <div className={styles.hp_cont_2a_mail}>
+                    <div className={styles.mail_inp}>
+                      <input className={styles.hp_cont_2a_input} type="email" name="member[email]" id="member_email" placeholder="Email Address" />
+                    </div>
+                    <div className={styles.mail_btn}>
                       <button type="submit" name="member[subscribe]" id="member_submit" className={styles.hp_cont_2a_btn}>
 
                         <p className={styles.hp_cont_2a_btn_content}>
@@ -91,9 +92,9 @@ export default function HomepageFeatures() {
                         </p>
 
                       </button>
-                      </div>
                     </div>
-                  </form>  
+                  </div>
+                </form>
               </div>
 
             </div>
@@ -198,15 +199,15 @@ export default function HomepageFeatures() {
               If you have an idea for a blog and want to get it published on Kubesimplify, then reach out to us. We will publish the blog with your name! ✍🏻
             </p>
             <div className={styles.cont_5_btn}>
-            <button className={styles.hp_cont_5_btn1}>
-              <p className={styles.hp_cont_5_btn1_content}>
-                Contribute
-              </p>
-            </button>
+              <button className={styles.hp_cont_5_btn1}>
+                <p className={styles.hp_cont_5_btn1_content}>
+                  Contribute
+                </p>
+              </button>
             </div>
           </div>
           <div className={styles.img} >
-          <img className={styles.hp_cont_5_blog_image} src={BlogsContribute} alt="Blog" />
+            <img className={styles.hp_cont_5_blog_image} src={BlogsContribute} alt="Blog" />
           </div>
         </div>
         {/*   Wanna contribute to Blog , container end  */}
@@ -214,7 +215,7 @@ export default function HomepageFeatures() {
         {/* Want to apply, container start */}
         <div className={styles.hp_cont_6}>
           <div className={styles.img} >
-          <img className={styles.hp_cont_6_ambassador_image} src={Ambassador} alt="Blog" />
+            <img className={styles.hp_cont_6_ambassador_image} src={Ambassador} alt="Blog" />
           </div>
           <div className={styles.hp_cont_6_ambassadors}>
 
