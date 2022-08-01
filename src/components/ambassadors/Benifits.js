@@ -60,7 +60,7 @@ const Benifits = () => {
                         </div>
 
                     )
-                })};
+                })}
 
             </div>
         </div>
