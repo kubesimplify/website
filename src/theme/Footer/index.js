@@ -41,31 +41,39 @@ const logo = {
 function Footer() {
   return (
     <section className={styles.footer}>
-      <div>
-        <div className={styles.title}>Help us do more</div>
-        <div className={styles.sponsors_content}>{content.sponsorsContent}</div>
+      <div className={styles.footer_upper}>
+        <div className={styles.content}>
+          <div className={styles.title}>Help us do more</div>
+          <div className={styles.sponsors_content}>{content.sponsorsContent}</div>
+        </div>
         <div className={styles.sponsors_card}>
           <div className={styles.sponsors_card_title}>Sponsor us on Hashnode</div>
           <button className={styles.sponsor_hashnode}>
-            <div className={styles.sponsor_hashnode_logo}>
-              <logo.hashnode.Svg className={styles.logo} role="img" />
-              <div className={styles.button_name}>Sponsor</div>
+            <div>
+              <div className={styles.sponsor_hashnode_logo}>
+                <logo.hashnode.Svg className={styles.logo} role="img" />
+                <div className={styles.button_name}>Sponsor</div>
+              </div>
             </div>
           </button>
         </div>
       </div>
       <hr className={styles.hr}></hr>
-      <div className={styles.end_first}>© 2022 Kubesimplify</div>
-      <IoMdMail className={styles.mail_logo} row="img" />
-      <div className={styles.mail_title}>example@kubesimplify.com</div>
-      <div className={styles.group_logo}>
-        <a target="_blank" href="https://www.youtube.com/c/saiyam911"><AiFillYoutube row="img" className={styles.social1}/></a>
-        <a target="_blank" href="https://discord.gg/eEEFPVMr"><FaDiscord row="img" className={styles.social2}/></a>
-        <a target="_blank" href="https://twitter.com/kubesimplify"><AiOutlineTwitter row="img" className={styles.social2}/></a>
-        <a target="_blank" href="https://www.linkedin.com/company/kubesimplify/"><TiSocialLinkedin row="img" className={styles.social2}/></a>
-        <a target="_blank" href="https://www.instagram.com/saiyampathak/"><AiOutlineInstagram row="img" className={styles.social2}/></a>
-        <a target="_blank" href="https://github.com/kubesimplify"><AiFillGithub row="img" className={styles.social3}/></a>
-      </div> 
+      <div className={styles.footer_lower} >
+        <div className={styles.end_first}>© 2022 Kubesimplify</div>
+        <div className={styles.footer_mail}>
+          <IoMdMail className={styles.mail_logo} row="img" />
+          <div className={styles.mail_title}>example@kubesimplify.com</div>
+        </div>
+        <div className={styles.group_logo}>
+          <a target="_blank" href="https://www.youtube.com/c/saiyam911"><AiFillYoutube row="img" className={styles.social1}/></a>
+          <a target="_blank" href="https://discord.gg/eEEFPVMr"><FaDiscord row="img" className={styles.social2}/></a>
+          <a target="_blank" href="https://twitter.com/kubesimplify"><AiOutlineTwitter row="img" className={styles.social2}/></a>
+          <a target="_blank" href="https://www.linkedin.com/company/kubesimplify/"><TiSocialLinkedin row="img" className={styles.social2}/></a>
+          <a target="_blank" href="https://www.instagram.com/saiyampathak/"><AiOutlineInstagram row="img" className={styles.social2}/></a>
+          <a target="_blank" href="https://github.com/kubesimplify"><AiFillGithub row="img" className={styles.social3}/></a>
+        </div> 
+      </div>
     </section>
   );
 }
