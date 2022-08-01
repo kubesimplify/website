@@ -74,7 +74,7 @@ function Footer() {
         <div className={styles.footer_mail}>
           <IoMdMail className={styles.mail_logo} row="img" />
           <a className={styles.mail_title} href="kubesimplify@gmail.com">
-            example@kubesimplify.com
+            kubesimplify@gmail.com
           </a>
         </div>
         <div className={styles.group_logo}>
