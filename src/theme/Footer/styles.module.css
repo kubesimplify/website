@@ -21,7 +21,7 @@
     font-size: 2.5vw;
     line-height: 90%;
     margin-top: 4.3%;
-/* identical to box height, or 124% */
+    /* identical to box height, or 124% */
     color: #FFFFFF;
 }
 
@@ -50,7 +50,7 @@
     font-style: bolder;
     font-weight: 400;
     font-size: 1.5rem;
-    
+
     /* or 136% */
 
     text-align: center;
@@ -78,6 +78,10 @@
     background: transparent;
 }
 
+.sponsor_hashnode_logo a:hover {
+    color: white;
+}
+
 .logo {
     height: 5vw;
     width: 5vw;
@@ -90,8 +94,8 @@
     font-size: 2vw;
     text-align: center;
     margin: auto;
-    
-    color: #FFFFFF;    
+
+    color: #FFFFFF;
 }
 
 
@@ -128,6 +132,11 @@
     margin: auto;
 }
 
+.footer_mail a:hover {
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
 .mail_logo {
     width: 2vw;
     height: 2vw;
@@ -141,9 +150,9 @@
     font-weight: 500;
     font-size: 1vw;
     /* identical to box height, or 150% */
-    
+
     text-align: justify;
-    
+
     color: #FFFFFF;
     cursor: pointer;
 }
@@ -151,7 +160,8 @@
 .group_logo {
     width: fit-content;
 }
-.social1{
+
+.social1 {
     width: 1.5vw;
     height: 1.5vw;
     color: #1B2731;
@@ -160,7 +170,8 @@
     margin-right: 0px;
     margin-top: -10%;
 }
-.social2{
+
+.social2 {
     width: 1.5vw;
     height: 1.5vw;
     color: #1B2731;
@@ -168,7 +179,8 @@
     border-radius: 11px;
     margin-left: 9px;
 }
-.social3{
+
+.social3 {
     width: 1.5vw;
     height: 1.5vw;
     color: white;
@@ -177,7 +189,7 @@
 
 
 @media only screen and (max-width: 700px) {
-    
+
     .footer_upper {
         flex-direction: column;
     }
@@ -198,10 +210,10 @@
         font-size: 3vw;
     }
 
-    .footer_lower{
+    .footer_lower {
         flex-direction: column;
     }
-    
+
     .footer_lower * {
         font-size: 2vw;
     }
@@ -209,6 +221,7 @@
     .group_logo {
         margin-top: 2%;
     }
+
     .group_logo * {
         height: 3vw;
         width: 3vw;
