@@ -1,12 +1,39 @@
-<h1 align="center"><a href="https://kubesimplify.github.io/website/">Kubesimplify Website </a></h1>
-<p align="center"><i>The source code for Kubesimplify.com</i></p>
+<p style="text-align:center;" align="center"><a href="https://kubesimplify.github.io/website/"><picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/white.svg"  width="70%" align="center" style="margin-bottom:20px;">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/black.svg" width="70%" align="center" style="margin-bottom:20px;">
+  <img alt="Shows an illustrated light mode kubesimplify logo in light color mode and a dark mode kubesimplify logo dark color mode." src="https://raw.githubusercontent.com/kubesimplify/branding/main/assets/svg/horizontal/white.svg" width="70%" align="center" style="margin-bottom:20px;">
+</picture></a><br /><br /></p>
+<p align="center">
+
+
+<a href="https://t.co/9KuC1EMxWo" alt="Discord Invite">
+  <img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white" /></a>
+<a href="https://www.linkedin.com/company/kubesimplify/" alt="Linkedin">
+  <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
+  <a href="https://twitter.com/intent/follow?screen_name=kubesimplify" alt="Twitter Follow">
+  <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" /></a> 
+  <a href="https://kubesimplify.com/" alt="Youtube">
+  <img src="https://img.shields.io/badge/Kubesimplify-%3CCOLOR%3E?style=for-the-badge&logo" /></a>
+    <a href="https://www.youtube.com/c/saiyam911" alt="Youtube">
+  <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" /></a>
+  </p>
+
+<p align="center"><i>If you like Kubesimplify, please ★ this repository to show your support! 🤩</i></p>
 
 This repository contains the assets required to build the Kubesimplify website and documentation. We're glad that you want to contribute! 
 
-- [Code of Conduct](code-of-conduct.md)
+## <h1>Code of conduct</h1>
+   <p style="text-align:center;" align="center"><a href="https://www.cncf.io/"><picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/white/cncf-white.svg"  width="30%" align="center" style="margin-bottom:20px;">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/black/cncf-black.svg" width="30%" align="center" style="margin-bottom:20px;">
+  <img alt="Shows an illustrated light mode kubesimplify logo in light color mode and a dark mode kubesimplify logo dark color mode." src="ttps://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/white/cncf-white.svg" width="30%" align="center" style="margin-bottom:20px;">
+</picture></a><br /></p>
+<p align="center">
+Participation in the Kubesimplify community is governed by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
 
 <h1>Contributing Guidelines: </h1>
 
+We're a warm and welcoming community of open source contributors. Please join. All types of contributions are welcome. Be sure to read the Kubesimplify <a href="https://github.com/KrishAryan/website/blob/main/CONTRIBUTION.md">Contribution.md</a> for a tour of resources available to you and how to get started.
 Kubesimplfy's new website. This codebase is what runs on [Kubesimplify](https://kubesimplify.github.io/website/). 
 
 For new developers getting started, here are some instructions to follow:
@@ -27,8 +54,7 @@ To run the website on your computer:
 ```
 And then open up your web browser and go to [localhost:3000](http://localhost:3000).
 
-## <h1>Code of conduct</h1>
-Participation in the Kubesimplify community is governed by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
+
 
 ---
 <h4 align="center"> Code under MIT License, assets may not be re-used or re-distributed.
