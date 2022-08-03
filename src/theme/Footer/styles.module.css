@@ -1,70 +1,56 @@
 .footer {
     position: relative;
-    /* height: 440px; */
-    left: 0px;
-    /* top: 2919px; */
     background: #1B2731;
 }
 
+
+.footer_upper {
+    display: flex;
+    flex-direction: row;
+    padding: 10% 10% 0 10%;
+}
+
+
 .title {
-    position: relative;
-    width: 23.5%;
-    height: 10%;
-    left: 10%;
-    right: 70.05%;
-    border: solid;
-    border-width: 0px 0px 2px 0px;
+    padding-bottom: 2%;
+    border-bottom: 1px solid;
+    border-image-slice: 1;
     font-family: 'Poppins';
     font-style: normal;
-    font-weight: 400;
-    font-size: 205%;
+    font-weight: 500;
+    font-size: 2.5vw;
     line-height: 90%;
     margin-top: 4.3%;
-/* identical to box height, or 124% */
-    letter-spacing: -0.01em;
+    /* identical to box height, or 124% */
     color: #FFFFFF;
 }
 
 .sponsors_content {
-    position: relative;
-    width: 52%;
-    left: 10%;
-    margin-top: 3%;
+    padding-top: 10%;
     font-family: 'Poppins';
-    font-size: 1.2rem;
-    font-weight: lighter;
-    line-height: 2.4rem;
+    font-size: 1.5vw;
+    font-weight: 400;
+    line-height: -1%;
     /* or 183% */
 
     color: white;
 }
 
 .sponsors_card {
-    position: relative;
-    align-items: center;
-    left: 69.7%;
-    right: 10%;
-
+    margin: 5%;
+    width: 50%;
+    text-align: center;
     background: #FFFFFF;
     border-radius: 10px;
-    margin-top: -13.5%;
-    height: 17.5rem;
-    width: 19.2rem;
 }
 
 .sponsors_card_title {
-    position: relative;
-    width: 80%;
-    height: 30%;
-    left: 10%;
-    right: 10%;
-    top: 7%;
-
+    margin-top: 10%;
     font-family: 'Poppins';
     font-style: bolder;
-    font-weight: lighter;
+    font-weight: 400;
     font-size: 1.5rem;
-    line-height: 30px;
+
     /* or 136% */
 
     text-align: center;
@@ -74,176 +60,172 @@
 }
 
 .sponsor_hashnode {
-    position: relative;
-    left: 9%;
-    right: 12%;
-
     background: #2962FF;
+    margin-top: 10%;
     border-radius: 10px;
+    width: 75%;
     border: none;
-
-    height: 3.2rem;
-    width: 15.6rem;
-    margin-top: 3.6%;
     cursor: pointer;
+}
+
+.sponsor_hashnode * {
+    display: flex;
+    width: 100%;
+    justify-content: center;
 }
 
 .sponsor_hashnode_logo {
     background: transparent;
 }
 
+.sponsor_hashnode_logo a:hover {
+    color: white;
+}
+
 .logo {
-    width: 10%;
-    height: 10%;
-    margin-right: 40%;
-    margin-top: -5%;
+    height: 5vw;
+    width: 5vw;
 }
 
 .button_name {
-    left: 10%;
-    margin-top: -7%;
-    margin-left: 14%;
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 150%;
-    line-height: 0px;
-    /* identical to box height, or 0% */
-    
-    /* letter-spacing: -0.01em; */
-    
-    color: #FFFFFF;    
-}
-
-.sponsors_or {
-    position: relative;
-    width: 29px;
-    height: 35px;
-    left: 43%;
-    right: 43%;
-    top: 1.7%;
-
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: lighter;
-    font-size: 1.5rem;
-    line-height: 35px;
-    /* identical to box height, or 125% */
-
+    font-size: 2vw;
     text-align: center;
-    letter-spacing: -0.01em;
+    margin: auto;
 
-    color: #1B2731;
-
+    color: #FFFFFF;
 }
 
-.sponsor_coffee {
-    position: relative;
-    left: 9%;
-    right: 12%;
-    top: 3%;
-    bottom: 20%;
-
-    background: #FFDD00;
-    border-radius: 10px;
-    border: none;
-    height: 3.2rem;
-    width: 15.6rem;
-    margin-top: 1%;
-    cursor: pointer;
-}
-
-.coffee {
-    width: 100%;
-    height: 100%;
-}
 
 .hr {
     position: relative;
     height: 1px;
     margin-left: 10%;
     margin-right: 10%;
-    top: 5%;
 
     background: white;
 }
 
+.footer_lower {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
 
 .end_first {
-    position: relative;
-    top: 2em;
-    left: 10%;
-    width: 20%;
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 100%;
-    line-height: 10%;
+    font-size: 1vw;
     /* identical to box height, or 130% */
-    align-items: center;
-    letter-spacing: -0.01em;
     color: #FFFFFF;
 }
 
+.footer_mail {
+    display: flex;
+}
+
+.footer_mail * {
+    margin: auto;
+}
+
+.footer_mail a:hover {
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
 .mail_logo {
-    position: relative;
-    width: 23px;
-    height: 23px;
-    left: 43.5%;
-    bottom: -1em;
+    width: 2vw;
+    height: 2vw;
     color: white;
     cursor: pointer;
 }
 
 .mail_title {
-    position: relative;
-    width: 284px;
-    height: 30px;
-    left: 46.1%;
-    bottom: 1em;
-    
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 100%;
-    line-height: 30px;
+    font-size: 1vw;
     /* identical to box height, or 150% */
-    
+
     text-align: justify;
-    letter-spacing: -0.01em;
-    
+
     color: #FFFFFF;
     cursor: pointer;
 }
 
 .group_logo {
-    position: relative;
-    width: 13%;
-    left: 79.2%;
-    bottom: 2.5em;
+    width: fit-content;
 }
-.social1{
-    width: 20px;
-    height: 20px;
+
+.social1 {
+    width: 1.5vw;
+    height: 1.5vw;
     color: #1B2731;
     background: white;
     border-radius: 11px;
     margin-right: 0px;
     margin-top: -10%;
 }
-.social2{
-    width: 20px;
-    height: 20px;
+
+.social2 {
+    width: 1.5vw;
+    height: 1.5vw;
     color: #1B2731;
     background: white;
     border-radius: 11px;
     margin-left: 9px;
 }
-.social3{
-    width: 21px;
-    height: 21px;
+
+.social3 {
+    width: 1.5vw;
+    height: 1.5vw;
     color: white;
     margin-left: 8px;
+}
+
+
+@media only screen and (max-width: 700px) {
+
+    .footer_upper {
+        flex-direction: column;
+    }
+
+    .title {
+        font-size: 4vw;
+    }
+
+    .sponsors_card {
+        margin: 10% auto auto auto;
+    }
+
+    .sponsors_card_title {
+        font-size: 4vw;
+    }
+
+    .sponsors_content {
+        font-size: 3vw;
+    }
+
+    .footer_lower {
+        flex-direction: column;
+    }
+
+    .footer_lower * {
+        font-size: 2vw;
+    }
+
+    .group_logo {
+        margin-top: 2%;
+    }
+
+    .group_logo * {
+        height: 3vw;
+        width: 3vw;
+    }
 }
 
 /* Hover color on social icons if needed */
