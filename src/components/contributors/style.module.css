@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins';
+}
+
+/* HeroBox */
+
+.hero_box {
+  background-color: #1B2731;
+  margin: 5rem 15rem;
+  padding: 2rem 8rem;
+  border-radius: 10px;
+}
+
+.hero_box h1 {
+  text-align: center;
+  color: #FFFF;
+  font-size: 3rem;
+  font-weight: 500;
+}
+
+.hero_box span {
+  background: -webkit-linear-gradient(left, #71FF7B, #54DBFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.box {
+  padding: 2rem 10rem;
+}
+
+p {
+  font-weight: 400;
+  color: #FFFF;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.handle {
+  display: flex;
+  gap: 1rem;
+  background-color: #FFFF;
+  color: #000;
+  border-radius: 10px;
+  width: fit-content;
+  margin: auto;
+  padding: 1rem 7rem;
+}
+
+.handle a:hover {
+  text-decoration: none;
+}
+
+.handle a img {
+  filter: invert(100%);
+  width: 2rem;
+}
+
+.handle span {
+  color: #000;
+  background: unset;
+  -webkit-text-fill-color: unset;
+  font-weight: bold;
+}
+
+.handle a {
+  display: flex;
+  gap: .3rem;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  padding: .3rem 1.2rem;
+  border-radius: 25px;
+  background-color: #1D9BF0;
+}
+
+.guidelines {
+  margin-block: 2rem;
+  color: #FFFF;
+  font-weight: 400;
+}
+
+.guidelines a {
+  color: #FFFF;
+  text-decoration: underline;
+}
+
+@media only screen and (max-width: 1600px)  {
+  .hero_box {
+    margin: 2rem 5rem;
+    padding: .5rem 2rem;
+  }
+}
+
+@media only screen and (max-width: 1000px)  {
+  .hero_box {
+    padding: 0rem 1rem;
+  }
+
+  .box {
+    padding: 1rem 5rem;
+  }
+}
+
+@media only screen and (max-width: 700px)  {
+
+  p {
+    font-size: 1rem;
+  }
+
+  .handle {
+    font-size: 1rem;
+    padding: .5rem 1rem;
+  } 
+  
+  .handle a {
+    font-size: 1rem;
+  }
+
+  .guidelines {
+    font-size: 1rem;
+  }
+  
+  .hero_box h1 {
+    font-size: 2rem;
+  }
+
+  .box {
+    padding: 1rem;
+  }
+}
+
+@media only screen and (max-width: 400px)  {
+  .hero_box h1 {
+    font-size: 1.2rem;
+  }
+}
+
+/* CList */
+
+.list_box {
+  margin: 5rem 15rem;
+}
+
+.heading {
+  width: fit-content;
+  margin-inline: auto;
+  padding: .1rem 1.2rem;
+  box-sizing: content-box;
+  border-width: 0 0 3px 0;
+  border-style: solid;
+  border-image: linear-gradient(to right bottom, #5CFF68, #05CAFF);
+  border-image-slice: 1;
+}
+
+.heading h1 {
+  text-align: center;
+  font-weight: 500;
+  font-size: 2.5rem;
+}
+
+@media only screen and (max-width: 1600px)  {
+  .heading {
+    margin: 2rem;
+  }
+
+  .heading h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Card */
+
+.card {
+  background-color: #1B2731;
+  color: #FFFF;
+  width: fit-content;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.profile {
+  width: 242px;
+  height: 233px;
+}
+
+.socials {
+  display: flex;
+  justify-content: start;
+  gap: .5rem;
+}
+
+.socials img {
+  filter: invert(100%);
+}
+
+@media only screen and (max-width: 400px)  {
+  .profile {
+    width: 142px;
+    height: 133px;
+  }
+
+  .name {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+}
