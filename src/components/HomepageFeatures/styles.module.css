@@ -278,7 +278,13 @@
     width: 150px;
     border: none;
     margin-left: 35px;
+    transition: 0.3s;
     cursor: pointer;
+}
+
+.hp_cont_3_btn1:hover,
+.hp_cont_3_btn2:hover {
+    box-shadow: inset 0em 0em 0em 10em rgba(0, 0, 0, 0.1);
 }
 
 .hp_cont_3_btn1_content,
@@ -334,6 +340,11 @@
     border-radius: 10px;
     border: none;
     cursor: pointer;
+    transition: 0.3s;
+}
+
+.hp_cont_4_btn1:hover {
+    box-shadow: inset 0em 0em 0em 10em rgba(0, 0, 0, 0.1);
 }
 
 .hp_cont_4_btn1 a {
@@ -404,6 +415,12 @@
     border-radius: 10px;
     border: none;
     cursor: pointer;
+    transition: 0.3s;
+}
+
+.hp_cont_5_btn1:hover,
+.hp_cont_6_btn1:hover {
+    box-shadow: inset 0em 0em 0em 10em rgba(0, 0, 0, 0.1);
 }
 
 .hp_cont_5_btn1 a,
