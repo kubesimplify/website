@@ -14,7 +14,7 @@ Follow these resources: https://lab.github.com and https://try.github.com/
 
 # Style guide
 
-The Kubesimplify website is hosted in this repository and is built using [Docusaurus2.0](https://docusaurus.io/). Once a pull request has been submitted, a preview deployment will be built and made available to you and other contributors on your PR to review.
+The Kubesimplify website is hosted in this repository and is built using [Docusaurus2.0](). Once a pull request has been submitted, a preview deployment will be built and made available to you and other contributors on your PR to review.
 
 # Contributing to Kubesimplify website
 
