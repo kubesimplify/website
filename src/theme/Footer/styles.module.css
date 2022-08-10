@@ -65,7 +65,16 @@
     border-radius: 10px;
     width: 75%;
     border: none;
+    transition: 0.3s;
     cursor: pointer;
+}
+
+.sponsor_hashnode:hover {
+    background: #1750ef;
+}
+
+.sponsor_hashnode a:hover {
+    text-decoration: none;
 }
 
 .sponsor_hashnode * {
