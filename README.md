@@ -22,14 +22,8 @@
 
 This repository contains the assets required to build the Kubesimplify website and documentation. We're glad that you want to contribute! 
 
-## <h1>Code of conduct</h1>
-   <p style="text-align:center;" align="center"><a href="https://www.cncf.io/"><picture align="center">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/white/cncf-white.svg"  width="30%" align="center" style="margin-bottom:20px;">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/black/cncf-black.svg" width="30%" align="center" style="margin-bottom:20px;">
-  <img alt="Shows an illustrated light mode kubesimplify logo in light color mode and a dark mode kubesimplify logo dark color mode." src="ttps://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/white/cncf-white.svg" width="30%" align="center" style="margin-bottom:20px;">
-</picture></a><br /></p>
-<p align="center">
-Kubesimplify follows [CNCF Code of Conduct]<br/>(https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
+  
+
 
 <h1>Contributing Guidelines: </h1>
 
