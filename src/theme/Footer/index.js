@@ -79,22 +79,23 @@ function Footer() {
         </div>
         <div className={styles.group_logo}>
           <a target="_blank" href="https://www.youtube.com/c/saiyam911">
-            <AiFillYoutube row="img" className={styles.social1} />
+            <AiFillYoutube row="img" className={styles.social1} style={{backgroundColor:'#FF0000'}} />
           </a>
           <a target="_blank" href="https://discord.gg/eEEFPVMr">
-            <FaDiscord row="img" className={styles.social2} />
+            <FaDiscord row="img" className={styles.social2} style={{backgroundColor:'#7289da'}} />
           </a>
           <a target="_blank" href="https://twitter.com/kubesimplify">
-            <AiOutlineTwitter row="img" className={styles.social2} />
+            <AiOutlineTwitter row="img" className={styles.social2} style={{backgroundColor:'#00acee'}}
+  />
           </a>
           <a
             target="_blank"
             href="https://www.linkedin.com/company/kubesimplify/"
           >
-            <TiSocialLinkedin row="img" className={styles.social2} />
+            <TiSocialLinkedin row="img" className={styles.social2} style={{backgroundColor:"#0072b1"}} />
           </a>
           <a target="_blank" href="https://www.instagram.com/saiyampathak/">
-            <AiOutlineInstagram row="img" className={styles.social2} />
+            <AiOutlineInstagram row="img" className={styles.social2} style={{background:"linear-gradient(to bottom right ,#8a3ab9,#e95950,#bc2a8d,#fccc63,#fbad50,#cd486b,#4c68d7 )"}}  />
           </a>
           <a target="_blank" href="https://github.com/kubesimplify">
             <AiFillGithub row="img" className={styles.social3} />
