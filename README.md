@@ -28,7 +28,7 @@ This repository contains the assets required to build the Kubesimplify website a
 <h1>Contributing Guidelines: </h1>
 
 We're a warm and welcoming community of open source contributors. Please join. All types of contributions are welcome. Be sure to read the Kubesimplify <a href="https://github.com/kubesimplify/website/blob/main/CONTRIBUTION.md">Contribution.md</a> for a tour of resources available to you and how to get started.
-Kubesimplify's new website. This codebase is what runs on [Kubesimplify](https://kubesimplify.github.io/website/). 
+This is the source code of the official [Kubesimplify's website](https://kubesimplify.github.io/website/). 
 
 For new developers getting started, here are some instructions to follow:
 Fork the repo by clicking the fork button. This will clone the repo in your account, changes done here will be shown in the main repo. 
