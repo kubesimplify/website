@@ -54,17 +54,18 @@ function Footer() {
             Sponsor us on Hashnode
           </div>
           <button className={styles.sponsor_hashnode}>
-            <div>
-              <div className={styles.sponsor_hashnode_logo}>
-                <logo.hashnode.Svg className={styles.logo} role="img" />
-                <a
-                  className={styles.button_name}
+            <a
                   href="https://kubesimplify.com/sponsor"
                 >
-                  Sponsor
-                </a>
+            <div className={styles.sponsor_hashnode_div}>
+              <div className={styles.sponsor_hashnode_logo}>
+                <logo.hashnode.Svg className={styles.logo} role="img" />  
+              </div>
+              <div className={styles.button_name}>
+              Sponsor
               </div>
             </div>
+            </a>
           </button>
         </div>
       </div>

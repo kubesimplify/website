@@ -104,7 +104,7 @@
   }
 
   .mobilView_learn * {
-    font-weight: 400;
+    font-weight: 500;
     color: white;
   }
 
@@ -113,7 +113,7 @@
   }
 
   .mobileView_community * {
-    font-weight: 400;
+    font-weight: 500;
     color: white;
   }
 }
@@ -124,7 +124,7 @@
 .contact,
 .navbarbutton {
   text-decoration: none;
-  font-size: 20px;
+  font-size: 18px;
   padding: 0px 10px;
   margin: 0 5px;
   cursor: pointer;
@@ -154,6 +154,7 @@
 
 .navbar_community_word {
   font-family: 'Poppins';
+  font-size: 18px;
   font-weight: 500;
   font-style: normal;
   color: white;
@@ -167,8 +168,10 @@
   width: 70%;
 }
 
+.navbar_learn_word,
 .navbar_contact_word {
   font-family: 'Poppins';
+  font-size: 20px;
   font-weight: 500;
   font-style: normal;
   color: white;
@@ -180,6 +183,7 @@
 
 .navbar_dropdown_content {
   display: none;
+  font-weight: 500;
   position: absolute;
   background-color: #1B2731;
 
@@ -191,6 +195,7 @@
 
 .navbar_dropdown_content a {
   font-size: 1vw;
+  font-weight: 500;
   float: none;
   color: white;
   padding: 12px 16px;
@@ -208,7 +213,7 @@
 }
 
 .navbar_dropdown .navbar_dropbtn {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
   border: none;
   outline: none;
