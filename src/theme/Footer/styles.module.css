@@ -60,10 +60,10 @@
 }
 
 .sponsor_hashnode {
+    padding: 2%;
     background: #2962FF;
-    margin-top: 10%;
+    margin: 10%;
     border-radius: 10px;
-    width: 75%;
     border: none;
     transition: 0.3s;
     cursor: pointer;
@@ -77,14 +77,15 @@
     text-decoration: none;
 }
 
-.sponsor_hashnode * {
+.sponsor_hashnode_div {
+    padding: 2%;
     display: flex;
-    width: 100%;
-    justify-content: center;
+    flex-direction: row;
 }
 
 .sponsor_hashnode_logo {
     background: transparent;
+    text-align: center;
 }
 
 .sponsor_hashnode_logo a:hover {
@@ -92,17 +93,18 @@
 }
 
 .logo {
-    height: 5vw;
-    width: 5vw;
+    height: 25px;
+    width: 25px;
 }
 
 .button_name {
+    padding: 5px;
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 2vw;
+    font-size:  14px;
     text-align: center;
-    margin: auto;
+
 
     color: #FFFFFF;
 }
