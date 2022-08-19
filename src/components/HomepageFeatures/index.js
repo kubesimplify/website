@@ -33,7 +33,7 @@ export default function HomepageFeatures() {
             </p>
 
             <p className={styles.hp_cont_1_p2}>
-              We. at Kubesimplify make complicated concepts of <br />
+              We, at Kubesimplify make complicated concepts of <br />
               cloud native into an easily understandable <br />
               manner through our blogs and video content.
             </p>
