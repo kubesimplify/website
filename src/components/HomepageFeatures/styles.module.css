@@ -164,8 +164,28 @@
 
 
 .hp_cont_2a_input {
-    width: fit-content;
 
+     /* Current change */
+     width: 73%;
+     margin-right: 167px;
+     padding-right: -7px;
+     padding-right: 48px;
+     height: 100%;
+     text-align: center;
+     background: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
+     border-radius: 5px;
+     font-family: 'Poppins';
+     font-style: normal;
+     color: #0d0d0d;
+     outline: none;
+     border: none;
+ }
+ 
+ 
+
+ /* Previous change for class [.hp_cont_2a_input]
+
+     width: fit-content;
     margin: auto;
     height: 100%;
     text-align: center;
@@ -175,8 +195,9 @@
     font-style: normal;
     color: #0d0d0d;
     outline: none;
-    border: none;
+    border: none; 
 }
+*/
 
 .hp_cont_2a_input::placeholder {
     opacity: 1;
@@ -200,6 +221,18 @@
 
 
 .hp_cont_2a_btn {
+
+    background: #05CAFF;
+    margin-left: 27px;
+    padding: 1%;
+    width: 140px;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 140px;
+}
+    
+/* previous change for class [.hp_cont_2a_btn]
+
     margin: auto;
     background: #05CAFF;
     padding: 1%;
@@ -207,6 +240,7 @@
     border: none;
     cursor: pointer;
 }
+*/
 
 .hp_cont_2a_btn_content {
     width: fit-content;
