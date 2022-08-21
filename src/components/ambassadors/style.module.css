@@ -73,15 +73,15 @@
     font-weight: 400;
     font-size: 24px;
     line-height: 48px;
-
     color: #ffffff;
+    margin-right: 56px;
 }
 
 .criteria_underline {
     background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
     width: 180px;
     height: 2px;
-    margin: auto;
+    margin-left: 41%;
 }
 
 .criteria_flex {
@@ -163,15 +163,15 @@
     font-weight: 500;
     font-size: 36px;
     line-height: 48px;
-
     color: #1B2731;
+    margin-left: -3%;
 }
 
 .benifits_underline {
     background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
     width: 180px;
     height: 2px;
-    margin: auto;
+    margin-left: 42%;
 }
 
 .benifits_flex {
@@ -185,6 +185,8 @@
     color: #1B2731;
 
     top: 10%;
+
+    margin-right: 3%;
 }
 
 .benifits_items {
@@ -346,6 +348,7 @@
     line-height: 48px;
 
     color: #1B2731;
+    margin-left: -2%;
 }
 
 .FAQs_underline {
