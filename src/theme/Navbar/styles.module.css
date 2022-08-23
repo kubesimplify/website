@@ -263,3 +263,10 @@
 .navbar_contri_designs {
   border-top: 1px solid white;
 }
+
+.navbar_theme_button {
+  cursor: pointer;
+  width: 2rem;
+  padding: 1rem 0 1rem 1rem;
+  filter: brightness(0) invert(1);
+}

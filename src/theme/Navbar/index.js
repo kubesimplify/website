@@ -10,6 +10,9 @@ const navbarLogo = {
   arrow: {
     Svg: require("@site/static/img/Arrow.svg").default,
   },
+  theme: {
+    Svg: require("@site/static/img/theme.svg").default,
+  },
 };
 
 const navbarContent = {
@@ -112,6 +115,7 @@ const mobileViewContent = {
 
 function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
+  const [darkTheme, setDarkTheme] = useState(false);
   useEffect(() => {
     window.addEventListener("resize", () => {
       window.innerWidth > 680 ? setIsMobile(false) : setIsMobile(!isMobile);
@@ -163,6 +167,21 @@ function Navbar() {
                   Newsletter
                 </a>
               </button>
+            </li>
+            <li
+              className={styles.navbar_theme_button}
+              onClick={() => {
+                setDarkTheme(!darkTheme);
+                const el = document.querySelector(
+                  `[data-theme="${darkTheme ? "dark" : "light"}"]`
+                );
+                el.setAttribute(
+                  "data-theme",
+                  `${darkTheme ? "light" : "dark"}`
+                );
+              }}
+            >
+              <navbarLogo.theme.Svg role="img" />
             </li>
           </ul>
         </nav>
