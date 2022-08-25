@@ -70,10 +70,10 @@
 .criteria_title {
 
     font-style: normal;
-    font-weight: 400;
-    font-size: 24px;
+    font-weight: 500;
+    font-size: 36px;
     line-height: 48px;
-
+    padding-top: 24px;
     color: #ffffff;
 }
 
@@ -90,6 +90,7 @@
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    padding: 24px;
 }
 
 .criteria_items {
@@ -98,6 +99,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* max-width:320px; */
 }
 
 .criteria_items_img {
@@ -349,13 +351,16 @@
 }
 
 .FAQs_underline {
-
     background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
+    width: 180px;
+    height: 2px;
+    margin: auto;
 }
 
 .FAQs_flex {
     width: 70%;
     margin: auto;
+    padding: 24px;
 }
 
 .FAQs_question {
