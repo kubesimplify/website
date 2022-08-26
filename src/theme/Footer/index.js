@@ -82,7 +82,7 @@ function Footer() {
           <a target="_blank" href="https://www.youtube.com/c/saiyam911">
             <AiFillYoutube row="img" className={styles.social1} />
           </a>
-          <a target="_blank" href="https://discord.gg/eEEFPVMr">
+          <a target="_blank" href="https://discord.gg/26Z384WSPB">
             <FaDiscord row="img" className={styles.social2} />
           </a>
           <a target="_blank" href="https://twitter.com/kubesimplify">
