@@ -8,6 +8,7 @@
 }
 
 .hp_cont_1 {
+    max-width: 1200px;
     display: flex;
     flex-direction: row;
     margin: auto;
@@ -15,21 +16,22 @@
 
 .cont_1_content {
     padding: 5%;
-    width: 70%;
+    width: 50%;
     margin: auto;
 }
 
 .hp_cont_1_p1 {
     font-size: 36px;
-    line-height: 56px;
+    font-weight: 550;
+    letter-spacing: -1px;
+    line-height: 40px;
 }
 
 .hp_cont_1_p2 {
     font-size: 18px;
     line-height: 28px;
 
-    margin-top: 30px;
-    ;
+    margin-top: 30px;    
     letter-spacing: -0.02em;
     max-width: fit-content;
 }
@@ -37,40 +39,57 @@
 .hp_cont_1_cloud {
     background: -webkit-linear-gradient(111.84deg, #5CFF68 12.29%, #05CAFF 112.72%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .cont_1_img {
-    width: auto;
-    height: auto;
-    margin: auto;
+    width: 50%;
+    margin: 1em;
+    display: inline-block;
+    position: relative;
 }
 
 .hp_cont_1_img1 {
-    width: 35vw;
-    height: 20vw;
+    width: 55%;
+    left: 42%;
+    top: 13%;
     border-radius: 5px;
+    display: block;
+    position: absolute;
 }
 
 .hp_cont_1_img2 {
-    width: 35vw;
-    height: 20vw;
+    width: 55%;
     border-radius: 5px;
+    z-index: -1;
+    top: 45%;
+    left: 6%;
+    display: block;
+    position: absolute;
 }
 
 
 .hp_cont_1_img3 {
-    width: 206.63px;
+    width: 40%;
+    position: relative;
     height: 130.05px;
+    display: block;
+    top: 10%;
+    left: 1%;
 }
 
 .hp_cont_1_img4 {
-    width: 156.78px;
+    width: 30%;
     height: 117.1px;
+    position: relative;
+    left: 62%;
+    top: 8rem;
+    display: block;
 }
 
 .hp_cont_1_btn {
-    margin-top: 50px;
+    margin-top: 20px;
     background: linear-gradient(94.34deg, #5CFF68 0%, #05CAFF 100%);
     border-radius: 5px;
     height: 38px;
@@ -221,15 +240,44 @@
 }
 
 .hp_cont_3 {
+    max-width: 1300px;
+    margin: 1em auto;
+}
+
+.hp_cont_3_h1{
+    padding-bottom: 1em;
+    text-align: center;
+    
+}
+
+.hp_cont_3_h1 > h1{
+    display: inline-block;
+    position: relative;
+    font-weight: 600;
+    font-size: 2.5em;
+}
+
+.hp_cont_3_h1 >h1::after{
+    content: "";
+    width: 75%;
+    position: absolute;
+    bottom: -20%;
+    left: 10%;
+    border-bottom: 3px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
+}
+
+.hp_cont_3_section{
     display: flex;
-    justify-content: space-around;
-    margin-top: 10%;
-    margin-bottom: 0;
+    gap: 2em;
+    justify-content: center;
+    margin: 0 3rem;
 }
 
 .hp_cont_3_vid,
 .hp_cont_3_blog {
-    padding: 5%;
+    padding: 1.5em 4em 1.8em 1.5em;
     background: -webkit-linear-gradient(rgba(27, 39, 49, 0.9), rgba(27, 39, 49, 0.9)), url("./assests/Videos.png");
     border-radius: 5px;
 }
@@ -241,29 +289,29 @@
     color: #FFFFFF;
 }
 
-.hp_cont_3_vid_p2,
-.hp_cont_3_blog_p2 {
+.hp_cont_3_vid_h2,
+.hp_cont_3_blog_h2 {
     display: flex;
     font-weight: 500;
-    font-size: 20px;
+    font-size: 2em;
+    align-items: center;
+    gap: 1rem;
     color: #FFFFFF;
 }
 
 .hp_cont_3_vid_p3,
 .hp_cont_3_blog_p3 {
     margin: auto;
-    font-size: 1.5vw;
     letter-spacing: -0.01em;
     color: #FFFFFF;
 }
 
 .hp_cont_3_vidIcon,
 .hp_cont_3_blogIcon {
-    margin-top: auto;
-    margin-left: 2%;
-    margin-bottom: auto;
-    width: 20px;
-    height: 15px;
+    
+    width: 1em;
+    object-fit: contain;
+    height: 1em;
 }
 
 .hp_cont_3_btn1,
@@ -330,6 +378,7 @@
 .hp_cont_4_projects {
     background: -webkit-linear-gradient(111.84deg, #5CFF68 12.29%, #05CAFF 112.72%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -496,7 +545,7 @@
         width: 100%;
     }
 
-    .hp_cont_3 {
+    .hp_cont_3_section{
         flex-direction: column;
     }
 
@@ -559,4 +608,14 @@
     .hp_cont_1_p1 {
         font-size: 21px;
     }
+}
+
+@media only screen and (max-width: 375px) {
+    /* mobile screen */
+    .hp_cont_3_vid_h2,
+    .hp_cont_3_blog_h2 {
+       font-size: 1.5em; 
+    }
+
+
 }

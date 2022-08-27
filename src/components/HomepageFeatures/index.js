@@ -69,6 +69,83 @@ export default function HomepageFeatures() {
         </div>
 
         {/* second portion(container) of the homepage */}
+        <div className={styles.hp_cont_3}>
+          <div className={styles.hp_cont_3_h1}>
+          <h1>Learn cloud native</h1>
+
+          </div>
+          <div className={styles.hp_cont_3_section}>
+
+          <div className={styles.hp_cont_3_vid}>
+            <p className={styles.hp_cont_3_vid_p1}>Youtube</p>
+
+            <h2 className={styles.hp_cont_3_vid_h2}>
+              Video Content
+              <img
+                className={styles.hp_cont_3_vidIcon}
+                src={vidIcon}
+                alt="Video_Icon"
+              />
+            </h2>
+
+            <p className={styles.hp_cont_3_vid_p3}>
+              Learn cloud native technology through our videos - 
+              CNCFMinutes, series, walkthroughs, livestreams and 
+              many more!
+            </p>
+
+            <a href="https://www.youtube.com/c/saiyam911" target="_blank">
+              <button className={styles.hp_cont_3_btn1}>
+                <p className={styles.hp_cont_3_btn1_content}>
+                  View Videos
+                  <img
+                    className={styles.hp_cont_3_linkIcon}
+                    src={Link}
+                    alt="link"
+                  />
+                </p>
+              </button>
+            </a>
+          </div>
+
+          <div className={styles.hp_cont_3_blog}>
+            <p className={styles.hp_cont_3_blog_p1}>Hashnode</p>
+
+            <h2 className={styles.hp_cont_3_blog_h2}>
+              Blog Content
+              <img
+                className={styles.hp_cont_3_blogIcon}
+                src={blogIcon}
+                alt="Blog_Icon"
+              />
+            </h2>
+
+            <p className={styles.hp_cont_3_blog_p3}>
+              Learn cloud native technology through our easy to 
+              understand articles where we explain everything in a 
+              simplified way!
+            </p>
+
+            <a href="https://kubesimplify.com/?t=1651944375419" target="_blank">
+              <button className={styles.hp_cont_3_btn2}>
+                <p className={styles.hp_cont_3_btn2_content}>
+                  View Blogs
+                  <img
+                    className={styles.hp_cont_3_linkIcon}
+                    src={Link}
+                    alt="link"
+                  />
+                </p>
+              </button>
+            </a>
+          </div>
+          </div>
+
+        </div>
+        
+        
+
+        {/* third portion(container) of the homepage */}
         <div className={styles.hp_cont_2}>
           <div className={styles.hp_cont_2_flex}>
             <div className={styles.hp_cont_2_1}>
@@ -121,74 +198,6 @@ export default function HomepageFeatures() {
             </div>
           </div>
         </div>
-
-        {/* third portion(container) of the homepage */}
-        <div className={styles.hp_cont_3}>
-          <div className={styles.hp_cont_3_vid}>
-            <p className={styles.hp_cont_3_vid_p1}>Youtube</p>
-
-            <p className={styles.hp_cont_3_vid_p2}>
-              Video Content
-              <img
-                className={styles.hp_cont_3_vidIcon}
-                src={vidIcon}
-                alt="Video_Icon"
-              />
-            </p>
-
-            <p className={styles.hp_cont_3_vid_p3}>
-              Learn cloud native technology through our videos - <br />
-              CNCFMinutes, series, walkthroughs, livestreams and <br />
-              many more!
-            </p>
-
-            <a href="https://www.youtube.com/c/saiyam911" target="_blank">
-              <button className={styles.hp_cont_3_btn1}>
-                <p className={styles.hp_cont_3_btn1_content}>
-                  View Videos
-                  <img
-                    className={styles.hp_cont_3_linkIcon}
-                    src={Link}
-                    alt="link"
-                  />
-                </p>
-              </button>
-            </a>
-          </div>
-
-          <div className={styles.hp_cont_3_blog}>
-            <p className={styles.hp_cont_3_blog_p1}>Hashnode</p>
-
-            <p className={styles.hp_cont_3_blog_p2}>
-              Blog Content
-              <img
-                className={styles.hp_cont_3_blogIcon}
-                src={blogIcon}
-                alt="Blog_Icon"
-              />
-            </p>
-
-            <p className={styles.hp_cont_3_blog_p3}>
-              Learn cloud native technology through our easy to <br />
-              understand articles where we explain everything in a <br />
-              simplified way!
-            </p>
-
-            <a href="https://kubesimplify.com/?t=1651944375419" target="_blank">
-              <button className={styles.hp_cont_3_btn2}>
-                <p className={styles.hp_cont_3_btn2_content}>
-                  View Blogs
-                  <img
-                    className={styles.hp_cont_3_linkIcon}
-                    src={Link}
-                    alt="link"
-                  />
-                </p>
-              </button>
-            </a>
-          </div>
-        </div>
-
         {/* Workshop container start */}
         <div className={styles.hp_cont_4}>
           <div className={styles.hp_cont_4_workshop}>
