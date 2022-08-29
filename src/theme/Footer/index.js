@@ -74,7 +74,7 @@ function Footer() {
         <div className={styles.end_first}>© 2022 Kubesimplify</div>
         <div className={styles.footer_mail}>
           <IoMdMail className={styles.mail_logo} row="img" />
-          <a className={styles.mail_title} href="kubesimplify@gmail.com">
+          <a className={styles.mail_title} href="mailto:kubesimplify@gmail.com">
             kubesimplify@gmail.com
           </a>
         </div>
