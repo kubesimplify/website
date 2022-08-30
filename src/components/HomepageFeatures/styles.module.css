@@ -610,11 +610,28 @@
     }
 }
 
-@media only screen and (max-width: 375px) {
-    /* mobile screen */
+@media only screen and (max-width: 426px) {
+    /* mobile screen - L */
+    
+    .hp_cont_3_h1 > h1{
+        font-size: 1.5em;
+    }
+
+    .hp_cont_3_vid_p1,
+    .hp_cont_3_blog_p1 {
+       margin: 5px 0; 
+    }
     .hp_cont_3_vid_h2,
     .hp_cont_3_blog_h2 {
-       font-size: 1.5em; 
+       font-size: 1em; 
+    }
+    .hp_cont_3_btn1_content,
+    .hp_cont_3_btn2_content {
+       font-size: 1em;
+       padding: 2px; 
+    }
+    .cont_1_content{
+        width: auto;
     }
 
 
