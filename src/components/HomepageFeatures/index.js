@@ -15,6 +15,7 @@ import blogIcon from "./assests/Blog-Icon.png";
 import Link from "./assests/Link.png";
 import BlogsContribute from "./assests/BlogsContribute.png";
 import Ambassador from "./assests/Ambassadors.png";
+import workshop from "./assests/workshop.png";
 
 export default function HomepageFeatures() {
   return (
@@ -72,7 +73,6 @@ export default function HomepageFeatures() {
         <div className={styles.hp_cont_3}>
           <div className={styles.hp_cont_3_h1}>
           <h1>Learn cloud native</h1>
-
           </div>
           <div className={styles.hp_cont_3_section}>
 
@@ -143,65 +143,12 @@ export default function HomepageFeatures() {
 
         </div>
         
-        
-
-        {/* third portion(container) of the homepage */}
-        <div className={styles.hp_cont_2}>
-          <div className={styles.hp_cont_2_flex}>
-            <div className={styles.hp_cont_2_1}>
-              <p className={styles.hp_cont_2_p1}>Newsletter</p>
-
-              <p className={styles.hp_cont_2_p2}>
-                Subscribe to our{" "}
-                <span className={styles.hp_cont_1_cloud}> newsletter </span>
-                and never miss any <br />
-                upcoming article about{" "}
-                <span className={styles.hp_cont_1_cloud}> cloud native </span>
-              </p>
-            </div>
-
-            <div className={styles.hp_cont_2_2}>
-              <div className={styles.hp_cont_2a}>
-                <p className={styles.hp_cont_2a_p}>Join the mailing list :</p>
-                <form
-                  action="https://www.getrevue.co/profile/saiyampathak/add_subscriber"
-                  method="post"
-                  id="revue-form"
-                  name="revue-form"
-                  target="_blank"
-                >
-                  <div className={styles.hp_cont_2a_mail}>
-                    <div className={styles.mail_inp}>
-                      <input
-                        className={styles.hp_cont_2a_input}
-                        type="email"
-                        name="member[email]"
-                        id="member_email"
-                        placeholder="Email Address"
-                      />
-                    </div>
-                    <div className={styles.mail_btn}>
-                      <button
-                        type="submit"
-                        name="member[subscribe]"
-                        id="member_submit"
-                        className={styles.hp_cont_2a_btn}
-                      >
-                        <p className={styles.hp_cont_2a_btn_content}>
-                          Subscribe 📨
-                        </p>
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
         {/* Workshop container start */}
         <div className={styles.hp_cont_4}>
+          <div className={styles.hp_cont_4_content}>
+
           <div className={styles.hp_cont_4_workshop}>
-            <p className={styles.hp_cont_4_p1}>Workshops</p>
+            <span className={styles.hp_cont_4_p1}>Workshops <span>FREE</span></span>
             <p className={styles.hp_cont_4_p2}>
               We regularly organize workshops on various topics like{" "}
               <span className={styles.hp_cont_4_kubernetes}>
@@ -221,19 +168,27 @@ export default function HomepageFeatures() {
               </a>
             </button>
           </div>
+          <div className={styles.hp_cont_4_img}>
+            <img
+              src={workshop}
+              alt="workshop"
+            />
+          </div>
+          </div>
+
         </div>
-        {/* Workshop container end */}
+        {/* Workshop container end */}        
 
         {/*   Wanna contribute to Blog , container start  */}
         <div className={styles.hp_cont_5}>
           <div className={styles.hp_cont_5_blog_contributor}>
             <p className={styles.hp_cont_5_blog_p1}>
               Want to write a blog for Kubesimplify? Become a
+            </p>
               <span className={styles.hp_cont_5_blog_kube}>
                 {" "}
                 Kubesimplify Blog Contributor{" "}
               </span>
-            </p>
 
             <p className={styles.hp_cont_5_blog_p2}>
               If you have an idea for a blog and want to get it published on
@@ -248,7 +203,7 @@ export default function HomepageFeatures() {
               </button>
             </div>
           </div>
-          <div className={styles.img}>
+          <div className={styles.hp_cont_5_img}>
             <img
               className={styles.hp_cont_5_blog_image}
               src={BlogsContribute}
@@ -260,7 +215,7 @@ export default function HomepageFeatures() {
 
         {/* Want to apply, container start */}
         <div className={styles.hp_cont_6}>
-          <div className={styles.img}>
+          <div className={styles.hp_cont_6_img}>
             <img
               className={styles.hp_cont_6_ambassador_image}
               src={Ambassador}
@@ -270,11 +225,11 @@ export default function HomepageFeatures() {
           <div className={styles.hp_cont_6_ambassadors}>
             <p className={styles.hp_cont_6_ambassador_p1}>
               Want to be a part of this mission? Join us as a
+            </p>
               <span className={styles.hp_cont_6_ambassador_kube}>
                 {" "}
                 Kubesimplify Ambassador{" "}
               </span>
-            </p>
 
             <p className={styles.hp_cont_6_ambassador_p2}>
               There are some requirements that you have to meet in order to
@@ -290,6 +245,54 @@ export default function HomepageFeatures() {
           </div>
         </div>
         {/* Want to apply, container end*/}
+
+        {/* third portion(container) of the homepage */}
+        <div className={styles.hp_cont_2}>
+          <div className={styles.hp_cont_2_flex}>
+            <div className={styles.hp_cont_2_1}>
+              <p className={styles.hp_cont_2_p1}>Newsletter</p>
+
+              <p className={styles.hp_cont_2_p2}>
+                Subscribe to our{" "}
+                <span className={styles.hp_cont_1_cloud}> newsletter </span>
+                and never miss any <br />
+                upcoming article about{" "}
+                <span className={styles.hp_cont_1_cloud}> cloud native </span>
+              </p>
+            </div>
+
+            <div className={styles.hp_cont_2_2}>
+              <div className={styles.hp_cont_2a}>
+                <p className={styles.hp_cont_2a_p}>Join the mailing list:</p>
+                <form
+                  action="https://www.getrevue.co/profile/saiyampathak/add_subscriber"
+                  method="post"
+                  id="revue-form"
+                  name="revue-form"
+                  target="_blank"
+                >
+                  <div className={styles.hp_cont_2a_mail}>
+                      <input
+                        className={styles.hp_cont_2a_input}
+                        type="email"
+                        name="member[email]"
+                        id="member_email"
+                        placeholder="Email Address"
+                      />
+                      <button
+                        type="submit"
+                        name="member[subscribe]"
+                        id="member_submit"
+                        className={styles.hp_cont_2a_btn}
+                      >
+                          Subscribe
+                      </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
