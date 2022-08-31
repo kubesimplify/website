@@ -139,6 +139,7 @@
 
 .hp_cont_2_p1 {
     display: inline-block;
+    font-weight: 550;
     font-size: 31px;
     color: #1B2731;
     border-bottom: 2px solid;
@@ -149,12 +150,14 @@
 .hp_cont_2_p2 {
     font-size: 18px;
     line-height: 25px;
+    font-weight: 550;
     letter-spacing: -0.01em;
     color: #1B2731;
 }
 
 .hp_cont_2a {
     padding: 1vw;
+    font-weight: 550;
     border: 2px solid #1B2731;
     box-sizing: border-box;
     border-radius: 5px;
@@ -210,6 +213,7 @@
     font-weight: bold;
     font-size: .9rem;
     letter-spacing: 1px;
+    color: #FFFFFF;
 }
 
 .hp_cont_3 {
