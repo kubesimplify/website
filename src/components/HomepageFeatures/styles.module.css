@@ -140,8 +140,8 @@
 .hp_cont_2_p1 {
     display: inline-block;
     font-size: 31px;
-    color: #FFFFFF;
-    border-bottom: 1px solid;
+    color: #1B2731;
+    border-bottom: 2px solid;
     border-image-slice: 1;
     border-image-source: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
 }
@@ -150,12 +150,12 @@
     font-size: 18px;
     line-height: 25px;
     letter-spacing: -0.01em;
-    color: #FFFFFF;
+    color: #1B2731;
 }
 
 .hp_cont_2a {
     padding: 1vw;
-    border: 2px solid #FFFFFF;
+    border: 2px solid #1B2731;
     box-sizing: border-box;
     border-radius: 5px;
 }
