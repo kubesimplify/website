@@ -6,12 +6,11 @@
   box-sizing: border-box;
 }
 
-.navbar {
-  
-}
+
 
 
 .navbar_positioning {
+  padding: 5px 0;
   background-color: #1B2731;
   display: flex;
   justify-content: space-around;
@@ -23,8 +22,8 @@
 
 
 .logo {
-  width: 75%;
-  padding-top: -10%;
+  width: 70%;
+  /* padding-top: 10%; */
 }
 
 
@@ -244,6 +243,7 @@
   border: solid 2px transparent;
   background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), linear-gradient(95.81deg, #34EF42 -23.83%, #27C9F4 121.82%);
   background-origin: border-box;
+  margin-left: 2rem;
   box-shadow: 2px 900px 1px #1B2731 inset;
 }
 

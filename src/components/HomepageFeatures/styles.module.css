@@ -47,15 +47,18 @@
 }
 
 .hp_cont_1_img1 {
+    margin-top: 2rem;
     width: 35vw;
     height: 20vw;
     border-radius: 5px;
 }
 
 .hp_cont_1_img2 {
+    margin-top: 2rem;
     width: 35vw;
     height: 20vw;
     border-radius: 5px;
+    margin-bottom: 5rem;
 }
 
 
@@ -67,6 +70,7 @@
 .hp_cont_1_img4 {
     width: 156.78px;
     height: 117.1px;
+    margin-bottom: 10rem;
 }
 
 .hp_cont_1_btn {
@@ -398,12 +402,12 @@
     font-weight: 400;
     text-align: left;
     color: #FFFFFF;
-    padding: 5%;
+    padding: 0% 5%;
 }
 
 .cont_5_btn {
     text-align: center;
-    margin-bottom: 2%;
+    margin-bottom: 5%;
 }
 
 

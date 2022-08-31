@@ -7,7 +7,7 @@
 .footer_upper {
     display: flex;
     flex-direction: row;
-    padding: 10% 10% 0 10%;
+    padding: 5% 10% 0 10%;
 }
 
 
@@ -20,7 +20,6 @@
     font-weight: 500;
     font-size: 2.5vw;
     line-height: 90%;
-    margin-top: 4.3%;
     /* identical to box height, or 124% */
     color: #FFFFFF;
 }
@@ -115,7 +114,7 @@
     height: 1px;
     margin-left: 10%;
     margin-right: 10%;
-
+    margin-bottom: 2rem;
     background: white;
 }
 
@@ -123,7 +122,7 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin-bottom: 9px;
+    padding-bottom: 2rem;
 }
 
 
@@ -154,6 +153,7 @@
     height: 2vw;
     color: white;
     cursor: pointer;
+    margin-right: 3px;
 }
 
 .mail_title {
@@ -172,33 +172,16 @@
 .group_logo {
     width: fit-content;
 }
-
-.social1 {
-    width: 1.5vw;
-    height: 1.5vw;
-    color: #1B2731;
-    background: white;
-    border-radius: 11px;
-    margin-right: 0px;
-    margin-top: -10%;
+.group_logo a{
+    padding: 0 5px;
 }
 
-.social2 {
-    width: 1.5vw;
-    height: 1.5vw;
-    color: #1B2731;
-    background: white;
-    border-radius: 11px;
-    margin-left: 9px;
-}
-
-.social3 {
-    width: 1.5vw;
-    height: 1.5vw;
+.social1 , .social2 , .social3{
+    width: 1.75vw;
+    height: 1.75vw;
     color: white;
-    margin-left: 8px;
+    margin: 0 3px;
 }
-
 
 @media only screen and (max-width: 700px) {
 
@@ -227,7 +210,7 @@
     }
 
     .footer_lower * {
-        font-size: 2vw;
+        font-size: 5vw;
     }
 
     .group_logo {
