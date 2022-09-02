@@ -44,29 +44,17 @@ function Footer() {
     <section className={styles.footer}>
       <div className={styles.footer_upper}>
         <div className={styles.content}>
-          <div className={styles.title}>Help us do more</div>
-          <div className={styles.sponsors_content}>
-            {content.sponsorsContent}
-          </div>
+          <h2 className={styles.title}>Help us do more</h2>
+          <p className={styles.sponsors_content}>{content.sponsorsContent}</p>
         </div>
         <div className={styles.sponsors_card}>
-          <div className={styles.sponsors_card_title}>
-            Sponsor us on Hashnode
-          </div>
-          <button className={styles.sponsor_hashnode}>
-            <a
-                  href="https://kubesimplify.com/sponsor"
-                >
-            <div className={styles.sponsor_hashnode_div}>
-              <div className={styles.sponsor_hashnode_logo}>
-                <logo.hashnode.Svg className={styles.logo} role="img" />  
-              </div>
-              <div className={styles.button_name}>
-              Sponsor
-              </div>
-            </div>
-            </a>
-          </button>
+          <p className={styles.sponsors_card_title}>Sponsor us on Hashnode</p>
+
+          <a href="https://kubesimplify.com/sponsor">
+            <button className={styles.sponsor_hashnode}>
+              <logo.hashnode.Svg className={styles.logo} role="img" /> Sponser
+            </button>
+          </a>
         </div>
       </div>
       <hr className={styles.hr}></hr>

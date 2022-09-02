@@ -284,9 +284,9 @@
 
 .hp_cont_3_vidIcon,
 .hp_cont_3_blogIcon {
-    width: 1em;
+    width: .7em;
     object-fit: contain;
-    height: 1em;
+    height: .7em;
 }
 
 .hp_cont_3_btn1,
@@ -362,11 +362,11 @@
 
 .hp_cont_4_p1 > span{
     background-color: #FFFFFF;
-    color: rgb(23, 45, 23);
+    color: red;
     border-radius: 10px;
     padding: 1px 7px;
     font-weight: bold;
-    font-size: 1.3rem;
+    font-size: 1rem;
 }
 
 .hp_cont_4_p2 {
