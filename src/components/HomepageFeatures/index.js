@@ -8,8 +8,8 @@ import React from "react";
 import styles from "./styles.module.css";
 import comments from "./assests/Comments.png";
 import reactions from "./assests/Reactions.png";
-import computer from "./assests/Computer.png";
-import githubActions from "./assests/github-actions.png";
+import github from "./assests/github.webp";
+import lego from "./assests/lego.webp";
 import vidIcon from "./assests/Video-Icon.png";
 import blogIcon from "./assests/Blog-Icon.png";
 import Link from "./assests/Link.png";
@@ -51,16 +51,20 @@ export default function HomepageFeatures() {
               src={comments}
               alt="comments"
             />
-            <img
-              className={styles.hp_cont_1_img1}
-              src={githubActions}
-              alt="github_actions"
-            />
-            <img
-              className={styles.hp_cont_1_img2}
-              src={computer}
-              alt="computer"
-            />
+            <a href="https://kubesimplify.com/get-good-at-git" target="_blank">
+              <img
+                className={styles.hp_cont_1_img1}
+                src={github}
+                alt="github"
+              />
+            </a>
+            <a href="https://kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications" target="_blank">
+              <img
+                className={styles.hp_cont_1_img2}
+                src={lego}
+                alt="lego"
+              />
+              </a>
             <img
               className={styles.hp_cont_1_img4}
               src={reactions}

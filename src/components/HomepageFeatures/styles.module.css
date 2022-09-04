@@ -56,12 +56,12 @@
     border-radius: 5px;
     display: block;
     position: absolute;
+    z-index: 1;
 }
 
 .hp_cont_1_img2 {
     width: 55%;
     border-radius: 5px;
-    z-index: -1;
     top: 45%;
     left: 6%;
     display: block;
