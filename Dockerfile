@@ -24,7 +24,7 @@ RUN npm run clear
 
 RUN npm install && npm run build
 
-CMD ["npm", "run-script", "serve"]
+CMD ["npm", "run", "serve"]
 
 
 EXPOSE 3000
