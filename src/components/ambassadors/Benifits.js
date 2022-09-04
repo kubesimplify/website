@@ -54,13 +54,13 @@ const Benifits = () => {
                 {benifits.map(function (benifit) {
                     return (
                         <div className={Styles.benifits_items}>
-                            <img className={Styles.benifits_items_img} src={benifit.logo} alt="" />
+                            <img className={Styles.benifits_items_img} src={benifit.logo} alt="img not found" />
                             <h2 className={Styles.benifits_items_heading}>{benifit.title}</h2>
                             <p className={Styles.benifits_items_para}>{benifit.para}</p>
                         </div>
 
                     )
-                })};
+                })}
 
             </div>
         </div>
