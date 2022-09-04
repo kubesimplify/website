@@ -8,6 +8,7 @@
     max-width: 1200px;
     margin: auto;
     padding: 2vw 5vw;
+    padding-top: 4vw;
     display: flex;
     flex-direction: row;
     gap: 3rem;
@@ -176,10 +177,6 @@
         flex-direction: column;
     }
 
-    .title {
-        font-size: 4vw;
-    }
-
     .footer_lower {
         flex-direction: column;
         gap: 1rem;
@@ -192,6 +189,12 @@
     .group_logo * {
         height: 3vw;
         width: 3vw;
+    }
+
+    .sponsors_card{
+        max-width: 70%;
+        padding: 2vw;
+        align-self: center;
     }
 }
 

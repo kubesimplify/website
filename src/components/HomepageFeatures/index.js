@@ -46,30 +46,41 @@ export default function HomepageFeatures() {
             </button>
           </div>
           <div className={styles.cont_1_img}>
-            <img
-              className={styles.hp_cont_1_img3}
-              src={comments}
-              alt="comments"
-            />
-            <a href="https://kubesimplify.com/get-good-at-git" target="_blank">
+            <p>Checkout our Blogs</p>
+
+            <div className={styles.hp_cont_1_img3}>
               <img
-                className={styles.hp_cont_1_img1}
-                src={github}
-                alt="github"
+                src={comments}
+                alt="comments"
               />
-            </a>
-            <a href="https://kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications" target="_blank">
-              <img
-                className={styles.hp_cont_1_img2}
-                src={lego}
-                alt="lego"
-              />
+            </div>
+
+            <div className={styles.hp_cont_1_img1}>
+              <a href="https://kubesimplify.com/get-good-at-git" target="_blank">
+                <img
+                  src={github}
+                  alt="github"
+                />
+                  <p>Get Good at Git </p>
               </a>
-            <img
-              className={styles.hp_cont_1_img4}
-              src={reactions}
-              alt="reactions"
-            />
+            </div>
+
+            <div className={styles.hp_cont_1_img2}>
+              <a href="https://kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications" target="_blank">
+                <img
+                  src={lego}
+                  alt="lego"
+                />
+                  <p>Getting started with Ko</p>
+              </a>
+            </div>
+
+            <div className={styles.hp_cont_1_img4} >
+              <img
+                src={reactions}
+                alt="reactions"
+              />
+            </div>
           </div>
         </div>
 
