@@ -1,0 +1,83 @@
+
+
+.team {
+    margin: 5vw auto;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.heading{
+    border-bottom: 2px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(94.72deg, #5cff68 0%, #05caff 100%);
+    display: block;
+    padding-right: 5rem;
+    font-weight: 500;
+    width: 10rem;
+    margin-left: 5vw;
+    padding-bottom: 1rem;
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    /* flex-direction: row; */
+}
+
+.card {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    height: 290px;
+    background-color: #1B2731;
+    border: 5px solid #1B2731;
+    border-radius: 10px;
+
+}
+
+.coverPhoto {
+    width: 200px;
+    border-radius: 10px;
+}
+
+.info{
+    margin: 5px 7px;
+    gap: .3rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.name {
+    font-weight: 600;
+}
+
+.role{
+    font-weight: 300;
+}
+
+.name,
+.role
+{
+    margin: 0;
+    color: #fff;
+}
+
+.socials{
+    display: flex;
+    gap: .5rem;
+}
+
+.social{
+    width: 15px;
+    height: 15px;
+    color: #1B2731;
+    background: #fff;
+    border-radius: 11px;
+    margin-right: 0px;
+    margin-top: -10%;
+}

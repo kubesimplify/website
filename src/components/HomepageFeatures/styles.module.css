@@ -131,116 +131,6 @@ a:hover {
     box-shadow: inset 0em 0em 0em 10em rgba(0, 0, 0, 0.1);
 }
 
-/* .hp_cont_1_btn_content {
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 23px;
-    color: #1B2731;
-} */
-
-.hp_cont_2 {
-    font-family: 'Poppins';
-    font-style: normal;
-    max-width: 1200px;
-    margin: auto;
-}
-
-.hp_cont_2_flex {
-    display: flex;
-    justify-content: center;
-    margin: 5vw;
-    gap: 2rem;
-}
-
-.hp_cont_2_1 {
-    width: 50%;
-}
-
-.hp_cont_2_2 {
-    width: 50%;
-    margin: auto;
-}
-
-.hp_cont_2_p1 {
-    display: inline-block;
-    font-weight: 550;
-    font-size: 31px;
-    color: #1B2731;
-    border-bottom: 2px solid;
-    border-image-slice: 1;
-    border-image-source: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
-}
-
-.hp_cont_2_p2 {
-    font-size: 18px;
-    line-height: 25px;
-    font-weight: 550;
-    letter-spacing: -0.01em;
-    color: #1B2731;
-}
-
-.hp_cont_2a {
-    padding: 1vw;
-    font-weight: 550;
-    border: 2px solid #1B2731;
-    box-sizing: border-box;
-    border-radius: 5px;
-}
-
-.hp_cont_2a_p {
-    font-size: 24px;
-}
-
-.hp_cont_2a_mail {
-    display: flex;
-    gap: 1rem;
-}
-
-
-.hp_cont_2a_input {
-    width: 60%;
-    padding: .5rem;
-    background: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
-    border-radius: 5px;
-    outline: none;
-    border: none;
-}
-
-.hp_cont_2a_input::placeholder {
-    opacity: 1;
-    /* Firefox */
-    font-family: 'Poppins';
-    font-style: normal;
-    font-size: 16px;
-    letter-spacing: 0.01em;
-    color: black;
-}
-
-:_ms_input_placeholder {
-    /* Internet Explorer 10_11 */
-    color: black;
-}
-
-::_ms_input_placeholder {
-    /* Microsoft Edge */
-    color: black;
-}
-
-
-.hp_cont_2a_btn {
-    width: 35%;
-    background: #05CAFF;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    padding: .5rem;
-    font-weight: bold;
-    font-size: .9rem;
-    letter-spacing: 1px;
-    color: #1B2731;
-}
-
 .hp_cont_3 {
     max-width: 1200px;
     margin: 1em auto;
@@ -549,15 +439,6 @@ a:hover {
         width: auto;
     }
 
-    .hp_cont_2_flex {
-        flex-direction: column;
-    }
-
-    .hp_cont_2_2,
-    .hp_cont_2_1 {
-        width: 100%;
-    }
-
     .hp_cont_3_vid,
     .hp_cont_3_blog {
         padding: 1.5em 1em;
@@ -572,18 +453,7 @@ a:hover {
     .hp_cont_6_ambassadors{
         padding: 1.5rem 2rem ;
     }
-
-    .hp_cont_2a_mail {
-        margin: auto;
-        font-size: medium;
-    }
-
-    .hp_cont_2a_input {
-        width: 70%;
-        /* padding: 1%; */
-        /* margin-bottom: 5%; */
-    }
-
+    
     .cont_1_img {
         display: none;
     }
