@@ -285,6 +285,7 @@
 .application_containner_mini {
     background-color: rgba(27, 39, 49, 1);
     width: 50%;
+    height: 14rem;
     border-radius: 5px;
     padding: 1.4rem 3rem;
     margin-right: 1rem;
@@ -315,18 +316,21 @@
 }
 
 .application_containner_mini_button {
+    position: relative;
+    top: -8rem;
 
-
+    height: 2.5rem;
+    width: 7rem;
     background: linear-gradient(92.19deg, #5CFF68 0%, #05CAFF 100%);
     border-radius: 6px;
     border: none;
 
     font-family: 'Poppins';
     font-style: normal;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 0px;
-    color: #FFFFFF;
-    ;
+    color: rgba(27, 39, 49, 1);;
+    
 }
 
 .application_qr_code {
@@ -367,6 +371,12 @@
 
     .application_containner_img {
         visibility: hidden;
+    }
+}
+
+@media only screen and (max-width:760px) {
+    .application_containner{
+        display: none;
     }
 }
 

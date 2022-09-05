@@ -12,6 +12,7 @@ const Ambassdors = () => {
       <Hero />
       <Criteria />
       <Benifits />
+      <Application />
       <FAQs />
     </Layout>
   )
