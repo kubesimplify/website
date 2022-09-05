@@ -39,11 +39,11 @@ export default function HomepageFeatures() {
               manner through our blogs and video content.
             </p>
 
-            <button className={styles.hp_cont_1_btn}>
-              <a href="https://kubesimplify.com/discord">
-                <p className={styles.hp_cont_1_btn_content}>Start learning</p>
-              </a>
-            </button>
+            <a href="https://kubesimplify.com/discord">
+              <button className={styles.hp_cont_1_btn}>
+                Start learning
+              </button>
+            </a>
           </div>
           <div className={styles.cont_1_img}>
             <p>Checkout our Blogs</p>

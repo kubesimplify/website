@@ -115,13 +115,12 @@ a:hover {
 .hp_cont_1_btn {
     margin-top: 20px;
     background: linear-gradient(94.34deg, #5CFF68 0%, #05CAFF 100%);
-    border-radius: 5px;
-    height: 38px;
-    width: 200px;
+    font-weight: 500;
+    font-size: 15px;
+    color: #1B2731;
     border: none;
-    transition: 0.3s;
-    text-decoration: none;
-    cursor: pointer;
+    padding: .5rem;
+    border-radius: 10px;
 }
 
 .hp_cont_1_btn a {
@@ -132,13 +131,13 @@ a:hover {
     box-shadow: inset 0em 0em 0em 10em rgba(0, 0, 0, 0.1);
 }
 
-.hp_cont_1_btn_content {
+/* .hp_cont_1_btn_content {
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
     font-size: 23px;
     color: #1B2731;
-}
+} */
 
 .hp_cont_2 {
     font-family: 'Poppins';
