@@ -5,47 +5,46 @@
 
 
 .footer_upper {
+    max-width: 1200px;
+    margin: auto;
+    padding: 2vw 5vw;
+    padding-top: 4vw;
     display: flex;
     flex-direction: row;
-    padding: 10% 10% 0 10%;
+    gap: 3rem;
+}
+.content {
+    width: 70%;
+
 }
 
-
 .title {
-    padding-bottom: 2%;
     border-bottom: 1px solid;
     border-image-slice: 1;
     font-family: 'Poppins';
-    font-style: normal;
     font-weight: 500;
-    font-size: 2.5vw;
-    line-height: 90%;
-    margin-top: 4.3%;
     /* identical to box height, or 124% */
     color: #FFFFFF;
 }
 
 .sponsors_content {
-    padding-top: 10%;
     font-family: 'Poppins';
-    font-size: 1.5vw;
-    font-weight: 400;
-    line-height: -1%;
+    letter-spacing: 1px;
     /* or 183% */
 
     color: white;
 }
 
-.sponsors_card {
-    margin: 5%;
-    width: 50%;
-    text-align: center;
+.sponsors_card { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background: #FFFFFF;
     border-radius: 10px;
 }
 
 .sponsors_card_title {
-    margin-top: 10%;
     font-family: 'Poppins';
     font-style: bolder;
     font-weight: 400;
@@ -60,62 +59,35 @@
 }
 
 .sponsor_hashnode {
-    padding: 2%;
     background: #2962FF;
-    margin: 10%;
     border-radius: 10px;
+    padding: 1vw 2vw;
     border: none;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin: auto;
     transition: 0.3s;
     cursor: pointer;
+    font-size: large;
+    color: #FFFFFF;
+    margin-bottom: 5px;
 }
 
 .sponsor_hashnode:hover {
     background: #1750ef;
-}
 
-.sponsor_hashnode a:hover {
-    text-decoration: none;
 }
-
-.sponsor_hashnode_div {
-    padding: 2%;
-    display: flex;
-    flex-direction: row;
-}
-
-.sponsor_hashnode_logo {
-    background: transparent;
-    text-align: center;
-}
-
-.sponsor_hashnode_logo a:hover {
-    color: white;
-}
-
 .logo {
     height: 25px;
     width: 25px;
 }
 
-.button_name {
-    padding: 5px;
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 500;
-    font-size:  14px;
-    text-align: center;
-
-
-    color: #FFFFFF;
-}
-
-
 .hr {
     position: relative;
     height: 1px;
-    margin-left: 10%;
-    margin-right: 10%;
-
+    max-width: 1200px;
+    margin: 1vw auto;
     background: white;
 }
 
@@ -123,7 +95,8 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin-bottom: 9px;
+    max-width: 1200px;
+    margin: 1vw auto;
 }
 
 
@@ -162,9 +135,7 @@
     font-weight: 500;
     font-size: 1vw;
     /* identical to box height, or 150% */
-
     text-align: justify;
-
     color: #FFFFFF;
     cursor: pointer;
 }
@@ -206,39 +177,38 @@
         flex-direction: column;
     }
 
-    .title {
-        font-size: 4vw;
-    }
-
-    .sponsors_card {
-        margin: 10% auto auto auto;
-    }
-
-    .sponsors_card_title {
-        font-size: 4vw;
-    }
-
-    .sponsors_content {
-        font-size: 3vw;
-    }
-
     .footer_lower {
         flex-direction: column;
+        gap: 1rem;
     }
 
     .footer_lower * {
         font-size: 2vw;
     }
 
-    .group_logo {
-        margin-top: 2%;
-    }
-
     .group_logo * {
         height: 3vw;
         width: 3vw;
     }
+
+    .sponsors_card{
+        max-width: 70%;
+        padding: 2vw;
+        align-self: center;
+    }
 }
+
+@media only screen and (max-width: 700px) {
+    .footer_upper{
+        gap: 1rem;
+    }
+
+    .content{
+        width: auto;
+    }
+}
+
+
 
 /* Hover color on social icons if needed */
 
