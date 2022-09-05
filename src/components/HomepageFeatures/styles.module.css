@@ -6,7 +6,13 @@
     font-family: 'Poppins';
     font-style: normal;
 }
+a {
+    text-decoration: none;
+}
 
+a:hover {
+    text-decoration: none;
+}
 .hp_cont_1 {
     max-width: 1200px;
     display: flex;
@@ -131,7 +137,7 @@
     font-style: normal;
     font-weight: 500;
     font-size: 23px;
-    color: #FFFFFF;
+    color: #1B2731;
 }
 
 .hp_cont_2 {
@@ -233,7 +239,7 @@
     font-weight: bold;
     font-size: .9rem;
     letter-spacing: 1px;
-    color: #FFFFFF;
+    color: #1B2731;
 }
 
 .hp_cont_3 {
@@ -334,7 +340,7 @@
     font-style: normal;
     font-weight: 400;
     font-size: 18px;
-    color: #FFFFFF;
+    color: #1B2731;
 }
 
 .hp_cont_3_linkIcon {
@@ -427,8 +433,8 @@
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 500;
-    font-size: 18px;
-    color: #FFFFFF;
+    font-size: 15px;
+    color: #1B2731;
 }
 .hp_cont_6,
 .hp_cont_5 {
@@ -494,8 +500,8 @@
 .hp_cont_6_btn1_content {
     margin: auto;
     font-family: 'Poppins';
-    font-size: 18px;
-    color: #FFFFFF;
+    font-size: 15px;
+    color: #1B2731;
 }
 
 .hp_cont_6_img{
