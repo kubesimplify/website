@@ -9,6 +9,7 @@ import styles from "./styles.module.css";
 import comments from "./assests/Comments.png";
 import reactions from "./assests/Reactions.png";
 import github from "./assests/github.webp";
+import Newsletter from '../newsletter/Newsletter';
 import lego from "./assests/lego.webp";
 import vidIcon from "./assests/Video-Icon.png";
 import blogIcon from "./assests/Blog-Icon.png";
@@ -262,52 +263,8 @@ export default function HomepageFeatures() {
         {/* Want to apply, container end*/}
 
         {/* third portion(container) of the homepage */}
-        <div className={styles.hp_cont_2}>
-          <div className={styles.hp_cont_2_flex}>
-            <div className={styles.hp_cont_2_1}>
-              <p className={styles.hp_cont_2_p1}>Newsletter</p>
-
-              <p className={styles.hp_cont_2_p2}>
-                Subscribe to our{" "}
-                <span className={styles.hp_cont_1_cloud}> newsletter </span>
-                and never miss any <br />
-                upcoming article about{" "}
-                <span className={styles.hp_cont_1_cloud}> cloud native </span>
-              </p>
-            </div>
-
-            <div className={styles.hp_cont_2_2}>
-              <div className={styles.hp_cont_2a}>
-                <p className={styles.hp_cont_2a_p}>Join the mailing list:</p>
-                <form
-                  action="https://www.getrevue.co/profile/saiyampathak/add_subscriber"
-                  method="post"
-                  id="revue-form"
-                  name="revue-form"
-                  target="_blank"
-                >
-                  <div className={styles.hp_cont_2a_mail}>
-                      <input
-                        className={styles.hp_cont_2a_input}
-                        type="email"
-                        name="member[email]"
-                        id="member_email"
-                        placeholder="Email Address"
-                      />
-                      <button
-                        type="submit"
-                        name="member[subscribe]"
-                        id="member_submit"
-                        className={styles.hp_cont_2a_btn}
-                      >
-                          Subscribe
-                      </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
+        
+        <Newsletter />
       </div>
     </section>
   );
