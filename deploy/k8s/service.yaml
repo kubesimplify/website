@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubesimplify-service
+spec:
+  selector:
+    app: kubesimplify
+  type: LoadBalancer
+  ports:
+  - port: 443
+    targetPort: 3000
+...
