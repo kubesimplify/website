@@ -214,7 +214,9 @@
 }
 
 .benifits_flex {
-
+    width: 80%;
+    margin: 4% auto;
+     
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -228,7 +230,7 @@
 
 .benifits_items {
     height: 10rem;
-    margin-top: 5%;
+    margin: 2% 5%;
     max-width: 240px;
 
     display: flex;
