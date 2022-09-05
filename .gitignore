@@ -1,6 +1,12 @@
 # Dependencies
 /node_modules
 
+# Terraform
+*.tfstate*
+.terraform
+*.hcl
+
+
 # Production
 /build
 
