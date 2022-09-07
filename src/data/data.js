@@ -10,7 +10,7 @@ export const teamData = [
         githubLink: 'https://github.com/saiyam1814'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 2',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
@@ -18,7 +18,7 @@ export const teamData = [
         githubLink: 'https://twitter.com/saiyampathak'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 3',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
@@ -26,7 +26,7 @@ export const teamData = [
         githubLink: 'https://twitter.com/saiyampathak'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 4',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
@@ -34,7 +34,7 @@ export const teamData = [
         githubLink: 'https://twitter.com/saiyampathak'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 5',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
@@ -42,7 +42,7 @@ export const teamData = [
         githubLink: 'https://twitter.com/saiyampathak'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 6',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
@@ -50,7 +50,7 @@ export const teamData = [
         githubLink: 'https://twitter.com/saiyampathak'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 7',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
@@ -58,7 +58,7 @@ export const teamData = [
         githubLink: 'https://twitter.com/saiyampathak'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 8',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
@@ -66,7 +66,7 @@ export const teamData = [
         githubLink: 'https://twitter.com/saiyampathak'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 9',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
@@ -74,7 +74,7 @@ export const teamData = [
         githubLink: 'https://twitter.com/saiyampathak'
     },
     {
-        name: 'Saiyam',
+        name: 'Saiyam 10',
         coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
         role: 'Founder',
         twitterLink: 'https://twitter.com/saiyampathak',
