@@ -56,7 +56,7 @@ export default function HomepageFeatures() {
             </div>
 
             <div className={styles.hp_cont_1_img1}>
-              <a href="https://kubesimplify.com/get-good-at-git" target="_blank">
+              <a href="https://blog.kubesimplify.com/get-good-at-git" target="_blank">
                 <img
                   src={github}
                   alt="github"
@@ -66,7 +66,7 @@ export default function HomepageFeatures() {
             </div>
 
             <div className={styles.hp_cont_1_img2}>
-              <a href="https://kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications" target="_blank">
+              <a href="https://blog.kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications" target="_blank">
                 <img
                   src={lego}
                   alt="lego"
@@ -141,7 +141,7 @@ export default function HomepageFeatures() {
               simplified way!
             </p>
 
-            <a href="https://kubesimplify.com/?t=1651944375419" target="_blank">
+            <a href="https://blog.kubesimplify.com/" target="_blank">
               <button className={styles.hp_cont_3_btn2}>
                 <p className={styles.hp_cont_3_btn2_content}>
                   View Blogs
@@ -178,7 +178,7 @@ export default function HomepageFeatures() {
               that are useful in the field of cloud native.
             </p>
             <button className={styles.hp_cont_4_btn1}>
-              <a href="https://kubesimplify.com/workshops">
+              <a href="https://kubesimplify.github.io/live-workshops/">
                 <p className={styles.hp_cont_4_btn1_content}>Learn more</p>
               </a>
             </button>
