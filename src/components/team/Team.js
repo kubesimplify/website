@@ -23,7 +23,7 @@ const Team = () => {
 
   return (
     <div className={styles.team}>
-      <h1 className={styles.heading}>Team</h1>
+      <h1 className={styles.heading}>Kubesimplify Ambassador</h1>
       <div className={styles.slider}>
         <span className={styles.previous_btn} onClick={() => prevCard()}>
           <BsFillArrowLeftCircleFill size={25} />
