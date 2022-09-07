@@ -29,7 +29,7 @@ const navbarContent = {
           </a>
           <a
             className={styles.navbar_blog_design}
-            href="https://kubesimplify.com/"
+            href="https://blog.kubesimplify.com/"
             target="blank"
           >
             Blog Content
@@ -50,7 +50,7 @@ const navbarContent = {
         </button>
         <div className={styles.navbar_dropdown_content}>
           {/* Links for respective webpage will add when new webpages are formed */}
-          <a href="/website/ambassadors">Student Ambassador</a>
+          <a href="/ambassadors">Student Ambassador</a>
           <a
             className={styles.navbar_workshops_designs}
             href="https://kubesimplify.github.io/live-workshops/"
@@ -65,7 +65,7 @@ const navbarContent = {
   aboutContent: (
     <>
       <div className={styles.navbar_about_start}>
-        <a className={styles.navbar_about_word} href="/website/about">
+        <a className={styles.navbar_about_word} href="/about">
           About
         </a>
       </div>
@@ -84,7 +84,7 @@ const mobileViewContent = {
       <div>
         <a
           className={styles.navbar_blog_design}
-          href="https://kubesimplify.com/"
+          href="https://blog.kubesimplify.com/"
           target="blank"
         >
           Blog Content
@@ -95,7 +95,7 @@ const mobileViewContent = {
   community: (
     <div className={styles.mobileView_community}>
       <div>
-        <a href="/website/ambassadors">Student Ambassador</a>
+        <a href="/ambassadors">Student Ambassador</a>
       </div>
       <div>
         <a
@@ -124,7 +124,9 @@ function Navbar() {
         <nav className={styles.navbar_positioning}>
           <div className={styles.navbar_logopair}>
             <div className={styles.navbar_logo}>
+              <a href="/">
               <navbarLogo.logo.Svg className={styles.logo} role="" />
+              </a>
             </div>
             <button
               className={styles.mobile_menu_icon}
