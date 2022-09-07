@@ -1,83 +1,99 @@
-
-
 .team {
-    margin: 5vw auto;
-    max-width: 1200px;
-    display: flex;
-    flex-direction: column;
-
+  margin: 5vw auto;
+  max-width: 1200px;
+  overflow: hidden;
 }
 
-.heading{
-    border-bottom: 2px solid;
-    border-image-slice: 1;
-    border-image-source: linear-gradient(94.72deg, #5cff68 0%, #05caff 100%);
-    display: block;
-    padding-right: 5rem;
-    font-weight: 500;
-    width: 10rem;
-    margin-left: 5vw;
-    padding-bottom: 1rem;
+.heading {
+  border-bottom: 2px solid;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(94.72deg, #5cff68 0%, #05caff 100%);
+  display: block;
+  padding-right: 5rem;
+  font-weight: 500;
+  width: 10rem;
+  margin-left: 5vw;
+  padding-bottom: 1rem;
 }
 
 .cards {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    /* flex-direction: row; */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+}
+
+.cards::-webkit-scrollbar {
+  display: none;
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  margin: 0 5vw;
+  gap: .5rem;
 }
 
 .card {
-    width: 200px;
-    display: flex;
-    flex-direction: column;
-    height: 290px;
-    background-color: #1B2731;
-    border: 5px solid #1B2731;
-    border-radius: 10px;
-
+  width: 200px;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  background-color: #1b2731;
+  border: 5px solid #1b2731;
+  border-radius: 10px;
 }
 
 .coverPhoto {
-    width: 200px;
-    border-radius: 10px;
+  max-width: 175px;
+  border-radius: 10px;
 }
 
-.info{
-    margin: 5px 7px;
-    gap: .3rem;
-    display: flex;
-    flex-direction: column;
+.info {
+  margin: 5px 7px;
+  gap: 0.3rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .name {
-    font-weight: 600;
+  font-weight: 600;
 }
 
-.role{
-    font-weight: 300;
+.role {
+  font-weight: 300;
 }
 
 .name,
-.role
-{
-    margin: 0;
-    color: #fff;
+.role {
+  margin: 0;
+  color: #fff;
 }
 
-.socials{
-    display: flex;
-    gap: .5rem;
+.socials {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.social{
-    width: 15px;
-    height: 15px;
-    color: #1B2731;
-    background: #fff;
-    border-radius: 11px;
-    margin-right: 0px;
-    margin-top: -10%;
+.social {
+  width: 15px;
+  height: 15px;
+  color: #1b2731;
+  background: #fff;
+  border-radius: 11px;
+  margin-right: 0px;
+  margin-top: -10%;
 }
+
+.previous_btn,
+.next_btn {
+  cursor: pointer;
+}
+
+
+@media screen and (max-width: 1000px) {
+    .coverPhoto {
+      max-width: 150px;
+    }
+  }
