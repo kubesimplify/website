@@ -50,7 +50,7 @@ const navbarContent = {
         </button>
         <div className={styles.navbar_dropdown_content}>
           {/* Links for respective webpage will add when new webpages are formed */}
-          <a href="/ambassadors">Student Ambassador</a>
+          <a href="/ambassadors">Kubesimplify Ambassador</a>
           <a
             className={styles.navbar_workshops_designs}
             href="https://kubesimplify.github.io/live-workshops/"
@@ -95,7 +95,7 @@ const mobileViewContent = {
   community: (
     <div className={styles.mobileView_community}>
       <div>
-        <a href="/ambassadors">Student Ambassador</a>
+        <a href="/ambassadors">Kubesimplify Ambassador</a>
       </div>
       <div>
         <a
