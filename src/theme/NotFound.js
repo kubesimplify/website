@@ -12,20 +12,30 @@ export default function NotFound() {
 
 
   // Temporary solution 
-
-  if (window.location.href.indexOf("live-workshops") > -1) {
-    window.location.replace('https://kubesimplify.github.io/live-workshops/')
-  } else{    
+  
+  useEffect(() => {
     let  location = window.location.href;
-    console.log(location)
-    if(location){
-      
-      location = location.replace("https://kubesimplify.com/", "https://blog.kubesimplify.com/")
-      console.log(location)
-      window.location.replace(location)
+    if (window.location.href.indexOf("live-workshops") > -1) {
+      window.location.replace('https://kubesimplify.github.io/live-workshops/')
+    } else{    
+      if(location){
+        
+        location = location.replace("https://www.kubesimplify.com/", "https://blog.kubesimplify.com/")
+        window.location.replace(location)
+      }else {
+        console.log("nothimg")
+      }
     }
+
+  }, [])
+  
+ 
     
-  }
+  
+
+  
+
+  
 
   return (
     <>
