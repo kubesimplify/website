@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./styles.module.css";
-import Logo from "./logo";
+import Logo from "./Logo";
 import { workshopData } from "../../data/data";
 import priceTag from "./assests/price-tag.png";
 import { AiFillCalendar, AiFillClockCircle } from "react-icons/ai";
