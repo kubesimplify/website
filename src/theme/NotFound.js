@@ -14,23 +14,19 @@ export default function NotFound() {
   // Temporary solution 
   
   useEffect(() => {
-    let  location = window.location.href;
-    if (window.location.href.indexOf("live-workshops") > -1) {
+
+    let address = window.location.href;
+    if(window.location.href.indexOf("live-workshops") > -1) {
       window.location.replace('https://kubesimplify.github.io/live-workshops/')
-    } else{    
-      if(location){
-        
-        location = location.replace("https://www.kubesimplify.com/", "https://blog.kubesimplify.com/")
-        window.location.replace(location)
+    } else {
+      if(address.length > 27){
+        address = address.slice(25 , address.length)
+        console.log("https://blog.kubesimplify.com/" + address)
+        window.location.replace("https://blog.kubesimplify.com/" + address)
       }
     }
 
   }, [])
-  
- 
-    
-  
-
   
 
   
