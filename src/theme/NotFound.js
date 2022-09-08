@@ -4,11 +4,29 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import Layout from '@theme/Layout';
 import Translate, {translate} from '@docusaurus/Translate';
 import {PageMetadata} from '@docusaurus/theme-common';
 export default function NotFound() {
+
+
+  // Temporary solution 
+
+  if (window.location.href.indexOf("live-workshops") > -1) {
+    window.location.replace('https://kubesimplify.github.io/live-workshops/')
+  } else{    
+    let  location = window.location.href;
+    console.log(location)
+    if(location){
+      
+      location = location.replace("https://kubesimplify.com/", "https://blog.kubesimplify.com/")
+      console.log(location)
+      window.location.replace(location)
+    }
+    
+  }
+
   return (
     <>
       <PageMetadata
