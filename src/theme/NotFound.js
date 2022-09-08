@@ -22,8 +22,6 @@ export default function NotFound() {
         
         location = location.replace("https://www.kubesimplify.com/", "https://blog.kubesimplify.com/")
         window.location.replace(location)
-      }else {
-        console.log("nothimg")
       }
     }
 
