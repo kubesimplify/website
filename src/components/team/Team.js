@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import styles from "./styles.module.css";
 import { teamData } from "../../data/data";
+import dummyProfile from '../team/defaultImage.png'
 
 import { BsFillArrowLeftCircleFill } from "react-icons/bs";
 import { BsFillArrowRightCircleFill } from "react-icons/bs";
@@ -8,7 +9,7 @@ import { TiSocialLinkedin } from "react-icons/ti";
 import { AiFillGithub } from "react-icons/ai";
 import { AiOutlineTwitter } from "react-icons/ai";
 
-const Team = () => {
+const Team = ({heading, slider }) => {
   const card = useRef();
   const prevCard = () => {
     let width = card.current.clientWidth;
@@ -20,25 +21,27 @@ const Team = () => {
     let change = width > 835 ? 402 : 175;
     card.current.scrollLeft += change;
   };
-
   return (
     <div className={styles.team}>
-      <h1 className={styles.heading}>Kubesimplify Ambassador</h1>
+      <h2 className={styles.heading}>{heading}</h2>
       <div className={styles.slider}>
-        <span className={styles.previous_btn} onClick={() => prevCard()}>
+        {slider ? (<span className={styles.previous_btn} onClick={() => prevCard()}>
           <BsFillArrowLeftCircleFill size={25} />
-        </span>
-        <div ref={card} className={styles.cards}>
+        </span>) : ""}
+        <div ref={card} className={slider ? styles.cards_slider : styles.cards}>
           {teamData.map((user, index) => (
             <div key={index} className={styles.card}>
               <img
                 className={styles.coverPhoto}
-                src={user.coverPhoto}
+                src={user.coverPhoto || dummyProfile}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = dummyProfile
+                }}
                 draggable="false"
               />
               <div className={styles.info}>
                 <h3 className={styles.name}>{user.name}</h3>
-                <h4 className={styles.role}>{user.role}</h4>
                 <div className={styles.socials}>
                   <span>
                     <a href={user.twitterLink}>
@@ -60,9 +63,9 @@ const Team = () => {
             </div>
           ))}
         </div>
-        <span className={styles.next_btn} onClick={() => nextCard()}>
+        { slider ? (<span className={styles.next_btn} onClick={() => nextCard()}>
           <BsFillArrowRightCircleFill size={25} />
-        </span>
+        </span>) : ""}
       </div>
     </div>
   );

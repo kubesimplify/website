@@ -13,7 +13,7 @@ export default function Home() {
       <Reach />
       <Founder />
       <Newsletter />
-      <Team />
+      <Team heading={"Kubesimplify Ambassadors"} slider={true} />
     </Layout>
   );
 }

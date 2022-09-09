@@ -11,12 +11,12 @@
   display: block;
   padding-right: 5rem;
   font-weight: 500;
-  width: 10rem;
+  width: fit-content;
   margin-left: 5vw;
   padding-bottom: 1rem;
 }
 
-.cards {
+.cards_slider {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -24,7 +24,15 @@
   scroll-behavior: smooth;
 }
 
-.cards::-webkit-scrollbar {
+.cards {
+  gap: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cards_slider::-webkit-scrollbar {
   display: none;
 }
 
@@ -32,11 +40,11 @@
   display: flex;
   align-items: center;
   margin: 0 5vw;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .card {
-  width: 200px;
+  width: 185px;
   display: flex;
   position: relative;
   flex-direction: column;
@@ -58,15 +66,7 @@
 }
 
 .name {
-  font-weight: 600;
-}
-
-.role {
-  font-weight: 300;
-}
-
-.name,
-.role {
+  font-weight: 400;
   margin: 0;
   color: #fff;
 }
@@ -91,9 +91,18 @@
   cursor: pointer;
 }
 
-
 @media screen and (max-width: 1000px) {
-    .coverPhoto {
-      max-width: 150px;
-    }
+  .coverPhoto {
+    max-width: 150px;
   }
+  .card {
+    width: 160px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .heading {
+    font-size: 1rem;
+    padding-right: 5vw;
+  }
+}
