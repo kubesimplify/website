@@ -1,390 +1,379 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap");
 * {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins';
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins";
 }
 
 .hero_containner {
-    margin: 5% auto auto auto;
-    width: 70%;
-    background: rgba(27, 39, 49, 0.02);
+  max-width: 1200px;
+  background: rgba(27, 39, 49, 0.02);
+  margin: 1vw auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .box {
-    background: #1B2731;
-    border-radius: 10px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background: #1b2731;
+  margin: 4vw auto;
+  border-radius: 10px;
+  /* width: 500px; */
+  gap: 1rem;
+  padding: 2vw 1vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .logo {
-    width: 100px;
-    height: 100px;
+  margin-left: 10px;
+  width: 100px;
+  height: 100px;
 }
 
-.box span {
-    position: relative;
-
-    font-style: normal;
-    font-weight: 400;
-    font-size: 3.5vw;
-    line-height: 8vw;
-
-    text-align: center;
-    letter-spacing: -0.02em;
-
-    color: #FFFFFF;
+.box > span {
+  /* width: 240px; */
+  line-height: 40px;
+  font-size: 33px;
+  color: #ffffff;
 }
 
 .hero_para {
-    padding: 5%;
-    margin: auto;
-    width: 75%;
-
-    font-style: normal;
-    font-size: 14px;
-    line-height: 28px;
-
-    display: flex;
-    align-items: center;
-    text-align: center;
-
-    color: #1B2731;
+  margin: auto;
+  width: 75%;
+  font-size: 22px;
+  line-height: 40px;
+  text-align: center;
+  color: #1b2731;
 }
-
-
 
 /* =================================================================================================== */
 
 /* CRETERIA SECTION  */
 .criteria_containner {
-    width: 100%;
-    z-index: -1;
-    background: #1B2731;
-    text-align: center;
+  width: 100%;
+  background: #1b2731;
+  margin-top: 5vw;
+}
+
+.criteria_containner > div {
+  text-align: center;
+  margin: auto;
+  max-width: 1200px;
+  padding: 4vw 0;
 }
 
 .criteria_title {
-
-    font-style: normal;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 48px;
-
-    color: #ffffff;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 38px;
+  line-height: 48px;
+  color: #ffffff;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 25px;
 }
 
-.criteria_underline {
-    background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
-    width: 180px;
-    height: 2px;
-    margin: auto;
+.criteria_title::after {
+  content: "";
+  width: 150%;
+  position: absolute;
+  bottom: -20%;
+  left: -20%;
+  border-bottom: 3px solid;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(94.72deg, #5cff68 0%, #05caff 100%);
 }
 
 .criteria_flex {
-
-
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .criteria_items {
-    display: inline-block;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: inline-block;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .criteria_items_img {
-    width: 30px;
-    height: 30px;
-    margin: 10px 0;
+  width: 30px;
+  height: 25px;
+  margin: 10px 0;
 }
 
 .criteria_items_heading {
-    font-style: normal;
-    font-weight: 500;
-    font-size: 26px;
-    text-transform: capitalize;
-    letter-spacing: 0.8px;
-
-    color: #FFFFFF;
+  /* font-style: normal; */
+  font-weight: 500;
+  font-size: 26px;
+  text-transform: capitalize;
+  letter-spacing: 0.8px;
+  color: #ffffff;
 }
 
 .criteria_items_para {
-    position: relative;
-    top: -8px;
-
-    font-style: normal;
+  font-size: 14px;
+  color: #ffffff;
+}
+/* 
+@media only screen and (max-width: 1300px) {
+  .criteria_flex {
+    padding: 0rem 0rem;
+  }
+  .criteria_items_heading {
+    font-size: 22px;
+  }
+  .criteria_items_para {
     font-size: 14px;
+    width: 80%;
+  }
+} */
 
-    color: #FFFFFF;
-}
-
-@media only screen and (max-width:1300px){
-    .criteria_flex{
-        padding:0rem 0rem;
-    }
-    .criteria_items_heading{
-        font-size: 22px;
-    }
-    .criteria_items_para{
-        font-size: 14px;
-        width:80%
-    }
-}
-
-@media only screen and (max-width:680px){
-    .criteria_flex {
-        flex-direction: column;
-    }
+@media only screen and (max-width: 680px) {
+  .criteria_flex {
+    flex-direction: column;
+  }
 }
 
 /* =================================================================================================== */
 
 /* BENIFITS SECTION  */
 .benifits_containner {
-    margin-top: 5%;
-    width: 100%;
-
-    background: rgba(27, 39, 49, 0.02);
+  margin: 5vw auto;
+  max-width: 1200px;
+  text-align: center;
 }
-
 
 .benifits_title {
-    text-align: center;
-
-    font-style: normal;
-    font-weight: 500;
-    font-size: 36px;
-    line-height: 48px;
-
-    color: #1B2731;
+  font-weight: 600;
+  font-size: 38px;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 30px;
 }
 
-.benifits_underline {
-    background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
-    width: 180px;
-    height: 2px;
-    margin: auto;
+.benifits_title::after {
+  content: "";
+  width: 150%;
+  position: absolute;
+  bottom: -20%;
+  left: -20%;
+  border-bottom: 3px solid;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(94.72deg, #5cff68 0%, #05caff 100%);
 }
 
 .benifits_flex {
-
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    color: #1B2731;
-
-    top: 10%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  color: #1b2731;
+  gap: 1rem;
+  margin: 0 5vw;
 }
 
 .benifits_items {
-    height: 10rem;
-    margin-top: 5%;
-    max-width: 240px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  height: 10rem;
+  margin-top: 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .benifits_items_img {
-    height: 40px;
+  height: 40px;
+  margin-bottom: 10px;
 }
 
 .benifits_items_heading {
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 24px;
-    line-height: 40px;
-    text-transform: capitalize;
-
-    color: #1B2731;
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 22px;
+  color: #1b2731;
 }
 
 .benifits_items_para {
-
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 20px;
-
-    display: flex;
-    text-align: center;
-    letter-spacing: -0.025em;
-
-    color: #1B2731;
+  font-size: 16px;
+  max-width: 250px;
+  line-height: 20px;
+  letter-spacing: -0.025em;
 }
 
-/* =================================================================================================== */
-
-/* APPLICATION SECTION  */
-.application_containner {
-    width: 100%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(27, 39, 49, 0.02);
+.ambassador {
+  margin: 5vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  gap: 3rem ;
 }
 
-.application_containner_mini {
-    background-color: rgba(27, 39, 49, 1);
-    width: 50%;
-    border-radius: 5px;
-    padding: 1.4rem 3rem;
-    margin-right: 1rem;
+.application {
+  width: 70%;
+  display: flex;
+  background-color: #1b2731;
+  color: #ffffff;
+  padding: 2rem 2rem;
+  border-radius: 5px;
+  gap: 1rem;
 }
 
-.application_containner_mini_title {
-
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 32px;
-    line-height: 54px;
-
-    letter-spacing: -0.01em;
-    color: #FFFFFF;
+.application > div{
+  flex: 1;
 }
 
-.application_containner_mini_para {
-    width: 70%;
-
-    font-family: 'Poppins';
-    font-style: normal;
-    font-size: 14px;
-    line-height: 24px;
-
-    letter-spacing: -0.01em;
-    color: #FFFFFF;
+.application_btn{
+  padding: 0.5em 1em;
+  background: linear-gradient(94.34deg, #5CFF68 0%, #05CAFF 100%);
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.application_containner_mini_button {
-
-
-    background: linear-gradient(92.19deg, #5CFF68 0%, #05CAFF 100%);
-    border-radius: 6px;
-    border: none;
-
-    font-family: 'Poppins';
-    font-style: normal;
-    font-size: 16px;
-    line-height: 0px;
-    color: #FFFFFF;
-    ;
+.application_btn > a {
+  color: #1b2731;
+  font-weight: 600;
+  font-size:  medium;
 }
 
-.application_qr_code {
-    position: relative;
-    height: 150px;
-    width: 150px;
-    left: 320px;
-    bottom: 120px;
-}
-
-.application_containner_img {
-    height: 200px;
-    margin-left: 1.5rem;
-}
-
-@media only screen and (max-width:1300px){
-    .application_containner{
-        top:1600px;
-        width:1200px;
-    }
-
-    .application_containner_mini_para{
-        width:70%;
-    }
-
-    .application_qr_code{
-        height:160px;
-        width:160px;
-
-        position: relative;
-        top: -130px;
-        left:240px;
-    }
-
-    .application_containner_mini_button {
-        top: -140px
-    }
-
-    .application_containner_img {
-        visibility: hidden;
-    }
+.benefits_img{
+  width: 250px;
 }
 
 /* =================================================================================================== */
 /* FAQs SECTION  */
 .FAQs_containner {
-    text-align: center;
-    margin-top: 5%;
+  margin: 5vw auto;
+  max-width: 1200px;
+}
 
+.faq_section{
+  margin: 0 5vw;
 }
 
 .FAQs_title {
-
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 36px;
-    line-height: 48px;
-
-    color: #1B2731;
+  font-family: "Poppins";
+  font-weight: 500;
+  font-size: 36px;
+  color: #1b2731;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 30px;
 }
 
-.FAQs_underline {
-
-    background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
+.FAQs_title::after{
+  content: "";
+  width: 150%;
+  position: absolute;
+  bottom: -20%;
+  left: -20%;
+  border-bottom: 3px solid;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(94.72deg, #5cff68 0%, #05caff 100%);
 }
 
 .FAQs_flex {
-    width: 70%;
-    margin: auto;
+  width: 75%;
 }
 
 .FAQs_question {
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: bolder;
-    font-size: 20px;
-    line-height: 18px;
-    
-    letter-spacing: -0.01em;
-
-    color: #1B2731;
+  font-weight: bolder;
+  font-size: 20px;
+  margin-bottom: 5px;
+  line-height: 20px;
+  letter-spacing: .7px;
+  margin-bottom: 15px;
 }
 
 .FAQs_answer {
-
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 18px;
-
-    letter-spacing: -0.01em;
-
-    color: #1B2731;
-
+  font-weight: 500;
+  font-size: 16px;
+  margin-left: 20px;
+  line-height: 18px;
 }
-@media only screen and (max-width:1300px){
-    .FAQs_containner{
-        top:1900px;
-    }
+
+@media only screen and (max-width: 768px  ) {
+  .benefits_img{
+   display: none;
+  }
+  .application{
+    width: 100%;
+  }
+  .FAQs_flex{
+    width: 100%;
+  }
+  .FAQs_question,
+  .FAQs_answer{
+    font-size: 1rem;
+  }
+}
+
+
+@media only screen and (max-width: 600px) {
+  .logo {
+    width: 15vw;
+    height: 15vw;
+  }
+  .box {
+    width: 70%;
+  }
+  .box > span {
+    line-height: 20px;
+    font-size: 15px;
+  }
+  .hero_para {
+    text-align: justify;
+    line-height: normal;
+    font-size: 18px;
+  }
+  .benifits_flex {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+  .benifits_items_heading{
+    font-size: 20px;
+  }
+  .benifits_items_img{
+    height: 30px;
+  }
+  .benifits_items_para{
+    font-size: 13px;
+  }
+  .benifits_title,
+  .criteria_title{
+    font-size: 30px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .application > div > h1 {
+    font-size: 20px ;
+  }
+  .application > div > p {
+    font-size: 15px;
+  }
+  .application > img {
+    width: 100px;
+    height: 100px;
+    align-self: center;
+  }
+  .application_btn > a{
+    font-size: small;
+  }
+}
+
+@media only screen and (max-width: 380px) {
+  .application{
+    flex-direction: column;
+  }
 }
