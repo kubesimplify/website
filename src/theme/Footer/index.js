@@ -52,7 +52,7 @@ function Footer() {
 
           <a href="https://blog.kubesimplify.com/sponsor">
             <button className={styles.sponsor_hashnode}>
-              <logo.hashnode.Svg className={styles.logo} role="img" /> Sponser
+              <logo.hashnode.Svg className={styles.logo} role="img" /> Sponsor
             </button>
           </a>
         </div>
