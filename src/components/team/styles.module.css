@@ -28,8 +28,14 @@
   gap: 1rem;
   display: flex;
   align-items: center;
+  margin: 2vw auto;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.cards > .card:hover{
+  scale: 1.05;
+  box-shadow: rgba(58, 69, 103, 0.959) 1px 4px 9px;
 }
 
 .cards_slider::-webkit-scrollbar {
@@ -49,6 +55,7 @@
   position: relative;
   flex-direction: column;
   background-color: #1b2731;
+transition: all 150ms ease-in;
   border: 5px solid #1b2731;
   border-radius: 10px;
 }
