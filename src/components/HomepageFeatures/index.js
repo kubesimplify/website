@@ -197,7 +197,7 @@ export default function HomepageFeatures() {
             </p>
             <div className={styles.cont_5_btn}>
               <button className={styles.hp_cont_5_btn1}>
-                <a href="https://discord.gg/WpCfpanR" traget="_blank">
+                <a href="https://discord.gg/WpCfpanR" target="_blank">
                   <p className={styles.hp_cont_5_btn1_content}>Contribute</p>
                 </a>
               </button>
