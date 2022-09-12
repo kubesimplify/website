@@ -6,8 +6,8 @@
 }
 
 .hero_containner {
-    margin: 5% auto auto auto;
-    width: 70%;
+    margin: 5% auto;
+    width: 80%;
     background: rgba(27, 39, 49, 0.02);
 }
 
@@ -15,38 +15,46 @@
     background: #1B2731;
     border-radius: 10px;
 
+    width: 55%;
+    height: 12rem;
+    margin: auto;
+    padding: 0rem 2rem;
+
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .logo {
-    width: 100px;
-    height: 100px;
+    position: relative;
+    width: 60%;
+    height: 80%;
 }
 
 .box span {
     position: relative;
+    margin: 0px 8px;
 
     font-style: normal;
     font-weight: 400;
-    font-size: 3.5vw;
-    line-height: 8vw;
+    font-size: 3.8vw;
+    line-height: 4.4vw;
 
-    text-align: center;
-    letter-spacing: -0.02em;
+    text-align: left;
+    letter-spacing: -0.01em;
 
     color: #FFFFFF;
 }
 
 .hero_para {
     padding: 5%;
-    margin: auto;
-    width: 75%;
+    margin: 0px auto;
+    width: 98%;
 
     font-style: normal;
-    font-size: 14px;
-    line-height: 28px;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 34px;
 
     display: flex;
     align-items: center;
@@ -55,6 +63,23 @@
     color: #1B2731;
 }
 
+@media screen and (max-width: 760px) {
+    .box{
+        width: 75%;
+        height: 60%;
+    }
+    .logo{
+        height: 4rem;
+        margin: 0.2rem;
+    }
+    .box span{
+        font-size: 5vw;
+        line-height: 5.5vw;
+    }
+    .hero_para {
+      font-size: 16px;
+    }
+  }
 
 
 /* =================================================================================================== */
@@ -62,16 +87,18 @@
 /* CRETERIA SECTION  */
 .criteria_containner {
     width: 100%;
+    height: 18rem;
+    padding: 1rem 4.5rem;
+
     z-index: -1;
     background: #1B2731;
     text-align: center;
 }
 
 .criteria_title {
-
     font-style: normal;
     font-weight: 400;
-    font-size: 24px;
+    font-size: 36px;
     line-height: 48px;
 
     color: #ffffff;
@@ -82,11 +109,12 @@
     width: 180px;
     height: 2px;
     margin: auto;
+
+    position: relative;
+    top: -10px;
 }
 
 .criteria_flex {
-
-
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -94,6 +122,7 @@
 
 .criteria_items {
     display: inline-block;
+    margin: 1.8rem 2rem;
 
     display: flex;
     flex-direction: column;
@@ -101,7 +130,7 @@
 }
 
 .criteria_items_img {
-    width: 30px;
+    width: 20%;
     height: 30px;
     margin: 10px 0;
 }
@@ -122,6 +151,7 @@
 
     font-style: normal;
     font-size: 14px;
+    width: 70%;
 
     color: #FFFFFF;
 }
@@ -139,7 +169,16 @@
     }
 }
 
-@media only screen and (max-width:680px){
+@media only screen and (max-width:760px){
+    .criteria_containner{
+        height: 38rem;
+    }
+    .criteria_flex{
+        margin: 1rem 0rem;
+    }
+    .criteria_items{
+        margin: 0.4rem 0rem;
+    }
     .criteria_flex {
         flex-direction: column;
     }
@@ -175,7 +214,9 @@
 }
 
 .benifits_flex {
-
+    width: 80%;
+    margin: 4% auto;
+     
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -189,7 +230,7 @@
 
 .benifits_items {
     height: 10rem;
-    margin-top: 5%;
+    margin: 2% 5%;
     max-width: 240px;
 
     display: flex;
@@ -244,6 +285,7 @@
 .application_containner_mini {
     background-color: rgba(27, 39, 49, 1);
     width: 50%;
+    height: 14rem;
     border-radius: 5px;
     padding: 1.4rem 3rem;
     margin-right: 1rem;
@@ -274,18 +316,21 @@
 }
 
 .application_containner_mini_button {
+    position: relative;
+    top: -8rem;
 
-
+    height: 2.5rem;
+    width: 7rem;
     background: linear-gradient(92.19deg, #5CFF68 0%, #05CAFF 100%);
     border-radius: 6px;
     border: none;
 
     font-family: 'Poppins';
     font-style: normal;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 0px;
-    color: #FFFFFF;
-    ;
+    color: rgba(27, 39, 49, 1);;
+    
 }
 
 .application_qr_code {
@@ -329,6 +374,12 @@
     }
 }
 
+@media only screen and (max-width:760px) {
+    .application_containner{
+        display: none;
+    }
+}
+
 /* =================================================================================================== */
 /* FAQs SECTION  */
 .FAQs_containner {
@@ -349,13 +400,17 @@
 }
 
 .FAQs_underline {
-
+    width: 8rem;
+    height: 2px;
+    margin: auto;
     background-image: linear-gradient(91.67deg, #5CFF68 1.42%, #05CAFF 98.58%);
 }
 
 .FAQs_flex {
     width: 70%;
-    margin: auto;
+    margin: 1rem auto;
+
+    text-align: left;
 }
 
 .FAQs_question {
@@ -371,7 +426,6 @@
 }
 
 .FAQs_answer {
-
     font-family: 'Poppins';
     font-style: normal;
     font-weight: 400;
@@ -386,5 +440,15 @@
 @media only screen and (max-width:1300px){
     .FAQs_containner{
         top:1900px;
+    }
+}
+@media only screen and (max-width:760px){
+    .FAQs_containner{
+        top:1900px;
+    }
+    .FAQs_question{
+        font-size: 16px;
+        line-height: 18px;
+        margin-top: 1rem;
     }
 }
