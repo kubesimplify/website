@@ -35,7 +35,7 @@ Fork the repo by clicking the fork button. This will clone the repo in your acco
  
 Clone the repo to your local device: 
 ```bash
-   git clone https://kubesimplify.github.io/website/ 
+   git clone https://github.com/kubesimplify/website.git 
    cd website
 ```
 
