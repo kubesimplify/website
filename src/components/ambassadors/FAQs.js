@@ -10,7 +10,7 @@ const faqs = [
   {
     question: "Q. Can I be removed as a Kubesimplify Ambassador?",
     answer:
-      "Kubesimplify will provide you with the support and other perks but if you are not active in the community or do not participate regulary, you will be removed as an Ambassador.",
+      "Kubesimplify will provide you with the support and other perks but if you are not active in the community or do not participate regularly, you will be removed as an Ambassador.",
   },
   {
     question:
