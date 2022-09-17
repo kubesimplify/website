@@ -1,0 +1,115 @@
+.team {
+  margin: 5vw auto;
+  max-width: 1200px;
+  overflow: hidden;
+}
+
+.heading {
+  border-bottom: 2px solid;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(94.72deg, #5cff68 0%, #05caff 100%);
+  display: block;
+  padding-right: 5rem;
+  font-weight: 500;
+  width: fit-content;
+  margin-left: 5vw;
+  padding-bottom: 1rem;
+}
+
+.cards_slider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+}
+
+.cards {
+  gap: 1rem;
+  display: flex;
+  align-items: center;
+  margin: 2vw auto;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cards > .card:hover{
+  scale: 1.05;
+  box-shadow: rgba(58, 69, 103, 0.959) 1px 4px 9px;
+}
+
+.cards_slider::-webkit-scrollbar {
+  display: none;
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  margin: 0 5vw;
+  gap: 0.5rem;
+}
+
+.card {
+  width: 185px;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  background-color: #1b2731;
+transition: all 150ms ease-in;
+  border: 5px solid #1b2731;
+  border-radius: 10px;
+}
+
+.coverPhoto {
+  max-width: 175px;
+  border-radius: 10px;
+}
+
+.info {
+  margin: 5px 7px;
+  gap: 0.3rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-weight: 400;
+  margin: 0;
+  color: #fff;
+}
+
+.socials {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.social {
+  width: 15px;
+  height: 15px;
+  color: #1b2731;
+  background: #fff;
+  border-radius: 11px;
+  margin-right: 0px;
+  margin-top: -10%;
+}
+
+.previous_btn,
+.next_btn {
+  cursor: pointer;
+}
+
+@media screen and (max-width: 1000px) {
+  .coverPhoto {
+    max-width: 150px;
+  }
+  .card {
+    width: 160px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .heading {
+    font-size: 1rem;
+    padding-right: 5vw;
+  }
+}

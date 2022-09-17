@@ -44,29 +44,17 @@ function Footer() {
     <section className={styles.footer}>
       <div className={styles.footer_upper}>
         <div className={styles.content}>
-          <div className={styles.title}>Help us do more</div>
-          <div className={styles.sponsors_content}>
-            {content.sponsorsContent}
-          </div>
+          <h2 className={styles.title}>Help us do more</h2>
+          <p className={styles.sponsors_content}>{content.sponsorsContent}</p>
         </div>
         <div className={styles.sponsors_card}>
-          <div className={styles.sponsors_card_title}>
-            Sponsor us on Hashnode
-          </div>
-          <button className={styles.sponsor_hashnode}>
-            <a
-                  href="https://kubesimplify.com/sponsor"
-                >
-            <div className={styles.sponsor_hashnode_div}>
-              <div className={styles.sponsor_hashnode_logo}>
-                <logo.hashnode.Svg className={styles.logo} role="img" />  
-              </div>
-              <div className={styles.button_name}>
-              Sponsor
-              </div>
-            </div>
-            </a>
-          </button>
+          <p className={styles.sponsors_card_title}>Sponsor us on Hashnode</p>
+
+          <a href="https://blog.kubesimplify.com/sponsor">
+            <button className={styles.sponsor_hashnode}>
+              <logo.hashnode.Svg className={styles.logo} role="img" /> Sponsor
+            </button>
+          </a>
         </div>
       </div>
       <hr className={styles.hr}></hr>
@@ -74,7 +62,7 @@ function Footer() {
         <div className={styles.end_first}>© 2022 Kubesimplify</div>
         <div className={styles.footer_mail}>
           <IoMdMail className={styles.mail_logo} row="img" />
-          <a className={styles.mail_title} href="kubesimplify@gmail.com">
+          <a className={styles.mail_title} href="mailto:kubesimplify@gmail.com">
             kubesimplify@gmail.com
           </a>
         </div>
@@ -82,7 +70,7 @@ function Footer() {
           <a target="_blank" href="https://www.youtube.com/c/saiyam911">
             <AiFillYoutube row="img" className={styles.social1} />
           </a>
-          <a target="_blank" href="https://discord.gg/eEEFPVMr">
+          <a target="_blank" href="https://discord.gg/26Z384WSPB">
             <FaDiscord row="img" className={styles.social2} />
           </a>
           <a target="_blank" href="https://twitter.com/kubesimplify">

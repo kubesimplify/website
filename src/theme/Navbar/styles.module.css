@@ -7,7 +7,9 @@
 }
 
 .navbar {
-  
+  position: sticky;
+  z-index: 999;
+  top: 0;
 }
 
 
@@ -89,7 +91,7 @@
 
   .mobile_menu_icon {
     margin-left: auto;
-    padding-right: 10%;
+    padding-right: 1rem;
     padding-top: 10px;
     display: block;
     background-color: #1B2731;

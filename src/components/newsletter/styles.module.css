@@ -1,0 +1,123 @@
+
+.newsletter_section {
+    font-family: 'Poppins';
+    font-style: normal;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.newsletter_flex {
+    display: flex;
+    justify-content: center;
+    margin: 5vw;
+    gap: 2rem;
+}
+
+.newsletter_first {
+    width: 50%;
+}
+
+.newsletter_second {
+    width: 50%;
+    margin: auto;
+}
+
+.newsletter_p1 {
+    display: inline-block;
+    font-weight: 550;
+    font-size: 31px;
+    color: #1B2731;
+    border-bottom: 2px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
+}
+
+.newsletter_p2 {
+    font-size: 18px;
+    line-height: 25px;
+    font-weight: 550;
+    letter-spacing: -0.01em;
+    color: #1B2731;
+}
+
+.newsletter_a {
+    padding: 1vw;
+    font-weight: 550;
+    border: 2px solid #1B2731;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
+.newsletter_a_p {
+    font-size: 24px;
+}
+
+.newsletter_a_mail {
+    display: flex;
+    gap: 1rem;
+}
+
+
+.newsletter_a_input {
+    width: 60%;
+    padding: .5rem;
+    background: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
+    border-radius: 5px;
+    outline: none;
+    border: none;
+}
+
+.newsletter_a_input::placeholder {
+    opacity: 1;
+    /* Firefox */
+    font-family: 'Poppins';
+    font-style: normal;
+    font-size: 16px;
+    letter-spacing: 0.01em;
+    color: black;
+}
+
+:_ms_input_placeholder {
+    /* Internet Explorer 10_11 */
+    color: black;
+}
+
+::_ms_input_placeholder {
+    /* Microsoft Edge */
+    color: black;
+}
+
+
+.newsletter_a_btn {
+    width: 35%;
+    background: #05CAFF;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    padding: .5rem;
+    font-weight: bold;
+    font-size: .9rem;
+    letter-spacing: 1px;
+    color: #1B2731;
+}
+
+@media only screen and (max-width: 768px) {
+
+    .newsletter_flex {
+        flex-direction: column;
+    }
+
+    .newsletter_second,
+    .newsletter_first {
+        width: 100%;
+    }
+
+    .newsletter_a_mail {
+        margin: auto;
+        font-size: medium;
+    }
+
+    .newsletter_a_input {
+        width: 70%;
+    }
+}

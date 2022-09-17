@@ -27,7 +27,7 @@ This repository contains the assets required to build the Kubesimplify website a
 
 <h1>Contributing Guidelines: </h1>
 
-We're a warm and welcoming community of open source contributors. Please join. All types of contributions are welcome. Be sure to read the Kubesimplify <a href="https://github.com/kubesimplify/website/blob/main/CONTRIBUTION.md">Contribution.md</a> for a tour of resources available to you and how to get started.
+We're a warm and welcoming community of open source contributors. Please join. All types of contributions are welcome. Be sure to read the Kubesimplify <a href="https://github.com/kubesimplify/website/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> for a tour of resources available to you and how to get started.
 This is the source code of the official [Kubesimplify's website](https://kubesimplify.github.io/website/). 
 
 For new developers getting started, here are some instructions to follow:
@@ -35,9 +35,11 @@ Fork the repo by clicking the fork button. This will clone the repo in your acco
  
 Clone the repo to your local device: 
 ```bash
-   git clone https://kubesimplify.github.io/website/ 
+   git clone https://github.com/kubesimplify/website.git 
    cd website
 ```
+
+## Local Runner
 Install dependencies:
 ```bash
     $ npm install 
@@ -46,6 +48,18 @@ To run the website on your computer:
 ```bash
     $ npm start
 ```
+
+## Docker based Runner
+```sh
+# Production environment
+docker build --target=prod -t kubesimplify:website . --no-cache
+docker run --rm -d -p 3000:3000 kubesimplify:website
+# Dev testing environment
+docker build --target=dev -t kubesimplify:website . --no-cache
+docker run --rm -it -v $(pwd):/app -p 3000:3000 kubesimplify:website sh
+```
+
+
 And then open up your web browser and go to [localhost:3000](http://localhost:3000).
 
 
