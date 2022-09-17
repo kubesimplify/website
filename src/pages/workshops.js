@@ -1,7 +1,7 @@
 import React from 'react'
 import LiveWorkshop from '../components/liveworkshop/LiveWorkshop'
 
-const LiveWorkshops = () => {
+const Workshops = () => {
   return (
     <>
         <LiveWorkshop />
@@ -9,4 +9,4 @@ const LiveWorkshops = () => {
   )
 }
 
-export default LiveWorkshops
+export default Workshops

@@ -79,7 +79,7 @@ export const workshopData = [
     {
       coverPhoto: david,
       workshopName: "Kubernetes Troubleshooting",
-      date: "July 11th, 2022",
+      date: "Sept 12th, 2022",
       time: "07:00 AM PT",
       workshopDesc:
         "In this workshop, we will learn how to operate and manage a Kubernetes cluster by debugging some clusters broken by members of the Kubernetes Community.",
@@ -90,7 +90,7 @@ export const workshopData = [
     {
       coverPhoto: micheal,
       workshopName: "Kubernetes Observability",
-      date: "July 11th, 2022",
+      date: "Sept 19th, 2022",
       time: "07:00 AM PT",
       workshopDesc:
         "In this workshop by Michael, you will learn the basics of Monitoring and Observability with microservices and container clusters.",

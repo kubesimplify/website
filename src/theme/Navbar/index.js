@@ -53,7 +53,7 @@ const navbarContent = {
           <a href="/ambassadors">Kubesimplify Ambassador</a>
           <a
             className={styles.navbar_workshops_designs}
-            href="/live-workshops"
+            href="/workshops"
           >
             Workshops
           </a>
@@ -99,8 +99,7 @@ const mobileViewContent = {
       <div>
         <a
           className={styles.navbar_workshops_designs}
-          href="https://kubesimplify.github.io/live-workshops/"
-          target="blank"
+          href="/workshops"
         >
           Workshops
         </a>
