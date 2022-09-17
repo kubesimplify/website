@@ -1,0 +1,299 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+:root {
+  --clr-primary: #651fff;
+  --clr-gray: #37474f;
+  --clr-gray-light: #b0bec5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+.liveworkshop {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #5cff68, #05caff);
+  background-repeat: no-repeat;
+  min-height: 120vh;
+}
+.navbar {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  justify-content: center;
+  background-color: #1b2731;
+  height: 70px;
+}
+
+.navbar > a {
+  display: flex;
+  align-items: center;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #4c4c4c;
+  border-radius: 20px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #7d7d7d;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+  margin-bottom: 25px;
+  padding: 0 90px;
+}
+.header {
+  margin-bottom: 50px;
+  max-width: 800px;
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 5px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.title {
+  display: inline-block;
+  font-size: 1rem;
+}
+.title h1 {
+  font-size: 1.8rem;
+}
+.title::after {
+  display: block;
+  content: " ";
+  width: calc(100% + 25px);
+  height: 4px;
+  margin-top: 8px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #5cff68, #05caff);
+}
+
+.bullet_points {
+  padding-top: 1rem;
+  padding-left: 1.5rem;
+  text-align: left;
+}
+.video {
+  border: 2px solid black;
+}
+
+.wrapper_flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.speakerContainer {
+  overflow: hidden;
+  box-shadow: 0 5px 10px rgb(0 0 0 / 15%);
+  background-color: white;
+  text-align: center;
+  border-radius: 1rem;
+  position: relative;
+  width: 31%;
+  margin-inline: 1.1%;
+  margin-bottom: 25px;
+}
+
+.speakerContainer::before {
+  position: absolute;
+  top: 0;
+  left: -75%;
+  z-index: 4;
+  display: block;
+  content: "";
+  width: 50%;
+  height: 100%;
+  background: -webkit-linear-gradient(
+    left,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  -webkit-transform: skewX(-25deg);
+  transform: skewX(-21deg);
+}
+.speakerContainer:hover:before {
+  -webkit-animation: shine 0.75s;
+  animation: shine 0.75s;
+}
+@-webkit-keyframes shine {
+  100% {
+    left: 125%;
+  }
+}
+@keyframes shine {
+  100% {
+    left: 125%;
+  }
+}
+
+
+.bannerImg {
+  position: absolute;
+  background-image: url(https://www.doit-intl.com/wp-content/uploads/2019/01/5c709-1ecs_g06obsiswvlwsvu-oq.png);
+  height: 10rem;
+  width: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.freeTag {
+  position: absolute;
+  width: 75px;
+  height: 30px;
+  left: 12px;
+  top: 12px;
+  z-index: 100;
+}
+
+.free {
+  color: black;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 2px 10px;
+  position: absolute;
+  left: 25px;
+  top: 12px;
+  z-index: 105;
+}
+
+.speaker_profile {
+  width: 8rem;
+  clip-path: circle(60px at center);
+  margin-top: 4.5rem;
+}
+
+.name {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.workshopTiming {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.workshopTiming p {
+  width: 161px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  padding: 1px 8px 1px 8px;
+  font-size: 16px;
+  margin: 4px;
+}
+
+.speakerDescription {
+  margin: 1rem 1.5rem;
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.speakerDescription::before {
+  display: block;
+  content: " ";
+  width: 100%;
+  height: 4px;
+  margin-bottom: 12px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #5cff68, #05caff);
+}
+
+.workshopBtn {
+  width: 100%;
+  background-color: #1b2731;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  border: none;
+}
+
+.workshopLink {
+  width: 100%;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+
+@media (max-width: 800px) {
+  .header {
+    margin-bottom: 25px;
+    padding: 25px 20px;
+    text-align: center;
+  }
+  .title h1 {
+    line-height: 2.2rem;
+  }
+  .title::after {
+    width: 100%;
+  }
+  .video {
+    width: auto;
+  }
+  .container {
+    padding-inline: 20px;
+    margin-bottom: 0px;
+    margin-top: 25px;
+  }
+  .wrapper_flex {
+    flex-direction: column;
+    margin-bottom: 0;
+  }
+  .speakerContainer {
+    width: 90%;
+    margin-bottom: 25px;
+  }
+  .nav_content > svg {
+    width: 250px;
+  }
+}
+
+
+@media (max-width: 1300px) {
+  .workshopTiming{
+    flex-direction: column;
+    gap: 0;
+    align-items: center;    
+  }
+}
+
+@media (max-width: 350px) {
+  .video {
+    width: 241px;
+    height: 134px;
+  }
+}
