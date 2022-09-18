@@ -150,10 +150,10 @@ a:hover {
 
 .hp_cont_3_h1 >h1::after{
     content: "";
-    width: 75%;
+    width: 98%;
     position: absolute;
     bottom: -20%;
-    left: 10%;
+    left: 1%;
     border-bottom: 3px solid;
     border-image-slice: 1;
     border-image-source: linear-gradient(94.72deg, #5CFF68 0%, #05CAFF 100%);
