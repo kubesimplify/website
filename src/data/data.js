@@ -84,8 +84,8 @@ export const workshopData = [
       workshopDesc:
         "In this workshop, we will learn how to operate and manage a Kubernetes cluster by debugging some clusters broken by members of the Kubernetes Community.",
       workshopLink:
-        "https://forms.gle/Zds9Sc9jdRXAxZeQ8",
-        workshopStatus: "Register Now",
+        "https://youtu.be/cRAA1B4R-1U",
+        workshopStatus: "Watch Recording",
     },
     {
       coverPhoto: micheal,
@@ -95,8 +95,8 @@ export const workshopData = [
       workshopDesc:
         "In this workshop by Michael, you will learn the basics of Monitoring and Observability with microservices and container clusters.",
       workshopLink:
-        "https://forms.gle/ygjNXC8bB7PmNGmXA",
-        workshopStatus: "Register Now",
+        "https://youtu.be/sMEEVbZ4NFM",
+        workshopStatus: "Watch Now",
     },
     {
       coverPhoto: kamesh,
