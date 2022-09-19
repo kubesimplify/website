@@ -113,6 +113,7 @@
   width: 31%;
   margin-inline: 1.1%;
   margin-bottom: 25px;
+  min-height: 580px;
 }
 
 .speakerContainer::before {
@@ -239,6 +240,9 @@
   color: white;
   cursor: pointer;
   border: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
 }
 
 .workshopLink {
