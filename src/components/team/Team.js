@@ -44,17 +44,17 @@ const Team = ({heading, slider }) => {
                 <h3 className={styles.name}>{user.name}</h3>
                 <div className={styles.socials}>
                   <span>
-                    <a href={user.twitterLink}>
+                    <a href={user.twitterLink} target="_blank">
                       <AiOutlineTwitter className={styles.social} />
                     </a>
                   </span>
                   <span>
-                    <a href={user.linkedinLink}>
+                    <a href={user.linkedinLink} target="_blank">
                       <TiSocialLinkedin className={styles.social} />
                     </a>
                   </span>
                   <span>
-                    <a href={user.githubLink}>
+                    <a href={user.githubLink} target="_blank">
                       <AiFillGithub className={styles.social} />
                     </a>
                   </span>

@@ -117,74 +117,102 @@ export const workshopData = [
 
 export const teamData = [
     {
-        name: 'Saiyam Pathak',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://www.linkedin.com/in/saiyampathak/',
-        githubLink: 'https://github.com/saiyam1814'
+        name: 'Aayush Sharma',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/78820926?v=4',
+        twitterLink: 'https://twitter.com/SuperAayush14',
+        linkedinLink: 'https://www.linkedin.com/in/superaayush/',
+        githubLink: 'https://github.com/SuperAayush'
     },
     {
-        name: 'Saiyam 2',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Avinesh',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/73980067?v=4',
+        twitterLink: 'https://twitter.com/Avinesh__T',
+        linkedinLink: 'https://www.linkedin.com/in/avineshtripathi/',
+        githubLink: 'https://github.com/vaidanshbhardwaj'
     },
     {
-        name: 'Saiyam 3',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Vaidansh',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016300749807943690/IMG_20211228_002744.jpg?width=598&height=598',
+        twitterLink: 'https://twitter.com/vaidansh23',
+        linkedinLink: 'https://www.linkedin.com/in/vaidanshbhardwaj',
+        githubLink: 'https://github.com/vaidanshbhardwaj'
     },
     {
-        name: 'Saiyam 4',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Aditya Tripathi',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016301861642453073/Aditya_Tripathi.jpg?width=324&height=358',
+        twitterLink: 'https://twitter.com/AdityaT94776666',
+        linkedinLink: 'https://www.linkedin.com/in/aditya-tripathi-7108911ab/',
+        githubLink: 'https://github.com/aditya5573'
     },
     {
-        name: 'Saiyam 5',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Lavakush',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016305209905000508/My_pic.jpg',
+        twitterLink: 'https://twitter.com/lavkushbiyani1',
+        linkedinLink: 'https://www.linkedin.com/in/lavkush-biyani-07/',
+        githubLink: 'https://github.com/lavakush07'
     },
     {
-        name: 'Saiyam 6',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Pawan',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016307938157154324/index.png',
+        twitterLink: 'https://twitter.com/pavangudiwada_',
+        linkedinLink: 'https://www.linkedin.com/in/pavangudiwada/',
+        githubLink: ''
     },
     {
-        name: 'Saiyam 7',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Kunal Verma',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/72245772?v=4',
+        twitterLink: 'https://twitter.com/kverma_twt',
+        linkedinLink: 'https://www.linkedin.com/in/verma-kunal/',
+        githubLink: 'https://github.com/verma-kunal'
     },
     {
-        name: 'Saiyam 8',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Dipankar Das',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016309636040773652/20210515_120358.png?width=464&height=598',
+        twitterLink: 'https://twitter.com/DipankarDas011',
+        linkedinLink: 'https://www.linkedin.com/in/dipankar-das-1324b6206/',
+        githubLink: 'https://github.com/dipankardas011'
     },
     {
-        name: 'Saiyam 9',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Bhavya',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/84725791?v=4',
+        twitterLink: 'https://twitter.com/bhavya_58',
+        linkedinLink: 'https://www.linkedin.com/in/bhavya-sachdeva9/',
+        githubLink: 'https://github.com/bhavyastar'
     },
     {
-        name: 'Saiyam 10',
-        coverPhoto: 'https://avatars.githubusercontent.com/u/8190114?v=4',
-        twitterLink: 'https://twitter.com/saiyampathak',
-        linkedinLink: 'https://twitter.com/saiyampathak',
-        githubLink: 'https://twitter.com/saiyampathak'
+        name: 'Anurag',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016343269413748828/Screenshot_from_2022-06-27_06-37-52.png',
+        twitterLink: 'https://twitter.com/kranurag7',
+        linkedinLink: 'https://linkedin.com/in/kranurag7',
+        githubLink: ''
+    },
+    {
+        name: 'Barkatul',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016368483610669076/IMG_20220621_035446_659.jpg?width=597&height=597',
+        twitterLink: 'https://twitter.com/barkatul_20',
+        linkedinLink: 'https://www.linkedin.com/in/barkatul-mujauddin-3a67771b8',
+        githubLink: 'https://github.com/barkatul'
+    },
+    {
+        name: 'Rishit Dagli',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016401948901134469/rishit.png',
+        twitterLink: 'https://twitter.com/rishit_dagli',
+        linkedinLink: 'https://www.linkedin.com/in/rishit-dagli/',
+        githubLink: 'https://github.com/Rishit-dagli'
+    },
+    {
+        name: 'Mayank Gupta',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016457079373975562/image0.png',
+        twitterLink: 'https://twitter.com/imayankgupta001',
+        linkedinLink: 'https://www.linkedin.com/in/mkgupta001/',
+        githubLink: 'https://github.com/mayankkuamr001'
+    },
+    {
+        name: 'Arnav',
+        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016772748623761478/1662487879507.jpg?width=398&height=597',
+        twitterLink: 'https://twitter.com/barman_arnav',
+        linkedinLink: 'https://www.linkedin.com/in/arnavbarman/',
+        githubLink: 'https://github.com/Arnav-Barman'
     },
 ]
 
