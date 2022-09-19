@@ -128,7 +128,7 @@ export const teamData = [
         coverPhoto: 'https://avatars.githubusercontent.com/u/73980067?v=4',
         twitterLink: 'https://twitter.com/Avinesh__T',
         linkedinLink: 'https://www.linkedin.com/in/avineshtripathi/',
-        githubLink: 'https://github.com/vaidanshbhardwaj'
+        githubLink: 'https://github.com/AvineshTripathi'
     },
     {
         name: 'Vaidansh',
