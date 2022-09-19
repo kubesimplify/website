@@ -179,7 +179,7 @@ export default function HomepageFeatures() {
               that are useful in the field of cloud native.
             </p>
             <button className={styles.hp_cont_4_btn1}>
-              <a href="https://kubesimplify.github.io/live-workshops/">
+              <a href="/workshops">
                 <p className={styles.hp_cont_4_btn1_content}>Learn more</p>
               </a>
             </button>
