@@ -78,6 +78,7 @@ transition: all 150ms ease-in;
   font-weight: 400;
   margin: 0;
   color: #fff;
+  font-size: inherit;
 }
 
 .socials {
