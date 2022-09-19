@@ -62,6 +62,8 @@ transition: all 150ms ease-in;
 
 .coverPhoto {
   max-width: 175px;
+  max-height: 175px;
+  object-fit: cover;
   border-radius: 10px;
 }
 
@@ -76,6 +78,7 @@ transition: all 150ms ease-in;
   font-weight: 400;
   margin: 0;
   color: #fff;
+  font-size: inherit;
 }
 
 .socials {
@@ -101,6 +104,7 @@ transition: all 150ms ease-in;
 @media screen and (max-width: 1000px) {
   .coverPhoto {
     max-width: 150px;
+    max-height: 150px;
   }
   .card {
     width: 160px;
