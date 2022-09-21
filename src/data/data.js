@@ -132,31 +132,31 @@ export const teamData = [
     },
     {
         name: 'Vaidansh Bhardwaj',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016300749807943690/IMG_20211228_002744.jpg?width=598&height=598',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/94763871?v=4',
         twitterLink: 'https://twitter.com/vaidansh23',
         linkedinLink: 'https://www.linkedin.com/in/vaidanshbhardwaj',
         githubLink: 'https://github.com/vaidanshbhardwaj'
     },
     {
         name: 'Aditya Tripathi',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016301861642453073/Aditya_Tripathi.jpg?width=324&height=358',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/81632787?v=4',
         twitterLink: 'https://twitter.com/AdityaT94776666',
         linkedinLink: 'https://www.linkedin.com/in/aditya-tripathi-7108911ab/',
         githubLink: 'https://github.com/aditya5573'
     },
     {
         name: 'Lavakush Biyani',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016305209905000508/My_pic.jpg',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/70131581?v=4',
         twitterLink: 'https://twitter.com/lavkushbiyani1',
         linkedinLink: 'https://www.linkedin.com/in/lavkush-biyani-07/',
         githubLink: 'https://github.com/lavakush07'
     },
     {
         name: 'Pawan Gudiwala',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016307938157154324/index.png',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/25551553?v=4',
         twitterLink: 'https://twitter.com/pavangudiwada_',
         linkedinLink: 'https://www.linkedin.com/in/pavangudiwada/',
-        githubLink: ''
+        githubLink: 'https://github.com/pavangudiwada'
     },
     {
         name: 'Kunal Verma',
@@ -167,7 +167,7 @@ export const teamData = [
     },
     {
         name: 'Dipankar Das',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016309636040773652/20210515_120358.png?width=464&height=598',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/65275144?v=4',
         twitterLink: 'https://twitter.com/DipankarDas011',
         linkedinLink: 'https://www.linkedin.com/in/dipankar-das-1324b6206/',
         githubLink: 'https://github.com/dipankardas011'
@@ -181,42 +181,42 @@ export const teamData = [
     },
     {
         name: 'Anurag Kumar',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016343269413748828/Screenshot_from_2022-06-27_06-37-52.png',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/81210977?v=4',
         twitterLink: 'https://twitter.com/kranurag7',
         linkedinLink: 'https://linkedin.com/in/kranurag7',
-        githubLink: ''
+        githubLink: 'https://github.com/kranurag7'
     },
     {
         name: 'Barkatul Mujauddin',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016368483610669076/IMG_20220621_035446_659.jpg?width=597&height=597',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/93897535?v=4',
         twitterLink: 'https://twitter.com/barkatul_20',
         linkedinLink: 'https://www.linkedin.com/in/barkatul-mujauddin-3a67771b8',
         githubLink: 'https://github.com/barkatul'
     },
     {
         name: 'Rishit Dagli',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016401948901134469/rishit.png',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/39672672?v=4',
         twitterLink: 'https://twitter.com/rishit_dagli',
         linkedinLink: 'https://www.linkedin.com/in/rishit-dagli/',
         githubLink: 'https://github.com/Rishit-dagli'
     },
     {
         name: 'Mayank Gupta',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016457079373975562/image0.png',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/66107976?v=4',
         twitterLink: 'https://twitter.com/imayankgupta001',
         linkedinLink: 'https://www.linkedin.com/in/mkgupta001/',
         githubLink: 'https://github.com/mayankkuamr001'
     },
     {
         name: 'Arnav Barman',
-        coverPhoto: 'https://media.discordapp.net/attachments/1016265994278289429/1016772748623761478/1662487879507.jpg?width=398&height=597',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/86536812?v=4',
         twitterLink: 'https://twitter.com/barman_arnav',
         linkedinLink: 'https://www.linkedin.com/in/arnavbarman/',
         githubLink: 'https://github.com/Arnav-Barman'
     },
     {
         name: 'Shivay Lamba',
-        coverPhoto: 'https://twitter.com/HowDevelop/photo?width=398&height=597',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/19529592?v=4',
         twitterLink: 'https://twitter.com/HowDevelop',
         linkedinLink: 'https://www.linkedin.com/in/shivaylamba/',
         githubLink: 'https://github.com/shivaylamba'
