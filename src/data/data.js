@@ -214,5 +214,12 @@ export const teamData = [
         linkedinLink: 'https://www.linkedin.com/in/arnavbarman/',
         githubLink: 'https://github.com/Arnav-Barman'
     },
+    {
+        name: 'Shivay Lamba',
+        coverPhoto: 'https://twitter.com/HowDevelop/photo?width=398&height=597',
+        twitterLink: 'https://twitter.com/HowDevelop',
+        linkedinLink: 'https://www.linkedin.com/in/shivaylamba/',
+        githubLink: 'https://github.com/shivaylamba'
+    },
 ]
 
