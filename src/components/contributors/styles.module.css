@@ -1,0 +1,130 @@
+.hero_section{
+    max-width: 1200px;
+    margin: auto;
+}
+
+.hero_heading {
+  text-align: center ;
+}
+
+.Hero_heading_h2 {
+  margin: 20px;
+  border-style: solid;
+  border-width: 0px 0px 1px 0px;
+  padding: 10px;
+  font-family: "Poppins";
+  font-weight: 500;
+  color: #1b2731;
+}
+
+.contribute_section {
+  padding: 3vw;
+  max-width: 1200px;
+  margin: 3vw ;
+  background-color: #1b2731;
+  color: #fff;
+  border-radius: 10px;
+}
+
+.contribute{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    padding: 2vw 5vw;
+    text-align: center;
+    gap: .5rem;
+}
+
+.contribute > h1 {
+  font-weight: 600;
+  font-size: 3vw;
+}
+
+.contribute > h3 {
+  font-weight: 400;
+}
+
+.theme_text {
+  background: -webkit-linear-gradient(
+    111.84deg,
+    #5cff68 12.29%,
+    #05caff 112.72%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: #0000;
+}
+
+.dm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  color: #1b2731;
+  padding: 1rem;
+  margin: auto;
+  /* width: 65%; */
+  border-radius: 10px;
+  gap: .5rem;
+}
+
+.dm > h3 {
+    font-weight: normal;
+    color: #1b2731;
+    margin-bottom: 0;   
+}
+
+.dm > h3 >span  {
+    font-weight: 600;
+    color: #1b2731;
+}
+
+.hero_btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  color: #1b2731;
+  background-color: #05caff;
+  /* outline: none;  */
+  font-size: large;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.hero_btn:hover{
+  background-color: #09b7e7fa;
+}
+
+.guidelines {
+    font-size: 20px;
+}
+
+.guidelines > a {
+    color: #fff;
+    text-decoration: underline !important;
+}
+
+
+@media only screen and (max-width: 768px) {
+
+  .dm {
+    flex-direction: column;
+  }
+  .contribute > h1 {
+    font-size: x-large  ;
+  }
+  
+}
+
+@media only screen and (max-width: 425px) {
+  .contribute > h1 {
+    font-size: large;
+  }
+  .guidelines{
+    font-size: 15px;
+  }
+
+}

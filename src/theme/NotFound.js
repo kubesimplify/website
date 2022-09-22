@@ -15,8 +15,9 @@ export default function NotFound() {
 
   useEffect(() => {
     let address = window.location.href;
-
-    if (address.length > 27) {
+    if (address.indexOf("blog-writing-guidelines") > -1) {
+      window.location.replace('https://hackmd.io/@jjthompson/kubesimplify-contributing')
+    } else if (address.length > 27) {
       address = address.slice(25, address.length);
       console.log("https://blog.kubesimplify.com/" + address);
       window.location.replace("https://blog.kubesimplify.com/" + address);

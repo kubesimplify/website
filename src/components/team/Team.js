@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
 import styles from "./styles.module.css";
-import { teamData } from "../../data/data";
 import dummyProfile from '../team/defaultImage.png'
 
 import { BsFillArrowLeftCircleFill } from "react-icons/bs";
@@ -9,7 +8,7 @@ import { TiSocialLinkedin } from "react-icons/ti";
 import { AiFillGithub } from "react-icons/ai";
 import { AiOutlineTwitter } from "react-icons/ai";
 
-const Team = ({heading, slider }) => {
+const Team = ({data, heading, slider }) => {
   const card = useRef();
   const prevCard = () => {
     let width = card.current.clientWidth;
@@ -29,7 +28,7 @@ const Team = ({heading, slider }) => {
           <BsFillArrowLeftCircleFill size={25} />
         </span>) : ""}
         <div ref={card} className={slider ? styles.cards_slider : styles.cards}>
-          {teamData.map((user, index) => (
+          {data.map((user, index) => (
             <div key={index} className={styles.card}>
               <img
                 className={styles.coverPhoto}

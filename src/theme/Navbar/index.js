@@ -57,6 +57,12 @@ const navbarContent = {
           >
             Workshops
           </a>
+          <a
+            className={styles.navbar_workshops_designs}
+            href="/contributors"
+          >
+            Contributors
+          </a>
         </div>
       </div>
     </>
@@ -102,6 +108,14 @@ const mobileViewContent = {
           href="/workshops"
         >
           Workshops
+        </a>
+        </div>
+        <div>
+        <a
+          className={styles.navbar_workshops_designs}
+          href="/contributors"
+        >
+          Contributors
         </a>
       </div>
     </div>
