@@ -6,8 +6,8 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 export default function Home() {
   return (
     <Layout
-      title={`Kubesimplify`}
-      description="Description will go into a meta tag in <head />">
+      title={`Kubesimplify`}  
+      description="On a mission to simplify cloud-native">
       {/* <HomepageHeader /> */}
       <main>
         <HomepageFeatures />
