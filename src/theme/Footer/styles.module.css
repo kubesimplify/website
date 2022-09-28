@@ -185,6 +185,11 @@
     .footer_lower * {
         font-size: 2.4vw;
     }
+    
+    .mail_logo {
+        width: 3vw;
+        height: 3vw;
+    }
 
     .group_logo * {
         height: 5.2vw;
