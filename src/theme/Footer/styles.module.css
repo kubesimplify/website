@@ -114,7 +114,7 @@
 }
 
 .footer_mail * {
-    margin: auto;
+    margin: auto 0.2vw;
 }
 
 .footer_mail a:hover {
@@ -183,12 +183,17 @@
     }
 
     .footer_lower * {
-        font-size: 2vw;
+        font-size: 2.4vw;
+    }
+    
+    .mail_logo {
+        width: 3vw;
+        height: 3vw;
     }
 
     .group_logo * {
-        height: 3vw;
-        width: 3vw;
+        height: 5.2vw;
+        width: 5.2vw;
     }
 
     .sponsors_card{
