@@ -58,27 +58,27 @@ a:hover {
 .cont_1_img > p{
     position: absolute;
     transform: translate(50%,50%);
-    top: 1%;
+    top: -4%;
     left: 20%;
-    font-weight: bold;
+    font-weight: 800;
     font-size: 1rem;
 }
 
 .hp_cont_1_img1 {
-    width: 55%;
-    left: 42%;
-    top: 13%;
     border-radius: 5px;
     display: block;
     position: absolute;
+    width: 49%;
+    left: 53%;
+    top: 7%;
     z-index: 1;
 }
 
 .hp_cont_1_img2 {
-    width: 55%;
+    width: 50%;
     border-radius: 5px;
-    top: 45%;
-    left: 6%;
+    top: 51%;
+    left: 3%;
     display: block;
     position: absolute;
 }
@@ -89,7 +89,7 @@ a:hover {
     height: 130.05px;
     display: block;
     top: 10%;
-    left: 1%;
+    left: 6%;
 }
 
 .hp_cont_1_img1 > a > p,
