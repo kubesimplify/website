@@ -40,7 +40,7 @@ export default function HomepageFeatures() {
               manner through our blogs and video content.
             </p>
 
-            <a href="https://discord.gg/WpCfpanR" target="_blank">
+            <a href="https://discord.gg/26Z384WSPB" target="_blank">
               <button className={styles.hp_cont_1_btn}>
                 Start learning
               </button>
