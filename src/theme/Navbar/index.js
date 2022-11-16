@@ -130,7 +130,7 @@ function Navbar() {
               className={styles.mobile_menu_icon}
               onClick={() => setIsMobile(!isMobile)}
             >
-              {isMobile ? <FaTimes /> : <FaBars />}
+              {isMobile ? <FaTimes color="white" /> : <FaBars color="white" />}
             </button>
           </div>
           <ul
