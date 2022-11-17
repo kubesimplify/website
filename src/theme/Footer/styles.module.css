@@ -99,7 +99,6 @@
     margin: 1vw auto;
 }
 
-
 .end_first {
     font-family: 'Poppins';
     font-style: normal;
@@ -183,7 +182,7 @@
     }
 
     .footer_lower * {
-        font-size: 2.4vw;
+        font-size: 3vw;
     }
     
     .mail_logo {
@@ -192,8 +191,8 @@
     }
 
     .group_logo * {
-        height: 5.2vw;
-        width: 5.2vw;
+        height: 4.5vw;
+        width: 4.5vw;
     }
 
     .sponsors_card{
@@ -213,7 +212,66 @@
     }
 }
 
+@media only screen and (max-width: 430px) {
+    .footer_lower * {
+        font-size: 4vw;
+    }
+}
 
+@media only screen and (min-width: 1080px) {
+    .footer_lower * {
+        font-size: 1.3vw;
+    }
+
+    .group_logo * {
+        height: 1.7vw;
+        width: 1.7vw;
+    }
+}
+
+@media only screen and (max-width: 1280px) and (min-width: 1080px) {
+    .footer_lower * {
+        font-size: 1.5vw;
+    }
+
+    .group_logo * {
+        height: 2vw;
+        width: 2vw;
+    }
+}
+
+@media only screen and (max-width: 1080px) and (min-width: 950px) {
+    .footer_lower * {
+        font-size: 2vw;
+    }
+
+    .group_logo * {
+        height: 2vw;
+        width: 2vw;
+    }
+}
+
+@media only screen and (max-width: 950px) and (min-width: 850px) {
+    .footer_lower * {
+        font-size: 2vw;
+    }
+
+    .group_logo * {
+        height: 3vw;
+        width: 3vw;
+    }
+}
+
+@media only screen and (max-width: 850px) and (min-width: 700px) {
+    .footer_lower * {
+        font-size: 2vw;
+    }
+
+    .group_logo * {
+        height: 3vw;
+        width: 3vw;
+    }
+}
 
 /* Hover color on social icons if needed */
 
