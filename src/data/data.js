@@ -221,5 +221,54 @@ export const teamData = [
         linkedinLink: 'https://www.linkedin.com/in/shivaylamba/',
         githubLink: 'https://github.com/shivaylamba'
     },
+    {
+        name: 'Sanyam Jain',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/107163858?v=4',
+        twitterLink: 'https://twitter.com/itsSanyam',
+        linkedinLink: 'https://www.linkedin.com/in/sanyamjain04/',
+        githubLink: 'https://github.com/sanyamjain04'
+    },
+    {
+        name: 'Srinivas karnati',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/52213014?v=4',
+        twitterLink: 'https://twitter.com/__karnati',
+        linkedinLink: 'https://www.linkedin.com/in/srinivas-karnati/',
+        githubLink: 'https://github.com/karnatisrinivas'
+    },
+    {
+        name: 'Steve Wade',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/594451?v=4',
+        twitterLink: 'https://twitter.com/swade1987',
+        linkedinLink: 'https://www.linkedin.com/in/stevendavidwade/',
+        githubLink: 'https://github.com/swade1987'
+    },
+    {
+        name: 'Atharva Shinde',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/69111235?v=4',
+        twitterLink: 'https://twitter.com/atharvashinde_',
+        linkedinLink: 'https://www.linkedin.com/in/atharva-shinde-6468b4205/',
+        githubLink: 'https://github.com/Atharva-Shinde'
+    },
+    {
+        name: 'Bishal Dojo',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/70086051?v=4',
+        twitterLink: 'https://twitter.com/bishaltwt7679',
+        linkedinLink: 'https://www.linkedin.com/in/bishal-das-1bba8b1b8/',
+        githubLink: 'https://github.com/bishal7679'
+    },
+    {
+        name: 'Parul Sahoo',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/60248260?v=4',
+        twitterLink: 'https://twitter.com/ParulSahoo',
+        linkedinLink: 'https://www.linkedin.com/in/parul-sahoo-4bb8301a0/',
+        githubLink: 'https://github.com/parul5sahoo'
+    },
+    {
+        name: 'Tania Duggal',
+        coverPhoto: 'https://avatars.githubusercontent.com/u/103496926?v=4',
+        twitterLink: 'https://twitter.com/taniadtwt',
+        linkedinLink: 'https://www.linkedin.com/in/tania-duggal-07a297220/',
+        githubLink: 'https://github.com/taniaduggal'
+    },
 ]
 
