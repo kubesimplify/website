@@ -69,11 +69,11 @@
   }
 
   .navbar_links_mobile {
-    justify-content: start;
     margin-right: auto;
     list-style: none;
     transition: all 0.6s ease-out;
     width: 90%;
+    line-height: 2.2;
   }
 
   .about,
@@ -98,7 +98,7 @@
     font-size: 30px;
     border: none;
     outline: none;
- 
+    color: #fff;
   }
 
   .mobilView_learn {

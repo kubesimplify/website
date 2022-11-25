@@ -99,7 +99,6 @@
     margin: 1vw auto;
 }
 
-
 .end_first {
     font-family: 'Poppins';
     font-style: normal;
@@ -183,7 +182,7 @@
     }
 
     .footer_lower * {
-        font-size: 2.4vw;
+        font-size: 3vw;
     }
     
     .mail_logo {
@@ -192,8 +191,8 @@
     }
 
     .group_logo * {
-        height: 5.2vw;
-        width: 5.2vw;
+        height: 4.5vw;
+        width: 4.5vw;
     }
 
     .sponsors_card{
@@ -201,9 +200,7 @@
         padding: 2vw;
         align-self: center;
     }
-}
 
-@media only screen and (max-width: 700px) {
     .footer_upper{
         gap: 1rem;
     }
@@ -213,7 +210,119 @@
     }
 }
 
+@media only screen and (max-width: 560px) and (min-width: 500px) {
+    .group_logo * {
+        height: 5.5vw;
+        width: 5.5vw;
+    }
 
+    .footer_lower * {
+        font-size: 3.5vw;
+    }
+}
+
+@media only screen and (max-width: 500px) and (min-width: 450px) {
+    .group_logo * {
+        height: 6vw;
+        width: 6vw;
+    }
+
+    .footer_lower * {
+        font-size: 3.5vw;
+    }
+
+    .mail_logo {
+        width: 4vw;
+        height: 4vw;
+    }
+}
+
+@media only screen and (max-width: 450px) {
+    .footer_lower * {
+        font-size: 4.5vw;
+    }
+
+    .group_logo * {
+        height: 7.5vw;
+        width: 7.5vw;
+    }
+
+    .mail_logo_src-theme-Footer-styles-module  {
+        width: 4vw !important;
+        height: 4vw !important;
+    }
+
+    .mail_logo {
+        width: 5vw;
+        height: 5vw;
+    }
+}
+
+@media only screen and (min-width: 1080px) {
+    .footer_lower * {
+        font-size: 1.3vw;
+    }
+
+    .group_logo * {
+        height: 1.7vw;
+        width: 1.7vw;
+    }
+}
+
+@media only screen and (max-width: 1280px) and (min-width: 1080px) {
+    .footer_lower * {
+        font-size: 1.5vw;
+    }
+
+    .group_logo * {
+        height: 2.5vw;
+        width: 2.5vw;
+    }
+}
+
+@media only screen and (max-width: 1080px) and (min-width: 950px) {
+    .footer_lower * {
+        font-size: 1.7vw;
+    }
+
+    .group_logo * {
+        height: 2.5vw;
+        width: 2.5vw;
+    }
+}
+
+@media only screen and (max-width: 950px) and (min-width: 850px) {
+    .footer_lower * {
+        font-size: 2vw;
+    }
+
+    .group_logo * {
+        height: 3vw;
+        width: 3vw;
+    }
+}
+
+@media only screen and (max-width: 850px) and (min-width: 760px) {
+    .footer_lower * {
+        font-size: 2.3vw;
+    }
+
+    .group_logo * {
+        height: 3.5vw;
+        width: 3.5vw;
+    }
+}
+
+@media only screen and (max-width: 760px) and (min-width: 700px) {
+    .footer_lower * {
+        font-size: 2.5vw;
+    }
+
+    .group_logo * {
+        height: 3.5vw;
+        width: 3.5vw;
+    }
+}
 
 /* Hover color on social icons if needed */
 
