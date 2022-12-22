@@ -9,16 +9,15 @@ import Layout from "@theme/Layout";
 import Translate, { translate } from "@docusaurus/Translate";
 import { PageMetadata } from "@docusaurus/theme-common";
 export default function NotFound() {
-
-
   // Temporary solution
 
   useEffect(() => {
     let address = window.location.href;
-
+    if (address == "https://kubesimplify.com/book") {
+      window.location.replace("https://saiyampathak.gumroad.com/l/visualbook");
+    }
     if (address.length > 27) {
       address = address.slice(25, address.length);
-      console.log("https://blog.kubesimplify.com/" + address);
       window.location.replace("https://blog.kubesimplify.com/" + address);
     }
   }, []);
