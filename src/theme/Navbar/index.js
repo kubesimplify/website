@@ -34,6 +34,13 @@ const navbarContent = {
           >
             Blog Content
           </a>
+          <a
+            className={styles.navbar_blog_design}
+            href="https://saiyampathak.gumroad.com/l/visualbook"
+            target="blank"
+          >
+            Visual Book
+          </a>
         </div>
       </div>
     </>
