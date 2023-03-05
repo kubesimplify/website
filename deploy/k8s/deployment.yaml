@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubesimplify-website
+  namespace: default
+  labels:
+    app: kubesimplify
+spec:
+  selector:
+    matchLabels:
+      app: kubesimplify
+  template:
+    metadata:
+      labels:
+        app: kubesimplify
+    spec:
+      containers:
+      - name: kubesimplify-cont
+      # TODO: Replace the image with new image
+        image: public.ecr.aws/dipankardas011/kubesimplify-website:v2
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 3000
+        livenessProbe:
+          tcpSocket:
+            port: 3000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 5m
+            memory: 50Mi
+...
