@@ -27,20 +27,13 @@ const Newsletter = () => {
           <div className={styles.newsletter_a}>
             <p className={styles.newsletter_a_p}>Join the mailing list:</p>
             <form
-              action="https://www.getrevue.co/profile/saiyampathak/add_subscriber"
-              method="post"
+              action="https://saiyampathak.substack.com/subscribe"
+              method="get"
               id="revue-form"
               name="revue-form"
               target="_blank"
             >
               <div className={styles.newsletter_a_mail}>
-                <input
-                  className={styles.newsletter_a_input}
-                  type="email"
-                  name="member[email]"
-                  id="member_email"
-                  placeholder="Email Address"
-                />
                 <button
                   type="submit"
                   name="member[subscribe]"
