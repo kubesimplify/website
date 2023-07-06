@@ -1,6 +1,7 @@
 # Dependencies
 website/node_modules
-website/package.lock
+website/package-lock.json
+/.spin
 
 # Production
 website/build
