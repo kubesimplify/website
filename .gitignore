@@ -1,12 +1,13 @@
 # Dependencies
-/node_modules
+website/node_modules
+website/package.lock
 
 # Production
-/build
+website/build
 
 # Generated files
-.docusaurus
-.cache-loader
+website/.docusaurus
+website/.cache-loader
 
 # Misc
 .DS_Store
