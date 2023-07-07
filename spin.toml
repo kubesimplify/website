@@ -3,12 +3,13 @@ authors = ["Dipankar Das <dipankardas0115@gmail.com>"]
 description = "kubesimplify-website"
 name = "kubesimplify"
 trigger = { type = "http", base = "/" }
-version = "1.0.0"
+version = "1.1.0"
 
 [[component]]
 source = { url = "https://github.com/fermyon/spin-fileserver/releases/download/v0.0.2/spin_static_fs.wasm", digest = "sha256:65456bf4e84cf81b62075e761b2b0afaffaef2d0aeda521b245150f76b96421b" }
 id = "kubesimplify"
 files = [ { source = "website/build", destination = "/" } ]
+environment = { FALLBACK_PATH = "index.html" }
 
 [component.trigger]
 route = "/..."
