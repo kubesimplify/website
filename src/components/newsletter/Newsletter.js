@@ -27,7 +27,7 @@ const Newsletter = () => {
           <div className={styles.newsletter_a}>
             <p className={styles.newsletter_a_p}>Join the mailing list:</p>
             <form
-              action="https://www.getrevue.co/profile/saiyampathak/add_subscriber"
+              action="https://blog.kubesimplify.com/newsletter"
               method="post"
               id="revue-form"
               name="revue-form"
