@@ -158,7 +158,7 @@ function Navbar() {
               <button className={styles.navbarbutton}>
                 <a
                   className={styles.navbar_text}
-                  href=" https://www.getrevue.co/profile/saiyampathak"
+                  href="https://blog.kubesimplify.com/newsletter"
                 >
                   Newsletter
                 </a>
