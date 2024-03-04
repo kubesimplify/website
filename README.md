@@ -35,6 +35,7 @@ Fork the repo by clicking the fork button. This will clone the repo in your acco
  
 Clone the repo to your local device: 
 ```bash
+   # Clone the repository
    git clone https://github.com/kubesimplify/website.git 
    cd website
 ```
@@ -44,6 +45,16 @@ Install dependencies:
 ```bash
     $ npm install 
 ```
+If you having fund issue:
+```bash
+    # Use flag --no-fund
+    $ npm install --no-fund
+```
+You can also build the app in production mode:
+```bash
+    $ npm build
+```
+
 To run the website on your computer:
 ```bash
     $ npm start
