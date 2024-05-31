@@ -62,8 +62,36 @@ docker run --rm -it -v $(pwd):/app -p 3000:3000 kubesimplify:website sh
 
 And then open up your web browser and go to [localhost:3000](http://localhost:3000).
 
+# Step by Step Guide, How you can contribute here.
 
+### Steps Involved
 
+1. then you need to go inside the directory
+```bash
+    cd tweets/
+```
+2. You need to set upstream url, run this command to do so:
+```bash
+    git remote add upstream https://github.com/kubesimplify/website.git
+    # as best practice before creating a new branch
+    git pull upstream main --rebase
+```
+
+3. Run these commands to add a different branch:
+
+You can have anything as <branch_name> , but by convention it should reflect your work
+
+```bash
+    # next is to create a branch 
+    git branch <branch_name>
+    git checkout <branch_name>
+```
+4. Make a PR
+```
+    git add .
+    git commit -m <Commit Message>
+    git push origin <branch_name> # this will push your changes to your github repo
+```
 ---
 <h4 align="center"> Code under MIT License, assets may not be re-used or re-distributed.
 <br>
