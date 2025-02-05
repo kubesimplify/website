@@ -9,7 +9,7 @@ const LiveWorkshop = () => {
   return (
     <div className={styles.liveworkshop}>
       <nav className={styles.navbar}>
-        <a className={styles.nav_content} href="/" >
+        <a className={styles.nav_content} href="/">
           <Logo />
         </a>
       </nav>
@@ -99,7 +99,11 @@ const LiveWorkshop = () => {
                 </div>
                 <p className={styles.description}>{workshop.workshopDesc}</p>
               </div>
-              <a className={styles.workshopLink} href={workshop.workshopLink} target="_blank">
+              <a
+                className={styles.workshopLink}
+                href={workshop.workshopLink}
+                target="_blank"
+              >
                 <button className={styles.workshopBtn} id="work-1">
                   {workshop.workshopStatus}
                 </button>
