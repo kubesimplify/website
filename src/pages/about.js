@@ -1,17 +1,19 @@
-import React from 'react';
-import Mission from '@site/src/components/Aboutpage/Mission';
-import Reach from '@site/src/components/Aboutpage/Reach';
-import Founder from '@site/src/components/Aboutpage/Founder';
-import Layout from '@theme/Layout';
-import Team from '../components/team/Team';
+import React from "react";
+import Mission from "@site/src/components/Aboutpage/Mission";
+import Reach from "@site/src/components/Aboutpage/Reach";
+import Founder from "@site/src/components/Aboutpage/Founder";
+import Layout from "@theme/Layout";
+import Team from "../components/team/Team";
+import PDF from "../components/PDF";
 
 export default function Home() {
   return (
     <Layout>
-      <Mission/>
+      <Mission />
       <Reach />
       <Founder />
-      <Team heading={"Kubesimplify Ambassadors"} slider={true} />
+      <PDF />
+      {/* <Team heading={"Kubesimplify Ambassadors"} slider={true} /> */}
     </Layout>
   );
 }
