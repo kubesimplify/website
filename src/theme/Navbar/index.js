@@ -50,13 +50,11 @@ const navbarContent = {
         </button>
         <div className={styles.navbar_dropdown_content}>
           {/* Links for respective webpage will add when new webpages are formed */}
+          <a href="/ambassadors">Kubesimplify Ambassador</a>
           <a
-            target="_blank"
-            href="https://www.youtube.com/channel/UC4ERxwDGmWk1ASy5kDlyS3Q"
+            className={styles.navbar_workshops_designs}
+            href="/workshops"
           >
-            Kubesimplify Hindi
-          </a>
-          <a className={styles.navbar_workshops_designs} href="/workshops">
             Workshops
           </a>
         </div>
@@ -99,7 +97,10 @@ const mobileViewContent = {
         <a href="/ambassadors">Kubesimplify Ambassador</a>
       </div>
       <div>
-        <a className={styles.navbar_workshops_designs} href="/workshops">
+        <a
+          className={styles.navbar_workshops_designs}
+          href="/workshops"
+        >
           Workshops
         </a>
       </div>
@@ -122,7 +123,7 @@ function Navbar() {
           <div className={styles.navbar_logopair}>
             <div className={styles.navbar_logo}>
               <a href="/">
-                <navbarLogo.logo.Svg className={styles.logo} role="" />
+              <navbarLogo.logo.Svg className={styles.logo} role="" />
               </a>
             </div>
             <button
