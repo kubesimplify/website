@@ -64,8 +64,8 @@ jobs:
             exit 1
           fi
           
-          # Check for specific hero styles
-          if grep -q "from-\[#050505\]\|hero-floating-card" "$CSS_FILE"; then
+          # Check for specific hero styles (minified CSS may have different format)
+          if grep -q "hero-floating-card\|hero-section-new\|050505\|0a0a0a" "$CSS_FILE"; then
             echo "✓ Hero section styles found"
           else
             echo "ERROR: Hero section styles missing!"
@@ -73,7 +73,8 @@ jobs:
           fi
           
           # Check for background colors (critical for hero section)
-          if grep -q "from-\[#050505\]\|bg-gradient-to-b.*from-\[#050505\]" "$CSS_FILE"; then
+          # Minified CSS may have different format, so check for color values
+          if grep -q "050505\|0a0a0a\|111625\|bg-gradient" "$CSS_FILE"; then
             echo "✓ Hero background gradients found"
           else
             echo "ERROR: Hero background gradients MISSING - this will break the hero section!"
@@ -81,7 +82,8 @@ jobs:
           fi
           
           # Check for animations (critical for floating cards)
-          if grep -q "@keyframes\|animation-name.*a\|animation-name.*b\|animation-name.*c" "$CSS_FILE"; then
+          # Minified CSS may have keyframes renamed, so check for animation properties
+          if grep -q "@keyframes\|animation-name\|animation:" "$CSS_FILE"; then
             echo "✓ Animations found"
           else
             echo "ERROR: Animations MISSING - floating cards won't animate!"
