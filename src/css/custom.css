@@ -639,6 +639,11 @@ img, svg, video, iframe {
     linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
 }
 
+/* ============================================
+   KEYFRAMES - CRITICAL: DO NOT REMOVE
+   These keyframes are required for animations
+   ============================================ */
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
@@ -648,8 +653,51 @@ img, svg, video, iframe {
   }
 }
 
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation classes - MUST reference keyframes above */
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation-name: float !important;
+  animation-duration: 6s !important;
+  animation-timing-function: ease-in-out !important;
+  animation-iteration-count: infinite !important;
+}
+
+.animate-blob {
+  animation-name: blob !important;
+  animation-duration: 7s !important;
+  animation-iteration-count: infinite !important;
+}
+
+.animate-fade-in {
+  animation-name: fadeIn !important;
+  animation-duration: 0.5s !important;
+  animation-timing-function: ease-out !important;
+  animation-fill-mode: forwards !important;
 }
 
 /* Hero Background Glows */

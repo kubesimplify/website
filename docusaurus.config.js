@@ -78,6 +78,10 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+
+  plugins: [
+    require.resolve('./plugins/preserve-keyframes'),
+  ],
 };
 
 module.exports = config;
