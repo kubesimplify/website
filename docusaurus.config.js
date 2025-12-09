@@ -78,6 +78,18 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+
+  plugins: [],
+  
+  // Ensure PostCSS processes CSS files correctly
+  webpack: {
+    jsLoader: (isServer) => ({
+      loader: require.resolve('babel-loader'),
+      options: {
+        presets: [require.resolve('@docusaurus/core/lib/babel/preset')],
+      },
+    }),
+  },
 };
 
 module.exports = config;
