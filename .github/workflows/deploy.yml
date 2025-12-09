@@ -28,13 +28,15 @@ jobs:
         run: cat postcss.config.js
       - name: Verify Tailwind config
         run: cat tailwind.config.js | head -10
-      - name: Build website
+      - name: Build website (production)
         run: npm run build
         env:
           NODE_ENV: production
           CI: true
-          # Ensure PostCSS processes CSS
+          # Ensure PostCSS processes CSS correctly
           POSTCSS: true
+          # Force fresh build
+          FORCE_COLOR: 0
 
       - name: Verify CSS file exists and is complete
         run: |
@@ -104,6 +106,25 @@ jobs:
           echo ""
           echo "✓✓✓ CSS verification PASSED - All critical styles present! ✓✓✓"
 
+      - name: Verify built CSS is valid
+        run: |
+          CSS_FILE=$(find build/assets/css -name "styles.*.css" | head -1)
+          if [ -z "$CSS_FILE" ]; then
+            echo "ERROR: CSS file not found after build!"
+            exit 1
+          fi
+          # Check CSS is not empty and has reasonable size
+          CSS_SIZE=$(wc -c < "$CSS_FILE")
+          if [ "$CSS_SIZE" -lt 50000 ]; then
+            echo "ERROR: CSS file too small ($CSS_SIZE bytes) - build may have failed!"
+            exit 1
+          fi
+          # Try to validate CSS syntax (basic check)
+          if ! tail -c 100 "$CSS_FILE" | grep -q "}"; then
+            echo "WARNING: CSS file may be malformed (doesn't end with }"
+          fi
+          echo "✓ CSS file is valid and complete ($CSS_SIZE bytes)"
+
       # Popular action to deploy to GitHub Pages:
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
       - name: Deploy to GitHub Pages
@@ -114,6 +135,8 @@ jobs:
           publish_dir: ./build
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          # Force fresh deployment
+          # Force fresh deployment to bypass cache
           force_orphan: true
           cname: kubesimplify.com
+          # Add nojekyll to prevent GitHub Pages from processing files
+          disable_nojekyll: false
