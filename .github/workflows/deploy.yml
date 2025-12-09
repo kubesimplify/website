@@ -42,10 +42,18 @@ jobs:
           echo "CSS file found: $CSS_FILE"
           echo "CSS file size: $(wc -c < $CSS_FILE) bytes"
           # Check if Tailwind classes are present
-          if grep -q "bg-gradient\|flex\|grid" "$CSS_FILE"; then
+          if grep -q "bg-gradient\|flex\|grid\|hero-section-new" "$CSS_FILE"; then
             echo "✓ Tailwind classes found in CSS"
+            echo "✓ Custom hero classes found in CSS"
           else
             echo "WARNING: Tailwind classes not found in CSS"
+            exit 1
+          fi
+          # Check for specific hero styles
+          if grep -q "from-\[#050505\]\|hero-floating-card" "$CSS_FILE"; then
+            echo "✓ Hero section styles found"
+          else
+            echo "WARNING: Hero section styles missing"
           fi
 
       # Popular action to deploy to GitHub Pages:
@@ -58,6 +66,6 @@ jobs:
           publish_dir: ./build
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          # Force update to bypass cache
-          force_orphan: false
+          # Force fresh deployment
+          force_orphan: true
           cname: kubesimplify.com
