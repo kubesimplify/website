@@ -79,9 +79,6 @@ const config = {
       },
     }),
 
-  plugins: [
-    require.resolve('./plugins/preserve-keyframes'),
-  ],
 };
 
 module.exports = config;
