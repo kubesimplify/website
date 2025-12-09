@@ -79,9 +79,6 @@ const config = {
       },
     }),
 
-  plugins: [
-    require.resolve('./plugins/configure-css-minifier'),
-  ],
 };
 
 module.exports = config;
