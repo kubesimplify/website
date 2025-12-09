@@ -70,29 +70,39 @@ jobs:
             exit 1
           fi
           
-          # Check for background colors
-          if grep -q "background.*#050505\|background.*#0a0a0a\|background.*#111625" "$CSS_FILE"; then
-            echo "✓ Background colors found"
+          # Check for background colors (critical for hero section)
+          if grep -q "from-\[#050505\]\|bg-gradient-to-b.*from-\[#050505\]" "$CSS_FILE"; then
+            echo "✓ Hero background gradients found"
           else
-            echo "WARNING: Background colors may be missing"
-          fi
-          
-          # Check for animations
-          if grep -q "@keyframes\|animation-name\|animate-float\|animate-blob" "$CSS_FILE"; then
-            echo "✓ Animations found"
-          else
-            echo "ERROR: Animations missing!"
+            echo "ERROR: Hero background gradients MISSING - this will break the hero section!"
             exit 1
           fi
           
-          # Check for CSS variables
-          if grep -q "--theme-bg\|--dark-bg\|--light-bg" "$CSS_FILE"; then
+          # Check for animations (critical for floating cards)
+          if grep -q "@keyframes\|animation-name.*a\|animation-name.*b\|animation-name.*c" "$CSS_FILE"; then
+            echo "✓ Animations found"
+          else
+            echo "ERROR: Animations MISSING - floating cards won't animate!"
+            exit 1
+          fi
+          
+          # Check for CSS variables (critical for theming)
+          if grep -q "theme-bg\|dark-bg\|light-bg" "$CSS_FILE"; then
             echo "✓ CSS variables found"
           else
             echo "WARNING: CSS variables may be missing"
           fi
           
-          echo "✓ CSS verification passed!"
+          # Check for hero floating card styles
+          if grep -q "hero-floating-card\|hero-section-new" "$CSS_FILE"; then
+            echo "✓ Hero floating card styles found"
+          else
+            echo "ERROR: Hero floating card styles MISSING!"
+            exit 1
+          fi
+          
+          echo ""
+          echo "✓✓✓ CSS verification PASSED - All critical styles present! ✓✓✓"
 
       # Popular action to deploy to GitHub Pages:
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
