@@ -22,18 +22,8 @@ const config = {
       "classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
-        docs: {
-          sidebarPath: require.resolve("./sidebars.js"),
-          // Please change this to your repo.
-          editUrl:
-           "https://github.com/kubesimplify/website",
-        },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          editUrl:
-            "https://github.com/kubesimplify/website",
-        },
+        docs: false, // Disabled - not using docs
+        blog: false, // Disabled - blog is external
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
         },
@@ -41,15 +31,15 @@ const config = {
     ],
   ],
 
-  themes: [
-    // Your other themes...
-    [
-      require.resolve("@easyops-cn/docusaurus-search-local"),
-      {
-        hashed: true,
-      },
-    ],
-  ],
+  // Search disabled - not using docs
+  // themes: [
+  //   [
+  //     require.resolve("@easyops-cn/docusaurus-search-local"),
+  //     {
+  //       hashed: true,
+  //     },
+  //   ],
+  // ],
 
   /* i18n support
   i18n: {
@@ -73,6 +63,11 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
 
     ({
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
       navbar: {
         title: "Kubesimplify",
         logo: {
@@ -81,63 +76,31 @@ const config = {
         },
         items: [
           {
-            type: "doc",
-            docId: "intro",
-            position: "left",
-            label: "Notes",
-          },
-          // { to: "/blog", label: "Blog", position: "left" },
-          {
-            href: "https://github.com/kubesimplify/website",
-            label: "GitHub",
+            to: "/about",
+            label: "About",
             position: "right",
+          },
+          {
+            href: "https://blog.kubesimplify.com",
+            label: "Blog",
+            position: "right",
+          },
+          {
+            href: "https://www.youtube.com/@kubesimplify",
+            label: "YouTube",
+            position: "right",
+          },
+          {
+            href: "https://saiyampathak.substack.com/",
+            label: "Newsletter",
+            position: "right",
+            className: "button button--primary button--sm navbar-button",
           },
         ],
       },
+      // Footer is handled by custom component in src/theme/Footer/index.js
       footer: {
         style: "dark",
-        links: [
-          {
-            title: "Docs",
-            items: [
-              {
-                label: "Notes",
-                to: "/docs",
-              },
-            ],
-          },
-          {
-            title: "Community",
-            items: [
-              {
-                label: "LinkedIn",
-                href: "https://www.linkedin.com/company/kubesimplify/",
-              },
-              {
-                label: "Discord",
-                href: "https://discord.gg/HpAym4xQkc",
-              },
-              {
-                label: "Twitter",
-                href: "https://twitter.com/kubesimplify",
-              },
-            ],
-          },
-          {
-            title: "More",
-            items: [
-              {
-                label: "Blog",
-                to: "/blog",
-              },
-              {
-                label: "GitHub",
-                href: "https://github.com/kubesimplify",
-              },
-            ],
-          },
-        ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
       },
       prism: {
         theme: lightCodeTheme,

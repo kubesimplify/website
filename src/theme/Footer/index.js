@@ -47,46 +47,34 @@ function Footer() {
           <h2 className={styles.title}>Help us do more</h2>
           <p className={styles.sponsors_content}>{content.sponsorsContent}</p>
         </div>
-        <div className={styles.sponsors_card}>
-          <p className={styles.sponsors_card_title}>Sponsor us on Hashnode</p>
-
-          <a href="https://blog.kubesimplify.com/sponsor">
-            <button className={styles.sponsor_hashnode}>
-              <logo.hashnode.Svg className={styles.logo} role="img" /> Sponsor
-            </button>
-          </a>
-        </div>
       </div>
       <hr className={styles.hr}></hr>
       <div className={styles.footer_lower}>
-        <div className={styles.end_first}>© 2023 Kubesimplify</div>
+        <div className={styles.end_first}>© {new Date().getFullYear()} Kubesimplify</div>
         <div className={styles.footer_mail}>
-          <IoMdMail className={styles.mail_logo} row="img" />
+          <IoMdMail className={styles.mail_logo} />
           <a className={styles.mail_title} href="mailto:kubesimplify@gmail.com">
             kubesimplify@gmail.com
           </a>
         </div>
         <div className={styles.group_logo}>
-          <a target="_blank" href="https://www.youtube.com/c/saiyam911">
-            <AiFillYoutube row="img" className={styles.social1} />
+          <a target="_blank" href="https://www.youtube.com/c/saiyam911" aria-label="YouTube">
+            <AiFillYoutube />
           </a>
-          <a target="_blank" href="https://discord.gg/26Z384WSPB">
-            <FaDiscord row="img" className={styles.social2} />
+          <a target="_blank" href="https://discord.gg/26Z384WSPB" aria-label="Discord">
+            <FaDiscord />
           </a>
-          <a target="_blank" href="https://twitter.com/kubesimplify">
-            <AiOutlineTwitter row="img" className={styles.social2} />
+          <a target="_blank" href="https://twitter.com/kubesimplify" aria-label="Twitter">
+            <AiOutlineTwitter />
           </a>
-          <a
-            target="_blank"
-            href="https://www.linkedin.com/company/kubesimplify/"
-          >
-            <TiSocialLinkedin row="img" className={styles.social2} />
+          <a target="_blank" href="https://www.linkedin.com/company/kubesimplify/" aria-label="LinkedIn">
+            <TiSocialLinkedin />
           </a>
-          <a target="_blank" href="https://www.instagram.com/saiyampathak/">
-            <AiOutlineInstagram row="img" className={styles.social2} />
+          <a target="_blank" href="https://www.instagram.com/saiyampathak/" aria-label="Instagram">
+            <AiOutlineInstagram />
           </a>
-          <a target="_blank" href="https://github.com/kubesimplify">
-            <AiFillGithub row="img" className={styles.social3} />
+          <a target="_blank" href="https://github.com/kubesimplify" aria-label="GitHub">
+            <AiFillGithub />
           </a>
         </div>
       </div>
