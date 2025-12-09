@@ -26,13 +26,17 @@ jobs:
         run: npm run clear || true
       - name: Verify PostCSS config
         run: cat postcss.config.js
+      - name: Verify Tailwind config
+        run: cat tailwind.config.js | head -10
       - name: Build website
         run: npm run build
         env:
           NODE_ENV: production
           CI: true
+          # Ensure PostCSS processes CSS
+          POSTCSS: true
 
-      - name: Verify CSS file exists
+      - name: Verify CSS file exists and is complete
         run: |
           CSS_FILE=$(find build/assets/css -name "styles.*.css" | head -1)
           if [ -z "$CSS_FILE" ]; then
@@ -40,21 +44,55 @@ jobs:
             exit 1
           fi
           echo "CSS file found: $CSS_FILE"
-          echo "CSS file size: $(wc -c < $CSS_FILE) bytes"
+          CSS_SIZE=$(wc -c < "$CSS_FILE")
+          echo "CSS file size: $CSS_SIZE bytes"
+          
+          # Check minimum size (should be substantial)
+          if [ "$CSS_SIZE" -lt 50000 ]; then
+            echo "ERROR: CSS file is too small ($CSS_SIZE bytes) - likely incomplete!"
+            exit 1
+          fi
+          
           # Check if Tailwind classes are present
           if grep -q "bg-gradient\|flex\|grid\|hero-section-new" "$CSS_FILE"; then
             echo "✓ Tailwind classes found in CSS"
             echo "✓ Custom hero classes found in CSS"
           else
-            echo "WARNING: Tailwind classes not found in CSS"
+            echo "ERROR: Tailwind classes not found in CSS!"
             exit 1
           fi
+          
           # Check for specific hero styles
           if grep -q "from-\[#050505\]\|hero-floating-card" "$CSS_FILE"; then
             echo "✓ Hero section styles found"
           else
-            echo "WARNING: Hero section styles missing"
+            echo "ERROR: Hero section styles missing!"
+            exit 1
           fi
+          
+          # Check for background colors
+          if grep -q "background.*#050505\|background.*#0a0a0a\|background.*#111625" "$CSS_FILE"; then
+            echo "✓ Background colors found"
+          else
+            echo "WARNING: Background colors may be missing"
+          fi
+          
+          # Check for animations
+          if grep -q "@keyframes\|animation-name\|animate-float\|animate-blob" "$CSS_FILE"; then
+            echo "✓ Animations found"
+          else
+            echo "ERROR: Animations missing!"
+            exit 1
+          fi
+          
+          # Check for CSS variables
+          if grep -q "--theme-bg\|--dark-bg\|--light-bg" "$CSS_FILE"; then
+            echo "✓ CSS variables found"
+          else
+            echo "WARNING: CSS variables may be missing"
+          fi
+          
+          echo "✓ CSS verification passed!"
 
       # Popular action to deploy to GitHub Pages:
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
