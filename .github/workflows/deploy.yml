@@ -32,6 +32,22 @@ jobs:
           NODE_ENV: production
           CI: true
 
+      - name: Verify CSS file exists
+        run: |
+          CSS_FILE=$(find build/assets/css -name "styles.*.css" | head -1)
+          if [ -z "$CSS_FILE" ]; then
+            echo "ERROR: CSS file not found!"
+            exit 1
+          fi
+          echo "CSS file found: $CSS_FILE"
+          echo "CSS file size: $(wc -c < $CSS_FILE) bytes"
+          # Check if Tailwind classes are present
+          if grep -q "bg-gradient\|flex\|grid" "$CSS_FILE"; then
+            echo "✓ Tailwind classes found in CSS"
+          else
+            echo "WARNING: Tailwind classes not found in CSS"
+          fi
+
       # Popular action to deploy to GitHub Pages:
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
       - name: Deploy to GitHub Pages
@@ -42,3 +58,6 @@ jobs:
           publish_dir: ./build
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          # Force update to bypass cache
+          force_orphan: false
+          cname: kubesimplify.com
