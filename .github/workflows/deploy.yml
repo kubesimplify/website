@@ -24,10 +24,13 @@ jobs:
         run: npm ci
       - name: Clear cache
         run: npm run clear || true
+      - name: Verify PostCSS config
+        run: cat postcss.config.js
       - name: Build website
         run: npm run build
         env:
           NODE_ENV: production
+          CI: true
 
       # Popular action to deploy to GitHub Pages:
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
