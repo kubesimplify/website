@@ -79,6 +79,9 @@ const config = {
       },
     }),
 
+  plugins: [
+    require.resolve('./plugins/fix-css-minification'),
+  ],
 };
 
 module.exports = config;
