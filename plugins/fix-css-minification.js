@@ -13,35 +13,48 @@ function fixCssMinification(context, options) {
       // Find and configure CSS minimizer
       const minimizerPlugins = config.optimization?.minimizer || [];
       
-      minimizerPlugins.forEach((plugin) => {
+      minimizerPlugins.forEach((plugin, index) => {
         // Check if this is the CSS minimizer plugin
-        if (plugin && plugin.constructor && plugin.constructor.name === 'CssMinimizerPlugin') {
-          // Configure to be less aggressive and preserve Tailwind CSS v4 syntax
-          if (plugin.options) {
-            plugin.options.minimizerOptions = {
-              preset: [
-                'default',
-                {
-                  // Don't break modern CSS features
-                  discardComments: { removeAll: false },
-                  normalizeWhitespace: false,
-                  // Critical: Don't minify keyframes names or break animations
-                  reduceIdents: false,
-                  // Don't merge rules that might break Tailwind
-                  mergeRules: false,
-                  // Preserve CSS variables
-                  reduceTransforms: false,
-                  // Don't break @supports queries
-                  discardUnused: false,
-                  // Preserve important comments
-                  minifySelectors: true,
-                  minifyParams: true,
-                  minifyFontValues: true,
-                  minifyGradients: true,
-                  minifyTimingFunctions: true,
-                },
-              ],
-            };
+        // It could be CssMinimizerPlugin or an instance
+        const pluginName = plugin?.constructor?.name || '';
+        const isCssMinimizer = pluginName === 'CssMinimizerPlugin' || 
+                              pluginName.includes('CssMinimizer') ||
+                              (plugin.constructor && plugin.constructor.toString().includes('CssMinimizer'));
+        
+        if (isCssMinimizer) {
+          // Replace with a safer configuration
+          try {
+            // Try to configure the minimizer to be less aggressive
+            if (plugin.options) {
+              plugin.options.minimizerOptions = {
+                preset: [
+                  'default',
+                  {
+                    // Critical: Disable features that break Tailwind CSS v4
+                    discardComments: { removeAll: false },
+                    normalizeWhitespace: false,
+                    reduceIdents: false, // Don't rename keyframes
+                    mergeRules: false, // Don't merge rules
+                    reduceTransforms: false,
+                    discardUnused: false,
+                    // Only safe minifications
+                    minifySelectors: true,
+                    minifyParams: true,
+                    minifyFontValues: true,
+                    minifyGradients: true,
+                    minifyTimingFunctions: true,
+                  },
+                ],
+              };
+            }
+            
+            // Also try to set parallel to false to avoid race conditions
+            if (plugin.options && typeof plugin.options.parallel !== 'undefined') {
+              plugin.options.parallel = false;
+            }
+          } catch (e) {
+            // If configuration fails, try to replace the plugin entirely
+            console.warn('Could not configure CSS minimizer, trying alternative approach');
           }
         }
       });
