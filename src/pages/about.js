@@ -70,7 +70,7 @@ export default function About() {
                 name="Saiyam Pathak"
                 role="Founder"
                 image="https://unavatar.io/twitter/saiyampathak"
-                bio="CNCF Ambassador, Civo Director of Technical Evangelism, and a passionate educator in the cloud native space. Saiyam has helped thousands of developers start their journey."
+                bio="KubeCon Co-Chair, Kubestronaut, CNCF TAG Operational Resilience Chair, Keynote Speaker, Kubernetes Certification Advisory Council Member, Author, and educator who has taught Kubernetes to millions."
                 twitter="https://twitter.com/saiyampathak"
                 linkedin="https://linkedin.com/in/saiyampathak"
               />
@@ -78,7 +78,7 @@ export default function About() {
                 name="Saloni Narang"
                 role="Co-Founder"
                 image="/img/saloni_new.png"
-                bio="Marketing strategist and community builder, driving the vision and growth of Kubesimplify. Saloni ensures our community remains inclusive and helpful."
+                bio="CNCF Ambassador, Docker Captain, Marketing strategist and community builder, driving the vision and growth of Kubesimplify. Saloni ensures our community remains inclusive and helpful."
                 twitter="https://twitter.com/saloninarang_"
                 linkedin="https://www.linkedin.com/in/saloninarang/"
               />
