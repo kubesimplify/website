@@ -70,20 +70,20 @@ function Hero() {
             {/* Stats - Below CTAs, Centered */}
             <div className="mt-12 flex flex-wrap items-center justify-center gap-8 animate-fade-in animation-delay-400">
               <div className="text-center">
-                <div className="text-3xl font-semibold text-white">15K+</div>
+                <div className="text-3xl font-semibold text-white">100K+</div>
                 <div className="mt-1 text-xs uppercase tracking-wide text-gray-400">Community Members</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-semibold text-white">50K+</div>
-                <div className="mt-1 text-xs uppercase tracking-wide text-gray-400">Subscribers</div>
+                <div className="mt-1 text-xs uppercase tracking-wide text-gray-400">Youtube Subscribers</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-semibold text-white">100+</div>
-                <div className="mt-1 text-xs uppercase tracking-wide text-gray-400">Workshops</div>
+                <div className="mt-1 text-xs uppercase tracking-wide text-gray-400">Workshops/Events</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-semibold text-white">2M+</div>
-                <div className="mt-1 text-xs uppercase tracking-wide text-gray-400">Views</div>
+                <div className="text-3xl font-semibold text-white">120K+</div>
+                <div className="mt-1 text-xs uppercase tracking-wide text-gray-400">Social Reach</div>
               </div>
             </div>
           </div>
@@ -165,10 +165,10 @@ function Stats() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 py-16 md:py-20 text-center">
           {[
-            { label: 'Community', value: '15K+' },
-            { label: 'Subscribers', value: '50K+' },
-            { label: 'Workshops', value: '100+' },
-            { label: 'Views', value: '2M+' },
+            { label: 'Community Members', value: '100K+' },
+            { label: 'Youtube Subscribers', value: '50K+' },
+            { label: 'Workshops/Events', value: '100+' },
+            { label: 'Social Reach', value: '120K+' },
           ].map((stat, idx) => (
             <div key={idx} className="stat-item">
               <div className="stat-value text-5xl md:text-6xl lg:text-7xl font-black mb-3">{stat.value}</div>
