@@ -1181,18 +1181,58 @@ img, svg, video, iframe {
   border-top-width: 1px;
   border-bottom-width: 1px;
   margin-top: 0;
-  padding-top: 4rem;
-  padding-bottom: 4rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 [data-theme='dark'] .partnership-section {
-  background: rgba(255, 255, 255, 0.02);
+  background: transparent;
   border-color: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme='light'] .partnership-section {
-  background: rgba(241, 243, 245, 0.5);
+  background: transparent;
   border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Partnership section card styling - explicit rules */
+.partnership-section a.bg-dark-card {
+  background-color: var(--theme-card) !important;
+}
+
+[data-theme='light'] .partnership-section a.bg-dark-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme='dark'] .partnership-section a.bg-dark-card {
+  background-color: #111625 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.partnership-section h3.text-theme {
+  color: var(--theme-text) !important;
+}
+
+[data-theme='light'] .partnership-section h3.text-theme {
+  color: #1a1a1a !important;
+}
+
+[data-theme='dark'] .partnership-section h3.text-theme {
+  color: #ffffff !important;
+}
+
+.partnership-section p.text-theme-secondary {
+  color: var(--theme-text-secondary) !important;
+}
+
+[data-theme='light'] .partnership-section p.text-theme-secondary {
+  color: #4a5568 !important;
+}
+
+[data-theme='dark'] .partnership-section p.text-theme-secondary {
+  color: #a0aec0 !important;
 }
 
 .section-title {
@@ -1283,6 +1323,23 @@ img, svg, video, iframe {
 
 [data-theme='light'] .articles-section {
   background: rgba(248, 249, 250, 0.5);
+}
+
+/* Blog Card Text Overflow Utilities */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ============================================
