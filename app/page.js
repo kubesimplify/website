@@ -12,7 +12,7 @@ import BlogFeed from '@/components/BlogFeed';
 
 const partners = [
   'Cisco', 'Sysdig', 'Chainguard', 'Komodor', 'CloudCasa',
-  'Armo', 'Namespace Labs', 'Robusta', 'Akuity',
+  'Armo', 'Namespace Labs', 'Robusta',
 ];
 
 const stats = [
