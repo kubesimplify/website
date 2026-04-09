@@ -19,8 +19,8 @@ const team = [
     bio: 'CNCF Ambassador, Docker Captain, Marketing strategist and community builder. Saloni drives partnerships, content strategy, and community growth across the Kubesimplify ecosystem.',
     credentials: ['CNCF Ambassador', 'Docker Captain', 'Marketing Strategist', 'Community Builder'],
     image: '/img/saloni_new.png',
-    twitter: 'https://twitter.com/saloninrng',
-    linkedin: 'https://www.linkedin.com/in/saloni-narang-a5b7a3166/',
+    twitter: 'https://x.com/thesaloninarang',
+    linkedin: 'https://www.linkedin.com/in/saloninarang/',
   },
 ];
 

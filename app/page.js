@@ -69,8 +69,8 @@ const team = [
     role: 'Co-Founder',
     credentials: ['CNCF Ambassador', 'Docker Captain', 'Marketing Strategist', 'Community Builder'],
     image: '/img/saloni_new.png',
-    twitter: 'https://twitter.com/saloninrng',
-    linkedin: 'https://www.linkedin.com/in/saloni-narang-a5b7a3166/',
+    twitter: 'https://x.com/thesaloninarang',
+    linkedin: 'https://www.linkedin.com/in/saloninarang/',
   },
 ];
 
