@@ -95,7 +95,7 @@ export default function Partnerships() {
                   Let's discuss how we can help you achieve your DevRel and marketing goals with custom packages.
                 </p>
                 <a
-                  href="mailto:kubesimplify@gmail.com"
+                  href="mailto:contact@kubesimplify.com"
                   className="btn-primary px-10 py-4 rounded-xl text-base inline-flex items-center gap-2"
                 >
                   <span>Contact Us Today</span>

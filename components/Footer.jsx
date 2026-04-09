@@ -31,7 +31,7 @@ export default function Footer() {
             <Link href="/about" className="hover:underline" style={{ color: 'inherit' }}>About</Link>
             <Link href="/blogs" className="hover:underline" style={{ color: 'inherit' }}>Blog</Link>
             <Link href="/workshops" className="hover:underline" style={{ color: 'inherit' }}>Watch & Learn</Link>
-            <a href="mailto:kubesimplify@gmail.com" className="hover:underline" style={{ color: 'inherit' }}>Contact</a>
+            <a href="mailto:contact@kubesimplify.com" className="hover:underline" style={{ color: 'inherit' }}>Contact</a>
           </div>
 
           <div className="flex items-center gap-3">

@@ -95,7 +95,7 @@ const jsonLd = {
       ],
       contactPoint: {
         '@type': 'ContactPoint',
-        email: 'kubesimplify@gmail.com',
+        email: 'contact@kubesimplify.com',
         contactType: 'business',
       },
     },

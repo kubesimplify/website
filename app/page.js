@@ -180,7 +180,7 @@ function Hero() {
               <Link href="/workshops" className="btn-primary px-8 py-4 rounded-xl text-base inline-flex items-center gap-2">
                 <span>Explore Workshops</span><span className="text-lg">&rarr;</span>
               </Link>
-              <a href="mailto:kubesimplify@gmail.com" className="btn-secondary px-8 py-4 rounded-xl text-base">
+              <a href="mailto:contact@kubesimplify.com" className="btn-secondary px-8 py-4 rounded-xl text-base">
                 Partner With Us
               </a>
             </motion.div>
@@ -313,7 +313,7 @@ function Services() {
         </StaggerContainer>
 
         <FadeIn className="text-center mt-10" delay={0.3}>
-          <a href="mailto:kubesimplify@gmail.com" className="inline-flex items-center gap-2 text-sm font-semibold group" style={{ color: 'var(--accent)' }}>
+          <a href="mailto:contact@kubesimplify.com" className="inline-flex items-center gap-2 text-sm font-semibold group" style={{ color: 'var(--accent)' }}>
             Discuss a custom package
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -640,8 +640,8 @@ function CTA() {
                 Partnership inquiries, workshop requests, or just want to say hi? We&apos;d love to hear from you.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4">
-                <a href="mailto:kubesimplify@gmail.com" className="btn-primary px-8 py-4 rounded-xl text-base inline-flex items-center gap-2">
-                  <span>kubesimplify@gmail.com</span>
+                <a href="mailto:contact@kubesimplify.com" className="btn-primary px-8 py-4 rounded-xl text-base inline-flex items-center gap-2">
+                  <span>contact@kubesimplify.com</span>
                 </a>
                 <a href="https://discord.gg/26Z384WSPB" target="_blank" rel="noopener noreferrer" className="btn-secondary px-8 py-4 rounded-xl text-base inline-flex items-center gap-2">
                   Join Discord
