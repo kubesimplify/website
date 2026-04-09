@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    # Review gh actions docs if you want to further define triggers, paths, etc
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
 
 jobs:
   deploy:
@@ -22,123 +20,29 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-      - name: Clear cache
-        run: npm run clear || true
-      - name: Verify PostCSS config
-        run: cat postcss.config.js
-      - name: Verify Tailwind config
-        run: cat tailwind.config.js | head -10
-      - name: Build website (production)
+
+      - name: Build website
         run: npm run build
         env:
           NODE_ENV: production
-          CI: true
-          # Ensure PostCSS processes CSS correctly
-          POSTCSS: true
-          # Force fresh build
-          FORCE_COLOR: 0
 
-      - name: Verify CSS file exists and is complete
+      - name: Verify build output
         run: |
-          CSS_FILE=$(find build/assets/css -name "styles.*.css" | head -1)
-          if [ -z "$CSS_FILE" ]; then
-            echo "ERROR: CSS file not found!"
+          if [ ! -f "out/index.html" ]; then
+            echo "ERROR: out/index.html not found!"
             exit 1
           fi
-          echo "CSS file found: $CSS_FILE"
-          CSS_SIZE=$(wc -c < "$CSS_FILE")
-          echo "CSS file size: $CSS_SIZE bytes"
-          
-          # Check minimum size (should be substantial)
-          if [ "$CSS_SIZE" -lt 50000 ]; then
-            echo "ERROR: CSS file is too small ($CSS_SIZE bytes) - likely incomplete!"
-            exit 1
-          fi
-          
-          # Check if Tailwind classes are present
-          if grep -q "bg-gradient\|flex\|grid\|hero-section-new" "$CSS_FILE"; then
-            echo "✓ Tailwind classes found in CSS"
-            echo "✓ Custom hero classes found in CSS"
-          else
-            echo "ERROR: Tailwind classes not found in CSS!"
-            exit 1
-          fi
-          
-          # Check for specific hero styles (minified CSS may have different format)
-          if grep -q "hero-floating-card\|hero-section-new\|050505\|0a0a0a" "$CSS_FILE"; then
-            echo "✓ Hero section styles found"
-          else
-            echo "ERROR: Hero section styles missing!"
-            exit 1
-          fi
-          
-          # Check for background colors (critical for hero section)
-          # Minified CSS may have different format, so check for color values
-          if grep -q "050505\|0a0a0a\|111625\|bg-gradient" "$CSS_FILE"; then
-            echo "✓ Hero background gradients found"
-          else
-            echo "ERROR: Hero background gradients MISSING - this will break the hero section!"
-            exit 1
-          fi
-          
-          # Check for animations (critical for floating cards)
-          # Minified CSS may have keyframes renamed, so check for animation properties
-          if grep -q "@keyframes\|animation-name\|animation:" "$CSS_FILE"; then
-            echo "✓ Animations found"
-          else
-            echo "ERROR: Animations MISSING - floating cards won't animate!"
-            exit 1
-          fi
-          
-          # Check for CSS variables (critical for theming)
-          if grep -q "theme-bg\|dark-bg\|light-bg" "$CSS_FILE"; then
-            echo "✓ CSS variables found"
-          else
-            echo "WARNING: CSS variables may be missing"
-          fi
-          
-          # Check for hero floating card styles
-          if grep -q "hero-floating-card\|hero-section-new" "$CSS_FILE"; then
-            echo "✓ Hero floating card styles found"
-          else
-            echo "ERROR: Hero floating card styles MISSING!"
-            exit 1
-          fi
-          
+          echo "Build output pages:"
+          find out -name "*.html" | sort
           echo ""
-          echo "✓✓✓ CSS verification PASSED - All critical styles present! ✓✓✓"
+          echo "Build successful"
 
-      - name: Verify built CSS is valid
-        run: |
-          CSS_FILE=$(find build/assets/css -name "styles.*.css" | head -1)
-          if [ -z "$CSS_FILE" ]; then
-            echo "ERROR: CSS file not found after build!"
-            exit 1
-          fi
-          # Check CSS is not empty and has reasonable size
-          CSS_SIZE=$(wc -c < "$CSS_FILE")
-          if [ "$CSS_SIZE" -lt 50000 ]; then
-            echo "ERROR: CSS file too small ($CSS_SIZE bytes) - build may have failed!"
-            exit 1
-          fi
-          # Try to validate CSS syntax (basic check)
-          if ! tail -c 100 "$CSS_FILE" | grep -q "}"; then
-            echo "WARNING: CSS file may be malformed (doesn't end with }"
-          fi
-          echo "✓ CSS file is valid and complete ($CSS_SIZE bytes)"
-
-      # Popular action to deploy to GitHub Pages:
-      # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Build output to publish to the `gh-pages` branch:
-          publish_dir: ./build
+          publish_dir: ./out
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          # Force fresh deployment to bypass cache
           force_orphan: true
           cname: kubesimplify.com
-          # Add nojekyll to prevent GitHub Pages from processing files
-          disable_nojekyll: false
