@@ -143,56 +143,109 @@ function Hero() {
       </div>
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pt-32 pb-20">
-        <div className="text-center max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
-            <div className="inline-flex items-center gap-2.5 rounded-full border px-5 py-2.5 text-[11px] font-semibold tracking-[0.2em] uppercase backdrop-blur-sm mb-10"
-              style={{ borderColor: 'var(--border-medium)', background: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75 animate-ping" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]" />
-              </span>
-              Where AI Meets Cloud Native
-            </div>
-          </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left: Text content */}
+          <div className="lg:col-span-7 text-center lg:text-left">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
+              <div className="inline-flex items-center gap-2.5 rounded-full border px-5 py-2.5 text-[11px] font-semibold tracking-[0.2em] uppercase backdrop-blur-sm mb-10"
+                style={{ borderColor: 'var(--border-medium)', background: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75 animate-ping" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]" />
+                </span>
+                Where AI Meets Cloud Native
+              </div>
+            </motion.div>
 
-          <motion.h1 className="text-display-lg" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
-            Simplifying
-          </motion.h1>
-          <motion.h1 className="text-display-lg gradient-text-hero mb-4" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}>
-            Cloud Native & AI
-          </motion.h1>
-          <motion.p className="text-display" style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--text-muted)' }}
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}>
-            for Everyone.
-          </motion.p>
+            <motion.h1 className="text-display-lg" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
+              Simplifying
+            </motion.h1>
+            <motion.h1 className="text-display-lg gradient-text-hero mb-4" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}>
+              Cloud Native & AI
+            </motion.h1>
+            <motion.p className="text-display" style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--text-muted)' }}
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}>
+              for Everyone.
+            </motion.p>
 
-          <motion.p className="mt-8 text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: 'var(--text-secondary)' }}
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.65 }}>
-            Expert-led workshops, deep-dive content, and open source tools for engineers building with{' '}
-            <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Kubernetes</span>,{' '}
-            <span style={{ color: 'var(--accent-secondary)', fontWeight: 500 }}>AI/ML infrastructure</span>, and the cloud native stack.
-          </motion.p>
+            <motion.p className="mt-8 text-lg max-w-2xl leading-relaxed mx-auto lg:mx-0" style={{ color: 'var(--text-secondary)' }}
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.65 }}>
+              Expert-led workshops, deep-dive content, and open source tools for engineers building with{' '}
+              <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Kubernetes</span>,{' '}
+              <span style={{ color: 'var(--accent-secondary)', fontWeight: 500 }}>AI/ML infrastructure</span>, and the cloud native stack.
+            </motion.p>
 
-          <motion.div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}>
-            <Link href="/workshops" className="btn-primary px-8 py-4 rounded-xl text-base inline-flex items-center gap-2">
-              <span>Explore Workshops</span><span className="text-lg">&rarr;</span>
-            </Link>
-            <a href="mailto:kubesimplify@gmail.com" className="btn-secondary px-8 py-4 rounded-xl text-base">
-              Partner With Us
+            <motion.div className="mt-10 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}>
+              <Link href="/workshops" className="btn-primary px-8 py-4 rounded-xl text-base inline-flex items-center gap-2">
+                <span>Explore Workshops</span><span className="text-lg">&rarr;</span>
+              </Link>
+              <a href="mailto:kubesimplify@gmail.com" className="btn-secondary px-8 py-4 rounded-xl text-base">
+                Partner With Us
+              </a>
+            </motion.div>
+          </div>
+
+          {/* Right: Floating book */}
+          <motion.div
+            className="lg:col-span-5 hidden lg:flex justify-center"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <a
+              href="https://saiyampathak.gumroad.com/l/gpubook"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative group block"
+            >
+              {/* Glow behind book */}
+              <div className="absolute -inset-8 rounded-3xl bg-gradient-to-br from-[#5CFF68]/10 to-[#05CAFF]/10 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-700" />
+              <div className="relative hero-float">
+                <img
+                  src="/img/book-cover.png"
+                  alt="GPU-Enabled Platforms on Kubernetes - Free E-Book"
+                  className="w-72 rounded-lg shadow-2xl group-hover:shadow-[0_30px_80px_rgba(5,202,255,0.15)] transition-shadow duration-500"
+                />
+                <div className="absolute -top-3 -right-3 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider gradient-bg text-gray-950 shadow-lg">
+                  Free E-Book
+                </div>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-medium)', color: 'var(--accent)' }}>
+                  Download Free &darr;
+                </div>
+              </div>
             </a>
           </motion.div>
-
-          <motion.div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4"
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.95 }}>
-            {stats.map((s, i) => (
-              <div key={i} className="py-5 px-4 rounded-xl border" style={{ borderColor: 'var(--border-subtle)', background: 'var(--border-subtle)' }}>
-                <div className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>{s.value}</div>
-                <div className="mt-1 text-[11px] uppercase tracking-[0.15em] font-medium" style={{ color: 'var(--text-muted)' }}>{s.label}</div>
-              </div>
-            ))}
-          </motion.div>
         </div>
+
+        {/* Mobile book banner - shown only on mobile */}
+        <motion.a
+          href="https://saiyampathak.gumroad.com/l/gpubook"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-12 lg:hidden flex items-center gap-4 rounded-2xl border p-4 mx-auto max-w-sm"
+          style={{ borderColor: 'var(--border-medium)', background: 'var(--border-subtle)' }}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.9 }}
+        >
+          <img src="/img/book-cover.png" alt="Free E-Book" className="w-16 h-20 rounded object-cover flex-shrink-0" />
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--accent)' }}>Free E-Book</div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>GPU-Enabled Platforms on K8s</div>
+            <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Download &rarr;</div>
+          </div>
+        </motion.a>
+
+        {/* Stats - full width below */}
+        <motion.div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto lg:mx-0"
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.95 }}>
+          {stats.map((s, i) => (
+            <div key={i} className="py-5 px-4 rounded-xl border text-center lg:text-left" style={{ borderColor: 'var(--border-subtle)', background: 'var(--border-subtle)' }}>
+              <div className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>{s.value}</div>
+              <div className="mt-1 text-[11px] uppercase tracking-[0.15em] font-medium" style={{ color: 'var(--text-muted)' }}>{s.label}</div>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
@@ -382,6 +435,66 @@ function Projects() {
             </svg>
           </a>
         </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   BOOK
+   ═══════════════════════════════════════════ */
+
+function Book() {
+  return (
+    <section className="py-28 md:py-36 border-t relative overflow-hidden" style={{ borderColor: 'var(--border-subtle)' }}>
+      {/* Subtle background glow */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#05CAFF] opacity-[0.03] blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row items-center gap-12 md:gap-16">
+          {/* Book cover - floating with subtle animation */}
+          <FadeIn direction="left" className="flex-shrink-0">
+            <div className="relative group">
+              <div className="absolute -inset-4 rounded-2xl bg-gradient-to-br from-[#5CFF68]/10 to-[#05CAFF]/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <img
+                src="/img/book-cover.png"
+                alt="GPU-Enabled Platforms on Kubernetes - by Saiyam Pathak & Daniele Polencic"
+                className="relative w-64 md:w-72 rounded-lg shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500"
+                style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.4)' }}
+              />
+              <div className="absolute -top-3 -right-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider gradient-bg text-gray-950">
+                Free
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Book info */}
+          <FadeIn delay={0.15} className="flex-1 text-center md:text-left">
+            <Badge text="Free E-Book" />
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              GPU-Enabled Platforms<br className="hidden sm:block" /> on Kubernetes
+            </h2>
+            <p className="text-base md:text-lg mb-3" style={{ color: 'var(--text-secondary)' }}>
+              By <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Saiyam Pathak</span> & <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Daniele Polencic</span>
+            </p>
+            <p className="text-sm md:text-base mb-8 max-w-lg" style={{ color: 'var(--text-muted)' }}>
+              The definitive guide to running AI/ML workloads on Kubernetes with GPU acceleration. Covers architecture patterns, scheduling, multi-tenancy, and real-world production strategies.
+            </p>
+            <a
+              href="https://saiyampathak.gumroad.com/l/gpubook"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary px-8 py-4 rounded-xl text-base inline-flex items-center gap-2"
+            >
+              <span>Download Free Copy</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </a>
+          </FadeIn>
+        </div>
       </div>
     </section>
   );
