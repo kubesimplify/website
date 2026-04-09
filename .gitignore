@@ -1,10 +1,14 @@
 # Dependencies
 /node_modules
 
+# Next.js
+/.next
+/out
+
 # Production
 /build
 
-# Generated files
+# Legacy Docusaurus
 .docusaurus
 .cache-loader
 

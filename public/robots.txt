@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kubesimplify.com/sitemap.xml
+
+# Allow all search engine bots to crawl everything
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /

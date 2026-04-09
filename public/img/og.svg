@@ -1,0 +1,75 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#030712"/>
+      <stop offset="100%" stop-color="#0a0f1a"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5CFF68"/>
+      <stop offset="100%" stop-color="#05CAFF"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0" y1="0" x2="500" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5CFF68"/>
+      <stop offset="50%" stop-color="#30E8A0"/>
+      <stop offset="100%" stop-color="#05CAFF"/>
+    </linearGradient>
+    <filter id="glow1" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="60" result="blur"/>
+      <feMerge><feMergeNode in="blur"/></feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Ambient glow orbs -->
+  <circle cx="300" cy="250" r="250" fill="#5CFF68" opacity="0.05" filter="url(#glow1)"/>
+  <circle cx="900" cy="350" r="300" fill="#05CAFF" opacity="0.05" filter="url(#glow1)"/>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1200" height="3" fill="url(#brand)"/>
+
+  <!-- Logo placeholder - 100x100 centered at (120, 195) → will be composited -->
+  <!-- empty space reserved for logo -->
+
+  <!-- Logo placeholder: 90x90 at (255, 140) - composited later -->
+
+  <!-- "Kubesimplify" text - to the right of logo -->
+  <text x="360" y="210" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="78" font-weight="800" fill="white" letter-spacing="-2">Kubesimplify</text>
+
+  <!-- Tagline - left aligned under the text -->
+  <text x="360" y="280" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="34" font-weight="700" fill="url(#textGrad)" letter-spacing="-0.5">AI &amp; Cloud Native Education</text>
+
+  <!-- Description -->
+  <text x="360" y="340" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" fill="#94a3b8">Expert-led workshops, deep-dive content, and open source tools for</text>
+  <text x="360" y="368" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" fill="#94a3b8">Kubernetes, AI/ML infrastructure, and cloud native engineering.</text>
+
+  <!-- Stats bar - left aligned -->
+  <g transform="translate(360, 410)">
+    <rect x="0" y="0" width="140" height="56" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <text x="70" y="24" text-anchor="middle" font-family="system-ui" font-size="18" font-weight="800" fill="white">100K+</text>
+    <text x="70" y="44" text-anchor="middle" font-family="system-ui" font-size="10" fill="#64748b" letter-spacing="1.5">COMMUNITY</text>
+
+    <rect x="160" y="0" width="140" height="56" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <text x="230" y="24" text-anchor="middle" font-family="system-ui" font-size="18" font-weight="800" fill="white">50K+</text>
+    <text x="230" y="44" text-anchor="middle" font-family="system-ui" font-size="10" fill="#64748b" letter-spacing="1.5">YT SUBS</text>
+
+    <rect x="320" y="0" width="140" height="56" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <text x="390" y="24" text-anchor="middle" font-family="system-ui" font-size="18" font-weight="800" fill="white">250+</text>
+    <text x="390" y="44" text-anchor="middle" font-family="system-ui" font-size="10" fill="#64748b" letter-spacing="1.5">VIDEOS</text>
+
+    <rect x="480" y="0" width="140" height="56" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <text x="550" y="24" text-anchor="middle" font-family="system-ui" font-size="18" font-weight="800" fill="white">200K+</text>
+    <text x="550" y="44" text-anchor="middle" font-family="system-ui" font-size="10" fill="#64748b" letter-spacing="1.5">REACH</text>
+  </g>
+
+  <!-- URL -->
+  <text x="360" y="540" font-family="ui-monospace, SFMono-Regular, monospace" font-size="16" fill="#64748b" letter-spacing="0.5">kubesimplify.com</text>
+
+  <!-- Bottom accent line -->
+  <rect x="0" y="627" width="1200" height="3" fill="url(#brand)"/>
+</svg>
