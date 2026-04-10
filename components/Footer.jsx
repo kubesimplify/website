@@ -31,6 +31,7 @@ export default function Footer() {
             <Link href="/about" className="hover:underline" style={{ color: 'inherit' }}>About</Link>
             <Link href="/blogs" className="hover:underline" style={{ color: 'inherit' }}>Blog</Link>
             <Link href="/workshops" className="hover:underline" style={{ color: 'inherit' }}>Watch & Learn</Link>
+            <Link href="/resources" className="hover:underline" style={{ color: 'inherit' }}>Resources</Link>
             <a href="mailto:contact@kubesimplify.com" className="hover:underline" style={{ color: 'inherit' }}>Contact</a>
           </div>
 

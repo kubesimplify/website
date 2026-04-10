@@ -8,6 +8,7 @@ const navLinks = [
   { href: '/about', label: 'About' },
   { href: '/workshops', label: 'Watch & Learn' },
   { href: '/partnerships', label: 'Partnerships' },
+  { href: '/resources', label: 'Resources' },
   { href: '/blogs', label: 'Blog' },
   { href: 'https://www.youtube.com/@kubesimplify', label: 'YouTube', external: true },
 ];
