@@ -107,19 +107,17 @@ const publications = [
     outlet: 'Civo',
     url: 'https://www.civo.com/learn',
     articles: [
-      { title: 'Switching on the Cluster Insights Using Headlamp', url: 'https://www.civo.com/learn/switching-on-the-cluster-insights-using-headlamp' },
-    ],
-  },
-  {
-    outlet: 'CNCF Blog',
-    articles: [
-      { title: 'Cloud native ecosystem and project articles' },
-    ],
-  },
-  {
-    outlet: 'Google Cloud',
-    articles: [
-      { title: 'Google Cloud community articles on Kubernetes' },
+      { title: 'Chaos Engineering Experiments on Kubernetes using Litmus', url: 'https://www.civo.com/learn/chaos-engineering-kubernetes-litmus' },
+      { title: 'Exposing Your Application to HTTPS with Traefik and cert-manager', url: 'https://www.civo.com/learn/exposing-applications-https-traefik' },
+      { title: 'Get Up and Running with Kubeflow on Kubernetes', url: 'https://www.civo.com/learn/get-up-and-running-with-kubeflow-on-civo-kubernetes' },
+      { title: 'Kube-ception: Kubernetes within Kubernetes using Harvester', url: 'https://www.civo.com/learn/kube-ception-kubernetes-within-kubernetes-within-kubernetes-using-harvester' },
+      { title: 'Kubernetes Power for Virtual Machines using KubeVirt', url: 'https://www.civo.com/learn/kubernetes-power-for-virtual-machines-using-kubevirt' },
+      { title: 'Level Up Your Development with DevPod', url: 'https://www.civo.com/learn/level-up-development-devpod' },
+      { title: 'Why Are Network Policies in Kubernetes So Hard to Understand?', url: 'https://www.civo.com/learn/network-policies-kubernetes' },
+      { title: 'Headlamp: Visualize Your Kubernetes Clusters with Ease', url: 'https://www.civo.com/learn/switching-on-the-cluster-insights-using-headlamp' },
+      { title: 'Tips to Ace the CKA and CKAD Exams', url: 'https://www.civo.com/learn/tips-to-ace-cka-and-ckad-exams' },
+      { title: 'Webkubectl: Running Kubectl Commands from Your Web Browser', url: 'https://www.civo.com/learn/webkubectl-running-kubectl-commands-from-your-web-browser' },
+      { title: 'Ensuring YAML Best Practices using KubeLinter', url: 'https://www.civo.com/learn/yaml-best-practices-using-kubelinter' },
     ],
   },
 ];
