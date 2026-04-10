@@ -60,7 +60,7 @@ const team = [
     name: 'Saiyam Pathak',
     role: 'Founder',
     credentials: ['KubeCon Co-Chair', 'CNCF TAG Ops Resilience Chair', 'Kubestronaut', 'K8s Certification SME', 'Keynote Speaker'],
-    image: '/img/saiyam-new.jpg',
+    image: '/img/saiyam-new.webp',
     twitter: 'https://twitter.com/saiyampathak',
     linkedin: 'https://linkedin.com/in/saiyampathak',
   },
@@ -68,7 +68,7 @@ const team = [
     name: 'Saloni Narang',
     role: 'Co-Founder',
     credentials: ['CNCF Ambassador', 'Docker Captain', 'Marketing Strategist', 'Community Builder'],
-    image: '/img/saloni_new.png',
+    image: '/img/saloni_new.webp',
     twitter: 'https://x.com/thesaloninarang',
     linkedin: 'https://www.linkedin.com/in/saloninarang/',
   },
@@ -203,7 +203,7 @@ function Hero() {
               <div className="absolute -inset-8 rounded-3xl bg-gradient-to-br from-[#5CFF68]/10 to-[#05CAFF]/10 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-700" />
               <div className="relative hero-float">
                 <img
-                  src="/img/book-cover.png"
+                  src="/img/book-cover.webp"
                   alt="GPU-Enabled Platforms on Kubernetes - Free E-Book"
                   className="w-72 rounded-lg shadow-2xl group-hover:shadow-[0_30px_80px_rgba(5,202,255,0.15)] transition-shadow duration-500"
                 />
@@ -228,7 +228,7 @@ function Hero() {
           style={{ borderColor: 'var(--border-medium)', background: 'var(--border-subtle)' }}
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.9 }}
         >
-          <img src="/img/book-cover.png" alt="Free E-Book" className="w-16 h-20 rounded object-cover flex-shrink-0" />
+          <img src="/img/book-cover.webp" alt="Free E-Book" className="w-16 h-20 rounded object-cover flex-shrink-0" />
           <div>
             <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--accent)' }}>Free E-Book</div>
             <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>GPU-Enabled Platforms on K8s</div>
@@ -459,7 +459,7 @@ function Book() {
             <div className="relative group">
               <div className="absolute -inset-4 rounded-2xl bg-gradient-to-br from-[#5CFF68]/10 to-[#05CAFF]/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <img
-                src="/img/book-cover.png"
+                src="/img/book-cover.webp"
                 alt="GPU-Enabled Platforms on Kubernetes - by Saiyam Pathak & Daniele Polencic"
                 className="relative w-64 md:w-72 rounded-lg shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500"
                 style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.4)' }}
