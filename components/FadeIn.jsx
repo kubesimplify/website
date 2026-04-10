@@ -1,8 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { LazyMotion, domAnimation, m } from 'framer-motion';
 
-export function FadeIn({ children, delay = 0, className = '', direction = 'up' }) {
+function FadeInInner({ children, delay = 0, className = '', direction = 'up' }) {
   const dirMap = {
     up: { y: 30 },
     down: { y: -30 },
@@ -12,7 +12,7 @@ export function FadeIn({ children, delay = 0, className = '', direction = 'up' }
   };
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, ...dirMap[direction] }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
@@ -24,31 +24,41 @@ export function FadeIn({ children, delay = 0, className = '', direction = 'up' }
       className={className}
     >
       {children}
-    </motion.div>
+    </m.div>
+  );
+}
+
+export function FadeIn(props) {
+  return (
+    <LazyMotion features={domAnimation}>
+      <FadeInInner {...props} />
+    </LazyMotion>
   );
 }
 
 export function StaggerContainer({ children, className = '' }) {
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-60px' }}
-      variants={{
-        visible: {
-          transition: { staggerChildren: 0.08 },
-        },
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <LazyMotion features={domAnimation}>
+      <m.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-60px' }}
+        variants={{
+          visible: {
+            transition: { staggerChildren: 0.08 },
+          },
+        }}
+        className={className}
+      >
+        {children}
+      </m.div>
+    </LazyMotion>
   );
 }
 
 export function StaggerItem({ children, className = '' }) {
   return (
-    <motion.div
+    <m.div
       variants={{
         hidden: { opacity: 0, y: 24 },
         visible: {
@@ -63,6 +73,6 @@ export function StaggerItem({ children, className = '' }) {
       className={className}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
