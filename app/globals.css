@@ -292,3 +292,29 @@ a:focus-visible, button:focus-visible {
 .bg-accent-soft { background: rgba(5, 202, 255, 0.1); }
 .dark .bg-accent-soft { background: rgba(5, 202, 255, 0.1); }
 .border-accent-soft { border-color: rgba(5, 202, 255, 0.2); }
+
+/* ═══════════════════════════════════════════
+   HERO ENTRANCE ANIMATIONS (CSS-only, no JS)
+   ═══════════════════════════════════════════ */
+
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heroFadeRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.hero-enter {
+  animation: heroFadeUp 0.7s ease-out both;
+}
+
+.hero-enter-right {
+  animation: heroFadeRight 0.8s ease-out both;
+}
+
+/* Marquee hover (CSS-only) */
+.marquee-item { color: var(--text-muted); transition: color 0.3s; }
+.marquee-item:hover { color: var(--accent); }

@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { FadeIn, StaggerContainer, StaggerItem } from '@/components/FadeIn';
-import YouTubeFeed from '@/components/YouTubeFeed';
-import BlogFeed from '@/components/BlogFeed';
+
+const YouTubeFeed = dynamic(() => import('@/components/YouTubeFeed'), { ssr: false });
+const BlogFeed = dynamic(() => import('@/components/BlogFeed'), { ssr: false });
 
 /* ═══════════════════════════════════════════
    DATA
@@ -79,9 +80,9 @@ const projects = [
     name: 'ClawSpark',
     desc: 'One-click AI agent setup for NVIDIA DGX Spark, Jetson, and RTX hardware. OpenClaw + Ollama, fully local.',
     tech: ['Python', 'AI/LLM', 'NVIDIA DGX'],
-    url: 'https://github.com/ClawSpark/ClawSpark',
-    logo: null,
-    emoji: '⚡',
+    url: 'https://github.com/theshiphq/claw-spark',
+    logo: '/img/clawspark-logo.svg',
+    emoji: null,
   },
   {
     name: 'ing-switch',
@@ -96,8 +97,8 @@ const projects = [
     desc: 'Write once, publish everywhere - Markdown editor with live previews for Hashnode, Dev.to, Medium & LinkedIn.',
     tech: ['Next.js', 'Markdown', 'CI/CD'],
     url: 'https://github.com/saiyam1814/blogkit',
-    logo: null,
-    emoji: '📝',
+    logo: '/img/blogkit-logo.svg',
+    emoji: null,
   },
   {
     name: 'Kubesimplify Website',
@@ -146,7 +147,7 @@ function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left: Text content */}
           <div className="lg:col-span-7 text-center lg:text-left">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
+            <div className="hero-enter" style={{ animationDelay: '100ms', animationDuration: '600ms' }}>
               <div className="inline-flex items-center gap-2.5 rounded-full border px-5 py-2.5 text-[11px] font-semibold tracking-[0.2em] uppercase backdrop-blur-sm mb-10"
                 style={{ borderColor: 'var(--border-medium)', background: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
                 <span className="relative flex h-2 w-2">
@@ -155,43 +156,39 @@ function Hero() {
                 </span>
                 Where AI Meets Cloud Native
               </div>
-            </motion.div>
+            </div>
 
-            <motion.h1 className="text-display-lg" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
+            <h1 className="text-display-lg hero-enter" style={{ animationDelay: '200ms' }}>
               Simplifying
-            </motion.h1>
-            <motion.h1 className="text-display-lg gradient-text-hero mb-4" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}>
+            </h1>
+            <h1 className="text-display-lg gradient-text-hero mb-4 hero-enter" style={{ animationDelay: '350ms' }}>
               Cloud Native & AI
-            </motion.h1>
-            <motion.p className="text-display" style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--text-muted)' }}
-              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}>
+            </h1>
+            <p className="text-display hero-enter" style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--text-muted)', animationDelay: '500ms' }}>
               for Everyone.
-            </motion.p>
+            </p>
 
-            <motion.p className="mt-8 text-lg max-w-2xl leading-relaxed mx-auto lg:mx-0" style={{ color: 'var(--text-secondary)' }}
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.65 }}>
+            <p className="mt-8 text-lg max-w-2xl leading-relaxed mx-auto lg:mx-0 hero-enter" style={{ color: 'var(--text-secondary)', animationDelay: '650ms', animationDuration: '600ms' }}>
               Expert-led workshops, deep-dive content, and open source tools for engineers building with{' '}
               <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Kubernetes</span>,{' '}
               <span style={{ color: 'var(--accent-secondary)', fontWeight: 500 }}>AI/ML infrastructure</span>, and the cloud native stack.
-            </motion.p>
+            </p>
 
-            <motion.div className="mt-10 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4"
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.8 }}>
+            <div className="mt-10 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 hero-enter"
+              style={{ animationDelay: '800ms', animationDuration: '600ms' }}>
               <Link href="/workshops" className="btn-primary px-8 py-4 rounded-xl text-base inline-flex items-center gap-2">
                 <span>Explore Workshops</span><span className="text-lg">&rarr;</span>
               </Link>
               <a href="mailto:contact@kubesimplify.com" className="btn-secondary px-8 py-4 rounded-xl text-base">
                 Partner With Us
               </a>
-            </motion.div>
+            </div>
           </div>
 
           {/* Right: Floating book */}
-          <motion.div
-            className="lg:col-span-5 hidden lg:flex justify-center"
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
+          <div
+            className="lg:col-span-5 hidden lg:flex justify-center hero-enter-right"
+            style={{ animationDelay: '600ms' }}
           >
             <a
               href="https://saiyampathak.gumroad.com/l/gpubook"
@@ -205,7 +202,7 @@ function Hero() {
                 <img
                   src="/img/book-cover.webp"
                   alt="GPU-Enabled Platforms on Kubernetes - Free E-Book"
-                  className="w-72 rounded-lg shadow-2xl group-hover:shadow-[0_30px_80px_rgba(5,202,255,0.15)] transition-shadow duration-500"
+                  className="w-72 rounded-lg shadow-2xl group-hover:shadow-[0_30px_80px_rgba(5,202,255,0.15)] transition-shadow duration-500 border border-gray-200 dark:border-white/10"
                 />
                 <div className="absolute -top-3 -right-3 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider gradient-bg text-gray-950 shadow-lg">
                   Free E-Book
@@ -216,17 +213,16 @@ function Hero() {
                 </div>
               </div>
             </a>
-          </motion.div>
+          </div>
         </div>
 
         {/* Mobile book banner - shown only on mobile */}
-        <motion.a
+        <a
           href="https://saiyampathak.gumroad.com/l/gpubook"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-12 lg:hidden flex items-center gap-4 rounded-2xl border p-4 mx-auto max-w-sm"
-          style={{ borderColor: 'var(--border-medium)', background: 'var(--border-subtle)' }}
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.9 }}
+          className="mt-12 lg:hidden flex items-center gap-4 rounded-2xl border p-4 mx-auto max-w-sm hero-enter"
+          style={{ borderColor: 'var(--border-medium)', background: 'var(--border-subtle)', animationDelay: '900ms', animationDuration: '600ms' }}
         >
           <img src="/img/book-cover.webp" alt="Free E-Book" className="w-16 h-20 rounded object-cover flex-shrink-0" />
           <div>
@@ -234,18 +230,18 @@ function Hero() {
             <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>GPU-Enabled Platforms on K8s</div>
             <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Download &rarr;</div>
           </div>
-        </motion.a>
+        </a>
 
         {/* Stats - full width below */}
-        <motion.div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto lg:mx-0"
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.95 }}>
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto lg:mx-0 hero-enter"
+          style={{ animationDelay: '950ms', animationDuration: '600ms' }}>
           {stats.map((s, i) => (
             <div key={i} className="py-5 px-4 rounded-xl border text-center lg:text-left" style={{ borderColor: 'var(--border-subtle)', background: 'var(--border-subtle)' }}>
               <div className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>{s.value}</div>
               <div className="mt-1 text-[11px] uppercase tracking-[0.15em] font-medium" style={{ color: 'var(--text-muted)' }}>{s.label}</div>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -266,10 +262,7 @@ function TrustedBy() {
       <div className="marquee-mask overflow-hidden">
         <div className="marquee-track">
           {[...partners, ...partners].map((name, i) => (
-            <span key={i} className="text-xl font-bold whitespace-nowrap select-none transition-colors duration-300"
-              style={{ color: 'var(--text-muted)' }}
-              onMouseEnter={e => e.target.style.color = 'var(--accent-cyan)'}
-              onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>
+            <span key={i} className="text-xl font-bold whitespace-nowrap select-none marquee-item">
               {name}
             </span>
           ))}
@@ -461,7 +454,7 @@ function Book() {
               <img
                 src="/img/book-cover.webp"
                 alt="GPU-Enabled Platforms on Kubernetes - by Saiyam Pathak & Daniele Polencic"
-                className="relative w-64 md:w-72 rounded-lg shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500"
+                className="relative w-64 md:w-72 rounded-lg shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500 border border-gray-200 dark:border-white/10"
                 style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.4)' }}
               />
               <div className="absolute -top-3 -right-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider gradient-bg text-gray-950">
