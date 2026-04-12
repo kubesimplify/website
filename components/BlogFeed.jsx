@@ -41,6 +41,7 @@ export default function BlogFeed({ count = 6, showSearch = false }) {
         if (result.data?.publication?.posts?.edges) {
           const sorted = result.data.publication.posts.edges
             .map((e) => e.node)
+            .filter((b) => !b.slug || /^[a-zA-Z0-9_-]+$/.test(b.slug))
             .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
             .slice(0, count);
           setBlogs(sorted);
@@ -110,6 +111,7 @@ export default function BlogFeed({ count = 6, showSearch = false }) {
               placeholder="Search articles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              maxLength={200}
               className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-gray-900/80 border border-white/[0.08] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all text-sm"
             />
           </div>

@@ -3,9 +3,18 @@ import BlogFeed from '@/components/BlogFeed';
 export const metadata = {
   title: 'Blog - Cloud Native & AI Articles',
   description: 'Technical deep-dives, tutorials, and insights on Kubernetes, cloud native, AI/ML infrastructure, and DevOps from the Kubesimplify community.',
+  keywords: ['kubernetes blog', 'cloud native articles', 'AI ML tutorials', 'DevOps guides', 'CNCF blog', 'container tutorials'],
+  alternates: { canonical: 'https://kubesimplify.com/blogs' },
   openGraph: {
     title: 'Kubesimplify Blog - Cloud Native & AI Articles',
     description: 'Technical deep-dives on Kubernetes, AI, and cloud native.',
+    images: [{ url: 'https://kubesimplify.com/img/og.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kubesimplify Blog - Cloud Native & AI Articles',
+    description: 'Technical deep-dives on Kubernetes, AI, and cloud native.',
+    images: ['https://kubesimplify.com/img/og.png'],
   },
 };
 

@@ -69,8 +69,13 @@ export default function YouTubeFeed({ count = 3, source = 'mixed' }) {
           result = await fetchChannel();
         }
 
-        if (result.length > 0) {
-          setVideos(result.slice(0, count));
+        // Validate URLs from third-party API
+        const safe = result.filter(v =>
+          (!v.link || v.link.startsWith('https://')) &&
+          (!v.thumbnail || v.thumbnail.startsWith('https://'))
+        );
+        if (safe.length > 0) {
+          setVideos(safe.slice(0, count));
         } else {
           setError(true);
         }

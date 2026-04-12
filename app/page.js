@@ -160,9 +160,9 @@ function Hero() {
 
             <h1 className="text-display-lg hero-enter" style={{ animationDelay: '200ms' }}>
               Simplifying
-            </h1>
-            <h1 className="text-display-lg gradient-text-hero mb-4 hero-enter" style={{ animationDelay: '350ms' }}>
-              Cloud Native & AI
+              <span className="text-display-lg gradient-text-hero block hero-enter" style={{ animationDelay: '350ms' }}>
+                Cloud Native & AI
+              </span>
             </h1>
             <p className="text-display hero-enter" style={{ fontSize: 'clamp(1.5rem, 4vw, 3.5rem)', fontWeight: 700, color: 'var(--text-muted)', animationDelay: '500ms' }}>
               for Everyone.
