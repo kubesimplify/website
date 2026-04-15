@@ -116,7 +116,7 @@ const jsonLd = {
       name: 'The Kubernetes Course 2025',
       description: 'Complete Kubernetes course covering everything from basics to advanced concepts for 2025.',
       thumbnailUrl: 'https://i.ytimg.com/vi/7XDeI5fyj3w/hqdefault.jpg',
-      uploadDate: '2025-01-01',
+      uploadDate: '2025-01-01T00:00:00+00:00',
       contentUrl: 'https://www.youtube.com/watch?v=7XDeI5fyj3w',
       embedUrl: 'https://www.youtube.com/embed/7XDeI5fyj3w',
       publisher: {
@@ -130,7 +130,7 @@ const jsonLd = {
       name: 'Master Kubernetes Operators with Kubebuilder',
       description: 'Learn how to build Kubernetes operators using Kubebuilder framework with hands-on examples.',
       thumbnailUrl: 'https://i.ytimg.com/vi/X5kkrIPr5Hk/hqdefault.jpg',
-      uploadDate: '2025-01-01',
+      uploadDate: '2025-01-01T00:00:00+00:00',
       contentUrl: 'https://www.youtube.com/watch?v=X5kkrIPr5Hk',
       embedUrl: 'https://www.youtube.com/embed/X5kkrIPr5Hk',
       publisher: {
@@ -144,7 +144,7 @@ const jsonLd = {
       name: 'DevOps Roadmap 2025: Step-by-Step Guide',
       description: 'Your complete step-by-step guide to mastering DevOps in 2025 covering tools, practices, and career paths.',
       thumbnailUrl: 'https://i.ytimg.com/vi/Tvx5LB3jOYQ/hqdefault.jpg',
-      uploadDate: '2025-01-01',
+      uploadDate: '2025-01-01T00:00:00+00:00',
       contentUrl: 'https://www.youtube.com/watch?v=Tvx5LB3jOYQ',
       embedUrl: 'https://www.youtube.com/embed/Tvx5LB3jOYQ',
       publisher: {
