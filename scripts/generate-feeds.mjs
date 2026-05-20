@@ -73,7 +73,6 @@ const latest = posts[0]?.datePublished ? new Date(posts[0].datePublished).toUTCS
 
 // ── RSS 2.0 ───────────────────────────────────────────────────────────────
 const rssItems = posts
-  .slice(0, 50)
   .map((p) => {
     const link = `${SITE_URL}/${p.slug}`;
     const pubDate = new Date(p.datePublished).toUTCString();
@@ -107,7 +106,6 @@ writeFileSync(join(PUBLIC, 'rss.xml'), rss, 'utf8');
 
 // ── Atom 1.0 ──────────────────────────────────────────────────────────────
 const atomEntries = posts
-  .slice(0, 50)
   .map((p) => {
     const link = `${SITE_URL}/${p.slug}`;
     const updated = new Date(p.datePublished).toISOString();
@@ -248,7 +246,7 @@ export const FEED_POSTS = ${JSON.stringify(feedData, null, 2)};
 writeFileSync(join(ROOT, 'lib', '_blog-feed-data.js'), feedJs, 'utf8');
 
 console.log(`Generated:`);
-console.log(`  rss.xml                  (${posts.slice(0, 50).length} items)`);
-console.log(`  atom.xml                 (${posts.slice(0, 50).length} entries)`);
+console.log(`  rss.xml                  (${posts.length} items)`);
+console.log(`  atom.xml                 (${posts.length} entries)`);
 console.log(`  llms.txt                 (${posts.length} posts indexed)`);
 console.log(`  lib/_blog-feed-data.js   (${feedData.length} posts for homepage)`);
