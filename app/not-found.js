@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-const KNOWN_PATHS = ['/', '/about', '/blogs', '/workshops', '/partnerships', '/resources'];
+const KNOWN_PATHS = ['/', '/about', '/blog', '/blogs', '/workshops', '/partnerships', '/resources'];
 
 export default function NotFound() {
   const [redirectUrl, setRedirectUrl] = useState('');
@@ -10,9 +10,10 @@ export default function NotFound() {
   useEffect(() => {
     const path = window.location.pathname.replace(/\/$/, '') || '/';
     if (!KNOWN_PATHS.includes(path)) {
-      const slug = path.replace(/^\//, '');
+      const slug = path.replace(/^\//, '').replace(/^blog\//, '');
       if (slug) {
-        const url = `https://blog.kubesimplify.com/${slug}`;
+        // Try the self-hosted blog first; same slugs as the old Hashnode URLs.
+        const url = `/blog/${slug}`;
         setRedirectUrl(url);
         window.location.replace(url);
       }

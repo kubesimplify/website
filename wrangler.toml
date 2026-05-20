@@ -1,0 +1,10 @@
+# Cloudflare Workers + Static Assets config for blog.kubesimplify.com
+# Build is `npm run build` (produces /out). Wrangler uploads that dir to Cloudflare.
+# Redirect rules live in public/_redirects (copied to out/_redirects at build).
+
+name = "website"
+compatibility_date = "2024-12-01"
+
+[assets]
+directory = "./out"
+not_found_handling = "404-page"

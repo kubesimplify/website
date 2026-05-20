@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Kubesimplify Blog</title>
+  <subtitle>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</subtitle>
+  <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
+  <link href="https://blog.kubesimplify.com/"/>
+  <id>https://blog.kubesimplify.com/</id>
+  <updated>2026-05-20T06:17:14.657Z</updated>
+  <author>
+    <name>Kubesimplify</name>
+    <email>hello@kubesimplify.com</email>
+  </author>
+  <entry>
+    <title>How Kubernetes EndpointSlices Actually Work (and Why Endpoints Had to Die)</title>
+    <link href="https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die"/>
+    <id>https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die</id>
+    <updated>2026-05-11T17:09:39.080Z</updated>
+    <published>2026-05-11T17:09:39.080Z</published>
+    <summary></summary>
+    <category term="kubernetes"/>
+    <category term="devops"/>
+    <category term="networking"/>
+    <category term="kube-proxy"/>
+    <category term="endpointslices"/>
+  </entry>
+  <entry>
+    <title>NVCF Is Now Open Source: Inside NVIDIA&apos;s GPU Function Platform</title>
+    <link href="https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform"/>
+    <id>https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform</id>
+    <updated>2026-05-11T13:04:44.104Z</updated>
+    <published>2026-05-11T13:04:44.104Z</published>
+    <summary></summary>
+    <category term="opensource"/>
+    <category term="kubernetes"/>
+    <category term="nvidia"/>
+    <category term="gpu"/>
+    <category term="cloudnative"/>
+  </entry>
+  <entry>
+    <title>How a Kubernetes Service Actually Works (and All 5 Types You Need)</title>
+    <link href="https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need"/>
+    <id>https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need</id>
+    <updated>2026-05-05T06:55:18.005Z</updated>
+    <published>2026-05-05T06:55:18.005Z</published>
+    <summary></summary>
+    <category term="kubernetes"/>
+    <category term="service"/>
+    <category term="devops"/>
+    <category term="networking"/>
+    <category term="cloud-native"/>
+  </entry>
+  <entry>
+    <title>Day 7: Ship It - and What Comes Next</title>
+    <link href="https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next"/>
+    <id>https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next</id>
+    <updated>2026-05-04T05:35:33.778Z</updated>
+    <published>2026-05-04T05:35:33.778Z</published>
+    <summary>Your container runs as root and has 18 CVEs. A Docker Captain&apos;s guide to hardening, Scout policies, DHI, Sandboxes, and what comes after Docker. </summary>
+    <category term="docker"/>
+    <category term="security"/>
+    <category term="devops"/>
+    <category term="cloud-native"/>
+    <category term="production-ready"/>
+    <category term="docker-scout"/>
+    <category term="hardenedimages"/>
+    <category term="learndocker"/>
+    <category term="dockercaptain"/>
+  </entry>
+  <entry>
+    <title>Day 6: Run an LLM on Your Laptop - With Docker</title>
+    <link href="https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker"/>
+    <id>https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker</id>
+    <updated>2026-04-30T15:38:25.439Z</updated>
+    <published>2026-04-30T15:38:25.439Z</published>
+    <summary>\&quot;Pull AI models from Docker Hub, run them locally with GPU acceleration, and build an AI-powered app</summary>
+    <category term="ai"/>
+    <category term="docker"/>
+    <category term="devops"/>
+    <category term="openai"/>
+    <category term="llm"/>
+    <category term="mlx"/>
+    <category term="docker-model-runner"/>
+  </entry>
+  <entry>
+    <title>A Kubeconfig for GKE That Doesn&apos;t Need gcloud</title>
+    <link href="https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud"/>
+    <id>https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud</id>
+    <updated>2026-04-29T05:56:22.335Z</updated>
+    <published>2026-04-29T05:56:22.335Z</published>
+    <summary></summary>
+
+  </entry>
+  <entry>
+    <title>Day 5: Docker Compose - How Docker Actually Gets Used</title>
+    <link href="https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used"/>
+    <id>https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used</id>
+    <updated>2026-04-28T13:38:38.532Z</updated>
+    <published>2026-04-28T13:38:38.532Z</published>
+    <summary></summary>
+    <category term="docker"/>
+    <category term="docker-compose"/>
+    <category term="docker-images"/>
+  </entry>
+  <entry>
+    <title>What Actually Happens When kube-scheduler Picks a Node (13 Stages Inside Kubernetes)</title>
+    <link href="https://blog.kubesimplify.com/kube-scheduler-deep-dive"/>
+    <id>https://blog.kubesimplify.com/kube-scheduler-deep-dive</id>
+    <updated>2026-04-28T11:25:13.348Z</updated>
+    <published>2026-04-28T11:25:13.348Z</published>
+    <summary>How kube-scheduler picks a node: 13 framework stages, 14 Filter plugins, 9 Score plugins, live preemption demo.</summary>
+    <category term="kubernetes"/>
+    <category term="devops"/>
+    <category term="internals"/>
+    <category term="scheduler"/>
+    <category term="cloud-native"/>
+  </entry>
+  <entry>
+    <title>Day 4: Breaking Isolation on Purpose - Volumes, Networks, and the Real World</title>
+    <link href="https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world"/>
+    <id>https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world</id>
+    <updated>2026-04-27T17:44:24.875Z</updated>
+    <published>2026-04-27T17:44:24.875Z</published>
+    <summary></summary>
+    <category term="docker"/>
+    <category term="docker-images"/>
+    <category term="docker-container"/>
+    <category term="docker-network"/>
+    <category term="docker-storage"/>
+    <category term="docker-volume"/>
+  </entry>
+  <entry>
+    <title>Day 3: Stop Writing Dockerfiles From Scratch</title>
+    <link href="https://blog.kubesimplify.com/day-3-stop-writing-dockerfiles-from-scratch"/>
+    <id>https://blog.kubesimplify.com/day-3-stop-writing-dockerfiles-from-scratch</id>
+    <updated>2026-04-24T17:10:21.609Z</updated>
+    <published>2026-04-24T17:10:21.609Z</published>
+    <summary>Stop writing Dockerfiles from scratch. A Docker Captain walks through docker init, layer caching, multi-stage builds, and docker debug for 2026.</summary>
+    <category term="docker"/>
+    <category term="dockerfile"/>
+    <category term="docker-images"/>
+    <category term="docker-captain"/>
+  </entry>
+  <entry>
+    <title>What Actually Happens When You Run kubectl run nginx</title>
+    <link href="https://blog.kubesimplify.com/kubectl-run-nginx-inside"/>
+    <id>https://blog.kubesimplify.com/kubectl-run-nginx-inside</id>
+    <updated>2026-04-24T11:30:41.065Z</updated>
+    <published>2026-04-24T11:30:41.065Z</published>
+    <summary>Every step of what happens when you run kubectl run nginx on Kubernetes. From argv to etcd Raft, scheduler, CRI, CNI, runc, and PLEG.</summary>
+    <category term="kubernetes"/>
+    <category term="devops"/>
+    <category term="containers"/>
+    <category term="cloud-native"/>
+    <category term="kubectl"/>
+    <category term="pods"/>
+  </entry>
+  <entry>
+    <title>Day 2: Your Images Are a Supply Chain - and It&apos;s Probably Broken</title>
+    <link href="https://blog.kubesimplify.com/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken"/>
+    <id>https://blog.kubesimplify.com/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken</id>
+    <updated>2026-04-23T09:33:10.632Z</updated>
+    <published>2026-04-23T09:33:10.632Z</published>
+    <summary></summary>
+    <category term="docker"/>
+    <category term="opensource"/>
+    <category term="2025toptools"/>
+  </entry>
+  <entry>
+    <title>Day 1: What Actually Happens When You Type docker run</title>
+    <link href="https://blog.kubesimplify.com/day-1-what-actually-happens-when-you-type-docker-run"/>
+    <id>https://blog.kubesimplify.com/day-1-what-actually-happens-when-you-type-docker-run</id>
+    <updated>2026-04-22T10:38:27.885Z</updated>
+    <published>2026-04-22T10:38:27.885Z</published>
+    <summary>Containers aren&apos;t VMs. They&apos;re Linux processes. A Docker Captain explains namespaces, cgroups, and how Docker really works on your Mac in 2026.    </summary>
+    <category term="linux"/>
+    <category term="docker"/>
+    <category term="devops"/>
+    <category term="containers"/>
+    <category term="cloud-native"/>
+    <category term="docker-desktop"/>
+  </entry>
+  <entry>
+    <title>\&quot;SSH Into Your DGX Spark From Anywhere in the World Using Tailscale</title>
+    <link href="https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale"/>
+    <id>https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale</id>
+    <updated>2026-04-07T12:01:10.914Z</updated>
+    <published>2026-04-07T12:01:10.914Z</published>
+    <summary>Learn how to set up Tailscale on your NVIDIA DGX Spark for secure SSH access from anywhere in the world.</summary>
+    <category term="kubernetes"/>
+    <category term="devops"/>
+    <category term="ssh"/>
+    <category term="nvidia"/>
+    <category term="tailscale"/>
+    <category term="dgxspark"/>
+  </entry>
+  <entry>
+    <title>What Claude Code&apos;s Leaked Source Actually Teaches Us About Building AI Agents</title>
+    <link href="https://blog.kubesimplify.com/claude-code-leak-what-the-source-actually-teaches"/>
+    <id>https://blog.kubesimplify.com/claude-code-leak-what-the-source-actually-teaches</id>
+    <updated>2026-04-01T15:13:33.877Z</updated>
+    <published>2026-04-01T15:13:33.877Z</published>
+    <summary>512K lines of TypeScript, verified against actual source. The engineering patterns in Claude Code&apos;s leaked codebase that most coverage got wrong.</summary>
+    <category term="typescript"/>
+    <category term="llm"/>
+    <category term="ai-agents"/>
+    <category term="ai-engineering"/>
+    <category term="claude-code"/>
+  </entry>
+  <entry>
+    <title>The Ingress NGINX Migration Just Got Easier: 119 Annotations, 3 Targets, Impact Ratings</title>
+    <link href="https://blog.kubesimplify.com/ing-switch-119-annotations-gateway-api-traefik-impact-ratings"/>
+    <id>https://blog.kubesimplify.com/ing-switch-119-annotations-gateway-api-traefik-impact-ratings</id>
+    <updated>2026-03-30T12:30:00.000Z</updated>
+    <published>2026-03-30T12:30:00.000Z</published>
+    <summary>\&quot;Ingress NGINX was archived March 24, 2026. ing-switch maps all 119 NGINX annotations with</summary>
+    <category term="kubernetes"/>
+    <category term="migration"/>
+    <category term="devops"/>
+    <category term="cloud-native"/>
+    <category term="traefik"/>
+    <category term="gateway-api"/>
+    <category term="ingress-nginx"/>
+  </entry>
+  <entry>
+    <title>clawspark: Your Private OpenClaw AI Assistant That Never Phones Home</title>
+    <link href="https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home"/>
+    <id>https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home</id>
+    <updated>2026-03-15T15:37:37.104Z</updated>
+    <published>2026-03-15T15:37:37.104Z</published>
+    <summary>Clawspark provides a way to Install openclaw on your device in a secure way with a single command. </summary>
+    <category term="ollama"/>
+    <category term="ai-assistants"/>
+    <category term="ai-agent"/>
+    <category term="openclaw"/>
+    <category term="clawspark"/>
+  </entry>
+  <entry>
+    <title>Here&apos;s What I Learned About Nemotron 3 Super -I Ran a 120B Parameter Model on Nvidia DGX Spark</title>
+    <link href="https://blog.kubesimplify.com/nemotron3-on-dgx-spark"/>
+    <id>https://blog.kubesimplify.com/nemotron3-on-dgx-spark</id>
+    <updated>2026-03-14T12:44:36.246Z</updated>
+    <published>2026-03-14T12:44:36.246Z</published>
+    <summary>Understand everything about Nvidia DGX spark along with hands on and benchmarks. </summary>
+    <category term="nvidia"/>
+    <category term="ai-agents"/>
+    <category term="dgxspark"/>
+    <category term="nemotron-3"/>
+    <category term="nemotron"/>
+  </entry>
+  <entry>
+    <title>ing-switch: Migrate from Ingress NGINX to Traefik or Gateway API in Minutes, Not Days</title>
+    <link href="https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days"/>
+    <id>https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days</id>
+    <updated>2026-02-25T17:24:43.487Z</updated>
+    <published>2026-02-25T17:24:43.487Z</published>
+    <summary></summary>
+
+  </entry>
+  <entry>
+    <title>Exploiting Metasploitable2 Using msfconsole (Kali Linux Lab)</title>
+    <link href="https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab"/>
+    <id>https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab</id>
+    <updated>2026-01-17T16:15:22.400Z</updated>
+    <published>2026-01-17T16:15:22.400Z</published>
+    <summary></summary>
+    <category term="cybersecurity"/>
+    <category term="msfconsole"/>
+    <category term="web-exploitation"/>
+    <category term="metasploitable2"/>
+  </entry>
+  <entry>
+    <title>Kubernetes v1.35 – What’s New, What’s Changing, and What You Should Know</title>
+    <link href="https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know"/>
+    <id>https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know</id>
+    <updated>2025-12-19T13:42:59.181Z</updated>
+    <published>2025-12-19T13:42:59.181Z</published>
+    <summary>Learn about the latest Kubenretes release Kubernetes 1.35</summary>
+    <category term="kubernetes"/>
+    <category term="new"/>
+    <category term="newrelease"/>
+    <category term="release-updates"/>
+    <category term="kuberntes-135"/>
+  </entry>
+  <entry>
+    <title>Ditch the Overheating Laptop: Supercharge Your Docker Workflow with Docker Offload</title>
+    <link href="https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload"/>
+    <id>https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload</id>
+    <updated>2025-08-26T06:40:46.134Z</updated>
+    <published>2025-08-26T06:40:46.134Z</published>
+    <summary>Running multiple Docker containers can slow down your laptop and drain your battery. In this blog, we explore Docker Offload — a game-changing feature</summary>
+    <category term="ai"/>
+    <category term="cloud"/>
+    <category term="docker"/>
+    <category term="docker-desktop"/>
+  </entry>
+  <entry>
+    <title>Docker MCP Catalog: Finding the Right AI Tools for Your Project</title>
+    <link href="https://blog.kubesimplify.com/docker-mcp-catalog"/>
+    <id>https://blog.kubesimplify.com/docker-mcp-catalog</id>
+    <updated>2025-06-26T07:32:05.511Z</updated>
+    <published>2025-06-26T07:32:05.511Z</published>
+    <summary>This blog describes what Docker MCP is and how it</summary>
+    <category term="ai"/>
+    <category term="docker"/>
+    <category term="docker-images"/>
+    <category term="docker-desktop"/>
+    <category term="llm"/>
+    <category term="mcp"/>
+  </entry>
+  <entry>
+    <title>Kubernetes v1.33: Key Features, Updates, and What You Need to Know</title>
+    <link href="https://blog.kubesimplify.com/kubernetes-v133-key-features-updates-and-what-you-need-to-know"/>
+    <id>https://blog.kubesimplify.com/kubernetes-v133-key-features-updates-and-what-you-need-to-know</id>
+    <updated>2025-06-10T07:24:57.667Z</updated>
+    <published>2025-06-10T07:24:57.667Z</published>
+    <summary>\&quot;Kubernetes v1.33: Key Features, Updates, and What You Need to Know</summary>
+    <category term="kubernetes"/>
+    <category term="devops"/>
+    <category term="devrel"/>
+    <category term="kubernetes-container"/>
+    <category term="newrelease"/>
+    <category term="v133"/>
+  </entry>
+  <entry>
+    <title>Ephemeral Pull Request environment using Vcluster.</title>
+    <link href="https://blog.kubesimplify.com/ephemeral-pull-request-environment-using-vcluster"/>
+    <id>https://blog.kubesimplify.com/ephemeral-pull-request-environment-using-vcluster</id>
+    <updated>2025-04-10T16:52:03.343Z</updated>
+    <published>2025-04-10T16:52:03.343Z</published>
+    <summary></summary>
+    <category term="demo"/>
+    <category term="kubernetes"/>
+    <category term="applications"/>
+    <category term="pull-requests"/>
+    <category term="cluster"/>
+    <category term="ingress-controllers"/>
+    <category term="vcluster"/>
+  </entry>
+  <entry>
+    <title>Multi tenancy in 2025 and beyond</title>
+    <link href="https://blog.kubesimplify.com/multi-tenancy-in-2025-and-beyond"/>
+    <id>https://blog.kubesimplify.com/multi-tenancy-in-2025-and-beyond</id>
+    <updated>2025-03-12T06:11:58.485Z</updated>
+    <published>2025-03-12T06:11:58.485Z</published>
+    <summary>Multi-tenancy in Kubernetes has been an ongoing challenge for organizations looking to optimize their cloud-native infrastructure. Over the years, the appro</summary>
+    <category term="kubernetes"/>
+    <category term="cluster"/>
+    <category term="argocd"/>
+    <category term="multitenancy"/>
+  </entry>
+  <entry>
+    <title>Testing Docker AI&apos;s \&quot;Gordon\&quot; – How Smart Is It?</title>
+    <link href="https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it"/>
+    <id>https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it</id>
+    <updated>2025-02-21T07:28:49.667Z</updated>
+    <published>2025-02-21T07:28:49.667Z</published>
+    <summary>Testing Docker AI&apos;s \&quot;Gordon\&quot; – How Smart Is It?</summary>
+    <category term="ai"/>
+    <category term="docker"/>
+    <category term="docker-desktop"/>
+    <category term="ai-tools"/>
+    <category term="dockerdesktop"/>
+    <category term="docker-gordon"/>
+  </entry>
+  <entry>
+    <title>Understanding Docker Desktop: All-in-One Platform for Containers</title>
+    <link href="https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers"/>
+    <id>https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers</id>
+    <updated>2025-01-31T10:56:37.289Z</updated>
+    <published>2025-01-31T10:56:37.289Z</published>
+    <summary>This is a blog on docker desktop which discusses about how to use it&apos;s features</summary>
+    <category term="docker"/>
+    <category term="kubernetes"/>
+    <category term="devrel"/>
+    <category term="devops-journey"/>
+    <category term="docker-desktop"/>
+  </entry>
+  <entry>
+    <title>Best DevOps Tools 2025</title>
+    <link href="https://blog.kubesimplify.com/best-devops-tools-2025"/>
+    <id>https://blog.kubesimplify.com/best-devops-tools-2025</id>
+    <updated>2025-01-13T07:18:15.133Z</updated>
+    <published>2025-01-13T07:18:15.133Z</published>
+    <summary>Best DevOps tools in 2025</summary>
+    <category term="technology"/>
+    <category term="kubernetes"/>
+    <category term="devops"/>
+    <category term="trending"/>
+    <category term="2025"/>
+  </entry>
+  <entry>
+    <title>Becoming a Docker Captain</title>
+    <link href="https://blog.kubesimplify.com/docker-captain-journey"/>
+    <id>https://blog.kubesimplify.com/docker-captain-journey</id>
+    <updated>2024-12-17T06:22:46.559Z</updated>
+    <published>2024-12-17T06:22:46.559Z</published>
+    <summary>This blog shares Saloni Narang&apos;s Journey on becoming Docker captain and also a quick introduction to docker desktop.</summary>
+    <category term="docker"/>
+    <category term="kubernetes"/>
+    <category term="docker-desktop"/>
+    <category term="docker-captain"/>
+  </entry>
+  <entry>
+    <title>Mastering Kubernetes Costs: From Monitoring to Automation</title>
+    <link href="https://blog.kubesimplify.com/mastering-kubernetes-costs-from-monitoring-to-automation"/>
+    <id>https://blog.kubesimplify.com/mastering-kubernetes-costs-from-monitoring-to-automation</id>
+    <updated>2024-12-13T12:48:18.307Z</updated>
+    <published>2024-12-13T12:48:18.307Z</published>
+    <summary>Discover how to optimize Kubernetes costs with advanced monitoring and automation. Learn actionable strategies, explore CAST AI&apos;s innovative solutions, and </summary>
+    <category term="kubernetes"/>
+    <category term="monitoring"/>
+    <category term="cost-optimisation"/>
+    <category term="castai"/>
+    <category term="kubernetes-costs"/>
+  </entry>
+  <entry>
+    <title>KubeCon + CloudNativeCon North America 2024 Recap: Themes, Innovations, and Community Spirit</title>
+    <link href="https://blog.kubesimplify.com/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit"/>
+    <id>https://blog.kubesimplify.com/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit</id>
+    <updated>2024-11-23T10:41:18.115Z</updated>
+    <published>2024-11-23T10:41:18.115Z</published>
+    <summary>Here is my KubeCon NA 2024 recap. This KubeCon was filled with innovation, insightful sessions, and a vibrant community. Dive into all the highlights!</summary>
+    <category term="kubernetes"/>
+    <category term="cncf"/>
+    <category term="cloud-native"/>
+    <category term="kubecon"/>
+  </entry>
+  <entry>
+    <title>Optimizing Kubernetes Costs: Balancing Spot and On-Demand Instances with Topology Spread Constraints</title>
+    <link href="https://blog.kubesimplify.com/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints"/>
+    <id>https://blog.kubesimplify.com/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints</id>
+    <updated>2024-09-21T08:41:43.410Z</updated>
+    <published>2024-09-21T08:41:43.410Z</published>
+    <summary>Addressing high Kubernetes costs and inefficient pod distribution, this article reveals how balancing spot and on-demand instances with Topology Spread Cons</summary>
+    <category term="kubernetes"/>
+    <category term="devops"/>
+    <category term="devops-articles"/>
+    <category term="cost-optimisation"/>
+    <category term="cloudcostmanagement"/>
+  </entry>
+  <entry>
+    <title>Kubernetes Adoption: Key Challenges in Migrating to Kubernetes</title>
+    <link href="https://blog.kubesimplify.com/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes"/>
+    <id>https://blog.kubesimplify.com/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes</id>
+    <updated>2024-09-10T05:33:48.698Z</updated>
+    <published>2024-09-10T05:33:48.698Z</published>
+    <summary></summary>
+    <category term="kubernetes"/>
+    <category term="cncf"/>
+  </entry>
+  <entry>
+    <title>Kubernetes Scheduling - The Complete Guide</title>
+    <link href="https://blog.kubesimplify.com/kubernetes-scheduling-the-complete-guide"/>
+    <id>https://blog.kubesimplify.com/kubernetes-scheduling-the-complete-guide</id>
+    <updated>2024-08-29T08:45:04.252Z</updated>
+    <published>2024-08-29T08:45:04.252Z</published>
+    <summary>In this guide, we&apos;ll break down the essentials of scheduling in Kubernetes.</summary>
+    <category term="kubernetes"/>
+    <category term="containers"/>
+    <category term="scheduling"/>
+  </entry>
+  <entry>
+    <title>What is Reproducibility and why does it matter?</title>
+    <link href="https://blog.kubesimplify.com/what-is-reproducibility-and-why-does-it-matter"/>
+    <id>https://blog.kubesimplify.com/what-is-reproducibility-and-why-does-it-matter</id>
+    <updated>2024-08-26T03:01:44.816Z</updated>
+    <published>2024-08-26T03:01:44.816Z</published>
+    <summary>In this blog, we&apos;ll explore how reproducible builds plays a significant role in securing the software supply chain.</summary>
+    <category term="security"/>
+    <category term="vulnerability"/>
+  </entry>
+  <entry>
+    <title>Building APIGateway with Lambda using Pulumi</title>
+    <link href="https://blog.kubesimplify.com/building-apigateway-with-lambda-using-pulumi"/>
+    <id>https://blog.kubesimplify.com/building-apigateway-with-lambda-using-pulumi</id>
+    <updated>2024-08-07T16:04:05.548Z</updated>
+    <published>2024-08-07T16:04:05.548Z</published>
+    <summary>In this post, I will guide you through creating an API Gateway with Lambda using Pulumi. I will also explain some of Pulumi&apos;s functionalities along the way.</summary>
+    <category term="aws"/>
+    <category term="apis"/>
+    <category term="devops"/>
+    <category term="iac"/>
+  </entry>
+  <entry>
+    <title>Confidential Containers - Running on Kubernetes</title>
+    <link href="https://blog.kubesimplify.com/confidential-containers-running-on-kubernetes"/>
+    <id>https://blog.kubesimplify.com/confidential-containers-running-on-kubernetes</id>
+    <updated>2024-08-05T17:35:50.780Z</updated>
+    <published>2024-08-05T17:35:50.780Z</published>
+    <summary></summary>
+    <category term="confidential"/>
+    <category term="confidential-computing-consortium"/>
+    <category term="confidential-containers"/>
+    <category term="coco"/>
+  </entry>
+  <entry>
+    <title>K8sGPT Tutorial - When Kubernetes Meets AI</title>
+    <link href="https://blog.kubesimplify.com/k8sgpt-tutorial-when-kubernetes-meets-ai"/>
+    <id>https://blog.kubesimplify.com/k8sgpt-tutorial-when-kubernetes-meets-ai</id>
+    <updated>2024-07-31T12:30:21.789Z</updated>
+    <published>2024-07-31T12:30:21.789Z</published>
+    <summary>In this blog we’ll explore k8sGPT, a powerful tool that brings the capabilities of AI to change the way you manage Kubernetes.</summary>
+    <category term="ai"/>
+    <category term="kubernetes"/>
+    <category term="openai"/>
+    <category term="llm"/>
+    <category term="ollama"/>
+  </entry>
+  <entry>
+    <title>Kubernetes Management with Rust - A Dive into Generic Client-Go, Controller Abstractions, and CRD Macros with Kube.rs</title>
+    <link href="https://blog.kubesimplify.com/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers"/>
+    <id>https://blog.kubesimplify.com/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers</id>
+    <updated>2024-07-23T12:30:43.479Z</updated>
+    <published>2024-07-23T12:30:43.479Z</published>
+    <summary>In this blog, we dive into Generic Client-Go, Controller Abstractions, and CRD Macros with Kube.rs.</summary>
+    <category term="kubernetes"/>
+    <category term="rust"/>
+    <category term="kubectl"/>
+  </entry>
+  <entry>
+    <title>Building a Zero CVE Strategy</title>
+    <link href="https://blog.kubesimplify.com/building-a-zero-cve-strategy"/>
+    <id>https://blog.kubesimplify.com/building-a-zero-cve-strategy</id>
+    <updated>2024-07-12T12:25:50.797Z</updated>
+    <published>2024-07-12T12:25:50.797Z</published>
+    <summary>In this blog, we will delve into the primary causes of CVE fatigue and discuss some actionable strategies to minimize CVE fatigue.</summary>
+    <category term="security"/>
+    <category term="nix"/>
+    <category term="cve"/>
+    <category term="dependabot"/>
+  </entry>
+  <entry>
+    <title>Supply Chain Security Using SLSA - Part 2 (The Framework)</title>
+    <link href="https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-2-the-framework"/>
+    <id>https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-2-the-framework</id>
+    <updated>2024-06-13T16:33:19.614Z</updated>
+    <published>2024-06-13T16:33:19.614Z</published>
+    <summary>In this article we&apos;ll discuss the Supply Chain Levels for Software Artifacts (SLSA) framework to achieve supply chain security in an organization.</summary>
+    <category term="framework"/>
+    <category term="security"/>
+    <category term="supplychainsecurity"/>
+  </entry>
+  <entry>
+    <title>Announcing BuildSafe: Your Path to Secure Software Supply Chain</title>
+    <link href="https://blog.kubesimplify.com/announcing-buildsafe"/>
+    <id>https://blog.kubesimplify.com/announcing-buildsafe</id>
+    <updated>2024-06-10T11:26:08.882Z</updated>
+    <published>2024-06-10T11:26:08.882Z</published>
+    <summary>This post introduces BuildSafe that lets you build your application using nix with ease. It also helps you in securing your software supply chain.</summary>
+    <category term="security"/>
+    <category term="cve"/>
+    <category term="slsa"/>
+    <category term="buildsafe"/>
+    <category term="supply-chain-security"/>
+  </entry>
+  <entry>
+    <title>My Journey to Kubestronaut on Kubernetes 10th Birthday</title>
+    <link href="https://blog.kubesimplify.com/my-journey-to-kubestronaut-on-kubernetes-10th-birthday"/>
+    <id>https://blog.kubesimplify.com/my-journey-to-kubestronaut-on-kubernetes-10th-birthday</id>
+    <updated>2024-06-08T08:14:58.164Z</updated>
+    <published>2024-06-08T08:14:58.164Z</published>
+    <summary>Journey to Kubestronaut, learning Kubernetes over the years and implementing at different organizations. </summary>
+    <category term="kubernetes"/>
+    <category term="kubestronaut"/>
+  </entry>
+  <entry>
+    <title>Supply Chain Security Using SLSA - Part 1 (Fundamentals)</title>
+    <link href="https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-1-fundamentals"/>
+    <id>https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-1-fundamentals</id>
+    <updated>2024-05-29T12:04:59.362Z</updated>
+    <published>2024-05-29T12:04:59.362Z</published>
+    <summary>In this article, we will delve into the fundamental aspects of supply chain security and its increasing significance. </summary>
+    <category term="security"/>
+    <category term="cloud-native"/>
+    <category term="cybersecurity-1"/>
+    <category term="supplychainsecurity"/>
+  </entry>
+  <entry>
+    <title>Perform CRUD Operations on Kubernetes Using Golang</title>
+    <link href="https://blog.kubesimplify.com/perform-crud-operations-on-kubernetes-using-golang"/>
+    <id>https://blog.kubesimplify.com/perform-crud-operations-on-kubernetes-using-golang</id>
+    <updated>2024-04-17T11:30:47.299Z</updated>
+    <published>2024-04-17T11:30:47.299Z</published>
+    <summary>A step-by-step guide on performing basic CRUD operations on a Kubernetes resource, using Go as the programming language.</summary>
+    <category term="go"/>
+    <category term="kubernetes"/>
+    <category term="apis"/>
+    <category term="crud-operations"/>
+  </entry>
+  <entry>
+    <title>Optimizing Scalability: A Deep Dive into Load Testing with Locust on EKS</title>
+    <link href="https://blog.kubesimplify.com/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks"/>
+    <id>https://blog.kubesimplify.com/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks</id>
+    <updated>2024-04-15T11:30:23.802Z</updated>
+    <published>2024-04-15T11:30:23.802Z</published>
+    <summary>This article explores strategies for optimizing scalability using Locust for load testing on Amazon EKS.</summary>
+    <category term="aws"/>
+    <category term="nodejs"/>
+    <category term="kubernetes"/>
+    <category term="scalability"/>
+    <category term="eks"/>
+    <category term="locust"/>
+  </entry>
+  <entry>
+    <title>Introducing Unikraft - Lightweight Virtualization Using Unikernels</title>
+    <link href="https://blog.kubesimplify.com/introducing-unikraft-lightweight-virtualization-using-unikernels"/>
+    <id>https://blog.kubesimplify.com/introducing-unikraft-lightweight-virtualization-using-unikernels</id>
+    <updated>2024-04-08T11:30:40.051Z</updated>
+    <published>2024-04-08T11:30:40.051Z</published>
+    <summary>Unikraft is a fast, secure and open-source Unikernel Development Kit which enables you to easily build minimal, ultra-lightweight virtual machines.</summary>
+    <category term="cloud"/>
+    <category term="virtual-machine"/>
+    <category term="containers"/>
+    <category term="virtualization"/>
+    <category term="unikernel"/>
+  </entry>
+  <entry>
+    <title>Kubernetes on Apple MacBooks (M Series)</title>
+    <link href="https://blog.kubesimplify.com/kubernetes-on-apple-macbooks-m-series"/>
+    <id>https://blog.kubesimplify.com/kubernetes-on-apple-macbooks-m-series</id>
+    <updated>2024-04-01T11:30:31.176Z</updated>
+    <published>2024-04-01T11:30:31.176Z</published>
+    <summary>This article is a step-by-step walkthrough on how to install a Kubernetes cluster on a MacBook (M series) laptop using the kubeadm tool.</summary>
+    <category term="macbook"/>
+    <category term="kubernetes"/>
+    <category term="multipass"/>
+    <category term="kubeadm"/>
+  </entry>
+  <entry>
+    <title>KubeCon + CloudNativeCon, Rejekts and Wasm I/O Wrap-Up: A Leap into the Future with WebAssembly, AI, and Sustainable Cloud Practices</title>
+    <link href="https://blog.kubesimplify.com/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices"/>
+    <id>https://blog.kubesimplify.com/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices</id>
+    <updated>2024-03-27T07:02:02.929Z</updated>
+    <published>2024-03-27T07:02:02.929Z</published>
+    <summary>Team Kubesimplify was at KubeCon and WasmIO. This blgo highlights the summary of both the events.</summary>
+    <category term="webassembly"/>
+    <category term="kubernetes"/>
+    <category term="wasm"/>
+    <category term="kubecon"/>
+    <category term="wasmio"/>
+  </entry>
+</feed>

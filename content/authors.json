@@ -1,0 +1,614 @@
+{
+  "engin-diri": {
+    "handle": "engin-diri",
+    "name": "Engin Diri",
+    "avatar": "/img/authors/engin-diri.jpeg",
+    "bio": "Cloud Native Pilgrim | Kubernetes Enthusiast | Serverless Believer | Customer Experience Architect @ Pulumi | (he/him) | CK{A,AD} |",
+    "socials": {
+      "hashnode": "https://hashnode.com/@ediri"
+    },
+    "postCount": 3
+  },
+  "sysxplore": {
+    "handle": "sysxplore",
+    "name": "sysxplore",
+    "avatar": "/img/authors/sysxplore.png",
+    "bio": "Helping people master Linux | @kubesimplify contributor. Daily blogs on Linux🐧, Security🐱‍💻 and Networking🌐.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@sysxplore"
+    },
+    "postCount": 6
+  },
+  "arnav-barman": {
+    "handle": "arnav-barman",
+    "name": "Arnav Barman",
+    "avatar": "/img/authors/arnav-barman.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@ArnavBarman"
+    },
+    "postCount": 5
+  },
+  "abhishek-kumar": {
+    "handle": "abhishek-kumar",
+    "name": "Abhishek Kumar",
+    "avatar": "/img/authors/abhishek-kumar.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@AbhishekK"
+    },
+    "postCount": 2
+  },
+  "saiyam-pathak": {
+    "handle": "saiyam-pathak",
+    "name": "Saiyam Pathak",
+    "avatar": "/img/authors/saiyam-pathak.jpeg",
+    "bio": "Saiyam is working as Head of DevRel at vCluster Labs. He is the founder of Kubesimplify, focusing on simplifying cloud-native & AI infrastructure. He is KubeCon Co-chair and has worked on many facets of Kubernetes, including machine learning platforms, scaling, multi-cloud, & managed Kubernetes services. When not coding, Saiyam contributes to the community by writing blogs and organizing local meetups for Kubernetes and CNCF. He is also a CNCF TAG OpsRes Chair & can be reached on Twitter @saiyampathak.",
+    "socials": {
+      "twitter": "https://x.com/saiyampathak",
+      "linkedin": "https://www.linkedin.com/in/saiyampathak/",
+      "github": "https://github.com/saiyam1814",
+      "youtube": "https://www.youtube.com/@kubesimplify",
+      "hashnode": "https://hashnode.com/@Saiyampathak"
+    },
+    "postCount": 25
+  },
+  "leon": {
+    "handle": "leon",
+    "name": "Leon",
+    "avatar": "/img/authors/leon.jpeg",
+    "bio": "Extremely bored all the time, but I love tech.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@afrocoder"
+    },
+    "postCount": 2
+  },
+  "barkatul-mujauddin": {
+    "handle": "barkatul-mujauddin",
+    "name": "Barkatul Mujauddin",
+    "avatar": "/img/authors/barkatul-mujauddin.jpeg",
+    "bio": "Founder @hackforcode💕 Contributor @Keploy🥑 @kubesimplify Ambassador🚀creator @YouTube🎬 DevOps Enthusiast✨ Android📱 LeetCode 👨‍💻",
+    "socials": {
+      "hashnode": "https://hashnode.com/@barkatul"
+    },
+    "postCount": 4
+  },
+  "dipankar-das": {
+    "handle": "dipankar-das",
+    "name": "Dipankar Das",
+    "avatar": "/img/authors/dipankar-das.jpeg",
+    "bio": "DevOps, Development and CLoud related stuff\nKubesimplify ambassador and a OSS contributor to various CNCF projects",
+    "socials": {
+      "hashnode": "https://hashnode.com/@dipankardas011"
+    },
+    "postCount": 9
+  },
+  "rakshit-gondwal": {
+    "handle": "rakshit-gondwal",
+    "name": "Rakshit Gondwal",
+    "avatar": "/img/authors/rakshit-gondwal.jpg",
+    "bio": "Passionate for everything DevOps and all Cloud Native things.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@rakshitgondwal"
+    },
+    "postCount": 2
+  },
+  "anurag-kumar": {
+    "handle": "anurag-kumar",
+    "name": "Anurag Kumar",
+    "avatar": "/img/authors/anurag-kumar.png",
+    "bio": "Student",
+    "socials": {
+      "hashnode": "https://hashnode.com/@kranurag7"
+    },
+    "postCount": 8
+  },
+  "bhavya-sachdeva": {
+    "handle": "bhavya-sachdeva",
+    "name": "Bhavya Sachdeva",
+    "avatar": "/img/authors/bhavya-sachdeva.jpg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@bhavyastar"
+    },
+    "postCount": 1
+  },
+  "krish-gupta": {
+    "handle": "krish-gupta",
+    "name": "Krish Gupta",
+    "avatar": "/img/authors/krish-gupta.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@xkrishguptaa"
+    },
+    "postCount": 2
+  },
+  "praneeth-kondraju": {
+    "handle": "praneeth-kondraju",
+    "name": "Praneeth Kondraju",
+    "avatar": "/img/authors/praneeth-kondraju.png",
+    "bio": "I am an SRE. I'm a continuous learner of DevOps, AWS, Terraform. Furthermore, I'm interested in OpenSource and writing Technical blogs.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@praneethkondraju"
+    },
+    "postCount": 2
+  },
+  "batuhan-apaydin": {
+    "handle": "batuhan-apaydin",
+    "name": "Batuhan Apaydın",
+    "avatar": "/img/authors/batuhan-apaydin.jpeg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@developerguyba"
+    },
+    "postCount": 3
+  },
+  "kunal-verma": {
+    "handle": "kunal-verma",
+    "name": "Kunal Verma",
+    "avatar": "/img/authors/kunal-verma.png",
+    "bio": "Kunal is a DevOps and Cloud Native Advocate with a passion for Open Source. He's been involved in the DevOps and open-source ecosystem for 1.5+ years and has a strong experience in public speaking, community management, content creation etc. He has experience working on and contributing to some of the major projects in the CNCF, including Kubernetes, Layer5 and others. He always strives to empower others with my experiences and believes in growing with the community!",
+    "socials": {
+      "hashnode": "https://hashnode.com/@kunalverma"
+    },
+    "postCount": 12
+  },
+  "saloni-narang": {
+    "handle": "saloni-narang",
+    "name": "Saloni Narang",
+    "avatar": "/img/authors/saloni-narang.jpg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@saloninarang"
+    },
+    "postCount": 24
+  },
+  "nawaz-siddiqui": {
+    "handle": "nawaz-siddiqui",
+    "name": "Nawaz siddiqui",
+    "avatar": "/img/authors/nawaz-siddiqui.jpg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@nawazsiddiqui27"
+    },
+    "postCount": 1
+  },
+  "srinivas-karnati": {
+    "handle": "srinivas-karnati",
+    "name": "Srinivas Karnati",
+    "avatar": "/img/authors/srinivas-karnati.png",
+    "bio": "Hey there 👋\n\nI am Srinivas Karnati, a DevOps Engineer. I am interested in Cloud Native, Open source, and would love to help folks in their journey.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@srinivaskarnati"
+    },
+    "postCount": 4
+  },
+  "aditya-tripathi": {
+    "handle": "aditya-tripathi",
+    "name": "Aditya Tripathi",
+    "avatar": "/img/authors/aditya-tripathi.jpeg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@tripathiaditya"
+    },
+    "postCount": 3
+  },
+  "rishav-mehra": {
+    "handle": "rishav-mehra",
+    "name": "Rishav Mehra",
+    "avatar": "/img/authors/rishav-mehra.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@rishavmehra"
+    },
+    "postCount": 2
+  },
+  "navneet-nandan-jha": {
+    "handle": "navneet-nandan-jha",
+    "name": "Navneet Nandan Jha",
+    "avatar": "/img/authors/navneet-nandan-jha.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@navneet066"
+    },
+    "postCount": 1
+  },
+  "aryan-deshpande": {
+    "handle": "aryan-deshpande",
+    "name": "Aryan Deshpande",
+    "avatar": "/img/authors/aryan-deshpande.jpg",
+    "bio": "I am currently a student pursuing a computer science & engineering degree. Exploring the world of Cloud Native. I like writing.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@AryanD"
+    },
+    "postCount": 1
+  },
+  "kanika-gola": {
+    "handle": "kanika-gola",
+    "name": "Kanika Gola",
+    "avatar": "/img/authors/kanika-gola.jpg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Kanika26"
+    },
+    "postCount": 1
+  },
+  "tania-duggal": {
+    "handle": "tania-duggal",
+    "name": "Tania Duggal",
+    "avatar": "/img/authors/tania-duggal.jpg",
+    "bio": "I am Tania from India currently learning DevOps technologies and explore myself in different fields.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@taniaduggal"
+    },
+    "postCount": 1
+  },
+  "saurav-rana": {
+    "handle": "saurav-rana",
+    "name": "Saurav Rana",
+    "avatar": "/img/authors/saurav-rana.jpeg",
+    "bio": "I am a learner who likes to get behind the new technologies of the world and integrate them for a more efficient workflow.\nCurrently learning AWS, GitOps, Kubernetes, and much more...",
+    "socials": {
+      "hashnode": "https://hashnode.com/@rEbOoT"
+    },
+    "postCount": 1
+  },
+  "philippe-charriere": {
+    "handle": "philippe-charriere",
+    "name": "Philippe Charrière",
+    "avatar": "/img/authors/philippe-charriere.jpeg",
+    "bio": "I'm on BlueSky https://bsky.app/profile/k33gorg.bsky.social",
+    "socials": {
+      "hashnode": "https://hashnode.com/@k33g"
+    },
+    "postCount": 1
+  },
+  "santoshdts": {
+    "handle": "santoshdts",
+    "name": "Santoshdts",
+    "avatar": "/img/authors/santoshdts.jpeg",
+    "bio": "Driven DevOps Engineer with expertise in Linux Containers, Kubernetes, and the cloud-native ecosystem and a strong proficiency in Golang. Committed to continuous learning and staying up-to-date with emerging technologies. Currently, I am pursuing the Certified Kubernetes Security Specialist (CKS) certification from the Linux Foundation to bolster my knowledge and skills in securing container-based applications and Kubernetes platforms. Passionate about creating reliable, scalable, secure infrastructure enabling seamless application deployment and delivery.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@santoshdts"
+    },
+    "postCount": 3
+  },
+  "bishal-das": {
+    "handle": "bishal-das",
+    "name": "Bishal Das",
+    "avatar": "/img/authors/bishal-das.jpeg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@bishal491"
+    },
+    "postCount": 3
+  },
+  "hamees-sayed": {
+    "handle": "hamees-sayed",
+    "name": "Hamees Sayed",
+    "avatar": "/img/authors/hamees-sayed.jpeg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Hameesss"
+    },
+    "postCount": 3
+  },
+  "ankit-kumar": {
+    "handle": "ankit-kumar",
+    "name": "Ankit Kumar",
+    "avatar": null,
+    "bio": "",
+    "socials": {},
+    "postCount": 1
+  },
+  "bushra-nazish": {
+    "handle": "bushra-nazish",
+    "name": "BUSHRA NAZISH",
+    "avatar": "/img/authors/bushra-nazish.jpeg",
+    "bio": "A CS Engineer exploring DevOps and Cloud Native Technologies",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Bushra"
+    },
+    "postCount": 2
+  },
+  "chirag-varshney": {
+    "handle": "chirag-varshney",
+    "name": "Chirag Varshney",
+    "avatar": "/img/authors/chirag-varshney.jpg",
+    "bio": "I'm Chirag, a student at ABESIT in Ghaziabad. I am a Web Developer, DevOps Fan, and Open Source Contributor. I enjoy assisting and guiding others, participating in local and global communities, and making new connections.\n\nI'm a member of a few communities from which I've learned a lot, and I'm doing everything I can to give back to those communities so that the members of those communities can benefit from my experience and learnings.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Chirag0002"
+    },
+    "postCount": 1
+  },
+  "nitin-gouda": {
+    "handle": "nitin-gouda",
+    "name": "Nitin Gouda",
+    "avatar": "/img/authors/nitin-gouda.jpeg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@shaggyyyez"
+    },
+    "postCount": 2
+  },
+  "ruhika": {
+    "handle": "ruhika",
+    "name": "Ruhika",
+    "avatar": "/img/authors/ruhika.jpeg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@RuhikaBlogs"
+    },
+    "postCount": 1
+  },
+  "nourhan-khaled": {
+    "handle": "nourhan-khaled",
+    "name": "Nourhan Khaled",
+    "avatar": "/img/authors/nourhan-khaled.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@NourhanKhaled"
+    },
+    "postCount": 1
+  },
+  "geoff-burke": {
+    "handle": "geoff-burke",
+    "name": "Geoff Burke",
+    "avatar": "/img/authors/geoff-burke.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@ober72"
+    },
+    "postCount": 1
+  },
+  "vaidansh-bhardwaj": {
+    "handle": "vaidansh-bhardwaj",
+    "name": "Vaidansh Bhardwaj",
+    "avatar": "/img/authors/vaidansh-bhardwaj.png",
+    "bio": "Student",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Vaidansh"
+    },
+    "postCount": 3
+  },
+  "laszlo-fogas": {
+    "handle": "laszlo-fogas",
+    "name": "Laszlo Fogas",
+    "avatar": "/img/authors/laszlo-fogas.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@laszlocph"
+    },
+    "postCount": 1
+  },
+  "aviral-singh": {
+    "handle": "aviral-singh",
+    "name": "Aviral Singh",
+    "avatar": "/img/authors/aviral-singh.jpeg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@AviralSingh2609"
+    },
+    "postCount": 1
+  },
+  "anuja-kumari": {
+    "handle": "anuja-kumari",
+    "name": "Anuja Kumari",
+    "avatar": "/img/authors/anuja-kumari.jpg",
+    "bio": "I am a junior pursuing my bachelor's in Computer Science and Engineering. I'm a Cloud and Devops enthusiast.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@anujakumari"
+    },
+    "postCount": 2
+  },
+  "brijesh-kori": {
+    "handle": "brijesh-kori",
+    "name": "Brijesh Kori",
+    "avatar": "/img/authors/brijesh-kori.jpeg",
+    "bio": "Tech Enuthsiast , Currently learning and implementing DevOps apart from thatI like to make websites and mobile apps , great with desiging and deploying apps",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Brijesh46"
+    },
+    "postCount": 3
+  },
+  "prateek-singh": {
+    "handle": "prateek-singh",
+    "name": "prateek singh",
+    "avatar": "/img/authors/prateek-singh.jpg",
+    "bio": "I am a Full stack Software engineer, majoring in Computer science. I have strong foundational skills in multiple domains including Frontend, Backend engineering as well as Kubernetes administration.\nI am an active Open Source contributor, with contributions in major Open source projects including Cilium, Dapr etc. I also love to build products in general so I am trying out new tech regularly.\nI am also founder of Senseii, a SaaS product that helps people in their fitness journey by creating workout and meal plans for them. It also helps them follow their plan by regular updates and real time data processing.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@prateek421"
+    },
+    "postCount": 2
+  },
+  "shaik-ahmad-nawaz": {
+    "handle": "shaik-ahmad-nawaz",
+    "name": "Shaik Ahmad Nawaz",
+    "avatar": "/img/authors/shaik-ahmad-nawaz.png",
+    "bio": "Full Stack Developer, Cloud Enthusiast ☁️",
+    "socials": {
+      "hashnode": "https://hashnode.com/@shaikahmadnawaz"
+    },
+    "postCount": 1
+  },
+  "rishit-dagli": {
+    "handle": "rishit-dagli",
+    "name": "Rishit Dagli",
+    "avatar": "/img/authors/rishit-dagli.jpeg",
+    "bio": "High School, TEDx, TED-Ed Speaker",
+    "socials": {
+      "hashnode": "https://hashnode.com/@rishitdagli"
+    },
+    "postCount": 3
+  },
+  "siddhant-khisty": {
+    "handle": "siddhant-khisty",
+    "name": "Siddhant Khisty",
+    "avatar": "/img/authors/siddhant-khisty.jpg",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@siddhantkhisty"
+    },
+    "postCount": 1
+  },
+  "sangam-biradar": {
+    "handle": "sangam-biradar",
+    "name": "Sangam Biradar",
+    "avatar": "/img/authors/sangam-biradar.png",
+    "bio": "DevRel at StackGen | Formerly at Deepfence ,Tenable , Accurics | AWS Community Builder also Docker Community Award Winner at Dockercon2020 | CyberSecurity Innovator of Year 2023 award by Bsides Bangalore | Docker/HashiCorp Meetup Organiser Bangalore & Co-Author of Learn Lightweight Kubernetes with k3s (2019) , Packt Publication & also run Non Profit CloudNativeFolks / CloudSecCorner Community To Empower Free Education reach out me twitterhttps://twitter.com/sangamtwts or just follow on GitHub -> https://github.com/sangam14 for Valuable Resources",
+    "socials": {
+      "hashnode": "https://hashnode.com/@sangambiradar"
+    },
+    "postCount": 1
+  },
+  "aditya-samant": {
+    "handle": "aditya-samant",
+    "name": "Aditya Samant",
+    "avatar": "/img/authors/aditya-samant.jpeg",
+    "bio": "With a background in computer science and nearly two decades of experience in the industry, Aditya is enthusiastic about solving complex problems and staying up-to-date with the latest technologies.\n\nHe has achieved the CKAD, CKA, CKS certifications in Kubernetes along with the AWS CLF-C02 and SAA-C03 certifications.​\n\nHe loves to share his knowledge through blogs, articles, videos and courses.\n\nHe thrives on challenges and enjoys exploring new opportunities in the world of microservices and cloud-native technologies, with a particular emphasis on Kubernetes.\n\nAditya is a member of the Kubernetes GitHub organization and actively contributes to the documentation for Kubernetes.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@adityasamant"
+    },
+    "postCount": 1
+  },
+  "aayush-sharma": {
+    "handle": "aayush-sharma",
+    "name": "Aayush Sharma",
+    "avatar": "/img/authors/aayush-sharma.jpeg",
+    "bio": "Aayush is a computer science undergraduate student from India. He is a Junior Developer Evangelist at Merico. He is enthusiastic about DevOps and Cloud Native. He is a member of several communities such as Kubesimplify Ambassador, a Developer at WeMakeDevs, and a Co-Founder of SuperContributor. He has also worked at Sema Software as a Program Manager and contributed to Open-Source projects such as Kubernetes and Datree. He believes in the power of collaboration and enjoys contributing to Open-Source projects. He loves playing both outdoor and indoor games and is fond of listening to music.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@SuperAayush"
+    },
+    "postCount": 2
+  },
+  "naved-ahmad": {
+    "handle": "naved-ahmad",
+    "name": "Naved Ahmad",
+    "avatar": "/img/authors/naved-ahmad.jpeg",
+    "bio": "Exploring DevOps and CNCF. Learning Golang.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@NavedAhmad"
+    },
+    "postCount": 1
+  },
+  "daniele-polencic": {
+    "handle": "daniele-polencic",
+    "name": "Daniele Polencic",
+    "avatar": "/img/authors/daniele-polencic.png",
+    "bio": "Teaching containers & Kubernetes at Learnk8s",
+    "socials": {
+      "hashnode": "https://hashnode.com/@danielepolencic"
+    },
+    "postCount": 1
+  },
+  "lavakush-biyani": {
+    "handle": "lavakush-biyani",
+    "name": "Lavakush Biyani",
+    "avatar": "/img/authors/lavakush-biyani.jpg",
+    "bio": "I am a fullstack web developer and an opensource contributor.Admin Lead of Hackclub Hackerabad.Student Ambassador of kubesimplify community.I am currently learning Devops.I love to collaborate and network with people.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Lavakush07"
+    },
+    "postCount": 1
+  },
+  "sneh-chauhan": {
+    "handle": "sneh-chauhan",
+    "name": "Sneh Chauhan",
+    "avatar": "/img/authors/sneh-chauhan.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Sneh27"
+    },
+    "postCount": 1
+  },
+  "krishnamohan-yerrabilli": {
+    "handle": "krishnamohan-yerrabilli",
+    "name": "Krishnamohan Yerrabilli",
+    "avatar": "/img/authors/krishnamohan-yerrabilli.png",
+    "bio": "Krishnamohan is a dedicated Open-Source Contributor with a passion for teaching and helping others to get started in the tech industry. He has contributed to a variety of Open-Source projects, focusing on the development and maintenance of distributed applications and Cloud-Native technologies. In addition to his work as a contributor, He is currently working on automating the design of efficient CI/CD pipelines.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Krishnamohan-Yerrabilli"
+    },
+    "postCount": 1
+  },
+  "facetscloud": {
+    "handle": "facetscloud",
+    "name": "FacetsCloud",
+    "avatar": "/img/authors/facetscloud.png",
+    "bio": "Facets is a ready-made, self-serve DevOps automation platform that helps organizations adopt Platform Engineering practices – eliminating the need to build internal tools.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@Facets"
+    },
+    "postCount": 1
+  },
+  "anshu-kumar": {
+    "handle": "anshu-kumar",
+    "name": "Anshu Kumar",
+    "avatar": "/img/authors/anshu-kumar.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@anshu049"
+    },
+    "postCount": 1
+  },
+  "muhammad-hammad-sani": {
+    "handle": "muhammad-hammad-sani",
+    "name": "Muhammad Hammad Sani",
+    "avatar": "/img/authors/muhammad-hammad-sani.jpg",
+    "bio": "Currently, \n\nLearning Front End Web Dev (JavaScript) 🕸️ .\nExploring DevOps 📦 🚢 concepts like Docker, \nCI/CD, AWS, Kubernetes.\nWorking on improving problem solving ability by using \nPython 🐍 as a tool\n&&\nProficient in JavaScript, Python and Java.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@mhammadsaani"
+    },
+    "postCount": 1
+  },
+  "swapnasagar-pradhan": {
+    "handle": "swapnasagar-pradhan",
+    "name": "Swapnasagar Pradhan",
+    "avatar": "/img/authors/swapnasagar-pradhan.png",
+    "bio": "",
+    "socials": {
+      "hashnode": "https://hashnode.com/@pradhans0906"
+    },
+    "postCount": 1
+  },
+  "chad-m-crowell": {
+    "handle": "chad-m-crowell",
+    "name": "Chad M. Crowell",
+    "avatar": "/img/authors/chad-m-crowell.jpeg",
+    "bio": "CNCF Ambassador, Author & Kubernetes Engineer. Check out my book AcingTheCKA.com!",
+    "socials": {
+      "hashnode": "https://hashnode.com/@chadmcrowell"
+    },
+    "postCount": 1
+  },
+  "anuj-chourasia": {
+    "handle": "anuj-chourasia",
+    "name": "Anuj Chourasia",
+    "avatar": "/img/authors/anuj-chourasia.jpg",
+    "bio": "Hey, I Am Anuj.\n\nI am a DevOps enthusiast and I love to talk about communities, learning in public, open source, and all things cloud native, let's connect 😁.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@anujchourasia15"
+    },
+    "postCount": 1
+  },
+  "nitish-kumar": {
+    "handle": "nitish-kumar",
+    "name": "Nitish Kumar",
+    "avatar": "/img/authors/nitish-kumar.jpg",
+    "bio": "Writing what I learn....",
+    "socials": {
+      "hashnode": "https://hashnode.com/@nitish-kumar"
+    },
+    "postCount": 1
+  },
+  "kamesh-sampath": {
+    "handle": "kamesh-sampath",
+    "name": "Kamesh Sampath",
+    "avatar": "/img/authors/kamesh-sampath.jpg",
+    "bio": "An Author, Consultant and Developer Advocate; Kamesh is a Director of Developer Advocacy at https://harness.io. As part of his role he actively educates developers on Kubernetes/OpenShift, Cloud Native CI/CD, Servicemesh, and Serverless technologies. With a career spanning close to two decades, with the services industry he has helped various enterprise customers build Java-based solutions. Kamesh has been an active Open Source contributor for more than decade. Kamesh is also Google Developer Expert for Cloud(Kubernetes)",
+    "socials": {
+      "hashnode": "https://hashnode.com/@kameshs"
+    },
+    "postCount": 1
+  }
+}

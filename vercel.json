@@ -1,0 +1,1990 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "blog.kubesimplify.com"
+        }
+      ],
+      "destination": "/blog"
+    },
+    {
+      "source": "/((?!_next/|img/|api/|.*\\.[a-zA-Z0-9]+$|blog$|blog/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "blog.kubesimplify.com"
+        }
+      ],
+      "destination": "/blog/$1"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/blogs",
+      "destination": "/blog",
+      "permanent": true
+    },
+    {
+      "source": "/10-things-you-might-not-know-about-k9s",
+      "destination": "/blog/10-things-you-might-not-know-about-k9s",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/12-practical-grep-command-examples-in-linux",
+      "destination": "/blog/12-practical-grep-command-examples-in-linux",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1",
+      "destination": "/blog/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2",
+      "destination": "/blog/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/a-complete-walk-through-of-devops",
+      "destination": "/blog/a-complete-walk-through-of-devops",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/a-kubeconfig-for-gke-that-doesnt-need-gcloud",
+      "destination": "/blog/a-kubeconfig-for-gke-that-doesnt-need-gcloud",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/a-simple-way-to-structure-your-terraform-code",
+      "destination": "/blog/a-simple-way-to-structure-your-terraform-code",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/a-simplified-guide-to-yaml",
+      "destination": "/blog/a-simplified-guide-to-yaml",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/about-my-pdf-editor-project",
+      "destination": "/blog/about-my-pdf-editor-project",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/an-overview-of-gitops-and-argocd",
+      "destination": "/blog/an-overview-of-gitops-and-argocd",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/announcing-buildsafe",
+      "destination": "/blog/announcing-buildsafe",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/api-response-in-go",
+      "destination": "/blog/api-response-in-go",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/arkade",
+      "destination": "/blog/arkade",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/automate-repetitive-tasks-shell-scripting",
+      "destination": "/blog/automate-repetitive-tasks-shell-scripting",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/automated-github-releases-with-github-actions-and-conventional-commits",
+      "destination": "/blog/automated-github-releases-with-github-actions-and-conventional-commits",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/avoid-overspending-with-kubecost",
+      "destination": "/blog/avoid-overspending-with-kubecost",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/aws-elastic-cloud-compute",
+      "destination": "/blog/aws-elastic-cloud-compute",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/bake-your-container-images-with-bake",
+      "destination": "/blog/bake-your-container-images-with-bake",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/become-a-hashicorp-certified-terraform-associate-preparation-guide",
+      "destination": "/blog/become-a-hashicorp-certified-terraform-associate-preparation-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/best-devops-tools-2025",
+      "destination": "/blog/best-devops-tools-2025",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/breaking-down-docker",
+      "destination": "/blog/breaking-down-docker",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/building-a-zero-cve-strategy",
+      "destination": "/blog/building-a-zero-cve-strategy",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/building-apigateway-with-lambda-using-pulumi",
+      "destination": "/blog/building-apigateway-with-lambda-using-pulumi",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/certified-kubernetes-security-specialist-cks-2022-exam-guide",
+      "destination": "/blog/certified-kubernetes-security-specialist-cks-2022-exam-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/cicd-pipeline-github-actions-with-aws-ecs",
+      "destination": "/blog/cicd-pipeline-github-actions-with-aws-ecs",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ckad-exam-april-2022",
+      "destination": "/blog/ckad-exam-april-2022",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/claude-code-leak-what-the-source-actually-teaches",
+      "destination": "/blog/claude-code-leak-what-the-source-actually-teaches",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home",
+      "destination": "/blog/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/cloud-computing",
+      "destination": "/blog/cloud-computing",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/cloud-native-buildpacks-concepts",
+      "destination": "/blog/cloud-native-buildpacks-concepts",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/confidential-containers-running-on-kubernetes",
+      "destination": "/blog/confidential-containers-running-on-kubernetes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/container-and-kubernetes-security",
+      "destination": "/blog/container-and-kubernetes-security",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/coolify",
+      "destination": "/blog/coolify",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/creating-multi-node-kubernetes-cluster-locally",
+      "destination": "/blog/creating-multi-node-kubernetes-cluster-locally",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-1-what-actually-happens-when-you-type-docker-run",
+      "destination": "/blog/day-1-what-actually-happens-when-you-type-docker-run",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken",
+      "destination": "/blog/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-3-stop-writing-dockerfiles-from-scratch",
+      "destination": "/blog/day-3-stop-writing-dockerfiles-from-scratch",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
+      "destination": "/blog/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-5-docker-compose-how-docker-actually-gets-used",
+      "destination": "/blog/day-5-docker-compose-how-docker-actually-gets-used",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-6-run-an-llm-on-your-laptop-with-docker",
+      "destination": "/blog/day-6-run-an-llm-on-your-laptop-with-docker",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-7-ship-it-and-what-comes-next",
+      "destination": "/blog/day-7-ship-it-and-what-comes-next",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws",
+      "destination": "/blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/deploy-a-simple-server-using-aws-terraform",
+      "destination": "/blog/deploy-a-simple-server-using-aws-terraform",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/deploying-java-application-using-docker-and-kubernetes-devops-project",
+      "destination": "/blog/deploying-java-application-using-docker-and-kubernetes-devops-project",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
+      "destination": "/blog/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/diy-how-to-build-a-kubernetes-policy-engine",
+      "destination": "/blog/diy-how-to-build-a-kubernetes-policy-engine",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/docker-captain-journey",
+      "destination": "/blog/docker-captain-journey",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/docker-mcp-catalog",
+      "destination": "/blog/docker-mcp-catalog",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/docker-networking-demystified",
+      "destination": "/blog/docker-networking-demystified",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/embed-http-servers-in-wasm-with-rust-and-csharp",
+      "destination": "/blog/embed-http-servers-in-wasm-with-rust-and-csharp",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/enhancing-runtime-security-with-falco-my-hands-on-experience",
+      "destination": "/blog/enhancing-runtime-security-with-falco-my-hands-on-experience",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ephemeral-pull-request-environment-using-vcluster",
+      "destination": "/blog/ephemeral-pull-request-environment-using-vcluster",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/essential-linux-commands-for-devops",
+      "destination": "/blog/essential-linux-commands-for-devops",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/event-driven-architecture-simplified-monolith-to-microservices",
+      "destination": "/blog/event-driven-architecture-simplified-monolith-to-microservices",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/everything-you-need-to-know-about-docker-compose",
+      "destination": "/blog/everything-you-need-to-know-about-docker-compose",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/everything-you-need-to-know-about-the-linux-ls-command",
+      "destination": "/blog/everything-you-need-to-know-about-the-linux-ls-command",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/exploiting-metasploitable2-using-msfconsole-kali-linux-lab",
+      "destination": "/blog/exploiting-metasploitable2-using-msfconsole-kali-linux-lab",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/firewall-a-networks-gatekeeper",
+      "destination": "/blog/firewall-a-networks-gatekeeper",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/four-pillars-of-observability-in-kubernetes",
+      "destination": "/blog/four-pillars-of-observability-in-kubernetes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/get-good-at-git",
+      "destination": "/blog/get-good-at-git",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster",
+      "destination": "/blog/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications",
+      "destination": "/blog/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/getting-started-with-kyverno",
+      "destination": "/blog/getting-started-with-kyverno",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/git-and-github-a-beginners-guide",
+      "destination": "/blog/git-and-github-a-beginners-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide",
+      "destination": "/blog/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/gitops-demystified",
+      "destination": "/blog/gitops-demystified",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ha-kubernetes",
+      "destination": "/blog/ha-kubernetes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
+      "destination": "/blog/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/how-get-started-with-hashicorp-vault",
+      "destination": "/blog/how-get-started-with-hashicorp-vault",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die",
+      "destination": "/blog/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/how-to-backup-kubernetes-with-kasten-community-edition",
+      "destination": "/blog/how-to-backup-kubernetes-with-kasten-community-edition",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/how-to-change-directory-in-shell-scripts",
+      "destination": "/blog/how-to-change-directory-in-shell-scripts",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide",
+      "destination": "/blog/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/how-to-setup-your-ftp-server-in-linux",
+      "destination": "/blog/how-to-setup-your-ftp-server-in-linux",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/implementing-kubernetes-network-policies-a-comprehensive-guide",
+      "destination": "/blog/implementing-kubernetes-network-policies-a-comprehensive-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/important-concepts-of-operating-systems",
+      "destination": "/blog/important-concepts-of-operating-systems",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ing-switch-119-annotations-gateway-api-traefik-impact-ratings",
+      "destination": "/blog/ing-switch-119-annotations-gateway-api-traefik-impact-ratings",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
+      "destination": "/blog/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/installing-prometheus-with-selinux",
+      "destination": "/blog/installing-prometheus-with-selinux",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introducing-unikraft-lightweight-virtualization-using-unikernels",
+      "destination": "/blog/introducing-unikraft-lightweight-virtualization-using-unikernels",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introduction-of-jenkins-pipeline",
+      "destination": "/blog/introduction-of-jenkins-pipeline",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introduction-to-cicd-and-cicd-pipeline",
+      "destination": "/blog/introduction-to-cicd-and-cicd-pipeline",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introduction-to-cri",
+      "destination": "/blog/introduction-to-cri",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introduction-to-developer-platforms-with-gimlet",
+      "destination": "/blog/introduction-to-developer-platforms-with-gimlet",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introduction-to-helm",
+      "destination": "/blog/introduction-to-helm",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introduction-to-jenkins",
+      "destination": "/blog/introduction-to-jenkins",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introduction-to-kubernetes",
+      "destination": "/blog/introduction-to-kubernetes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introduction-to-terraform",
+      "destination": "/blog/introduction-to-terraform",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/iptables-demo",
+      "destination": "/blog/iptables-demo",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/istio-service-mesh",
+      "destination": "/blog/istio-service-mesh",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/k8sgpt-tutorial-when-kubernetes-meets-ai",
+      "destination": "/blog/k8sgpt-tutorial-when-kubernetes-meets-ai",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/keptn-getting-started",
+      "destination": "/blog/keptn-getting-started",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ksctl-making-kubernetes-easy-across-clouds",
+      "destination": "/blog/ksctl-making-kubernetes-easy-across-clouds",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kube-scheduler-deep-dive",
+      "destination": "/blog/kube-scheduler-deep-dive",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit",
+      "destination": "/blog/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices",
+      "destination": "/blog/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubectl-run-nginx-inside",
+      "destination": "/blog/kubectl-run-nginx-inside",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubeflow-machine-learning-on-kubernetes-part-1",
+      "destination": "/blog/kubeflow-machine-learning-on-kubernetes-part-1",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubeflow-notebooks-ml-experimentation-made-easier-part-2",
+      "destination": "/blog/kubeflow-notebooks-ml-experimentation-made-easier-part-2",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3",
+      "destination": "/blog/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-125-dockerd",
+      "destination": "/blog/kubernetes-125-dockerd",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-126",
+      "destination": "/blog/kubernetes-126",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-access-control-with-authentication-authorization-admission-control",
+      "destination": "/blog/kubernetes-access-control-with-authentication-authorization-admission-control",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes",
+      "destination": "/blog/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-backup-using-cloudcasa",
+      "destination": "/blog/kubernetes-backup-using-cloudcasa",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-containerd-setup",
+      "destination": "/blog/kubernetes-containerd-setup",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-crio",
+      "destination": "/blog/kubernetes-crio",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
+      "destination": "/blog/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-on-apple-macbooks-m-series",
+      "destination": "/blog/kubernetes-on-apple-macbooks-m-series",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-scheduling-the-complete-guide",
+      "destination": "/blog/kubernetes-scheduling-the-complete-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-v133-key-features-updates-and-what-you-need-to-know",
+      "destination": "/blog/kubernetes-v133-key-features-updates-and-what-you-need-to-know",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know",
+      "destination": "/blog/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubesimplify-a-journey-to-remember",
+      "destination": "/blog/kubesimplify-a-journey-to-remember",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubesimplify-at-wasmio-and-kubecon-eu-2024",
+      "destination": "/blog/kubesimplify-at-wasmio-and-kubecon-eu-2024",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kyverno-and-cosign",
+      "destination": "/blog/kyverno-and-cosign",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kyverno-cli",
+      "destination": "/blog/kyverno-cli",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/lets-learn-terraform",
+      "destination": "/blog/lets-learn-terraform",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/lets-simplify-golang-part-1",
+      "destination": "/blog/lets-simplify-golang-part-1",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/lets-simplify-golang-part-2",
+      "destination": "/blog/lets-simplify-golang-part-2",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/lets-simplify-golang-part-3",
+      "destination": "/blog/lets-simplify-golang-part-3",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/lets-talk-about-ansible",
+      "destination": "/blog/lets-talk-about-ansible",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/linux-boot-process-simplified",
+      "destination": "/blog/linux-boot-process-simplified",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/linux-system-directories-explained",
+      "destination": "/blog/linux-system-directories-explained",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/managing-contexts-in-kubernetes-with-plugins",
+      "destination": "/blog/managing-contexts-in-kubernetes-with-plugins",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/managing-your-operating-system-with-package-managers",
+      "destination": "/blog/managing-your-operating-system-with-package-managers",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/mastering-kubernetes-costs-from-monitoring-to-automation",
+      "destination": "/blog/mastering-kubernetes-costs-from-monitoring-to-automation",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/microservices",
+      "destination": "/blog/microservices",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/moving-code-between-git-repositories-with-copybara",
+      "destination": "/blog/moving-code-between-git-repositories-with-copybara",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/multi-stage-docker-build",
+      "destination": "/blog/multi-stage-docker-build",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/multi-tenancy-in-2025-and-beyond",
+      "destination": "/blog/multi-tenancy-in-2025-and-beyond",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/my-first-international-conference-open-source-summit-2022",
+      "destination": "/blog/my-first-international-conference-open-source-summit-2022",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/my-journey-to-kubestronaut-on-kubernetes-10th-birthday",
+      "destination": "/blog/my-journey-to-kubestronaut-on-kubernetes-10th-birthday",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/my-kubecon-euvirtual-experience",
+      "destination": "/blog/my-kubecon-euvirtual-experience",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/my-schedule-for-kubecon-cloudnativecon-eu-2022",
+      "destination": "/blog/my-schedule-for-kubecon-cloudnativecon-eu-2022",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/navigating-through-cncf-landscape",
+      "destination": "/blog/navigating-through-cncf-landscape",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/nemotron3-on-dgx-spark",
+      "destination": "/blog/nemotron3-on-dgx-spark",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/networking-fundamentals-for-devops",
+      "destination": "/blog/networking-fundamentals-for-devops",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet",
+      "destination": "/blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
+      "destination": "/blog/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/operating-systems-101-essential-knowledge-for-devopssre-engineers",
+      "destination": "/blog/operating-systems-101-essential-knowledge-for-devopssre-engineers",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints",
+      "destination": "/blog/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks",
+      "destination": "/blog/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/package-managers-demystified",
+      "destination": "/blog/package-managers-demystified",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/perform-crud-operations-on-kubernetes-using-golang",
+      "destination": "/blog/perform-crud-operations-on-kubernetes-using-golang",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/platform-engineering-demystified-navigating-the-basics",
+      "destination": "/blog/platform-engineering-demystified-navigating-the-basics",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/pods-in-kubernetes",
+      "destination": "/blog/pods-in-kubernetes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/practical-guide-to-kubernetes-api",
+      "destination": "/blog/practical-guide-to-kubernetes-api",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/progressive-rollouts-with-argo-cd-rollouts",
+      "destination": "/blog/progressive-rollouts-with-argo-cd-rollouts",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/prometheus-explained",
+      "destination": "/blog/prometheus-explained",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/pure-cilium-a-guide-for-local-load-balancing-and-bgp",
+      "destination": "/blog/pure-cilium-a-guide-for-local-load-balancing-and-bgp",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/quick-bites-of-fluxcd-health-assessment",
+      "destination": "/blog/quick-bites-of-fluxcd-health-assessment",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/rancher-desktop-evolution",
+      "destination": "/blog/rancher-desktop-evolution",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ready-for-wasm-day-2023",
+      "destination": "/blog/ready-for-wasm-day-2023",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/simplified-introduction-to-bacalhau",
+      "destination": "/blog/simplified-introduction-to-bacalhau",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/speeding-up-using-microk8s",
+      "destination": "/blog/speeding-up-using-microk8s",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
+      "destination": "/blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/starting-your-devops-journey-as-a-windows-user",
+      "destination": "/blog/starting-your-devops-journey-as-a-windows-user",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/statefulsets",
+      "destination": "/blog/statefulsets",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/supply-chain-security-using-slsa-part-1-fundamentals",
+      "destination": "/blog/supply-chain-security-using-slsa-part-1-fundamentals",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/supply-chain-security-using-slsa-part-2-the-framework",
+      "destination": "/blog/supply-chain-security-using-slsa-part-2-the-framework",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/terraform-best-practices",
+      "destination": "/blog/terraform-best-practices",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/testing-docker-ais-gordon-how-smart-is-it",
+      "destination": "/blog/testing-docker-ais-gordon-how-smart-is-it",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/the-complete-guide-to-the-dd-command-in-linux",
+      "destination": "/blog/the-complete-guide-to-the-dd-command-in-linux",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx",
+      "destination": "/blog/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis",
+      "destination": "/blog/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/the-webassembly-course",
+      "destination": "/blog/the-webassembly-course",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser",
+      "destination": "/blog/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/understanding-docker-desktop-all-in-one-platform-for-containers",
+      "destination": "/blog/understanding-docker-desktop-all-in-one-platform-for-containers",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/understanding-etcd-in-kubernetes-a-beginners-guide",
+      "destination": "/blog/understanding-etcd-in-kubernetes-a-beginners-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/understanding-how-containers-work-behind-the-scenes",
+      "destination": "/blog/understanding-how-containers-work-behind-the-scenes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/understanding-the-architecture-of-kubernetes-a-beginners-guide",
+      "destination": "/blog/understanding-the-architecture-of-kubernetes-a-beginners-guide",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/understanding-the-ins-and-outs-of-git-using-github",
+      "destination": "/blog/understanding-the-ins-and-outs-of-git-using-github",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/what-is-reproducibility-and-why-does-it-matter",
+      "destination": "/blog/what-is-reproducibility-and-why-does-it-matter",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/what-is-shell-scripting",
+      "destination": "/blog/what-is-shell-scripting",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/why-are-network-policies-in-kubernetes-so-hard-to-understand",
+      "destination": "/blog/why-are-network-policies-in-kubernetes-so-hard-to-understand",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/why-devops-case-study",
+      "destination": "/blog/why-devops-case-study",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/wtf-is-linux-shell-command-substitution",
+      "destination": "/blog/wtf-is-linux-shell-command-substitution",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/yours-kindly-drone",
+      "destination": "/blog/yours-kindly-drone",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    }
+  ]
+}

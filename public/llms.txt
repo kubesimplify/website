@@ -1,0 +1,118 @@
+# Kubesimplify Blog
+
+> Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.
+
+## About
+
+Kubesimplify is a community-driven publication on cloud-native technologies, with 178 in-depth technical articles by 61 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+
+Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
+
+## Site structure
+
+- Main site: https://kubesimplify.com
+- Blog index: https://blog.kubesimplify.com
+- Blog posts: https://blog.kubesimplify.com/{slug}
+- Topic hubs: https://blog.kubesimplify.com/hub/{kubernetes|docker|ai-ml|devops|security|linux}
+- Tags: https://blog.kubesimplify.com/tag/{tag}
+- Authors: https://blog.kubesimplify.com/authors  •  https://blog.kubesimplify.com/author/{handle}
+- RSS feed: https://blog.kubesimplify.com/rss.xml
+- Atom feed: https://blog.kubesimplify.com/atom.xml
+- Sitemap: https://blog.kubesimplify.com/sitemap.xml
+
+## Multi-part series
+
+- 7 Days of Docker: https://blog.kubesimplify.com/series/7-days-of-docker (7-part deep dive by Saloni Narang)
+- 7 Days of DGX Spark: https://blog.kubesimplify.com/series/7-days-of-dgx-spark (upcoming, by Saiyam Pathak)
+
+## Curated topic hubs (canonical entry points)
+
+- Kubernetes: https://blog.kubesimplify.com/hub/kubernetes (kubelet internals, scheduling, networking, operators, releases)
+- Docker & Containers: https://blog.kubesimplify.com/hub/docker (runtimes, image building, multi-stage, Compose)
+- AI & ML on Cloud Native: https://blog.kubesimplify.com/hub/ai-ml (GPU scheduling, Kubeflow, LLMs on Kubernetes, NVIDIA NVCF)
+- DevOps & Platform: https://blog.kubesimplify.com/hub/devops (GitOps, CI/CD, Terraform, platform engineering)
+- Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
+- Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
+
+## Recent posts (most recent 30 of 178)
+
+- [How Kubernetes EndpointSlices Actually Work (and Why Endpoints Had to Die)](https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die) (2026-05-11)
+- [NVCF Is Now Open Source: Inside NVIDIA's GPU Function Platform](https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform) (2026-05-11)
+- [How a Kubernetes Service Actually Works (and All 5 Types You Need)](https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need) (2026-05-05)
+- [Day 7: Ship It - and What Comes Next](https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next) (2026-05-04). Your container runs as root and has 18 CVEs. A Docker Captain's guide to hardening, Scout policies, DHI, Sandboxes, and what comes after Docker. 
+- [Day 6: Run an LLM on Your Laptop - With Docker](https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker) (2026-04-30). \"Pull AI models from Docker Hub, run them locally with GPU acceleration, and build an AI-powered app
+- [A Kubeconfig for GKE That Doesn't Need gcloud](https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud) (2026-04-29)
+- [Day 5: Docker Compose - How Docker Actually Gets Used](https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used) (2026-04-28)
+- [What Actually Happens When kube-scheduler Picks a Node (13 Stages Inside Kubernetes)](https://blog.kubesimplify.com/kube-scheduler-deep-dive) (2026-04-28). How kube-scheduler picks a node: 13 framework stages, 14 Filter plugins, 9 Score plugins, live preemption demo.
+- [Day 4: Breaking Isolation on Purpose - Volumes, Networks, and the Real World](https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world) (2026-04-27)
+- [Day 3: Stop Writing Dockerfiles From Scratch](https://blog.kubesimplify.com/day-3-stop-writing-dockerfiles-from-scratch) (2026-04-24). Stop writing Dockerfiles from scratch. A Docker Captain walks through docker init, layer caching, multi-stage builds, and docker debug for 2026.
+- [What Actually Happens When You Run kubectl run nginx](https://blog.kubesimplify.com/kubectl-run-nginx-inside) (2026-04-24). Every step of what happens when you run kubectl run nginx on Kubernetes. From argv to etcd Raft, scheduler, CRI, CNI, runc, and PLEG.
+- [Day 2: Your Images Are a Supply Chain - and It's Probably Broken](https://blog.kubesimplify.com/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken) (2026-04-23)
+- [Day 1: What Actually Happens When You Type docker run](https://blog.kubesimplify.com/day-1-what-actually-happens-when-you-type-docker-run) (2026-04-22). Containers aren't VMs. They're Linux processes. A Docker Captain explains namespaces, cgroups, and how Docker really works on your Mac in 2026.    
+- [\"SSH Into Your DGX Spark From Anywhere in the World Using Tailscale](https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale) (2026-04-07). Learn how to set up Tailscale on your NVIDIA DGX Spark for secure SSH access from anywhere in the world.
+- [What Claude Code's Leaked Source Actually Teaches Us About Building AI Agents](https://blog.kubesimplify.com/claude-code-leak-what-the-source-actually-teaches) (2026-04-01). 512K lines of TypeScript, verified against actual source. The engineering patterns in Claude Code's leaked codebase that most coverage got wrong.
+- [The Ingress NGINX Migration Just Got Easier: 119 Annotations, 3 Targets, Impact Ratings](https://blog.kubesimplify.com/ing-switch-119-annotations-gateway-api-traefik-impact-ratings) (2026-03-30). \"Ingress NGINX was archived March 24, 2026. ing-switch maps all 119 NGINX annotations with
+- [clawspark: Your Private OpenClaw AI Assistant That Never Phones Home](https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home) (2026-03-15). Clawspark provides a way to Install openclaw on your device in a secure way with a single command. 
+- [Here's What I Learned About Nemotron 3 Super -I Ran a 120B Parameter Model on Nvidia DGX Spark](https://blog.kubesimplify.com/nemotron3-on-dgx-spark) (2026-03-14). Understand everything about Nvidia DGX spark along with hands on and benchmarks. 
+- [ing-switch: Migrate from Ingress NGINX to Traefik or Gateway API in Minutes, Not Days](https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days) (2026-02-25)
+- [Exploiting Metasploitable2 Using msfconsole (Kali Linux Lab)](https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab) (2026-01-17)
+- [Kubernetes v1.35 – What’s New, What’s Changing, and What You Should Know](https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know) (2025-12-19). Learn about the latest Kubenretes release Kubernetes 1.35
+- [Ditch the Overheating Laptop: Supercharge Your Docker Workflow with Docker Offload](https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload) (2025-08-26). Running multiple Docker containers can slow down your laptop and drain your battery. In this blog, we explore Docker Offload — a game-changing feature
+- [Docker MCP Catalog: Finding the Right AI Tools for Your Project](https://blog.kubesimplify.com/docker-mcp-catalog) (2025-06-26). This blog describes what Docker MCP is and how it
+- [Kubernetes v1.33: Key Features, Updates, and What You Need to Know](https://blog.kubesimplify.com/kubernetes-v133-key-features-updates-and-what-you-need-to-know) (2025-06-10). \"Kubernetes v1.33: Key Features, Updates, and What You Need to Know
+- [Ephemeral Pull Request environment using Vcluster.](https://blog.kubesimplify.com/ephemeral-pull-request-environment-using-vcluster) (2025-04-10)
+- [Multi tenancy in 2025 and beyond](https://blog.kubesimplify.com/multi-tenancy-in-2025-and-beyond) (2025-03-12). Multi-tenancy in Kubernetes has been an ongoing challenge for organizations looking to optimize their cloud-native infrastructure. Over the years, the appro
+- [Testing Docker AI's \"Gordon\" – How Smart Is It?](https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it) (2025-02-21). Testing Docker AI's \"Gordon\" – How Smart Is It?
+- [Understanding Docker Desktop: All-in-One Platform for Containers](https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers) (2025-01-31). This is a blog on docker desktop which discusses about how to use it's features
+- [Best DevOps Tools 2025](https://blog.kubesimplify.com/best-devops-tools-2025) (2025-01-13). Best DevOps tools in 2025
+- [Becoming a Docker Captain](https://blog.kubesimplify.com/docker-captain-journey) (2024-12-17). This blog shares Saloni Narang's Journey on becoming Docker captain and also a quick introduction to docker desktop.
+
+## Topics covered (auto-derived from tags)
+
+- kubernetes (91 articles): https://blog.kubesimplify.com/tag/kubernetes
+- devops (71 articles): https://blog.kubesimplify.com/tag/devops
+- docker (31 articles): https://blog.kubesimplify.com/tag/docker
+- k8s (27 articles): https://blog.kubesimplify.com/tag/k8s
+- linux (19 articles): https://blog.kubesimplify.com/tag/linux
+- containers (17 articles): https://blog.kubesimplify.com/tag/containers
+- cloud (16 articles): https://blog.kubesimplify.com/tag/cloud
+- aws (12 articles): https://blog.kubesimplify.com/tag/aws
+- cloud-native (11 articles): https://blog.kubesimplify.com/tag/cloud-native
+- security (11 articles): https://blog.kubesimplify.com/tag/security
+- go (9 articles): https://blog.kubesimplify.com/tag/go
+- git (9 articles): https://blog.kubesimplify.com/tag/git
+- linux-for-beginners (9 articles): https://blog.kubesimplify.com/tag/linux-for-beginners
+- github (8 articles): https://blog.kubesimplify.com/tag/github
+- terraform (8 articles): https://blog.kubesimplify.com/tag/terraform
+- docker-images (7 articles): https://blog.kubesimplify.com/tag/docker-images
+- kubesimplify (7 articles): https://blog.kubesimplify.com/tag/kubesimplify
+- linux-basics (7 articles): https://blog.kubesimplify.com/tag/linux-basics
+- opensource (6 articles): https://blog.kubesimplify.com/tag/opensource
+- docker-desktop (6 articles): https://blog.kubesimplify.com/tag/docker-desktop
+- ai (5 articles): https://blog.kubesimplify.com/tag/ai
+- wasm (5 articles): https://blog.kubesimplify.com/tag/wasm
+- shell (5 articles): https://blog.kubesimplify.com/tag/shell
+- technical-writing-1 (5 articles): https://blog.kubesimplify.com/tag/technical-writing-1
+- bash (5 articles): https://blog.kubesimplify.com/tag/bash
+
+## Top contributors
+
+- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (25 posts)
+- [Saloni Narang](https://blog.kubesimplify.com/author/saloni-narang) (24 posts)
+- [Kunal Verma](https://blog.kubesimplify.com/author/kunal-verma) (12 posts)
+- [Dipankar Das](https://blog.kubesimplify.com/author/dipankar-das) (9 posts)
+- [Anurag Kumar](https://blog.kubesimplify.com/author/anurag-kumar) (8 posts)
+- [sysxplore](https://blog.kubesimplify.com/author/sysxplore) (6 posts)
+- [Arnav Barman](https://blog.kubesimplify.com/author/arnav-barman) (5 posts)
+- [Srinivas Karnati](https://blog.kubesimplify.com/author/srinivas-karnati) (4 posts)
+- [Barkatul Mujauddin](https://blog.kubesimplify.com/author/barkatul-mujauddin) (4 posts)
+- [Santoshdts](https://blog.kubesimplify.com/author/santoshdts) (3 posts)
+- [Rishit Dagli](https://blog.kubesimplify.com/author/rishit-dagli) (3 posts)
+- [Bishal Das](https://blog.kubesimplify.com/author/bishal-das) (3 posts)
+- [Brijesh Kori](https://blog.kubesimplify.com/author/brijesh-kori) (3 posts)
+- [Hamees Sayed](https://blog.kubesimplify.com/author/hamees-sayed) (3 posts)
+- [Batuhan Apaydın](https://blog.kubesimplify.com/author/batuhan-apaydin) (3 posts)
+
+## Crawl policy
+
+All content is freely accessible; no paywall. Citations of canonical URLs (`blog.kubesimplify.com/<slug>`) are encouraged. Author attribution is preserved in each post's schema.org metadata.

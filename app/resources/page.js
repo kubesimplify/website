@@ -42,7 +42,7 @@ const talks = [
   { year: '2025', event: 'KubeCon NA', title: 'Open Source at the Edge: Hardware, Firmware, and AI Stacks', video: 'https://youtu.be/W9Uj8x_qimE', type: 'talk' },
   { year: '2025', event: 'KubeCon NA', title: 'Building Resilient Cloud Native Infrastructure', video: 'https://youtu.be/I7TuNNsJSZc', type: 'talk' },
   { year: '2025', event: 'KubeCon NA', title: 'PE Keynote: AI-Ready Platforms', type: 'keynote' },
-  { year: '2025', event: 'KubeCon India', title: 'Keynote: From Outage To Observability — Kubernetes Meltdown Lessons', video: 'https://youtu.be/7JCZ688cWpY', type: 'keynote' },
+  { year: '2025', event: 'KubeCon India', title: 'Keynote: From Outage To Observability, Kubernetes Meltdown Lessons', video: 'https://youtu.be/7JCZ688cWpY', type: 'keynote' },
   { year: '2025', event: 'KubeCon EU', title: 'A Huge Cluster or Multi-Clusters? Identifying the Bottleneck', video: 'https://www.youtube.com/watch?v=6l5zCt5QsdY', type: 'talk' },
   { year: '2025', event: 'Google Cloud Community Day Bengaluru', title: 'Keynote: AI at Scale with LLMs on Kubernetes', type: 'keynote' },
   { year: '2025', event: 'FOSDEM', title: 'Accelerating CI Pipelines: Rapid Kubernetes Testing with vCluster', video: 'https://video.fosdem.org/2025/ud6215/fosdem-2025-5569-accelerating-ci-pipelines-rapid-kubernetes-testing-with-vcluster.mp4', type: 'talk' },
@@ -54,7 +54,7 @@ const talks = [
   { year: '2025', event: 'WasmI/O', title: 'AI Workloads with WASM & Privacy-First LLM Web Apps', type: 'talk' },
   { year: '2025', event: 'DevOps 2.0 Confex', title: 'AI Meets Kubernetes: GPU Infrastructure Design', type: 'talk' },
   // 2024
-  { year: '2024', event: 'KubeCon India', title: 'Cell-Based Kubernetes — Scalable, Repeatable and Resilient', video: 'https://youtu.be/oacoUMdD4_Y', type: 'talk' },
+  { year: '2024', event: 'KubeCon India', title: 'Cell-Based Kubernetes: Scalable, Repeatable and Resilient', video: 'https://youtu.be/oacoUMdD4_Y', type: 'talk' },
   { year: '2024', event: 'KubeCon NA', title: 'Cloud Native Sustainability Speedrun', video: 'https://youtu.be/X-0zyyWRkiM', type: 'talk' },
   { year: '2024', event: 'KubeCon NA', title: "CNCF Environmental Sustainability TAG", video: 'https://www.youtube.com/watch?v=PfuSzPv7fSQ', type: 'talk' },
   { year: '2024', event: 'KubeCon EU', title: 'Building a Tool to Debug Minimal Container Images', video: 'https://youtu.be/H5NES1Is7rw', type: 'talk' },
@@ -90,7 +90,7 @@ const publications = [
       { title: 'Multi-Node vind Clusters: Real Scheduling, Real Node Drains', url: 'https://www.vcluster.com/blog/vind-multinode-kubernetes-cluster-scheduling-node-drain' },
       { title: 'Introduction to vind: Why I Replaced KinD with vCluster in Docker', url: 'https://www.vcluster.com/blog/introduction-to-vind-why-i-replaced-kind-with-vcluster-in-docker' },
       { title: 'Demystifying Karpenter on GCP: The Complete Setup Guide', url: 'https://www.vcluster.com/blog/karpenter-gcp-setup-guide-alpha-vcluster-auto-nodes' },
-      { title: 'Introducing vCluster Auto Nodes — Practical Deep Dive', url: 'https://www.vcluster.com/blog/introducing-vcluster-auto-nodes-practical-deep-dive' },
+      { title: 'Introducing vCluster Auto Nodes: Practical Deep Dive', url: 'https://www.vcluster.com/blog/introducing-vcluster-auto-nodes-practical-deep-dive' },
       { title: 'NVIDIAScape: How vNode Prevents Container Breakout', url: 'https://www.vcluster.com/blog/nvidiascape-container-breakout-vnode-security' },
       { title: 'Bare Metal Kubernetes with GPU: Challenges and Multi-Tenancy', url: 'https://www.vcluster.com/blog/bare-metal-kubernetes-with-gpu-challenges-and-multi-tenancy-solutions' },
       { title: 'vCluster Performance Paradox: Save Millions Without Sacrificing Speed', url: 'https://www.vcluster.com/blog/vcluster-performance-paradox-kubernetes-cost-optimization' },
@@ -290,9 +290,9 @@ export default function Resources() {
           </div>
 
           <FadeIn className="text-center mt-10" delay={0.2}>
-            <a href="https://blog.kubesimplify.com" target="_blank" rel="noopener noreferrer"
+            <a href="/blog"
               className="inline-flex items-center gap-2 text-sm font-semibold group" style={{ color: 'var(--accent)' }}>
-              Read more on blog.kubesimplify.com
+              Read more on the Kubesimplify blog
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
