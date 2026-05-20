@@ -9,15 +9,23 @@ export default function NotFound() {
 
   useEffect(() => {
     const path = window.location.pathname.replace(/\/$/, '') || '/';
-    if (!KNOWN_PATHS.includes(path)) {
-      const slug = path.replace(/^\//, '').replace(/^blog\//, '');
-      if (slug) {
-        // Try the self-hosted blog first; same slugs as the old Hashnode URLs.
-        const url = `/blog/${slug}`;
-        setRedirectUrl(url);
-        window.location.replace(url);
-      }
-    }
+    if (KNOWN_PATHS.includes(path)) return;
+
+    // Don't try to redirect file-like URLs (assets, feeds, sitemaps).
+    // These should serve directly or stay 404'd, never go through the
+    // /blog/<slug> fallback (which would loop on /blog/rss.xml etc.).
+    if (/\.[a-zA-Z0-9]+$/.test(path)) return;
+
+    const slug = path.replace(/^\//, '').replace(/^blog\//, '');
+    if (!slug) return;
+
+    const target = `/blog/${slug}`;
+    // Guard against self-redirect loops. If we're already at the target,
+    // bail — there's no working slug to redirect to.
+    if (path === target) return;
+
+    setRedirectUrl(target);
+    window.location.replace(target);
   }, []);
 
   if (redirectUrl) {

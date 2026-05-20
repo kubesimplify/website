@@ -154,7 +154,18 @@ export default {
     const path = url.pathname.replace(/\\/$/, '') || '/';
     const search = url.search;
 
-    // Assets: serve as-is, no rewrite
+    // 1. Strip /blog/ prefix FIRST — before asset detection. Otherwise
+    //    /blog/rss.xml looks like an asset, gets a 404 (no file at that path),
+    //    and the Next.js 404 page's JS loops back to /blog/rss.xml.
+    if (path === '/blog') {
+      return Response.redirect(url.origin + '/' + search, 301);
+    }
+    if (path.startsWith('/blog/')) {
+      const rest = path.slice(5); // remove '/blog'
+      return Response.redirect(url.origin + rest + search, 301);
+    }
+
+    // 2. Assets: serve as-is, no rewrite
     if (
       path.startsWith('/_next/') ||
       path.startsWith('/img/') ||
@@ -169,23 +180,14 @@ export default {
       return env.ASSETS.fetch(request);
     }
 
-    // Main-site routes don't belong on the blog subdomain
+    // 3. Main-site routes don't belong on the blog subdomain
     if (KUBESIMPLIFY_ROUTES.has(path)) {
       return Response.redirect('https://kubesimplify.com' + path + search, 301);
     }
 
-    // Legacy index → /
+    // 4. Legacy index → /
     if (path === '/blogs') {
       return Response.redirect(url.origin + '/' + search, 301);
-    }
-
-    // Strip /blog/ prefix → clean URL
-    if (path === '/blog') {
-      return Response.redirect(url.origin + '/' + search, 301);
-    }
-    if (path.startsWith('/blog/')) {
-      const rest = path.slice(5); // remove '/blog'
-      return Response.redirect(url.origin + rest + search, 301);
     }
 
     // / → serve /blog content (URL stays /)
