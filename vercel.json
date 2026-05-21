@@ -832,6 +832,17 @@
       ]
     },
     {
+      "source": "/how-to-run-ray-serve-as-an-nvcf-function",
+      "destination": "/blog/how-to-run-ray-serve-as-an-nvcf-function",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
       "source": "/how-to-setup-your-ftp-server-in-linux",
       "destination": "/blog/how-to-setup-your-ftp-server-in-linux",
       "permanent": true,

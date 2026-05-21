@@ -86,6 +86,7 @@
 /blog/how-to-backup-kubernetes-with-kasten-community-edition                           /how-to-backup-kubernetes-with-kasten-community-edition  301!
 /blog/how-to-change-directory-in-shell-scripts                                         /how-to-change-directory-in-shell-scripts  301!
 /blog/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide /how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide  301!
+/blog/how-to-run-ray-serve-as-an-nvcf-function                                         /how-to-run-ray-serve-as-an-nvcf-function  301!
 /blog/how-to-setup-your-ftp-server-in-linux                                            /how-to-setup-your-ftp-server-in-linux  301!
 /blog/implementing-kubernetes-network-policies-a-comprehensive-guide                   /implementing-kubernetes-network-policies-a-comprehensive-guide  301!
 /blog/important-concepts-of-operating-systems                                          /important-concepts-of-operating-systems  301!
@@ -285,6 +286,7 @@
 /how-to-backup-kubernetes-with-kasten-community-edition                           /blog/how-to-backup-kubernetes-with-kasten-community-edition  200!
 /how-to-change-directory-in-shell-scripts                                         /blog/how-to-change-directory-in-shell-scripts  200!
 /how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide /blog/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide  200!
+/how-to-run-ray-serve-as-an-nvcf-function                                         /blog/how-to-run-ray-serve-as-an-nvcf-function  200!
 /how-to-setup-your-ftp-server-in-linux                                            /blog/how-to-setup-your-ftp-server-in-linux  200!
 /implementing-kubernetes-network-policies-a-comprehensive-guide                   /blog/implementing-kubernetes-network-policies-a-comprehensive-guide  200!
 /important-concepts-of-operating-systems                                          /blog/important-concepts-of-operating-systems  200!
