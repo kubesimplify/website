@@ -4,12 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Absolute URLs so the same Navbar works correctly on both kubesimplify.com
+// (main site) and blog.kubesimplify.com (blog). On the blog subdomain these
+// navigate directly to the main domain instead of bouncing through a 301.
 const navLinks = [
-  { href: '/about', label: 'About' },
-  { href: '/workshops', label: 'Watch & Learn' },
-  { href: '/partnerships', label: 'Partnerships' },
-  { href: '/resources', label: 'Resources' },
-  { href: '/blogs', label: 'Blog' },
+  { href: 'https://kubesimplify.com/about', label: 'About' },
+  { href: 'https://kubesimplify.com/workshops', label: 'Watch & Learn' },
+  { href: 'https://kubesimplify.com/partnerships', label: 'Partnerships' },
+  { href: 'https://kubesimplify.com/resources', label: 'Resources' },
+  { href: 'https://blog.kubesimplify.com', label: 'Blog' },
   { href: 'https://www.youtube.com/@kubesimplify', label: 'YouTube', external: true },
 ];
 
@@ -73,12 +76,13 @@ export default function Navbar() {
       style={{ borderColor: scrolled ? 'var(--border-subtle)' : 'transparent' }}
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
+        <a href="https://kubesimplify.com" className="flex items-center gap-3 group">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/img/color.svg" alt="Kubesimplify" className="h-8 w-8" />
           <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
             Kubesimplify
           </span>
-        </Link>
+        </a>
 
         <div className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
