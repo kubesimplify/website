@@ -6,16 +6,8 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 20 May 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 11 May 2026 17:09:39 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
-    <item>
-      <title>How to Run Ray Serve as an NVCF Function</title>
-      <link>https://blog.kubesimplify.com/how-to-run-ray-serve-as-an-nvcf-function</link>
-      <guid isPermaLink="true">https://blog.kubesimplify.com/how-to-run-ray-serve-as-an-nvcf-function</guid>
-      <pubDate>Wed, 20 May 2026 00:00:00 GMT</pubDate>
-      <description>Step-by-step: deploy a Ray Serve app as an NVCF Helm function with no KubeRay operator. Real outputs, real bugs, working chart.</description>
-      <category>nvidia</category><category>ray</category><category>kubernetes</category><category>gpu</category><category>mlops</category>
-    </item>
     <item>
       <title>How Kubernetes EndpointSlices Actually Work (and Why Endpoints Had to Die)</title>
       <link>https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die</link>

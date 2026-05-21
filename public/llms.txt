@@ -4,7 +4,7 @@
 
 ## About
 
-Kubesimplify is a community-driven publication on cloud-native technologies, with 179 in-depth technical articles by 61 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+Kubesimplify is a community-driven publication on cloud-native technologies, with 178 in-depth technical articles by 61 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
 
 Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
 
@@ -34,9 +34,8 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
 - Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
 
-## Recent posts (most recent 30 of 179)
+## Recent posts (most recent 30 of 178)
 
-- [How to Run Ray Serve as an NVCF Function](https://blog.kubesimplify.com/how-to-run-ray-serve-as-an-nvcf-function) (2026-05-20). Step-by-step: deploy a Ray Serve app as an NVCF Helm function with no KubeRay operator. Real outputs, real bugs, working chart.
 - [How Kubernetes EndpointSlices Actually Work (and Why Endpoints Had to Die)](https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die) (2026-05-11)
 - [NVCF Is Now Open Source: Inside NVIDIA's GPU Function Platform](https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform) (2026-05-11)
 - [How a Kubernetes Service Actually Works (and All 5 Types You Need)](https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need) (2026-05-05)
@@ -66,10 +65,11 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [Testing Docker AI's \"Gordon\" – How Smart Is It?](https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it) (2025-02-21). Testing Docker AI's \"Gordon\" – How Smart Is It?
 - [Understanding Docker Desktop: All-in-One Platform for Containers](https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers) (2025-01-31). This is a blog on docker desktop which discusses about how to use it's features
 - [Best DevOps Tools 2025](https://blog.kubesimplify.com/best-devops-tools-2025) (2025-01-13). Best DevOps tools in 2025
+- [Becoming a Docker Captain](https://blog.kubesimplify.com/docker-captain-journey) (2024-12-17). This blog shares Saloni Narang's Journey on becoming Docker captain and also a quick introduction to docker desktop.
 
 ## Topics covered (auto-derived from tags)
 
-- kubernetes (92 articles): https://blog.kubesimplify.com/tag/kubernetes
+- kubernetes (91 articles): https://blog.kubesimplify.com/tag/kubernetes
 - devops (71 articles): https://blog.kubesimplify.com/tag/devops
 - docker (31 articles): https://blog.kubesimplify.com/tag/docker
 - k8s (27 articles): https://blog.kubesimplify.com/tag/k8s
@@ -97,7 +97,7 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 
 ## Top contributors
 
-- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (26 posts)
+- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (25 posts)
 - [Saloni Narang](https://blog.kubesimplify.com/author/saloni-narang) (24 posts)
 - [Kunal Verma](https://blog.kubesimplify.com/author/kunal-verma) (12 posts)
 - [Dipankar Das](https://blog.kubesimplify.com/author/dipankar-das) (9 posts)
