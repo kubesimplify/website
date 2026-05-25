@@ -15,6 +15,7 @@ The answer is **kube-proxy**. And it does that job in three different ways.
 
 This post walks the full picture: what kube-proxy actually is, the three modes it runs in (iptables, IPVS, nftables), the packet path through each one, where the performance crossover is, and what you should actually pick in 2026. Every claim verified against `kubernetes/kubernetes` 1.36 source.
 
+%[https://youtu.be/m5iq9whaRhc]
 
 ## TL;DR
 
