@@ -32,10 +32,13 @@ jobs:
             echo "ERROR: out/index.html not found!"
             exit 1
           fi
-          echo "Build output pages:"
-          find out -name "*.html" | sort
-          echo ""
           echo "Build successful"
+
+      - name: Rewrite blog URLs as redirects to blog.kubesimplify.com
+        # kubesimplify.com (GitHub Pages) should not host duplicate blog
+        # content. Every /blog/* and legacy root-level blog URL becomes a
+        # meta-refresh redirect to the canonical blog.kubesimplify.com URL.
+        run: node scripts/make-gh-pages-redirects.mjs
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
