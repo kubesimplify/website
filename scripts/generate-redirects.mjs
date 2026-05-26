@@ -50,31 +50,38 @@ const slugs = files
 console.log(`Found ${slugs.length} slugs.`);
 
 // ── vercel.json (kubesimplify.com) ───────────────────────────────────────
+//
+// Strategy: kubesimplify.com hosts ONLY the main site (about, workshops, etc.).
+// All blog URLs (/blog, /blog/*, /<old-slug>, /blogs) 301 off-domain to
+// blog.kubesimplify.com so Google sees exactly one canonical URL per post.
+// Eliminates duplicate-content concerns; consolidates link equity on the
+// blog subdomain (where every backlink already points).
+const BLOG = 'https://blog.kubesimplify.com';
 const vercelConfig = {
   $schema: 'https://openapi.vercel.sh/vercel.json',
-  rewrites: [
-    {
-      source: '/',
-      has: [{ type: 'host', value: 'blog.kubesimplify.com' }],
-      destination: '/blog',
-    },
-    {
-      source: '/((?!_next/|img/|api/|.*\\.[a-zA-Z0-9]+$|blog$|blog/).*)',
-      has: [{ type: 'host', value: 'blog.kubesimplify.com' }],
-      destination: '/blog/$1',
-    },
-  ],
   redirects: [
-    // Legacy /blogs index → /blog
-    {
-      source: '/blogs',
-      destination: '/blog',
+    // Blog index → blog subdomain
+    { source: '/blog', destination: BLOG + '/', permanent: true },
+    { source: '/blogs', destination: BLOG + '/', permanent: true },
+    // Blog meta routes
+    { source: '/blog/authors', destination: BLOG + '/authors', permanent: true },
+    { source: '/blog/write', destination: BLOG + '/write', permanent: true },
+    { source: '/blog/series', destination: BLOG + '/series', permanent: true },
+    { source: '/blog/series/:slug*', destination: BLOG + '/series/:slug*', permanent: true },
+    { source: '/blog/tag/:slug*', destination: BLOG + '/tag/:slug*', permanent: true },
+    { source: '/blog/author/:slug*', destination: BLOG + '/author/:slug*', permanent: true },
+    { source: '/blog/hub/:slug*', destination: BLOG + '/hub/:slug*', permanent: true },
+    { source: '/blog/page/:slug*', destination: BLOG + '/page/:slug*', permanent: true },
+    // Each known post slug → blog subdomain
+    ...slugs.map((slug) => ({
+      source: `/blog/${slug}`,
+      destination: `${BLOG}/${slug}`,
       permanent: true,
-    },
-    // Legacy root-level slugs (pre-Hashnode era) → /blog/<slug>
+    })),
+    // Legacy pre-Hashnode root-level slugs → blog subdomain
     ...slugs.map((slug) => ({
       source: `/${slug}`,
-      destination: `/blog/${slug}`,
+      destination: `${BLOG}/${slug}`,
       permanent: true,
       has: [{ type: 'host', value: 'kubesimplify.com' }],
     })),

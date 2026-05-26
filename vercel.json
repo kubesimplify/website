@@ -1,36 +1,964 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "blog.kubesimplify.com"
-        }
-      ],
-      "destination": "/blog"
-    },
-    {
-      "source": "/((?!_next/|img/|api/|.*\\.[a-zA-Z0-9]+$|blog$|blog/).*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "blog.kubesimplify.com"
-        }
-      ],
-      "destination": "/blog/$1"
-    }
-  ],
   "redirects": [
     {
+      "source": "/blog",
+      "destination": "https://blog.kubesimplify.com/",
+      "permanent": true
+    },
+    {
       "source": "/blogs",
-      "destination": "/blog",
+      "destination": "https://blog.kubesimplify.com/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/authors",
+      "destination": "https://blog.kubesimplify.com/authors",
+      "permanent": true
+    },
+    {
+      "source": "/blog/write",
+      "destination": "https://blog.kubesimplify.com/write",
+      "permanent": true
+    },
+    {
+      "source": "/blog/series",
+      "destination": "https://blog.kubesimplify.com/series",
+      "permanent": true
+    },
+    {
+      "source": "/blog/series/:slug*",
+      "destination": "https://blog.kubesimplify.com/series/:slug*",
+      "permanent": true
+    },
+    {
+      "source": "/blog/tag/:slug*",
+      "destination": "https://blog.kubesimplify.com/tag/:slug*",
+      "permanent": true
+    },
+    {
+      "source": "/blog/author/:slug*",
+      "destination": "https://blog.kubesimplify.com/author/:slug*",
+      "permanent": true
+    },
+    {
+      "source": "/blog/hub/:slug*",
+      "destination": "https://blog.kubesimplify.com/hub/:slug*",
+      "permanent": true
+    },
+    {
+      "source": "/blog/page/:slug*",
+      "destination": "https://blog.kubesimplify.com/page/:slug*",
+      "permanent": true
+    },
+    {
+      "source": "/blog/10-things-you-might-not-know-about-k9s",
+      "destination": "https://blog.kubesimplify.com/10-things-you-might-not-know-about-k9s",
+      "permanent": true
+    },
+    {
+      "source": "/blog/12-practical-grep-command-examples-in-linux",
+      "destination": "https://blog.kubesimplify.com/12-practical-grep-command-examples-in-linux",
+      "permanent": true
+    },
+    {
+      "source": "/blog/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1",
+      "destination": "https://blog.kubesimplify.com/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1",
+      "permanent": true
+    },
+    {
+      "source": "/blog/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2",
+      "destination": "https://blog.kubesimplify.com/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2",
+      "permanent": true
+    },
+    {
+      "source": "/blog/a-complete-walk-through-of-devops",
+      "destination": "https://blog.kubesimplify.com/a-complete-walk-through-of-devops",
+      "permanent": true
+    },
+    {
+      "source": "/blog/a-kubeconfig-for-gke-that-doesnt-need-gcloud",
+      "destination": "https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud",
+      "permanent": true
+    },
+    {
+      "source": "/blog/a-simple-way-to-structure-your-terraform-code",
+      "destination": "https://blog.kubesimplify.com/a-simple-way-to-structure-your-terraform-code",
+      "permanent": true
+    },
+    {
+      "source": "/blog/a-simplified-guide-to-yaml",
+      "destination": "https://blog.kubesimplify.com/a-simplified-guide-to-yaml",
+      "permanent": true
+    },
+    {
+      "source": "/blog/about-my-pdf-editor-project",
+      "destination": "https://blog.kubesimplify.com/about-my-pdf-editor-project",
+      "permanent": true
+    },
+    {
+      "source": "/blog/an-overview-of-gitops-and-argocd",
+      "destination": "https://blog.kubesimplify.com/an-overview-of-gitops-and-argocd",
+      "permanent": true
+    },
+    {
+      "source": "/blog/announcing-buildsafe",
+      "destination": "https://blog.kubesimplify.com/announcing-buildsafe",
+      "permanent": true
+    },
+    {
+      "source": "/blog/api-response-in-go",
+      "destination": "https://blog.kubesimplify.com/api-response-in-go",
+      "permanent": true
+    },
+    {
+      "source": "/blog/arkade",
+      "destination": "https://blog.kubesimplify.com/arkade",
+      "permanent": true
+    },
+    {
+      "source": "/blog/automate-repetitive-tasks-shell-scripting",
+      "destination": "https://blog.kubesimplify.com/automate-repetitive-tasks-shell-scripting",
+      "permanent": true
+    },
+    {
+      "source": "/blog/automated-github-releases-with-github-actions-and-conventional-commits",
+      "destination": "https://blog.kubesimplify.com/automated-github-releases-with-github-actions-and-conventional-commits",
+      "permanent": true
+    },
+    {
+      "source": "/blog/avoid-overspending-with-kubecost",
+      "destination": "https://blog.kubesimplify.com/avoid-overspending-with-kubecost",
+      "permanent": true
+    },
+    {
+      "source": "/blog/aws-elastic-cloud-compute",
+      "destination": "https://blog.kubesimplify.com/aws-elastic-cloud-compute",
+      "permanent": true
+    },
+    {
+      "source": "/blog/bake-your-container-images-with-bake",
+      "destination": "https://blog.kubesimplify.com/bake-your-container-images-with-bake",
+      "permanent": true
+    },
+    {
+      "source": "/blog/become-a-hashicorp-certified-terraform-associate-preparation-guide",
+      "destination": "https://blog.kubesimplify.com/become-a-hashicorp-certified-terraform-associate-preparation-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/best-devops-tools-2025",
+      "destination": "https://blog.kubesimplify.com/best-devops-tools-2025",
+      "permanent": true
+    },
+    {
+      "source": "/blog/breaking-down-docker",
+      "destination": "https://blog.kubesimplify.com/breaking-down-docker",
+      "permanent": true
+    },
+    {
+      "source": "/blog/building-a-zero-cve-strategy",
+      "destination": "https://blog.kubesimplify.com/building-a-zero-cve-strategy",
+      "permanent": true
+    },
+    {
+      "source": "/blog/building-apigateway-with-lambda-using-pulumi",
+      "destination": "https://blog.kubesimplify.com/building-apigateway-with-lambda-using-pulumi",
+      "permanent": true
+    },
+    {
+      "source": "/blog/certified-kubernetes-security-specialist-cks-2022-exam-guide",
+      "destination": "https://blog.kubesimplify.com/certified-kubernetes-security-specialist-cks-2022-exam-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/cicd-pipeline-github-actions-with-aws-ecs",
+      "destination": "https://blog.kubesimplify.com/cicd-pipeline-github-actions-with-aws-ecs",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ckad-exam-april-2022",
+      "destination": "https://blog.kubesimplify.com/ckad-exam-april-2022",
+      "permanent": true
+    },
+    {
+      "source": "/blog/claude-code-leak-what-the-source-actually-teaches",
+      "destination": "https://blog.kubesimplify.com/claude-code-leak-what-the-source-actually-teaches",
+      "permanent": true
+    },
+    {
+      "source": "/blog/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home",
+      "destination": "https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home",
+      "permanent": true
+    },
+    {
+      "source": "/blog/cloud-computing",
+      "destination": "https://blog.kubesimplify.com/cloud-computing",
+      "permanent": true
+    },
+    {
+      "source": "/blog/cloud-native-buildpacks-concepts",
+      "destination": "https://blog.kubesimplify.com/cloud-native-buildpacks-concepts",
+      "permanent": true
+    },
+    {
+      "source": "/blog/confidential-containers-running-on-kubernetes",
+      "destination": "https://blog.kubesimplify.com/confidential-containers-running-on-kubernetes",
+      "permanent": true
+    },
+    {
+      "source": "/blog/container-and-kubernetes-security",
+      "destination": "https://blog.kubesimplify.com/container-and-kubernetes-security",
+      "permanent": true
+    },
+    {
+      "source": "/blog/coolify",
+      "destination": "https://blog.kubesimplify.com/coolify",
+      "permanent": true
+    },
+    {
+      "source": "/blog/creating-multi-node-kubernetes-cluster-locally",
+      "destination": "https://blog.kubesimplify.com/creating-multi-node-kubernetes-cluster-locally",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter",
+      "destination": "https://blog.kubesimplify.com/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-1-what-actually-happens-when-you-type-docker-run",
+      "destination": "https://blog.kubesimplify.com/day-1-what-actually-happens-when-you-type-docker-run",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step",
+      "destination": "https://blog.kubesimplify.com/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken",
+      "destination": "https://blog.kubesimplify.com/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-3-stop-writing-dockerfiles-from-scratch",
+      "destination": "https://blog.kubesimplify.com/day-3-stop-writing-dockerfiles-from-scratch",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
+      "destination": "https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-5-docker-compose-how-docker-actually-gets-used",
+      "destination": "https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-6-run-an-llm-on-your-laptop-with-docker",
+      "destination": "https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-7-ship-it-and-what-comes-next",
+      "destination": "https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next",
+      "permanent": true
+    },
+    {
+      "source": "/blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws",
+      "destination": "https://blog.kubesimplify.com/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws",
+      "permanent": true
+    },
+    {
+      "source": "/blog/deploy-a-simple-server-using-aws-terraform",
+      "destination": "https://blog.kubesimplify.com/deploy-a-simple-server-using-aws-terraform",
+      "permanent": true
+    },
+    {
+      "source": "/blog/deploying-java-application-using-docker-and-kubernetes-devops-project",
+      "destination": "https://blog.kubesimplify.com/deploying-java-application-using-docker-and-kubernetes-devops-project",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
+      "destination": "https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
+      "permanent": true
+    },
+    {
+      "source": "/blog/diy-how-to-build-a-kubernetes-policy-engine",
+      "destination": "https://blog.kubesimplify.com/diy-how-to-build-a-kubernetes-policy-engine",
+      "permanent": true
+    },
+    {
+      "source": "/blog/docker-captain-journey",
+      "destination": "https://blog.kubesimplify.com/docker-captain-journey",
+      "permanent": true
+    },
+    {
+      "source": "/blog/docker-mcp-catalog",
+      "destination": "https://blog.kubesimplify.com/docker-mcp-catalog",
+      "permanent": true
+    },
+    {
+      "source": "/blog/docker-networking-demystified",
+      "destination": "https://blog.kubesimplify.com/docker-networking-demystified",
+      "permanent": true
+    },
+    {
+      "source": "/blog/embed-http-servers-in-wasm-with-rust-and-csharp",
+      "destination": "https://blog.kubesimplify.com/embed-http-servers-in-wasm-with-rust-and-csharp",
+      "permanent": true
+    },
+    {
+      "source": "/blog/enhancing-runtime-security-with-falco-my-hands-on-experience",
+      "destination": "https://blog.kubesimplify.com/enhancing-runtime-security-with-falco-my-hands-on-experience",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ephemeral-pull-request-environment-using-vcluster",
+      "destination": "https://blog.kubesimplify.com/ephemeral-pull-request-environment-using-vcluster",
+      "permanent": true
+    },
+    {
+      "source": "/blog/essential-linux-commands-for-devops",
+      "destination": "https://blog.kubesimplify.com/essential-linux-commands-for-devops",
+      "permanent": true
+    },
+    {
+      "source": "/blog/event-driven-architecture-simplified-monolith-to-microservices",
+      "destination": "https://blog.kubesimplify.com/event-driven-architecture-simplified-monolith-to-microservices",
+      "permanent": true
+    },
+    {
+      "source": "/blog/everything-you-need-to-know-about-docker-compose",
+      "destination": "https://blog.kubesimplify.com/everything-you-need-to-know-about-docker-compose",
+      "permanent": true
+    },
+    {
+      "source": "/blog/everything-you-need-to-know-about-the-linux-ls-command",
+      "destination": "https://blog.kubesimplify.com/everything-you-need-to-know-about-the-linux-ls-command",
+      "permanent": true
+    },
+    {
+      "source": "/blog/exploiting-metasploitable2-using-msfconsole-kali-linux-lab",
+      "destination": "https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab",
+      "permanent": true
+    },
+    {
+      "source": "/blog/firewall-a-networks-gatekeeper",
+      "destination": "https://blog.kubesimplify.com/firewall-a-networks-gatekeeper",
+      "permanent": true
+    },
+    {
+      "source": "/blog/four-pillars-of-observability-in-kubernetes",
+      "destination": "https://blog.kubesimplify.com/four-pillars-of-observability-in-kubernetes",
+      "permanent": true
+    },
+    {
+      "source": "/blog/get-good-at-git",
+      "destination": "https://blog.kubesimplify.com/get-good-at-git",
+      "permanent": true
+    },
+    {
+      "source": "/blog/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster",
+      "destination": "https://blog.kubesimplify.com/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster",
+      "permanent": true
+    },
+    {
+      "source": "/blog/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications",
+      "destination": "https://blog.kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications",
+      "permanent": true
+    },
+    {
+      "source": "/blog/getting-started-with-kyverno",
+      "destination": "https://blog.kubesimplify.com/getting-started-with-kyverno",
+      "permanent": true
+    },
+    {
+      "source": "/blog/git-and-github-a-beginners-guide",
+      "destination": "https://blog.kubesimplify.com/git-and-github-a-beginners-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide",
+      "destination": "https://blog.kubesimplify.com/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/gitops-demystified",
+      "destination": "https://blog.kubesimplify.com/gitops-demystified",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ha-kubernetes",
+      "destination": "https://blog.kubesimplify.com/ha-kubernetes",
+      "permanent": true
+    },
+    {
+      "source": "/blog/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
+      "destination": "https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
+      "permanent": true
+    },
+    {
+      "source": "/blog/how-get-started-with-hashicorp-vault",
+      "destination": "https://blog.kubesimplify.com/how-get-started-with-hashicorp-vault",
+      "permanent": true
+    },
+    {
+      "source": "/blog/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die",
+      "destination": "https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die",
+      "permanent": true
+    },
+    {
+      "source": "/blog/how-to-backup-kubernetes-with-kasten-community-edition",
+      "destination": "https://blog.kubesimplify.com/how-to-backup-kubernetes-with-kasten-community-edition",
+      "permanent": true
+    },
+    {
+      "source": "/blog/how-to-change-directory-in-shell-scripts",
+      "destination": "https://blog.kubesimplify.com/how-to-change-directory-in-shell-scripts",
+      "permanent": true
+    },
+    {
+      "source": "/blog/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide",
+      "destination": "https://blog.kubesimplify.com/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/how-to-setup-your-ftp-server-in-linux",
+      "destination": "https://blog.kubesimplify.com/how-to-setup-your-ftp-server-in-linux",
+      "permanent": true
+    },
+    {
+      "source": "/blog/implementing-kubernetes-network-policies-a-comprehensive-guide",
+      "destination": "https://blog.kubesimplify.com/implementing-kubernetes-network-policies-a-comprehensive-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/important-concepts-of-operating-systems",
+      "destination": "https://blog.kubesimplify.com/important-concepts-of-operating-systems",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ing-switch-119-annotations-gateway-api-traefik-impact-ratings",
+      "destination": "https://blog.kubesimplify.com/ing-switch-119-annotations-gateway-api-traefik-impact-ratings",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
+      "destination": "https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
+      "permanent": true
+    },
+    {
+      "source": "/blog/installing-prometheus-with-selinux",
+      "destination": "https://blog.kubesimplify.com/installing-prometheus-with-selinux",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introducing-unikraft-lightweight-virtualization-using-unikernels",
+      "destination": "https://blog.kubesimplify.com/introducing-unikraft-lightweight-virtualization-using-unikernels",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introduction-of-jenkins-pipeline",
+      "destination": "https://blog.kubesimplify.com/introduction-of-jenkins-pipeline",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introduction-to-cicd-and-cicd-pipeline",
+      "destination": "https://blog.kubesimplify.com/introduction-to-cicd-and-cicd-pipeline",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introduction-to-cri",
+      "destination": "https://blog.kubesimplify.com/introduction-to-cri",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introduction-to-developer-platforms-with-gimlet",
+      "destination": "https://blog.kubesimplify.com/introduction-to-developer-platforms-with-gimlet",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introduction-to-helm",
+      "destination": "https://blog.kubesimplify.com/introduction-to-helm",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introduction-to-jenkins",
+      "destination": "https://blog.kubesimplify.com/introduction-to-jenkins",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introduction-to-kubernetes",
+      "destination": "https://blog.kubesimplify.com/introduction-to-kubernetes",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introduction-to-terraform",
+      "destination": "https://blog.kubesimplify.com/introduction-to-terraform",
+      "permanent": true
+    },
+    {
+      "source": "/blog/iptables-demo",
+      "destination": "https://blog.kubesimplify.com/iptables-demo",
+      "permanent": true
+    },
+    {
+      "source": "/blog/istio-service-mesh",
+      "destination": "https://blog.kubesimplify.com/istio-service-mesh",
+      "permanent": true
+    },
+    {
+      "source": "/blog/k8sgpt-tutorial-when-kubernetes-meets-ai",
+      "destination": "https://blog.kubesimplify.com/k8sgpt-tutorial-when-kubernetes-meets-ai",
+      "permanent": true
+    },
+    {
+      "source": "/blog/keptn-getting-started",
+      "destination": "https://blog.kubesimplify.com/keptn-getting-started",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ksctl-making-kubernetes-easy-across-clouds",
+      "destination": "https://blog.kubesimplify.com/ksctl-making-kubernetes-easy-across-clouds",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kube-proxy-deep-dive",
+      "destination": "https://blog.kubesimplify.com/kube-proxy-deep-dive",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kube-scheduler-deep-dive",
+      "destination": "https://blog.kubesimplify.com/kube-scheduler-deep-dive",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit",
+      "destination": "https://blog.kubesimplify.com/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices",
+      "destination": "https://blog.kubesimplify.com/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubectl-run-nginx-inside",
+      "destination": "https://blog.kubesimplify.com/kubectl-run-nginx-inside",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubeflow-machine-learning-on-kubernetes-part-1",
+      "destination": "https://blog.kubesimplify.com/kubeflow-machine-learning-on-kubernetes-part-1",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubeflow-notebooks-ml-experimentation-made-easier-part-2",
+      "destination": "https://blog.kubesimplify.com/kubeflow-notebooks-ml-experimentation-made-easier-part-2",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3",
+      "destination": "https://blog.kubesimplify.com/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-125-dockerd",
+      "destination": "https://blog.kubesimplify.com/kubernetes-125-dockerd",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-126",
+      "destination": "https://blog.kubesimplify.com/kubernetes-126",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-access-control-with-authentication-authorization-admission-control",
+      "destination": "https://blog.kubesimplify.com/kubernetes-access-control-with-authentication-authorization-admission-control",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes",
+      "destination": "https://blog.kubesimplify.com/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-backup-using-cloudcasa",
+      "destination": "https://blog.kubesimplify.com/kubernetes-backup-using-cloudcasa",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-containerd-setup",
+      "destination": "https://blog.kubesimplify.com/kubernetes-containerd-setup",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-crio",
+      "destination": "https://blog.kubesimplify.com/kubernetes-crio",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
+      "destination": "https://blog.kubesimplify.com/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-on-apple-macbooks-m-series",
+      "destination": "https://blog.kubesimplify.com/kubernetes-on-apple-macbooks-m-series",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-scheduling-the-complete-guide",
+      "destination": "https://blog.kubesimplify.com/kubernetes-scheduling-the-complete-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-v133-key-features-updates-and-what-you-need-to-know",
+      "destination": "https://blog.kubesimplify.com/kubernetes-v133-key-features-updates-and-what-you-need-to-know",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know",
+      "destination": "https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubesimplify-a-journey-to-remember",
+      "destination": "https://blog.kubesimplify.com/kubesimplify-a-journey-to-remember",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kubesimplify-at-wasmio-and-kubecon-eu-2024",
+      "destination": "https://blog.kubesimplify.com/kubesimplify-at-wasmio-and-kubecon-eu-2024",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kyverno-and-cosign",
+      "destination": "https://blog.kubesimplify.com/kyverno-and-cosign",
+      "permanent": true
+    },
+    {
+      "source": "/blog/kyverno-cli",
+      "destination": "https://blog.kubesimplify.com/kyverno-cli",
+      "permanent": true
+    },
+    {
+      "source": "/blog/lets-learn-terraform",
+      "destination": "https://blog.kubesimplify.com/lets-learn-terraform",
+      "permanent": true
+    },
+    {
+      "source": "/blog/lets-simplify-golang-part-1",
+      "destination": "https://blog.kubesimplify.com/lets-simplify-golang-part-1",
+      "permanent": true
+    },
+    {
+      "source": "/blog/lets-simplify-golang-part-2",
+      "destination": "https://blog.kubesimplify.com/lets-simplify-golang-part-2",
+      "permanent": true
+    },
+    {
+      "source": "/blog/lets-simplify-golang-part-3",
+      "destination": "https://blog.kubesimplify.com/lets-simplify-golang-part-3",
+      "permanent": true
+    },
+    {
+      "source": "/blog/lets-talk-about-ansible",
+      "destination": "https://blog.kubesimplify.com/lets-talk-about-ansible",
+      "permanent": true
+    },
+    {
+      "source": "/blog/linux-boot-process-simplified",
+      "destination": "https://blog.kubesimplify.com/linux-boot-process-simplified",
+      "permanent": true
+    },
+    {
+      "source": "/blog/linux-system-directories-explained",
+      "destination": "https://blog.kubesimplify.com/linux-system-directories-explained",
+      "permanent": true
+    },
+    {
+      "source": "/blog/managing-contexts-in-kubernetes-with-plugins",
+      "destination": "https://blog.kubesimplify.com/managing-contexts-in-kubernetes-with-plugins",
+      "permanent": true
+    },
+    {
+      "source": "/blog/managing-your-operating-system-with-package-managers",
+      "destination": "https://blog.kubesimplify.com/managing-your-operating-system-with-package-managers",
+      "permanent": true
+    },
+    {
+      "source": "/blog/mastering-kubernetes-costs-from-monitoring-to-automation",
+      "destination": "https://blog.kubesimplify.com/mastering-kubernetes-costs-from-monitoring-to-automation",
+      "permanent": true
+    },
+    {
+      "source": "/blog/microservices",
+      "destination": "https://blog.kubesimplify.com/microservices",
+      "permanent": true
+    },
+    {
+      "source": "/blog/moving-code-between-git-repositories-with-copybara",
+      "destination": "https://blog.kubesimplify.com/moving-code-between-git-repositories-with-copybara",
+      "permanent": true
+    },
+    {
+      "source": "/blog/multi-stage-docker-build",
+      "destination": "https://blog.kubesimplify.com/multi-stage-docker-build",
+      "permanent": true
+    },
+    {
+      "source": "/blog/multi-tenancy-in-2025-and-beyond",
+      "destination": "https://blog.kubesimplify.com/multi-tenancy-in-2025-and-beyond",
+      "permanent": true
+    },
+    {
+      "source": "/blog/my-first-international-conference-open-source-summit-2022",
+      "destination": "https://blog.kubesimplify.com/my-first-international-conference-open-source-summit-2022",
+      "permanent": true
+    },
+    {
+      "source": "/blog/my-journey-to-kubestronaut-on-kubernetes-10th-birthday",
+      "destination": "https://blog.kubesimplify.com/my-journey-to-kubestronaut-on-kubernetes-10th-birthday",
+      "permanent": true
+    },
+    {
+      "source": "/blog/my-kubecon-euvirtual-experience",
+      "destination": "https://blog.kubesimplify.com/my-kubecon-euvirtual-experience",
+      "permanent": true
+    },
+    {
+      "source": "/blog/my-schedule-for-kubecon-cloudnativecon-eu-2022",
+      "destination": "https://blog.kubesimplify.com/my-schedule-for-kubecon-cloudnativecon-eu-2022",
+      "permanent": true
+    },
+    {
+      "source": "/blog/navigating-through-cncf-landscape",
+      "destination": "https://blog.kubesimplify.com/navigating-through-cncf-landscape",
+      "permanent": true
+    },
+    {
+      "source": "/blog/nemotron3-on-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/nemotron3-on-dgx-spark",
+      "permanent": true
+    },
+    {
+      "source": "/blog/networking-fundamentals-for-devops",
+      "destination": "https://blog.kubesimplify.com/networking-fundamentals-for-devops",
+      "permanent": true
+    },
+    {
+      "source": "/blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet",
+      "destination": "https://blog.kubesimplify.com/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet",
+      "permanent": true
+    },
+    {
+      "source": "/blog/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
+      "destination": "https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
+      "permanent": true
+    },
+    {
+      "source": "/blog/operating-systems-101-essential-knowledge-for-devopssre-engineers",
+      "destination": "https://blog.kubesimplify.com/operating-systems-101-essential-knowledge-for-devopssre-engineers",
+      "permanent": true
+    },
+    {
+      "source": "/blog/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints",
+      "destination": "https://blog.kubesimplify.com/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints",
+      "permanent": true
+    },
+    {
+      "source": "/blog/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks",
+      "destination": "https://blog.kubesimplify.com/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks",
+      "permanent": true
+    },
+    {
+      "source": "/blog/package-managers-demystified",
+      "destination": "https://blog.kubesimplify.com/package-managers-demystified",
+      "permanent": true
+    },
+    {
+      "source": "/blog/perform-crud-operations-on-kubernetes-using-golang",
+      "destination": "https://blog.kubesimplify.com/perform-crud-operations-on-kubernetes-using-golang",
+      "permanent": true
+    },
+    {
+      "source": "/blog/platform-engineering-demystified-navigating-the-basics",
+      "destination": "https://blog.kubesimplify.com/platform-engineering-demystified-navigating-the-basics",
+      "permanent": true
+    },
+    {
+      "source": "/blog/pods-in-kubernetes",
+      "destination": "https://blog.kubesimplify.com/pods-in-kubernetes",
+      "permanent": true
+    },
+    {
+      "source": "/blog/practical-guide-to-kubernetes-api",
+      "destination": "https://blog.kubesimplify.com/practical-guide-to-kubernetes-api",
+      "permanent": true
+    },
+    {
+      "source": "/blog/progressive-rollouts-with-argo-cd-rollouts",
+      "destination": "https://blog.kubesimplify.com/progressive-rollouts-with-argo-cd-rollouts",
+      "permanent": true
+    },
+    {
+      "source": "/blog/prometheus-explained",
+      "destination": "https://blog.kubesimplify.com/prometheus-explained",
+      "permanent": true
+    },
+    {
+      "source": "/blog/pure-cilium-a-guide-for-local-load-balancing-and-bgp",
+      "destination": "https://blog.kubesimplify.com/pure-cilium-a-guide-for-local-load-balancing-and-bgp",
+      "permanent": true
+    },
+    {
+      "source": "/blog/quick-bites-of-fluxcd-health-assessment",
+      "destination": "https://blog.kubesimplify.com/quick-bites-of-fluxcd-health-assessment",
+      "permanent": true
+    },
+    {
+      "source": "/blog/rancher-desktop-evolution",
+      "destination": "https://blog.kubesimplify.com/rancher-desktop-evolution",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ready-for-wasm-day-2023",
+      "destination": "https://blog.kubesimplify.com/ready-for-wasm-day-2023",
+      "permanent": true
+    },
+    {
+      "source": "/blog/simplified-introduction-to-bacalhau",
+      "destination": "https://blog.kubesimplify.com/simplified-introduction-to-bacalhau",
+      "permanent": true
+    },
+    {
+      "source": "/blog/speeding-up-using-microk8s",
+      "destination": "https://blog.kubesimplify.com/speeding-up-using-microk8s",
+      "permanent": true
+    },
+    {
+      "source": "/blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
+      "destination": "https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
+      "permanent": true
+    },
+    {
+      "source": "/blog/starting-your-devops-journey-as-a-windows-user",
+      "destination": "https://blog.kubesimplify.com/starting-your-devops-journey-as-a-windows-user",
+      "permanent": true
+    },
+    {
+      "source": "/blog/statefulsets",
+      "destination": "https://blog.kubesimplify.com/statefulsets",
+      "permanent": true
+    },
+    {
+      "source": "/blog/supply-chain-security-using-slsa-part-1-fundamentals",
+      "destination": "https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-1-fundamentals",
+      "permanent": true
+    },
+    {
+      "source": "/blog/supply-chain-security-using-slsa-part-2-the-framework",
+      "destination": "https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-2-the-framework",
+      "permanent": true
+    },
+    {
+      "source": "/blog/terraform-best-practices",
+      "destination": "https://blog.kubesimplify.com/terraform-best-practices",
+      "permanent": true
+    },
+    {
+      "source": "/blog/testing-docker-ais-gordon-how-smart-is-it",
+      "destination": "https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it",
+      "permanent": true
+    },
+    {
+      "source": "/blog/the-complete-guide-to-the-dd-command-in-linux",
+      "destination": "https://blog.kubesimplify.com/the-complete-guide-to-the-dd-command-in-linux",
+      "permanent": true
+    },
+    {
+      "source": "/blog/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx",
+      "destination": "https://blog.kubesimplify.com/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx",
+      "permanent": true
+    },
+    {
+      "source": "/blog/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis",
+      "destination": "https://blog.kubesimplify.com/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis",
+      "permanent": true
+    },
+    {
+      "source": "/blog/the-webassembly-course",
+      "destination": "https://blog.kubesimplify.com/the-webassembly-course",
+      "permanent": true
+    },
+    {
+      "source": "/blog/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser",
+      "destination": "https://blog.kubesimplify.com/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser",
+      "permanent": true
+    },
+    {
+      "source": "/blog/understanding-docker-desktop-all-in-one-platform-for-containers",
+      "destination": "https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers",
+      "permanent": true
+    },
+    {
+      "source": "/blog/understanding-etcd-in-kubernetes-a-beginners-guide",
+      "destination": "https://blog.kubesimplify.com/understanding-etcd-in-kubernetes-a-beginners-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/understanding-how-containers-work-behind-the-scenes",
+      "destination": "https://blog.kubesimplify.com/understanding-how-containers-work-behind-the-scenes",
+      "permanent": true
+    },
+    {
+      "source": "/blog/understanding-the-architecture-of-kubernetes-a-beginners-guide",
+      "destination": "https://blog.kubesimplify.com/understanding-the-architecture-of-kubernetes-a-beginners-guide",
+      "permanent": true
+    },
+    {
+      "source": "/blog/understanding-the-ins-and-outs-of-git-using-github",
+      "destination": "https://blog.kubesimplify.com/understanding-the-ins-and-outs-of-git-using-github",
+      "permanent": true
+    },
+    {
+      "source": "/blog/what-is-reproducibility-and-why-does-it-matter",
+      "destination": "https://blog.kubesimplify.com/what-is-reproducibility-and-why-does-it-matter",
+      "permanent": true
+    },
+    {
+      "source": "/blog/what-is-shell-scripting",
+      "destination": "https://blog.kubesimplify.com/what-is-shell-scripting",
+      "permanent": true
+    },
+    {
+      "source": "/blog/why-are-network-policies-in-kubernetes-so-hard-to-understand",
+      "destination": "https://blog.kubesimplify.com/why-are-network-policies-in-kubernetes-so-hard-to-understand",
+      "permanent": true
+    },
+    {
+      "source": "/blog/why-devops-case-study",
+      "destination": "https://blog.kubesimplify.com/why-devops-case-study",
+      "permanent": true
+    },
+    {
+      "source": "/blog/wtf-is-linux-shell-command-substitution",
+      "destination": "https://blog.kubesimplify.com/wtf-is-linux-shell-command-substitution",
+      "permanent": true
+    },
+    {
+      "source": "/blog/yours-kindly-drone",
+      "destination": "https://blog.kubesimplify.com/yours-kindly-drone",
       "permanent": true
     },
     {
       "source": "/10-things-you-might-not-know-about-k9s",
-      "destination": "/blog/10-things-you-might-not-know-about-k9s",
+      "destination": "https://blog.kubesimplify.com/10-things-you-might-not-know-about-k9s",
       "permanent": true,
       "has": [
         {
@@ -41,7 +969,7 @@
     },
     {
       "source": "/12-practical-grep-command-examples-in-linux",
-      "destination": "/blog/12-practical-grep-command-examples-in-linux",
+      "destination": "https://blog.kubesimplify.com/12-practical-grep-command-examples-in-linux",
       "permanent": true,
       "has": [
         {
@@ -52,7 +980,7 @@
     },
     {
       "source": "/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1",
-      "destination": "/blog/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1",
+      "destination": "https://blog.kubesimplify.com/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1",
       "permanent": true,
       "has": [
         {
@@ -63,7 +991,7 @@
     },
     {
       "source": "/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2",
-      "destination": "/blog/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2",
+      "destination": "https://blog.kubesimplify.com/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2",
       "permanent": true,
       "has": [
         {
@@ -74,7 +1002,7 @@
     },
     {
       "source": "/a-complete-walk-through-of-devops",
-      "destination": "/blog/a-complete-walk-through-of-devops",
+      "destination": "https://blog.kubesimplify.com/a-complete-walk-through-of-devops",
       "permanent": true,
       "has": [
         {
@@ -85,7 +1013,7 @@
     },
     {
       "source": "/a-kubeconfig-for-gke-that-doesnt-need-gcloud",
-      "destination": "/blog/a-kubeconfig-for-gke-that-doesnt-need-gcloud",
+      "destination": "https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud",
       "permanent": true,
       "has": [
         {
@@ -96,7 +1024,7 @@
     },
     {
       "source": "/a-simple-way-to-structure-your-terraform-code",
-      "destination": "/blog/a-simple-way-to-structure-your-terraform-code",
+      "destination": "https://blog.kubesimplify.com/a-simple-way-to-structure-your-terraform-code",
       "permanent": true,
       "has": [
         {
@@ -107,7 +1035,7 @@
     },
     {
       "source": "/a-simplified-guide-to-yaml",
-      "destination": "/blog/a-simplified-guide-to-yaml",
+      "destination": "https://blog.kubesimplify.com/a-simplified-guide-to-yaml",
       "permanent": true,
       "has": [
         {
@@ -118,7 +1046,7 @@
     },
     {
       "source": "/about-my-pdf-editor-project",
-      "destination": "/blog/about-my-pdf-editor-project",
+      "destination": "https://blog.kubesimplify.com/about-my-pdf-editor-project",
       "permanent": true,
       "has": [
         {
@@ -129,7 +1057,7 @@
     },
     {
       "source": "/an-overview-of-gitops-and-argocd",
-      "destination": "/blog/an-overview-of-gitops-and-argocd",
+      "destination": "https://blog.kubesimplify.com/an-overview-of-gitops-and-argocd",
       "permanent": true,
       "has": [
         {
@@ -140,7 +1068,7 @@
     },
     {
       "source": "/announcing-buildsafe",
-      "destination": "/blog/announcing-buildsafe",
+      "destination": "https://blog.kubesimplify.com/announcing-buildsafe",
       "permanent": true,
       "has": [
         {
@@ -151,7 +1079,7 @@
     },
     {
       "source": "/api-response-in-go",
-      "destination": "/blog/api-response-in-go",
+      "destination": "https://blog.kubesimplify.com/api-response-in-go",
       "permanent": true,
       "has": [
         {
@@ -162,7 +1090,7 @@
     },
     {
       "source": "/arkade",
-      "destination": "/blog/arkade",
+      "destination": "https://blog.kubesimplify.com/arkade",
       "permanent": true,
       "has": [
         {
@@ -173,7 +1101,7 @@
     },
     {
       "source": "/automate-repetitive-tasks-shell-scripting",
-      "destination": "/blog/automate-repetitive-tasks-shell-scripting",
+      "destination": "https://blog.kubesimplify.com/automate-repetitive-tasks-shell-scripting",
       "permanent": true,
       "has": [
         {
@@ -184,7 +1112,7 @@
     },
     {
       "source": "/automated-github-releases-with-github-actions-and-conventional-commits",
-      "destination": "/blog/automated-github-releases-with-github-actions-and-conventional-commits",
+      "destination": "https://blog.kubesimplify.com/automated-github-releases-with-github-actions-and-conventional-commits",
       "permanent": true,
       "has": [
         {
@@ -195,7 +1123,7 @@
     },
     {
       "source": "/avoid-overspending-with-kubecost",
-      "destination": "/blog/avoid-overspending-with-kubecost",
+      "destination": "https://blog.kubesimplify.com/avoid-overspending-with-kubecost",
       "permanent": true,
       "has": [
         {
@@ -206,7 +1134,7 @@
     },
     {
       "source": "/aws-elastic-cloud-compute",
-      "destination": "/blog/aws-elastic-cloud-compute",
+      "destination": "https://blog.kubesimplify.com/aws-elastic-cloud-compute",
       "permanent": true,
       "has": [
         {
@@ -217,7 +1145,7 @@
     },
     {
       "source": "/bake-your-container-images-with-bake",
-      "destination": "/blog/bake-your-container-images-with-bake",
+      "destination": "https://blog.kubesimplify.com/bake-your-container-images-with-bake",
       "permanent": true,
       "has": [
         {
@@ -228,7 +1156,7 @@
     },
     {
       "source": "/become-a-hashicorp-certified-terraform-associate-preparation-guide",
-      "destination": "/blog/become-a-hashicorp-certified-terraform-associate-preparation-guide",
+      "destination": "https://blog.kubesimplify.com/become-a-hashicorp-certified-terraform-associate-preparation-guide",
       "permanent": true,
       "has": [
         {
@@ -239,7 +1167,7 @@
     },
     {
       "source": "/best-devops-tools-2025",
-      "destination": "/blog/best-devops-tools-2025",
+      "destination": "https://blog.kubesimplify.com/best-devops-tools-2025",
       "permanent": true,
       "has": [
         {
@@ -250,7 +1178,7 @@
     },
     {
       "source": "/breaking-down-docker",
-      "destination": "/blog/breaking-down-docker",
+      "destination": "https://blog.kubesimplify.com/breaking-down-docker",
       "permanent": true,
       "has": [
         {
@@ -261,7 +1189,7 @@
     },
     {
       "source": "/building-a-zero-cve-strategy",
-      "destination": "/blog/building-a-zero-cve-strategy",
+      "destination": "https://blog.kubesimplify.com/building-a-zero-cve-strategy",
       "permanent": true,
       "has": [
         {
@@ -272,7 +1200,7 @@
     },
     {
       "source": "/building-apigateway-with-lambda-using-pulumi",
-      "destination": "/blog/building-apigateway-with-lambda-using-pulumi",
+      "destination": "https://blog.kubesimplify.com/building-apigateway-with-lambda-using-pulumi",
       "permanent": true,
       "has": [
         {
@@ -283,7 +1211,7 @@
     },
     {
       "source": "/certified-kubernetes-security-specialist-cks-2022-exam-guide",
-      "destination": "/blog/certified-kubernetes-security-specialist-cks-2022-exam-guide",
+      "destination": "https://blog.kubesimplify.com/certified-kubernetes-security-specialist-cks-2022-exam-guide",
       "permanent": true,
       "has": [
         {
@@ -294,7 +1222,7 @@
     },
     {
       "source": "/cicd-pipeline-github-actions-with-aws-ecs",
-      "destination": "/blog/cicd-pipeline-github-actions-with-aws-ecs",
+      "destination": "https://blog.kubesimplify.com/cicd-pipeline-github-actions-with-aws-ecs",
       "permanent": true,
       "has": [
         {
@@ -305,7 +1233,7 @@
     },
     {
       "source": "/ckad-exam-april-2022",
-      "destination": "/blog/ckad-exam-april-2022",
+      "destination": "https://blog.kubesimplify.com/ckad-exam-april-2022",
       "permanent": true,
       "has": [
         {
@@ -316,7 +1244,7 @@
     },
     {
       "source": "/claude-code-leak-what-the-source-actually-teaches",
-      "destination": "/blog/claude-code-leak-what-the-source-actually-teaches",
+      "destination": "https://blog.kubesimplify.com/claude-code-leak-what-the-source-actually-teaches",
       "permanent": true,
       "has": [
         {
@@ -327,7 +1255,7 @@
     },
     {
       "source": "/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home",
-      "destination": "/blog/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home",
+      "destination": "https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home",
       "permanent": true,
       "has": [
         {
@@ -338,7 +1266,7 @@
     },
     {
       "source": "/cloud-computing",
-      "destination": "/blog/cloud-computing",
+      "destination": "https://blog.kubesimplify.com/cloud-computing",
       "permanent": true,
       "has": [
         {
@@ -349,7 +1277,7 @@
     },
     {
       "source": "/cloud-native-buildpacks-concepts",
-      "destination": "/blog/cloud-native-buildpacks-concepts",
+      "destination": "https://blog.kubesimplify.com/cloud-native-buildpacks-concepts",
       "permanent": true,
       "has": [
         {
@@ -360,7 +1288,7 @@
     },
     {
       "source": "/confidential-containers-running-on-kubernetes",
-      "destination": "/blog/confidential-containers-running-on-kubernetes",
+      "destination": "https://blog.kubesimplify.com/confidential-containers-running-on-kubernetes",
       "permanent": true,
       "has": [
         {
@@ -371,7 +1299,7 @@
     },
     {
       "source": "/container-and-kubernetes-security",
-      "destination": "/blog/container-and-kubernetes-security",
+      "destination": "https://blog.kubesimplify.com/container-and-kubernetes-security",
       "permanent": true,
       "has": [
         {
@@ -382,7 +1310,7 @@
     },
     {
       "source": "/coolify",
-      "destination": "/blog/coolify",
+      "destination": "https://blog.kubesimplify.com/coolify",
       "permanent": true,
       "has": [
         {
@@ -393,7 +1321,18 @@
     },
     {
       "source": "/creating-multi-node-kubernetes-cluster-locally",
-      "destination": "/blog/creating-multi-node-kubernetes-cluster-locally",
+      "destination": "https://blog.kubesimplify.com/creating-multi-node-kubernetes-cluster-locally",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter",
+      "destination": "https://blog.kubesimplify.com/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter",
       "permanent": true,
       "has": [
         {
@@ -404,7 +1343,18 @@
     },
     {
       "source": "/day-1-what-actually-happens-when-you-type-docker-run",
-      "destination": "/blog/day-1-what-actually-happens-when-you-type-docker-run",
+      "destination": "https://blog.kubesimplify.com/day-1-what-actually-happens-when-you-type-docker-run",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step",
+      "destination": "https://blog.kubesimplify.com/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step",
       "permanent": true,
       "has": [
         {
@@ -415,7 +1365,7 @@
     },
     {
       "source": "/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken",
-      "destination": "/blog/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken",
+      "destination": "https://blog.kubesimplify.com/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken",
       "permanent": true,
       "has": [
         {
@@ -426,7 +1376,7 @@
     },
     {
       "source": "/day-3-stop-writing-dockerfiles-from-scratch",
-      "destination": "/blog/day-3-stop-writing-dockerfiles-from-scratch",
+      "destination": "https://blog.kubesimplify.com/day-3-stop-writing-dockerfiles-from-scratch",
       "permanent": true,
       "has": [
         {
@@ -437,7 +1387,7 @@
     },
     {
       "source": "/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
-      "destination": "/blog/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
+      "destination": "https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
       "permanent": true,
       "has": [
         {
@@ -448,7 +1398,7 @@
     },
     {
       "source": "/day-5-docker-compose-how-docker-actually-gets-used",
-      "destination": "/blog/day-5-docker-compose-how-docker-actually-gets-used",
+      "destination": "https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used",
       "permanent": true,
       "has": [
         {
@@ -459,7 +1409,7 @@
     },
     {
       "source": "/day-6-run-an-llm-on-your-laptop-with-docker",
-      "destination": "/blog/day-6-run-an-llm-on-your-laptop-with-docker",
+      "destination": "https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker",
       "permanent": true,
       "has": [
         {
@@ -470,7 +1420,7 @@
     },
     {
       "source": "/day-7-ship-it-and-what-comes-next",
-      "destination": "/blog/day-7-ship-it-and-what-comes-next",
+      "destination": "https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next",
       "permanent": true,
       "has": [
         {
@@ -481,7 +1431,7 @@
     },
     {
       "source": "/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws",
-      "destination": "/blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws",
+      "destination": "https://blog.kubesimplify.com/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws",
       "permanent": true,
       "has": [
         {
@@ -492,7 +1442,7 @@
     },
     {
       "source": "/deploy-a-simple-server-using-aws-terraform",
-      "destination": "/blog/deploy-a-simple-server-using-aws-terraform",
+      "destination": "https://blog.kubesimplify.com/deploy-a-simple-server-using-aws-terraform",
       "permanent": true,
       "has": [
         {
@@ -503,7 +1453,7 @@
     },
     {
       "source": "/deploying-java-application-using-docker-and-kubernetes-devops-project",
-      "destination": "/blog/deploying-java-application-using-docker-and-kubernetes-devops-project",
+      "destination": "https://blog.kubesimplify.com/deploying-java-application-using-docker-and-kubernetes-devops-project",
       "permanent": true,
       "has": [
         {
@@ -514,7 +1464,7 @@
     },
     {
       "source": "/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
-      "destination": "/blog/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
+      "destination": "https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
       "permanent": true,
       "has": [
         {
@@ -525,7 +1475,7 @@
     },
     {
       "source": "/diy-how-to-build-a-kubernetes-policy-engine",
-      "destination": "/blog/diy-how-to-build-a-kubernetes-policy-engine",
+      "destination": "https://blog.kubesimplify.com/diy-how-to-build-a-kubernetes-policy-engine",
       "permanent": true,
       "has": [
         {
@@ -536,7 +1486,7 @@
     },
     {
       "source": "/docker-captain-journey",
-      "destination": "/blog/docker-captain-journey",
+      "destination": "https://blog.kubesimplify.com/docker-captain-journey",
       "permanent": true,
       "has": [
         {
@@ -547,7 +1497,7 @@
     },
     {
       "source": "/docker-mcp-catalog",
-      "destination": "/blog/docker-mcp-catalog",
+      "destination": "https://blog.kubesimplify.com/docker-mcp-catalog",
       "permanent": true,
       "has": [
         {
@@ -558,7 +1508,7 @@
     },
     {
       "source": "/docker-networking-demystified",
-      "destination": "/blog/docker-networking-demystified",
+      "destination": "https://blog.kubesimplify.com/docker-networking-demystified",
       "permanent": true,
       "has": [
         {
@@ -569,7 +1519,7 @@
     },
     {
       "source": "/embed-http-servers-in-wasm-with-rust-and-csharp",
-      "destination": "/blog/embed-http-servers-in-wasm-with-rust-and-csharp",
+      "destination": "https://blog.kubesimplify.com/embed-http-servers-in-wasm-with-rust-and-csharp",
       "permanent": true,
       "has": [
         {
@@ -580,7 +1530,7 @@
     },
     {
       "source": "/enhancing-runtime-security-with-falco-my-hands-on-experience",
-      "destination": "/blog/enhancing-runtime-security-with-falco-my-hands-on-experience",
+      "destination": "https://blog.kubesimplify.com/enhancing-runtime-security-with-falco-my-hands-on-experience",
       "permanent": true,
       "has": [
         {
@@ -591,7 +1541,7 @@
     },
     {
       "source": "/ephemeral-pull-request-environment-using-vcluster",
-      "destination": "/blog/ephemeral-pull-request-environment-using-vcluster",
+      "destination": "https://blog.kubesimplify.com/ephemeral-pull-request-environment-using-vcluster",
       "permanent": true,
       "has": [
         {
@@ -602,7 +1552,7 @@
     },
     {
       "source": "/essential-linux-commands-for-devops",
-      "destination": "/blog/essential-linux-commands-for-devops",
+      "destination": "https://blog.kubesimplify.com/essential-linux-commands-for-devops",
       "permanent": true,
       "has": [
         {
@@ -613,7 +1563,7 @@
     },
     {
       "source": "/event-driven-architecture-simplified-monolith-to-microservices",
-      "destination": "/blog/event-driven-architecture-simplified-monolith-to-microservices",
+      "destination": "https://blog.kubesimplify.com/event-driven-architecture-simplified-monolith-to-microservices",
       "permanent": true,
       "has": [
         {
@@ -624,7 +1574,7 @@
     },
     {
       "source": "/everything-you-need-to-know-about-docker-compose",
-      "destination": "/blog/everything-you-need-to-know-about-docker-compose",
+      "destination": "https://blog.kubesimplify.com/everything-you-need-to-know-about-docker-compose",
       "permanent": true,
       "has": [
         {
@@ -635,7 +1585,7 @@
     },
     {
       "source": "/everything-you-need-to-know-about-the-linux-ls-command",
-      "destination": "/blog/everything-you-need-to-know-about-the-linux-ls-command",
+      "destination": "https://blog.kubesimplify.com/everything-you-need-to-know-about-the-linux-ls-command",
       "permanent": true,
       "has": [
         {
@@ -646,7 +1596,7 @@
     },
     {
       "source": "/exploiting-metasploitable2-using-msfconsole-kali-linux-lab",
-      "destination": "/blog/exploiting-metasploitable2-using-msfconsole-kali-linux-lab",
+      "destination": "https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab",
       "permanent": true,
       "has": [
         {
@@ -657,7 +1607,7 @@
     },
     {
       "source": "/firewall-a-networks-gatekeeper",
-      "destination": "/blog/firewall-a-networks-gatekeeper",
+      "destination": "https://blog.kubesimplify.com/firewall-a-networks-gatekeeper",
       "permanent": true,
       "has": [
         {
@@ -668,7 +1618,7 @@
     },
     {
       "source": "/four-pillars-of-observability-in-kubernetes",
-      "destination": "/blog/four-pillars-of-observability-in-kubernetes",
+      "destination": "https://blog.kubesimplify.com/four-pillars-of-observability-in-kubernetes",
       "permanent": true,
       "has": [
         {
@@ -679,7 +1629,7 @@
     },
     {
       "source": "/get-good-at-git",
-      "destination": "/blog/get-good-at-git",
+      "destination": "https://blog.kubesimplify.com/get-good-at-git",
       "permanent": true,
       "has": [
         {
@@ -690,7 +1640,7 @@
     },
     {
       "source": "/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster",
-      "destination": "/blog/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster",
+      "destination": "https://blog.kubesimplify.com/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster",
       "permanent": true,
       "has": [
         {
@@ -701,7 +1651,7 @@
     },
     {
       "source": "/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications",
-      "destination": "/blog/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications",
+      "destination": "https://blog.kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications",
       "permanent": true,
       "has": [
         {
@@ -712,7 +1662,7 @@
     },
     {
       "source": "/getting-started-with-kyverno",
-      "destination": "/blog/getting-started-with-kyverno",
+      "destination": "https://blog.kubesimplify.com/getting-started-with-kyverno",
       "permanent": true,
       "has": [
         {
@@ -723,7 +1673,7 @@
     },
     {
       "source": "/git-and-github-a-beginners-guide",
-      "destination": "/blog/git-and-github-a-beginners-guide",
+      "destination": "https://blog.kubesimplify.com/git-and-github-a-beginners-guide",
       "permanent": true,
       "has": [
         {
@@ -734,7 +1684,7 @@
     },
     {
       "source": "/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide",
-      "destination": "/blog/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide",
+      "destination": "https://blog.kubesimplify.com/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide",
       "permanent": true,
       "has": [
         {
@@ -745,7 +1695,7 @@
     },
     {
       "source": "/gitops-demystified",
-      "destination": "/blog/gitops-demystified",
+      "destination": "https://blog.kubesimplify.com/gitops-demystified",
       "permanent": true,
       "has": [
         {
@@ -756,7 +1706,7 @@
     },
     {
       "source": "/ha-kubernetes",
-      "destination": "/blog/ha-kubernetes",
+      "destination": "https://blog.kubesimplify.com/ha-kubernetes",
       "permanent": true,
       "has": [
         {
@@ -767,7 +1717,7 @@
     },
     {
       "source": "/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
-      "destination": "/blog/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
+      "destination": "https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
       "permanent": true,
       "has": [
         {
@@ -778,7 +1728,7 @@
     },
     {
       "source": "/how-get-started-with-hashicorp-vault",
-      "destination": "/blog/how-get-started-with-hashicorp-vault",
+      "destination": "https://blog.kubesimplify.com/how-get-started-with-hashicorp-vault",
       "permanent": true,
       "has": [
         {
@@ -789,7 +1739,7 @@
     },
     {
       "source": "/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die",
-      "destination": "/blog/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die",
+      "destination": "https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die",
       "permanent": true,
       "has": [
         {
@@ -800,7 +1750,7 @@
     },
     {
       "source": "/how-to-backup-kubernetes-with-kasten-community-edition",
-      "destination": "/blog/how-to-backup-kubernetes-with-kasten-community-edition",
+      "destination": "https://blog.kubesimplify.com/how-to-backup-kubernetes-with-kasten-community-edition",
       "permanent": true,
       "has": [
         {
@@ -811,7 +1761,7 @@
     },
     {
       "source": "/how-to-change-directory-in-shell-scripts",
-      "destination": "/blog/how-to-change-directory-in-shell-scripts",
+      "destination": "https://blog.kubesimplify.com/how-to-change-directory-in-shell-scripts",
       "permanent": true,
       "has": [
         {
@@ -822,7 +1772,7 @@
     },
     {
       "source": "/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide",
-      "destination": "/blog/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide",
+      "destination": "https://blog.kubesimplify.com/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide",
       "permanent": true,
       "has": [
         {
@@ -833,7 +1783,7 @@
     },
     {
       "source": "/how-to-setup-your-ftp-server-in-linux",
-      "destination": "/blog/how-to-setup-your-ftp-server-in-linux",
+      "destination": "https://blog.kubesimplify.com/how-to-setup-your-ftp-server-in-linux",
       "permanent": true,
       "has": [
         {
@@ -844,7 +1794,7 @@
     },
     {
       "source": "/implementing-kubernetes-network-policies-a-comprehensive-guide",
-      "destination": "/blog/implementing-kubernetes-network-policies-a-comprehensive-guide",
+      "destination": "https://blog.kubesimplify.com/implementing-kubernetes-network-policies-a-comprehensive-guide",
       "permanent": true,
       "has": [
         {
@@ -855,7 +1805,7 @@
     },
     {
       "source": "/important-concepts-of-operating-systems",
-      "destination": "/blog/important-concepts-of-operating-systems",
+      "destination": "https://blog.kubesimplify.com/important-concepts-of-operating-systems",
       "permanent": true,
       "has": [
         {
@@ -866,7 +1816,7 @@
     },
     {
       "source": "/ing-switch-119-annotations-gateway-api-traefik-impact-ratings",
-      "destination": "/blog/ing-switch-119-annotations-gateway-api-traefik-impact-ratings",
+      "destination": "https://blog.kubesimplify.com/ing-switch-119-annotations-gateway-api-traefik-impact-ratings",
       "permanent": true,
       "has": [
         {
@@ -877,7 +1827,7 @@
     },
     {
       "source": "/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
-      "destination": "/blog/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
+      "destination": "https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
       "permanent": true,
       "has": [
         {
@@ -888,7 +1838,7 @@
     },
     {
       "source": "/installing-prometheus-with-selinux",
-      "destination": "/blog/installing-prometheus-with-selinux",
+      "destination": "https://blog.kubesimplify.com/installing-prometheus-with-selinux",
       "permanent": true,
       "has": [
         {
@@ -899,7 +1849,7 @@
     },
     {
       "source": "/introducing-unikraft-lightweight-virtualization-using-unikernels",
-      "destination": "/blog/introducing-unikraft-lightweight-virtualization-using-unikernels",
+      "destination": "https://blog.kubesimplify.com/introducing-unikraft-lightweight-virtualization-using-unikernels",
       "permanent": true,
       "has": [
         {
@@ -910,7 +1860,7 @@
     },
     {
       "source": "/introduction-of-jenkins-pipeline",
-      "destination": "/blog/introduction-of-jenkins-pipeline",
+      "destination": "https://blog.kubesimplify.com/introduction-of-jenkins-pipeline",
       "permanent": true,
       "has": [
         {
@@ -921,7 +1871,7 @@
     },
     {
       "source": "/introduction-to-cicd-and-cicd-pipeline",
-      "destination": "/blog/introduction-to-cicd-and-cicd-pipeline",
+      "destination": "https://blog.kubesimplify.com/introduction-to-cicd-and-cicd-pipeline",
       "permanent": true,
       "has": [
         {
@@ -932,7 +1882,7 @@
     },
     {
       "source": "/introduction-to-cri",
-      "destination": "/blog/introduction-to-cri",
+      "destination": "https://blog.kubesimplify.com/introduction-to-cri",
       "permanent": true,
       "has": [
         {
@@ -943,7 +1893,7 @@
     },
     {
       "source": "/introduction-to-developer-platforms-with-gimlet",
-      "destination": "/blog/introduction-to-developer-platforms-with-gimlet",
+      "destination": "https://blog.kubesimplify.com/introduction-to-developer-platforms-with-gimlet",
       "permanent": true,
       "has": [
         {
@@ -954,7 +1904,7 @@
     },
     {
       "source": "/introduction-to-helm",
-      "destination": "/blog/introduction-to-helm",
+      "destination": "https://blog.kubesimplify.com/introduction-to-helm",
       "permanent": true,
       "has": [
         {
@@ -965,7 +1915,7 @@
     },
     {
       "source": "/introduction-to-jenkins",
-      "destination": "/blog/introduction-to-jenkins",
+      "destination": "https://blog.kubesimplify.com/introduction-to-jenkins",
       "permanent": true,
       "has": [
         {
@@ -976,7 +1926,7 @@
     },
     {
       "source": "/introduction-to-kubernetes",
-      "destination": "/blog/introduction-to-kubernetes",
+      "destination": "https://blog.kubesimplify.com/introduction-to-kubernetes",
       "permanent": true,
       "has": [
         {
@@ -987,7 +1937,7 @@
     },
     {
       "source": "/introduction-to-terraform",
-      "destination": "/blog/introduction-to-terraform",
+      "destination": "https://blog.kubesimplify.com/introduction-to-terraform",
       "permanent": true,
       "has": [
         {
@@ -998,7 +1948,7 @@
     },
     {
       "source": "/iptables-demo",
-      "destination": "/blog/iptables-demo",
+      "destination": "https://blog.kubesimplify.com/iptables-demo",
       "permanent": true,
       "has": [
         {
@@ -1009,7 +1959,7 @@
     },
     {
       "source": "/istio-service-mesh",
-      "destination": "/blog/istio-service-mesh",
+      "destination": "https://blog.kubesimplify.com/istio-service-mesh",
       "permanent": true,
       "has": [
         {
@@ -1020,7 +1970,7 @@
     },
     {
       "source": "/k8sgpt-tutorial-when-kubernetes-meets-ai",
-      "destination": "/blog/k8sgpt-tutorial-when-kubernetes-meets-ai",
+      "destination": "https://blog.kubesimplify.com/k8sgpt-tutorial-when-kubernetes-meets-ai",
       "permanent": true,
       "has": [
         {
@@ -1031,7 +1981,7 @@
     },
     {
       "source": "/keptn-getting-started",
-      "destination": "/blog/keptn-getting-started",
+      "destination": "https://blog.kubesimplify.com/keptn-getting-started",
       "permanent": true,
       "has": [
         {
@@ -1042,7 +1992,18 @@
     },
     {
       "source": "/ksctl-making-kubernetes-easy-across-clouds",
-      "destination": "/blog/ksctl-making-kubernetes-easy-across-clouds",
+      "destination": "https://blog.kubesimplify.com/ksctl-making-kubernetes-easy-across-clouds",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kube-proxy-deep-dive",
+      "destination": "https://blog.kubesimplify.com/kube-proxy-deep-dive",
       "permanent": true,
       "has": [
         {
@@ -1053,7 +2014,7 @@
     },
     {
       "source": "/kube-scheduler-deep-dive",
-      "destination": "/blog/kube-scheduler-deep-dive",
+      "destination": "https://blog.kubesimplify.com/kube-scheduler-deep-dive",
       "permanent": true,
       "has": [
         {
@@ -1064,7 +2025,7 @@
     },
     {
       "source": "/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit",
-      "destination": "/blog/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit",
+      "destination": "https://blog.kubesimplify.com/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit",
       "permanent": true,
       "has": [
         {
@@ -1075,7 +2036,7 @@
     },
     {
       "source": "/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices",
-      "destination": "/blog/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices",
+      "destination": "https://blog.kubesimplify.com/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices",
       "permanent": true,
       "has": [
         {
@@ -1086,7 +2047,7 @@
     },
     {
       "source": "/kubectl-run-nginx-inside",
-      "destination": "/blog/kubectl-run-nginx-inside",
+      "destination": "https://blog.kubesimplify.com/kubectl-run-nginx-inside",
       "permanent": true,
       "has": [
         {
@@ -1097,7 +2058,7 @@
     },
     {
       "source": "/kubeflow-machine-learning-on-kubernetes-part-1",
-      "destination": "/blog/kubeflow-machine-learning-on-kubernetes-part-1",
+      "destination": "https://blog.kubesimplify.com/kubeflow-machine-learning-on-kubernetes-part-1",
       "permanent": true,
       "has": [
         {
@@ -1108,7 +2069,7 @@
     },
     {
       "source": "/kubeflow-notebooks-ml-experimentation-made-easier-part-2",
-      "destination": "/blog/kubeflow-notebooks-ml-experimentation-made-easier-part-2",
+      "destination": "https://blog.kubesimplify.com/kubeflow-notebooks-ml-experimentation-made-easier-part-2",
       "permanent": true,
       "has": [
         {
@@ -1119,7 +2080,7 @@
     },
     {
       "source": "/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3",
-      "destination": "/blog/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3",
+      "destination": "https://blog.kubesimplify.com/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3",
       "permanent": true,
       "has": [
         {
@@ -1130,7 +2091,7 @@
     },
     {
       "source": "/kubernetes-125-dockerd",
-      "destination": "/blog/kubernetes-125-dockerd",
+      "destination": "https://blog.kubesimplify.com/kubernetes-125-dockerd",
       "permanent": true,
       "has": [
         {
@@ -1141,7 +2102,7 @@
     },
     {
       "source": "/kubernetes-126",
-      "destination": "/blog/kubernetes-126",
+      "destination": "https://blog.kubesimplify.com/kubernetes-126",
       "permanent": true,
       "has": [
         {
@@ -1152,7 +2113,7 @@
     },
     {
       "source": "/kubernetes-access-control-with-authentication-authorization-admission-control",
-      "destination": "/blog/kubernetes-access-control-with-authentication-authorization-admission-control",
+      "destination": "https://blog.kubesimplify.com/kubernetes-access-control-with-authentication-authorization-admission-control",
       "permanent": true,
       "has": [
         {
@@ -1163,7 +2124,7 @@
     },
     {
       "source": "/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes",
-      "destination": "/blog/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes",
+      "destination": "https://blog.kubesimplify.com/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes",
       "permanent": true,
       "has": [
         {
@@ -1174,7 +2135,7 @@
     },
     {
       "source": "/kubernetes-backup-using-cloudcasa",
-      "destination": "/blog/kubernetes-backup-using-cloudcasa",
+      "destination": "https://blog.kubesimplify.com/kubernetes-backup-using-cloudcasa",
       "permanent": true,
       "has": [
         {
@@ -1185,7 +2146,7 @@
     },
     {
       "source": "/kubernetes-containerd-setup",
-      "destination": "/blog/kubernetes-containerd-setup",
+      "destination": "https://blog.kubesimplify.com/kubernetes-containerd-setup",
       "permanent": true,
       "has": [
         {
@@ -1196,7 +2157,7 @@
     },
     {
       "source": "/kubernetes-crio",
-      "destination": "/blog/kubernetes-crio",
+      "destination": "https://blog.kubesimplify.com/kubernetes-crio",
       "permanent": true,
       "has": [
         {
@@ -1207,7 +2168,7 @@
     },
     {
       "source": "/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
-      "destination": "/blog/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
+      "destination": "https://blog.kubesimplify.com/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
       "permanent": true,
       "has": [
         {
@@ -1218,7 +2179,7 @@
     },
     {
       "source": "/kubernetes-on-apple-macbooks-m-series",
-      "destination": "/blog/kubernetes-on-apple-macbooks-m-series",
+      "destination": "https://blog.kubesimplify.com/kubernetes-on-apple-macbooks-m-series",
       "permanent": true,
       "has": [
         {
@@ -1229,7 +2190,7 @@
     },
     {
       "source": "/kubernetes-scheduling-the-complete-guide",
-      "destination": "/blog/kubernetes-scheduling-the-complete-guide",
+      "destination": "https://blog.kubesimplify.com/kubernetes-scheduling-the-complete-guide",
       "permanent": true,
       "has": [
         {
@@ -1240,7 +2201,7 @@
     },
     {
       "source": "/kubernetes-v133-key-features-updates-and-what-you-need-to-know",
-      "destination": "/blog/kubernetes-v133-key-features-updates-and-what-you-need-to-know",
+      "destination": "https://blog.kubesimplify.com/kubernetes-v133-key-features-updates-and-what-you-need-to-know",
       "permanent": true,
       "has": [
         {
@@ -1251,7 +2212,7 @@
     },
     {
       "source": "/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know",
-      "destination": "/blog/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know",
+      "destination": "https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know",
       "permanent": true,
       "has": [
         {
@@ -1262,7 +2223,7 @@
     },
     {
       "source": "/kubesimplify-a-journey-to-remember",
-      "destination": "/blog/kubesimplify-a-journey-to-remember",
+      "destination": "https://blog.kubesimplify.com/kubesimplify-a-journey-to-remember",
       "permanent": true,
       "has": [
         {
@@ -1273,7 +2234,7 @@
     },
     {
       "source": "/kubesimplify-at-wasmio-and-kubecon-eu-2024",
-      "destination": "/blog/kubesimplify-at-wasmio-and-kubecon-eu-2024",
+      "destination": "https://blog.kubesimplify.com/kubesimplify-at-wasmio-and-kubecon-eu-2024",
       "permanent": true,
       "has": [
         {
@@ -1284,7 +2245,7 @@
     },
     {
       "source": "/kyverno-and-cosign",
-      "destination": "/blog/kyverno-and-cosign",
+      "destination": "https://blog.kubesimplify.com/kyverno-and-cosign",
       "permanent": true,
       "has": [
         {
@@ -1295,7 +2256,7 @@
     },
     {
       "source": "/kyverno-cli",
-      "destination": "/blog/kyverno-cli",
+      "destination": "https://blog.kubesimplify.com/kyverno-cli",
       "permanent": true,
       "has": [
         {
@@ -1306,7 +2267,7 @@
     },
     {
       "source": "/lets-learn-terraform",
-      "destination": "/blog/lets-learn-terraform",
+      "destination": "https://blog.kubesimplify.com/lets-learn-terraform",
       "permanent": true,
       "has": [
         {
@@ -1317,7 +2278,7 @@
     },
     {
       "source": "/lets-simplify-golang-part-1",
-      "destination": "/blog/lets-simplify-golang-part-1",
+      "destination": "https://blog.kubesimplify.com/lets-simplify-golang-part-1",
       "permanent": true,
       "has": [
         {
@@ -1328,7 +2289,7 @@
     },
     {
       "source": "/lets-simplify-golang-part-2",
-      "destination": "/blog/lets-simplify-golang-part-2",
+      "destination": "https://blog.kubesimplify.com/lets-simplify-golang-part-2",
       "permanent": true,
       "has": [
         {
@@ -1339,7 +2300,7 @@
     },
     {
       "source": "/lets-simplify-golang-part-3",
-      "destination": "/blog/lets-simplify-golang-part-3",
+      "destination": "https://blog.kubesimplify.com/lets-simplify-golang-part-3",
       "permanent": true,
       "has": [
         {
@@ -1350,7 +2311,7 @@
     },
     {
       "source": "/lets-talk-about-ansible",
-      "destination": "/blog/lets-talk-about-ansible",
+      "destination": "https://blog.kubesimplify.com/lets-talk-about-ansible",
       "permanent": true,
       "has": [
         {
@@ -1361,7 +2322,7 @@
     },
     {
       "source": "/linux-boot-process-simplified",
-      "destination": "/blog/linux-boot-process-simplified",
+      "destination": "https://blog.kubesimplify.com/linux-boot-process-simplified",
       "permanent": true,
       "has": [
         {
@@ -1372,7 +2333,7 @@
     },
     {
       "source": "/linux-system-directories-explained",
-      "destination": "/blog/linux-system-directories-explained",
+      "destination": "https://blog.kubesimplify.com/linux-system-directories-explained",
       "permanent": true,
       "has": [
         {
@@ -1383,7 +2344,7 @@
     },
     {
       "source": "/managing-contexts-in-kubernetes-with-plugins",
-      "destination": "/blog/managing-contexts-in-kubernetes-with-plugins",
+      "destination": "https://blog.kubesimplify.com/managing-contexts-in-kubernetes-with-plugins",
       "permanent": true,
       "has": [
         {
@@ -1394,7 +2355,7 @@
     },
     {
       "source": "/managing-your-operating-system-with-package-managers",
-      "destination": "/blog/managing-your-operating-system-with-package-managers",
+      "destination": "https://blog.kubesimplify.com/managing-your-operating-system-with-package-managers",
       "permanent": true,
       "has": [
         {
@@ -1405,7 +2366,7 @@
     },
     {
       "source": "/mastering-kubernetes-costs-from-monitoring-to-automation",
-      "destination": "/blog/mastering-kubernetes-costs-from-monitoring-to-automation",
+      "destination": "https://blog.kubesimplify.com/mastering-kubernetes-costs-from-monitoring-to-automation",
       "permanent": true,
       "has": [
         {
@@ -1416,7 +2377,7 @@
     },
     {
       "source": "/microservices",
-      "destination": "/blog/microservices",
+      "destination": "https://blog.kubesimplify.com/microservices",
       "permanent": true,
       "has": [
         {
@@ -1427,7 +2388,7 @@
     },
     {
       "source": "/moving-code-between-git-repositories-with-copybara",
-      "destination": "/blog/moving-code-between-git-repositories-with-copybara",
+      "destination": "https://blog.kubesimplify.com/moving-code-between-git-repositories-with-copybara",
       "permanent": true,
       "has": [
         {
@@ -1438,7 +2399,7 @@
     },
     {
       "source": "/multi-stage-docker-build",
-      "destination": "/blog/multi-stage-docker-build",
+      "destination": "https://blog.kubesimplify.com/multi-stage-docker-build",
       "permanent": true,
       "has": [
         {
@@ -1449,7 +2410,7 @@
     },
     {
       "source": "/multi-tenancy-in-2025-and-beyond",
-      "destination": "/blog/multi-tenancy-in-2025-and-beyond",
+      "destination": "https://blog.kubesimplify.com/multi-tenancy-in-2025-and-beyond",
       "permanent": true,
       "has": [
         {
@@ -1460,7 +2421,7 @@
     },
     {
       "source": "/my-first-international-conference-open-source-summit-2022",
-      "destination": "/blog/my-first-international-conference-open-source-summit-2022",
+      "destination": "https://blog.kubesimplify.com/my-first-international-conference-open-source-summit-2022",
       "permanent": true,
       "has": [
         {
@@ -1471,7 +2432,7 @@
     },
     {
       "source": "/my-journey-to-kubestronaut-on-kubernetes-10th-birthday",
-      "destination": "/blog/my-journey-to-kubestronaut-on-kubernetes-10th-birthday",
+      "destination": "https://blog.kubesimplify.com/my-journey-to-kubestronaut-on-kubernetes-10th-birthday",
       "permanent": true,
       "has": [
         {
@@ -1482,7 +2443,7 @@
     },
     {
       "source": "/my-kubecon-euvirtual-experience",
-      "destination": "/blog/my-kubecon-euvirtual-experience",
+      "destination": "https://blog.kubesimplify.com/my-kubecon-euvirtual-experience",
       "permanent": true,
       "has": [
         {
@@ -1493,7 +2454,7 @@
     },
     {
       "source": "/my-schedule-for-kubecon-cloudnativecon-eu-2022",
-      "destination": "/blog/my-schedule-for-kubecon-cloudnativecon-eu-2022",
+      "destination": "https://blog.kubesimplify.com/my-schedule-for-kubecon-cloudnativecon-eu-2022",
       "permanent": true,
       "has": [
         {
@@ -1504,7 +2465,7 @@
     },
     {
       "source": "/navigating-through-cncf-landscape",
-      "destination": "/blog/navigating-through-cncf-landscape",
+      "destination": "https://blog.kubesimplify.com/navigating-through-cncf-landscape",
       "permanent": true,
       "has": [
         {
@@ -1515,7 +2476,7 @@
     },
     {
       "source": "/nemotron3-on-dgx-spark",
-      "destination": "/blog/nemotron3-on-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/nemotron3-on-dgx-spark",
       "permanent": true,
       "has": [
         {
@@ -1526,7 +2487,7 @@
     },
     {
       "source": "/networking-fundamentals-for-devops",
-      "destination": "/blog/networking-fundamentals-for-devops",
+      "destination": "https://blog.kubesimplify.com/networking-fundamentals-for-devops",
       "permanent": true,
       "has": [
         {
@@ -1537,7 +2498,7 @@
     },
     {
       "source": "/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet",
-      "destination": "/blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet",
+      "destination": "https://blog.kubesimplify.com/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet",
       "permanent": true,
       "has": [
         {
@@ -1548,7 +2509,7 @@
     },
     {
       "source": "/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
-      "destination": "/blog/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
+      "destination": "https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
       "permanent": true,
       "has": [
         {
@@ -1559,7 +2520,7 @@
     },
     {
       "source": "/operating-systems-101-essential-knowledge-for-devopssre-engineers",
-      "destination": "/blog/operating-systems-101-essential-knowledge-for-devopssre-engineers",
+      "destination": "https://blog.kubesimplify.com/operating-systems-101-essential-knowledge-for-devopssre-engineers",
       "permanent": true,
       "has": [
         {
@@ -1570,7 +2531,7 @@
     },
     {
       "source": "/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints",
-      "destination": "/blog/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints",
+      "destination": "https://blog.kubesimplify.com/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints",
       "permanent": true,
       "has": [
         {
@@ -1581,7 +2542,7 @@
     },
     {
       "source": "/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks",
-      "destination": "/blog/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks",
+      "destination": "https://blog.kubesimplify.com/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks",
       "permanent": true,
       "has": [
         {
@@ -1592,7 +2553,7 @@
     },
     {
       "source": "/package-managers-demystified",
-      "destination": "/blog/package-managers-demystified",
+      "destination": "https://blog.kubesimplify.com/package-managers-demystified",
       "permanent": true,
       "has": [
         {
@@ -1603,7 +2564,7 @@
     },
     {
       "source": "/perform-crud-operations-on-kubernetes-using-golang",
-      "destination": "/blog/perform-crud-operations-on-kubernetes-using-golang",
+      "destination": "https://blog.kubesimplify.com/perform-crud-operations-on-kubernetes-using-golang",
       "permanent": true,
       "has": [
         {
@@ -1614,7 +2575,7 @@
     },
     {
       "source": "/platform-engineering-demystified-navigating-the-basics",
-      "destination": "/blog/platform-engineering-demystified-navigating-the-basics",
+      "destination": "https://blog.kubesimplify.com/platform-engineering-demystified-navigating-the-basics",
       "permanent": true,
       "has": [
         {
@@ -1625,7 +2586,7 @@
     },
     {
       "source": "/pods-in-kubernetes",
-      "destination": "/blog/pods-in-kubernetes",
+      "destination": "https://blog.kubesimplify.com/pods-in-kubernetes",
       "permanent": true,
       "has": [
         {
@@ -1636,7 +2597,7 @@
     },
     {
       "source": "/practical-guide-to-kubernetes-api",
-      "destination": "/blog/practical-guide-to-kubernetes-api",
+      "destination": "https://blog.kubesimplify.com/practical-guide-to-kubernetes-api",
       "permanent": true,
       "has": [
         {
@@ -1647,7 +2608,7 @@
     },
     {
       "source": "/progressive-rollouts-with-argo-cd-rollouts",
-      "destination": "/blog/progressive-rollouts-with-argo-cd-rollouts",
+      "destination": "https://blog.kubesimplify.com/progressive-rollouts-with-argo-cd-rollouts",
       "permanent": true,
       "has": [
         {
@@ -1658,7 +2619,7 @@
     },
     {
       "source": "/prometheus-explained",
-      "destination": "/blog/prometheus-explained",
+      "destination": "https://blog.kubesimplify.com/prometheus-explained",
       "permanent": true,
       "has": [
         {
@@ -1669,7 +2630,7 @@
     },
     {
       "source": "/pure-cilium-a-guide-for-local-load-balancing-and-bgp",
-      "destination": "/blog/pure-cilium-a-guide-for-local-load-balancing-and-bgp",
+      "destination": "https://blog.kubesimplify.com/pure-cilium-a-guide-for-local-load-balancing-and-bgp",
       "permanent": true,
       "has": [
         {
@@ -1680,7 +2641,7 @@
     },
     {
       "source": "/quick-bites-of-fluxcd-health-assessment",
-      "destination": "/blog/quick-bites-of-fluxcd-health-assessment",
+      "destination": "https://blog.kubesimplify.com/quick-bites-of-fluxcd-health-assessment",
       "permanent": true,
       "has": [
         {
@@ -1691,7 +2652,7 @@
     },
     {
       "source": "/rancher-desktop-evolution",
-      "destination": "/blog/rancher-desktop-evolution",
+      "destination": "https://blog.kubesimplify.com/rancher-desktop-evolution",
       "permanent": true,
       "has": [
         {
@@ -1702,7 +2663,7 @@
     },
     {
       "source": "/ready-for-wasm-day-2023",
-      "destination": "/blog/ready-for-wasm-day-2023",
+      "destination": "https://blog.kubesimplify.com/ready-for-wasm-day-2023",
       "permanent": true,
       "has": [
         {
@@ -1713,7 +2674,7 @@
     },
     {
       "source": "/simplified-introduction-to-bacalhau",
-      "destination": "/blog/simplified-introduction-to-bacalhau",
+      "destination": "https://blog.kubesimplify.com/simplified-introduction-to-bacalhau",
       "permanent": true,
       "has": [
         {
@@ -1724,7 +2685,7 @@
     },
     {
       "source": "/speeding-up-using-microk8s",
-      "destination": "/blog/speeding-up-using-microk8s",
+      "destination": "https://blog.kubesimplify.com/speeding-up-using-microk8s",
       "permanent": true,
       "has": [
         {
@@ -1735,7 +2696,7 @@
     },
     {
       "source": "/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
-      "destination": "/blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
+      "destination": "https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
       "permanent": true,
       "has": [
         {
@@ -1746,7 +2707,7 @@
     },
     {
       "source": "/starting-your-devops-journey-as-a-windows-user",
-      "destination": "/blog/starting-your-devops-journey-as-a-windows-user",
+      "destination": "https://blog.kubesimplify.com/starting-your-devops-journey-as-a-windows-user",
       "permanent": true,
       "has": [
         {
@@ -1757,7 +2718,7 @@
     },
     {
       "source": "/statefulsets",
-      "destination": "/blog/statefulsets",
+      "destination": "https://blog.kubesimplify.com/statefulsets",
       "permanent": true,
       "has": [
         {
@@ -1768,7 +2729,7 @@
     },
     {
       "source": "/supply-chain-security-using-slsa-part-1-fundamentals",
-      "destination": "/blog/supply-chain-security-using-slsa-part-1-fundamentals",
+      "destination": "https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-1-fundamentals",
       "permanent": true,
       "has": [
         {
@@ -1779,7 +2740,7 @@
     },
     {
       "source": "/supply-chain-security-using-slsa-part-2-the-framework",
-      "destination": "/blog/supply-chain-security-using-slsa-part-2-the-framework",
+      "destination": "https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-2-the-framework",
       "permanent": true,
       "has": [
         {
@@ -1790,7 +2751,7 @@
     },
     {
       "source": "/terraform-best-practices",
-      "destination": "/blog/terraform-best-practices",
+      "destination": "https://blog.kubesimplify.com/terraform-best-practices",
       "permanent": true,
       "has": [
         {
@@ -1801,7 +2762,7 @@
     },
     {
       "source": "/testing-docker-ais-gordon-how-smart-is-it",
-      "destination": "/blog/testing-docker-ais-gordon-how-smart-is-it",
+      "destination": "https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it",
       "permanent": true,
       "has": [
         {
@@ -1812,7 +2773,7 @@
     },
     {
       "source": "/the-complete-guide-to-the-dd-command-in-linux",
-      "destination": "/blog/the-complete-guide-to-the-dd-command-in-linux",
+      "destination": "https://blog.kubesimplify.com/the-complete-guide-to-the-dd-command-in-linux",
       "permanent": true,
       "has": [
         {
@@ -1823,7 +2784,7 @@
     },
     {
       "source": "/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx",
-      "destination": "/blog/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx",
+      "destination": "https://blog.kubesimplify.com/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx",
       "permanent": true,
       "has": [
         {
@@ -1834,7 +2795,7 @@
     },
     {
       "source": "/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis",
-      "destination": "/blog/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis",
+      "destination": "https://blog.kubesimplify.com/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis",
       "permanent": true,
       "has": [
         {
@@ -1845,7 +2806,7 @@
     },
     {
       "source": "/the-webassembly-course",
-      "destination": "/blog/the-webassembly-course",
+      "destination": "https://blog.kubesimplify.com/the-webassembly-course",
       "permanent": true,
       "has": [
         {
@@ -1856,7 +2817,7 @@
     },
     {
       "source": "/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser",
-      "destination": "/blog/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser",
+      "destination": "https://blog.kubesimplify.com/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser",
       "permanent": true,
       "has": [
         {
@@ -1867,7 +2828,7 @@
     },
     {
       "source": "/understanding-docker-desktop-all-in-one-platform-for-containers",
-      "destination": "/blog/understanding-docker-desktop-all-in-one-platform-for-containers",
+      "destination": "https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers",
       "permanent": true,
       "has": [
         {
@@ -1878,7 +2839,7 @@
     },
     {
       "source": "/understanding-etcd-in-kubernetes-a-beginners-guide",
-      "destination": "/blog/understanding-etcd-in-kubernetes-a-beginners-guide",
+      "destination": "https://blog.kubesimplify.com/understanding-etcd-in-kubernetes-a-beginners-guide",
       "permanent": true,
       "has": [
         {
@@ -1889,7 +2850,7 @@
     },
     {
       "source": "/understanding-how-containers-work-behind-the-scenes",
-      "destination": "/blog/understanding-how-containers-work-behind-the-scenes",
+      "destination": "https://blog.kubesimplify.com/understanding-how-containers-work-behind-the-scenes",
       "permanent": true,
       "has": [
         {
@@ -1900,7 +2861,7 @@
     },
     {
       "source": "/understanding-the-architecture-of-kubernetes-a-beginners-guide",
-      "destination": "/blog/understanding-the-architecture-of-kubernetes-a-beginners-guide",
+      "destination": "https://blog.kubesimplify.com/understanding-the-architecture-of-kubernetes-a-beginners-guide",
       "permanent": true,
       "has": [
         {
@@ -1911,7 +2872,7 @@
     },
     {
       "source": "/understanding-the-ins-and-outs-of-git-using-github",
-      "destination": "/blog/understanding-the-ins-and-outs-of-git-using-github",
+      "destination": "https://blog.kubesimplify.com/understanding-the-ins-and-outs-of-git-using-github",
       "permanent": true,
       "has": [
         {
@@ -1922,7 +2883,7 @@
     },
     {
       "source": "/what-is-reproducibility-and-why-does-it-matter",
-      "destination": "/blog/what-is-reproducibility-and-why-does-it-matter",
+      "destination": "https://blog.kubesimplify.com/what-is-reproducibility-and-why-does-it-matter",
       "permanent": true,
       "has": [
         {
@@ -1933,7 +2894,7 @@
     },
     {
       "source": "/what-is-shell-scripting",
-      "destination": "/blog/what-is-shell-scripting",
+      "destination": "https://blog.kubesimplify.com/what-is-shell-scripting",
       "permanent": true,
       "has": [
         {
@@ -1944,7 +2905,7 @@
     },
     {
       "source": "/why-are-network-policies-in-kubernetes-so-hard-to-understand",
-      "destination": "/blog/why-are-network-policies-in-kubernetes-so-hard-to-understand",
+      "destination": "https://blog.kubesimplify.com/why-are-network-policies-in-kubernetes-so-hard-to-understand",
       "permanent": true,
       "has": [
         {
@@ -1955,7 +2916,7 @@
     },
     {
       "source": "/why-devops-case-study",
-      "destination": "/blog/why-devops-case-study",
+      "destination": "https://blog.kubesimplify.com/why-devops-case-study",
       "permanent": true,
       "has": [
         {
@@ -1966,7 +2927,7 @@
     },
     {
       "source": "/wtf-is-linux-shell-command-substitution",
-      "destination": "/blog/wtf-is-linux-shell-command-substitution",
+      "destination": "https://blog.kubesimplify.com/wtf-is-linux-shell-command-substitution",
       "permanent": true,
       "has": [
         {
@@ -1977,7 +2938,7 @@
     },
     {
       "source": "/yours-kindly-drone",
-      "destination": "/blog/yours-kindly-drone",
+      "destination": "https://blog.kubesimplify.com/yours-kindly-drone",
       "permanent": true,
       "has": [
         {

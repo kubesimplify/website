@@ -47,7 +47,9 @@
 /blog/container-and-kubernetes-security                                                /container-and-kubernetes-security  301!
 /blog/coolify                                                                          /coolify  301!
 /blog/creating-multi-node-kubernetes-cluster-locally                                   /creating-multi-node-kubernetes-cluster-locally  301!
+/blog/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter      /day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter  301!
 /blog/day-1-what-actually-happens-when-you-type-docker-run                             /day-1-what-actually-happens-when-you-type-docker-run  301!
+/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step     /day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step  301!
 /blog/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken                    /day-2-your-images-are-a-supply-chain-and-it-s-probably-broken  301!
 /blog/day-3-stop-writing-dockerfiles-from-scratch                                      /day-3-stop-writing-dockerfiles-from-scratch  301!
 /blog/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world          /day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world  301!
@@ -106,6 +108,7 @@
 /blog/k8sgpt-tutorial-when-kubernetes-meets-ai                                         /k8sgpt-tutorial-when-kubernetes-meets-ai  301!
 /blog/keptn-getting-started                                                            /keptn-getting-started  301!
 /blog/ksctl-making-kubernetes-easy-across-clouds                                       /ksctl-making-kubernetes-easy-across-clouds  301!
+/blog/kube-proxy-deep-dive                                                             /kube-proxy-deep-dive  301!
 /blog/kube-scheduler-deep-dive                                                         /kube-scheduler-deep-dive  301!
 /blog/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit /kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit  301!
 /blog/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices /kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices  301!
@@ -246,7 +249,9 @@
 /container-and-kubernetes-security                                                /blog/container-and-kubernetes-security  200!
 /coolify                                                                          /blog/coolify  200!
 /creating-multi-node-kubernetes-cluster-locally                                   /blog/creating-multi-node-kubernetes-cluster-locally  200!
+/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter      /blog/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter  200!
 /day-1-what-actually-happens-when-you-type-docker-run                             /blog/day-1-what-actually-happens-when-you-type-docker-run  200!
+/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step     /blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step  200!
 /day-2-your-images-are-a-supply-chain-and-it-s-probably-broken                    /blog/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken  200!
 /day-3-stop-writing-dockerfiles-from-scratch                                      /blog/day-3-stop-writing-dockerfiles-from-scratch  200!
 /day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world          /blog/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world  200!
@@ -305,6 +310,7 @@
 /k8sgpt-tutorial-when-kubernetes-meets-ai                                         /blog/k8sgpt-tutorial-when-kubernetes-meets-ai  200!
 /keptn-getting-started                                                            /blog/keptn-getting-started  200!
 /ksctl-making-kubernetes-easy-across-clouds                                       /blog/ksctl-making-kubernetes-easy-across-clouds  200!
+/kube-proxy-deep-dive                                                             /blog/kube-proxy-deep-dive  200!
 /kube-scheduler-deep-dive                                                         /blog/kube-scheduler-deep-dive  200!
 /kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit /blog/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit  200!
 /kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices /blog/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices  200!

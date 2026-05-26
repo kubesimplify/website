@@ -29,7 +29,7 @@ export default function BlogFeed({ count = 6 }) {
         {posts.map((p) => (
           <Link
             key={p.slug}
-            href={`/blog/${p.slug}`}
+            href={`https://blog.kubesimplify.com/${p.slug}`}
             className="group glass-card rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 flex flex-col"
           >
             {p.cover && (
@@ -85,7 +85,7 @@ export default function BlogFeed({ count = 6 }) {
       </div>
       <div className="text-center mt-10">
         <Link
-          href="/blog"
+          href="https://blog.kubesimplify.com/"
           className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] hover:underline"
         >
           See all posts &rarr;

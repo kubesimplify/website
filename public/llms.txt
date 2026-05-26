@@ -4,7 +4,7 @@
 
 ## About
 
-Kubesimplify is a community-driven publication on cloud-native technologies, with 178 in-depth technical articles by 61 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+Kubesimplify is a community-driven publication on cloud-native technologies, with 181 in-depth technical articles by 61 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
 
 Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
 
@@ -34,8 +34,11 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
 - Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
 
-## Recent posts (most recent 30 of 178)
+## Recent posts (most recent 30 of 181)
 
+- [Day 2: Anatomy of an LLM Inference Request. From Prompt to Answer, Step by Step](https://blog.kubesimplify.com/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step) (2026-05-26). A beginner-friendly walkthrough of tokenization, prefill, KV cache, decode, batching, TTFT, and why memory bandwidth shapes local LLM performance on NVIDIA DGX Spark.
+- [How kube-proxy Actually Works: iptables, IPVS, and nftables Inside Out](https://blog.kubesimplify.com/kube-proxy-deep-dive) (2026-05-25). How kube-proxy turns Kubernetes Services into kernel rules. iptables, IPVS, nftables packet paths and which to pick in 2026. Verified against k/k 1.36 source.
+- [Day 1: The Local LLM Revolution. Why Your Desk Just Became the New Datacenter](https://blog.kubesimplify.com/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter) (2026-05-25). Why local LLMs are becoming practical in 2026, what changed across open weights, hardware, and inference software, and why DGX Spark makes the desk feel like a small AI lab.
 - [How Kubernetes EndpointSlices Actually Work (and Why Endpoints Had to Die)](https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die) (2026-05-11)
 - [NVCF Is Now Open Source: Inside NVIDIA's GPU Function Platform](https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform) (2026-05-11)
 - [How a Kubernetes Service Actually Works (and All 5 Types You Need)](https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need) (2026-05-05)
@@ -63,13 +66,10 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [Ephemeral Pull Request environment using Vcluster.](https://blog.kubesimplify.com/ephemeral-pull-request-environment-using-vcluster) (2025-04-10)
 - [Multi tenancy in 2025 and beyond](https://blog.kubesimplify.com/multi-tenancy-in-2025-and-beyond) (2025-03-12). Multi-tenancy in Kubernetes has been an ongoing challenge for organizations looking to optimize their cloud-native infrastructure. Over the years, the appro
 - [Testing Docker AI's \"Gordon\" – How Smart Is It?](https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it) (2025-02-21). Testing Docker AI's \"Gordon\" – How Smart Is It?
-- [Understanding Docker Desktop: All-in-One Platform for Containers](https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers) (2025-01-31). This is a blog on docker desktop which discusses about how to use it's features
-- [Best DevOps Tools 2025](https://blog.kubesimplify.com/best-devops-tools-2025) (2025-01-13). Best DevOps tools in 2025
-- [Becoming a Docker Captain](https://blog.kubesimplify.com/docker-captain-journey) (2024-12-17). This blog shares Saloni Narang's Journey on becoming Docker captain and also a quick introduction to docker desktop.
 
 ## Topics covered (auto-derived from tags)
 
-- kubernetes (91 articles): https://blog.kubesimplify.com/tag/kubernetes
+- kubernetes (92 articles): https://blog.kubesimplify.com/tag/kubernetes
 - devops (71 articles): https://blog.kubesimplify.com/tag/devops
 - docker (31 articles): https://blog.kubesimplify.com/tag/docker
 - k8s (27 articles): https://blog.kubesimplify.com/tag/k8s
@@ -87,17 +87,17 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - docker-images (7 articles): https://blog.kubesimplify.com/tag/docker-images
 - kubesimplify (7 articles): https://blog.kubesimplify.com/tag/kubesimplify
 - linux-basics (7 articles): https://blog.kubesimplify.com/tag/linux-basics
+- llm (6 articles): https://blog.kubesimplify.com/tag/llm
 - opensource (6 articles): https://blog.kubesimplify.com/tag/opensource
 - docker-desktop (6 articles): https://blog.kubesimplify.com/tag/docker-desktop
+- nvidia (5 articles): https://blog.kubesimplify.com/tag/nvidia
 - ai (5 articles): https://blog.kubesimplify.com/tag/ai
 - wasm (5 articles): https://blog.kubesimplify.com/tag/wasm
 - shell (5 articles): https://blog.kubesimplify.com/tag/shell
-- technical-writing-1 (5 articles): https://blog.kubesimplify.com/tag/technical-writing-1
-- bash (5 articles): https://blog.kubesimplify.com/tag/bash
 
 ## Top contributors
 
-- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (25 posts)
+- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (28 posts)
 - [Saloni Narang](https://blog.kubesimplify.com/author/saloni-narang) (24 posts)
 - [Kunal Verma](https://blog.kubesimplify.com/author/kunal-verma) (12 posts)
 - [Dipankar Das](https://blog.kubesimplify.com/author/dipankar-das) (9 posts)

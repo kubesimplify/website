@@ -5,11 +5,50 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-05-21T14:36:33.754Z</updated>
+  <updated>2026-05-26T16:05:34.141Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>Day 2: Anatomy of an LLM Inference Request. From Prompt to Answer, Step by Step</title>
+    <link href="https://blog.kubesimplify.com/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step"/>
+    <id>https://blog.kubesimplify.com/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step</id>
+    <updated>2026-05-26T00:00:00.000Z</updated>
+    <published>2026-05-26T00:00:00.000Z</published>
+    <summary>A beginner-friendly walkthrough of tokenization, prefill, KV cache, decode, batching, TTFT, and why memory bandwidth shapes local LLM performance on NVIDIA DGX Spark.</summary>
+    <category term="nvidia"/>
+    <category term="dgxspark"/>
+    <category term="local-ai"/>
+    <category term="llm"/>
+    <category term="ai-inference"/>
+  </entry>
+  <entry>
+    <title>How kube-proxy Actually Works: iptables, IPVS, and nftables Inside Out</title>
+    <link href="https://blog.kubesimplify.com/kube-proxy-deep-dive"/>
+    <id>https://blog.kubesimplify.com/kube-proxy-deep-dive</id>
+    <updated>2026-05-25T13:00:00.000Z</updated>
+    <published>2026-05-25T13:00:00.000Z</published>
+    <summary>How kube-proxy turns Kubernetes Services into kernel rules. iptables, IPVS, nftables packet paths and which to pick in 2026. Verified against k/k 1.36 source.</summary>
+    <category term="kubernetes"/>
+    <category term="kube-proxy"/>
+    <category term="iptables"/>
+    <category term="nftables"/>
+    <category term="networking"/>
+  </entry>
+  <entry>
+    <title>Day 1: The Local LLM Revolution. Why Your Desk Just Became the New Datacenter</title>
+    <link href="https://blog.kubesimplify.com/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter"/>
+    <id>https://blog.kubesimplify.com/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter</id>
+    <updated>2026-05-25T00:00:00.000Z</updated>
+    <published>2026-05-25T00:00:00.000Z</published>
+    <summary>Why local LLMs are becoming practical in 2026, what changed across open weights, hardware, and inference software, and why DGX Spark makes the desk feel like a small AI lab.</summary>
+    <category term="nvidia"/>
+    <category term="dgxspark"/>
+    <category term="local-ai"/>
+    <category term="llm"/>
+    <category term="ai-infrastructure"/>
+  </entry>
   <entry>
     <title>How Kubernetes EndpointSlices Actually Work (and Why Endpoints Had to Die)</title>
     <link href="https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die"/>
