@@ -13,33 +13,22 @@ cover: /img/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer
 
 ---
 
-On Day 1 you ran your first local LLM on the Spark. You typed something into Ollama and the model wrote back. Today we look at what's actually happening *inside the box* while that little back-and-forth is going on.
+You typed `"What's the capital of France?"` and hit enter. A few seconds later you saw `"Paris."`
 
-Let's make it concrete. Imagine you ask the local model:
+What actually happened in those few seconds?
 
-> **You:** What's the capital of France?
+The usual answer is "the model thought about it." It's a nice story, but it's not how the machine actually works. What really happens is a short assembly line of distinct steps. Some run on the CPU, some on the GPU. Some are fast, some are slow. Some are limited by how quickly the hardware can do math, others by how quickly it can read numbers out of memory. Until you can tell those apart, the box on your desk feels a bit mysterious. Once you can, the mystery goes away and you start making better decisions about which model to run, which inference engine to use, and when to throw more hardware at the problem.
 
-A few seconds later, the model writes back:
-
-> **Model:** Paris.
-
-That's it. A question goes in, an answer comes out. From the outside it can look like one big magical step: the model "thought about it" and replied. **But that's not what's happening inside the computer.** Inside, the Spark is running a small assembly line of four phases, every single time:
-
-1. **Read your question** - turn your text into numbers the model can work with.
-2. **Absorb the prompt** - the model "looks at" your whole question in one go.
-3. **Write the answer** - the model generates its reply one piece at a time.
-4. **Show you the answer** - turn those pieces back into text on your screen.
-
-That's the whole story at the high level. Four phases, in order. (Later in the post we'll split them into six smaller steps for precision, but the four-phase shape is what matters.)
-
-Once you can see those phases as separate things, a lot of weird LLM behavior stops being weird. By the end of this post you'll understand:
+By the end of this post, you'll be able to answer questions like:
 
 - Why **"tokens per second"** is actually two different numbers, not one
-- Why a 70-billion-parameter model on a Spark generates only about 7 tokens per second, even though the chip can do trillions of math operations per second
+- Why a 70-billion-parameter model on a Spark generates only about 7 tokens per second, no matter how powerful the chip's tensor cores are
 - Why serving 16 users at once costs almost the same as serving one (yes, really)
-- Why the *same* model on the *same* hardware can feel snappy for one prompt and sluggish for another
+- Why the same model on the same hardware can feel snappy for one kind of prompt and sluggish for another
 
-You don't need a computer-science background to follow along. Every term gets defined when it first shows up. Let's walk through the four phases.
+We're going to follow one prompt all the way through, step by step, and look at what the GPU is doing at each one. No prior systems knowledge needed - we define every term as it shows up.
+
+Let's open the box.
 
 ## The whole lifecycle in one picture
 
