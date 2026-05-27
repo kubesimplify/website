@@ -2,33 +2,44 @@
 title: "Day 2: Anatomy of an LLM Inference Request. From Prompt to Answer, Step by Step"
 seoTitle: "Day 2: Anatomy of an LLM Inference Request on DGX Spark"
 seoDescription: "A beginner-friendly walkthrough of tokenization, prefill, KV cache, decode, batching, TTFT, and why memory bandwidth shapes local LLM performance on NVIDIA DGX Spark."
-datePublished: 2026-05-26T00:00:00.000Z
+datePublished: 2026-05-27T00:00:00.000Z
 slug: day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step
 author: saiyam-pathak
 tags: ["nvidia", "dgxspark", "local-ai", "llm", "ai-inference"]
-cover: /img/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step/d2-1-lifecycle.png
+cover: /img/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step/cover-day-2-llm-request-v2.png
 ---
 
 *Day 2 of "7 Days of DGX Spark". A field guide to running serious LLMs on a $4,699 box on your desk.*
 
 ---
 
-You typed `"What's the capital of France?"` and hit enter. A few seconds later you saw `"Paris."`
+On Day 1 you ran your first local LLM on the Spark. You typed something into Ollama and the model wrote back. Today we look at what's actually happening *inside the box* while that little back-and-forth is going on.
 
-What actually happened in those few seconds?
+Let's make it concrete. Imagine you ask the local model:
 
-The usual answer is "the model thought about it." It's a nice story, but it's not how the machine actually works. What really happens is a short assembly line of distinct steps. Some run on the CPU, some on the GPU. Some are fast, some are slow. Some are limited by how quickly the hardware can do math, others by how quickly it can read numbers out of memory. Until you can tell those apart, the box on your desk feels a bit mysterious. Once you can, the mystery goes away and you start making better decisions about which model to run, which inference engine to use, and when to throw more hardware at the problem.
+> **You:** What's the capital of France?
 
-By the end of this post, you'll be able to answer questions like:
+A few seconds later, the model writes back:
+
+> **Model:** Paris.
+
+That's it. A question goes in, an answer comes out. From the outside it can look like one big magical step: the model "thought about it" and replied. **But that's not what's happening inside the computer.** Inside, the Spark is running a small assembly line of four phases, every single time:
+
+1. **Read your question** - turn your text into numbers the model can work with.
+2. **Absorb the prompt** - the model "looks at" your whole question in one go.
+3. **Write the answer** - the model generates its reply one piece at a time.
+4. **Show you the answer** - turn those pieces back into text on your screen.
+
+That's the whole story at the high level. Four phases, in order. Think of that as the beginner map. In the lifecycle below, we'll split the same flow into six smaller systems steps so the performance pieces are easier to see.
+
+Once you can see those phases as separate things, a lot of weird LLM behavior stops being weird. By the end of this post you'll understand:
 
 - Why **"tokens per second"** is actually two different numbers, not one
-- Why a 70-billion-parameter model on a Spark generates only about 7 tokens per second, no matter how powerful the chip's tensor cores are
-- Why serving 16 users at once costs almost the same as serving one (yes, really)
-- Why the same model on the same hardware can feel snappy for one kind of prompt and sluggish for another
+- Why a 70-billion-parameter model on a Spark generates only about 7 tokens per second, even though the chip can do trillions of math operations per second
+- Why serving 16 users at once can be surprisingly close to serving one, until the GPU saturates
+- Why the *same* model on the *same* hardware can feel snappy for one prompt and sluggish for another
 
-We're going to follow one prompt all the way through, step by step, and look at what the GPU is doing at each one. No prior systems knowledge needed - we define every term as it shows up.
-
-Let's open the box.
+You don't need a computer-science background to follow along. Every term gets defined when it first shows up. Let's walk through the four phases.
 
 ## The whole lifecycle in one picture
 
@@ -81,27 +92,81 @@ Tokenization happens on the CPU and is essentially free. We're talking microseco
 
 ---
 
-## Step 2: Prefill (the compute-bound phase)
+## Step 2: Prefill (the model reads your prompt)
 
-Now your tokens go to the GPU. The model has to "read" your entire prompt before it can start replying. This is **prefill**, and it has one beautiful property: the model can read all your prompt tokens **in parallel**.
+After tokenization, your text is a list of integers. Now the model has to actually *read* it before it can answer. This reading step is called **prefill**.
 
-Think of it this way. Your prompt has, say, 1,000 tokens. The model has 80 layers. To prefill, the GPU computes:
+### What does "read" mean for a model?
 
-```
-for each layer in 1..80:
-    for each token in 1..1000:
-        compute self-attention and feed-forward
-```
+Reading, for an LLM, means: take each token, run it through every layer of the network, and build up an internal representation of what the prompt is "about." A typical 8B-class model has somewhere around 30 layers; a 70B model has 80. Every layer does the same kind of work: a chunk of matrix multiplication (the model's stored weights times your data), then a chunk of attention math (each token deciding which earlier tokens matter), then a non-linear squish, and on to the next layer.
 
-But the inner loop, "for each token," runs in parallel on the GPU. All 1,000 tokens are processed at the same time, layer by layer. The GPU is doing huge matrix multiplications: 1,000 tokens × the hidden dimension × the weight matrices. These matmuls saturate the tensor cores.
+By the time your prompt has been through every layer, the model has a rich internal state that represents "I've read this. I understand the context. I'm ready to start writing." Only then can it produce the first output token.
 
-**Prefill is compute-bound.** Your tensor core peak FLOP rate is what limits prefill speed. On a Spark, this number is high: NVIDIA's published spec is up to **1 PFLOP FP4 sparse** on the GB10 tensor cores. In practice you'll measure prefill rates of 2,000-7,000+ tokens per second on common models (see [Ollama's published numbers on Spark](https://ollama.com/blog/nvidia-spark-performance): llama 3.1 8B prefills at **7,614 tok/s**, gpt-oss 20B at **3,224 tok/s**).
+### The good news: prefill is embarrassingly parallel
 
-Two things you can do about prefill performance:
-- Send shorter prompts (fewer tokens to process)
-- Batch multiple requests so the GPU sees more work at once
+Here's the lucky bit. When the model reads your prompt, **every token can be processed at the same time inside each layer.**
 
-That's all. The math is what it is.
+Picture a 1,000-token prompt going through one layer. Instead of:
+
+> *do token 1 → do token 2 → do token 3 → ... → do token 1000* (sequentially, slow)
+
+the GPU does:
+
+> *do all 1,000 tokens together as one giant matrix multiply* (in parallel, fast)
+
+This works because at layer N, each token only needs to "look at" tokens that came before it. Those values are all already known (they're your prompt; nothing is being generated yet). So the GPU can lay all 1,000 tokens side by side and crunch through them in one go.
+
+That's what tensor cores are *built for*: enormous matrix multiplications. Prefill keeps them genuinely busy. This is why the prefill numbers in the Ollama benchmark look so big.
+
+### A concrete walk-through: "What's the capital of France?"
+
+Take our Paris example. After tokenization, you have **7 tokens**: `[What, 's, the, capital, of, France, ?]`. You send those 7 tokens to a model with, say, 32 layers.
+
+What the GPU does, layer by layer:
+
+| Step | What's happening | Cost |
+|---|---|---|
+| Layer 1 | All 7 tokens go through one big matmul + attention together | one parallel pass |
+| Layer 2 | Same again, but with layer 1's output as input | one parallel pass |
+| ... | ... | ... |
+| Layer 32 | Last pass, model now "understands" the prompt | one parallel pass |
+
+So for 7 tokens × 32 layers, the GPU does **32 sequential layer passes**, and each pass crunches all 7 tokens in one shot. For a tiny prompt like this, the 7-token width is almost free compared to the depth of 32 layer passes. (At long prompts, that stops being true: attention work in particular grows with the *square* of the sequence length, which is why a 50K-token RAG prompt takes meaningful prefill time.)
+
+That's why even a 1,000-token prompt only takes hundreds of milliseconds to prefill on a Spark: the GPU is doing tens of thousands of tokens worth of math in parallel, all at once. Spreading the work across tokens is exactly what tensor cores are good at.
+
+### So what limits prefill speed?
+
+Two factors, in this order:
+
+1. **The model.** Bigger models (more layers, bigger hidden size) mean each layer pass is heavier, and there are more of them. A 70B model prefills slower per-token than an 8B model on the same hardware. That's not a surprise: there's literally more math to do.
+2. **The hardware's raw math throughput.** Tensor cores have a peak rate (in FLOPS, floating-point operations per second). The GB10 chip in Spark is rated for **up to 1 PFLOP at FP4 sparse** (NVIDIA's published peak). Whatever your model demands per token, the chip can only push so many FLOPS per second.
+
+This is what "**prefill is compute-bound**" means: the bottleneck is the chip's *math speed*, not its memory speed. (Decode, the next step, is the opposite, and we'll see why in a minute.)
+
+### What that looks like on a real Spark
+
+[Ollama's published Spark benchmark](https://ollama.com/blog/nvidia-spark-performance) gives you concrete numbers:
+
+| Model | Prefill rate |
+|---|---|
+| Llama 3.1 8B Q4 | **~7,614 tok/s** |
+| DeepSeek R1 14B Q4 | ~5,919 tok/s |
+| GPT-OSS 20B MXFP4 | ~3,224 tok/s |
+
+Read that table left to right and the story tells itself: **bigger model = slower prefill on the same chip**. Same GPU, same memory, the only thing that changed is how much math each token has to go through.
+
+At those rates a 500-token prompt takes well under a second on the 8B model. By the time you hit enter, the model is already busy reading; by the time you blink, it's about to start writing.
+
+### So can you make prefill faster?
+
+Three knobs, in order of impact:
+
+1. **Send fewer prompt tokens** (no math, no time). RAG with 50K tokens of retrieved context will *always* be slower at TTFT than a 200-token chat turn, on the same model.
+2. **Pick a smaller model** if quality permits. A 4B model with a focused fine-tune often prefills 5-10x faster than a 70B and is good enough for the task.
+3. **Batch multiple requests together** so the GPU sees more work per pass. This is what serving engines like vLLM do automatically.
+
+That's prefill. **One big parallel chew through your prompt, limited by how fast the chip can do math.** Up next: the cache that makes the writing phase possible.
 
 ---
 
@@ -131,15 +196,53 @@ Naive question: when the model generates token 1001, does it have to re-process 
 
 The trick: **cache the K and V vectors.** Save them from prefill. For each new generated token, you only have to compute its own K and V, then attend to everything else from the cache.
 
-This cache is the **KV cache**. It lives in GPU memory. It grows as you generate. It is roughly:
+This cache is the **KV cache**. It grows as you generate. It is roughly:
 
 ```
 KV cache size = num_layers × 2 (K and V) × num_kv_heads × head_dim × context_length × bytes_per_element
 ```
 
-Modern 70B models like Llama 3.3 use **Grouped-Query Attention (GQA)**, which shares K and V across multiple query heads to keep the cache small. Plugging Llama 3.3 70B's actual shape (80 layers, 8 KV heads, head_dim 128, BF16) into the formula: **~1.25 GiB at 4K context, ~10 GiB at 32K, ~40 GiB at 128K**. That's manageable on a Spark's 128 GB pool, but at million-token contexts the cache can outgrow the weights themselves. **This is why context length is expensive**, and why most production stacks now KV-quantize the cache to 8-bit or below.
+**Where does it live? This is where Spark differs from a normal PC.**
 
-The KV cache is also why batching matters. The model's weights only need to be read from memory once per token, no matter how many concurrent requests are in flight. The KV cache is per request. So if you have 16 requests in flight, you read the weights once, and they "serve" all 16 KV caches in parallel. **That's where the throughput multiplier comes from.**
+- **Regular machine (discrete GPU):** the GPU has its own dedicated memory, called **VRAM**, physically separate from the computer's system RAM. That's 24 GB on an RTX 4090, 32 GB on a 5090, 80 GB on an H100. Both the model weights and the KV cache have to fit in that VRAM. Your system RAM might be much larger, but it sits on the other side of a slow PCIe link, so spilling the cache over there tanks performance.
+- **DGX Spark (unified memory):** there is **no separate GPU memory at all.** The Grace CPU and the Blackwell GPU share **one 128 GB LPDDR5x pool**, and both see the same bytes with no copying. Model weights, KV cache, activations, and your OS all live together in that single pool.
+
+So the question changes shape. On a regular machine you ask *"does this fit in VRAM?"* On a Spark you ask *"does weights + KV cache + overhead fit in the one 128 GB pool?"* Same budgeting problem, one pool instead of two. The mental model on Spark: **the KV cache is just one more tenant competing for the same 128 GB as your model weights.** (This is the unified-memory idea from Day 1; Day 3 opens it all the way up.)
+
+**One thing to be very clear about: bigger pool does not mean faster.** A Spark having 128 GB while an H100 has 80 GB does *not* make the Spark a faster chip. The opposite, in fact. The two differ on three separate axes, and Spark only wins one of them:
+
+| | DGX Spark (GB10) | H100 (SXM, 80 GB) |
+|---|---|---|
+| **Memory capacity** | 128 GB unified | 80 GB |
+| **Memory bandwidth** | ~273 GB/s | ~3.35 TB/s (about **12x** Spark) |
+| **GPU compute** | 48 SMs, 6,144 CUDA cores, 5th-gen tensor cores | 132 SMs, ~16,896 CUDA cores |
+| **Price** | ~$4,699 | ~$25,000-40,000 |
+
+An H100 will decode the *same* model roughly an order of magnitude faster than a Spark, because decode speed tracks **memory bandwidth** (the next section is all about why), and the H100 has about 12x more of it. What the Spark gives you is **capacity per dollar**: it can hold a 70B or 120B model that does not fit in an H100's 80 GB at all, for a tenth of the price. You are not buying speed. You are buying *"this large model runs on my desk at all."*
+
+And to answer the natural question, *"if the memory is shared, how much actual GPU is in a Spark?"* There is a real Blackwell GPU in there: **48 streaming multiprocessors, 6,144 CUDA cores, and 5th-generation tensor cores** (the sm_121 part we keep mentioning). It is a genuine GPU. It simply reads from the shared 128 GB pool instead of from its own private VRAM. The compute is modest next to an H100's, but it is real GPU silicon, not a CPU pretending to be one. Day 3 takes the lid off all of it.
+
+Modern 70B models like Llama 3.3 use **Grouped-Query Attention (GQA)**, which shares K and V across multiple query heads to keep the cache small. Plugging Llama 3.3 70B's actual shape (80 layers, 8 KV heads, head_dim 128, BF16) into the formula: **~1.25 GiB at 4K context, ~10 GiB at 32K, ~40 GiB at 128K**. At a million-token context the cache would be ~300 GB, which no single Spark can hold. **This is why context length is expensive.**
+
+### So what happens when the cache fills the 128 GB?
+
+This is the real constraint on Spark, and you asked exactly the right question. Add up your budget for a single request:
+
+> **weights + KV cache + framework overhead + OS** must fit in ~128 GB.
+
+A Llama 3.3 70B at Q4 is ~40 GB of weights. Give it a 128K context and the KV cache is another ~40 GB. Add ~10 GB of OS and runtime overhead and you are at ~90 GB for *one* long-context request. Push the context further, or add concurrent users (each needs its own KV cache), and you hit the ceiling. When you cross it, the inference engine either refuses the request or, worse, slows to a crawl. **You don't get a separate VRAM cliff like on a discrete GPU; you get one shared pool that you can overcommit.**
+
+Here is how people actually keep the cache under control, roughly in order of how often you'll reach for them:
+
+1. **Quantize the KV cache.** Store K and V in 8-bit (or even 4-bit) instead of 16-bit. That halves or quarters the cache for a small quality cost. In llama.cpp this is `--cache-type-k q8_0 --cache-type-v q8_0`; vLLM and others have equivalents. This is the single biggest lever.
+2. **Cap the context window.** If you do not need 128K tokens, do not allocate for it. Most engines let you set a max context (`--ctx-size` in llama.cpp, `--max-model-len` in vLLM). Right-size it to your actual prompts.
+3. **Use PagedAttention.** vLLM's KV cache manager treats the cache like virtual-memory pages, so you waste far less to fragmentation and pack more requests into the same pool. You don't tune anything; you just get more usable cache by choosing vLLM.
+4. **Share prefixes.** If many requests start with the same long system prompt or RAG bundle, compute that prefix's KV cache once and reuse it (SGLang's RadixAttention, vLLM's prefix caching). Huge win for agent and RAG workloads.
+5. **Pick a smaller or sliding-window model.** Some models (for example, Mistral-family) use sliding-window attention that only keeps the last N tokens' KV, so the cache stops growing past a fixed size.
+
+We get into the engine-specific knobs on Day 5. For now the takeaway is: **on Spark the KV cache and the weights live in the same 128 GB, and KV-quantization plus a sensible context cap is what keeps you off the cliff.**
+
+The KV cache is also why batching matters. The model's weights only need to be read from memory once per token, no matter how many concurrent requests are in flight. The KV cache, though, is *per request*. So if you have 16 requests in flight, you read the weights once and they "serve" all 16 KV caches in parallel, but you are also holding 16 KV caches in the pool at the same time. **That's where the throughput multiplier comes from, and also why memory, not compute, is what caps your concurrency on Spark.**
 
 ---
 
@@ -151,6 +254,14 @@ The KV cache is also why batching matters. The model's weights only need to be r
 
 Now the model generates new tokens. One at a time. Each new token requires reading the entire model from memory, doing the matrix multiplications, looking at the KV cache for attention, and producing the next token.
 
+**Let's watch it happen on our example.** After prefill, the model has read "What's the capital of France?" and its KV cache holds those 7 tokens. Now decode runs:
+
+- **Step 1:** read the whole model from memory, look at the KV cache (7 prompt tokens), predict the next token: `Paris`. Append it. Add its K and V to the cache (now 8 tokens).
+- **Step 2:** read the whole model again, look at the KV cache (8 tokens now), predict the next token: an *end-of-sequence* marker, the model's way of saying "I'm done."
+- Stop.
+
+So "Paris." cost **two output tokens, two full reads of the model.** If the answer had been 200 tokens long, that's 200 reads, strictly one after another, because each token can only be predicted once the previous one exists. **That sequential, one-read-per-token rhythm is the entire reason decode is slow.**
+
 The crucial thing: **for each generated token, roughly the active model weights have to be streamed from memory per output token.** Every layer's weight matrix gets pulled into the tensor cores, multiplied against the activations, and (mostly) discarded. "Active" matters: for a dense model that's the whole model; for a Mixture-of-Experts model it's just the experts the router picks for that token.
 
 The math: 273 GB/s memory bandwidth (Spark) divided by **the bytes actually read per token** equals your theoretical maximum tokens per second. For a dense model, "bytes read" = full model size. For an MoE, "bytes read" = active parameters × bytes/param, NOT the full resident model.
@@ -158,29 +269,21 @@ The math: 273 GB/s memory bandwidth (Spark) divided by **the bytes actually read
 | Model | Resident size | Bytes read per token | Theoretical decode max | Type |
 |---|---|---|---|---|
 | Llama 3.1 8B Q4 | 4.5 GB | 4.5 GB (dense) | ~61 tok/s | dense |
-| GPT-OSS 20B MXFP4 | 13 GB | ~3.6 GB (4 active experts of 32) | ~75 tok/s | MoE |
-| Llama 3.3 70B NVFP4 | 35 GB | 35 GB (dense) | ~7.8 tok/s | dense |
+| GPT-OSS 20B MXFP4 | 13 GB | ~3.6 GB (3.6B active params + shared attention layers) | ~75 tok/s | MoE |
+| Llama 3.3 70B NVFP4 | 40 GB | 40 GB (dense) | ~6.8 tok/s | dense |
 | Nemotron 3 Super 120B-A12B NVFP4 | 60 GB | ~6 GB (12B active) | ~45 tok/s | MoE |
 
 This is why some "bigger" models decode **faster** than smaller dense ones: an MoE only reads its active parameters per token. Resident-size-based math is wrong for MoEs.
 
-Compare to published numbers: llama 3.1 8B at **38 tok/s** *[per Ollama official benchmark](https://ollama.com/blog/nvidia-spark-performance)*, gpt-oss 20B at **58 tok/s** *[same source]*, deepseek-r1 14B at **20 tok/s** *[same source]*. The gap from theoretical max comes from KV cache reads, kernel overhead, MoE routing overhead, and other realities. **But the order of magnitude is set by memory bandwidth (and active-parameter count for MoEs), not by the GPU's compute power.**
+**One important caveat: that last column is a ceiling, not a promise.** It's the best you could ever do if memory bandwidth were the only cost. Real life is slower. On my own Spark, Nemotron 3 Super (Ollama Q4_K_M) measured **17.71 tok/s** decode, well under the ~45 tok/s NVFP4 ceiling in the table. Three reasons for that specific gap: Q4_K_M is a heavier format than NVFP4 (more bytes per token), Nemotron 3 Super is a hybrid Mamba/MoE rather than a clean MoE so the active-parameter math is only an upper bound, and every token also pays for KV cache reads and kernel overhead. The ceiling tells you the *shape* of what to expect; the measured number tells you what you actually get.
+
+Compare to published single-stream numbers from [Ollama's official Spark benchmark](https://ollama.com/blog/nvidia-spark-performance): llama 3.1 8B at **38 tok/s**, gpt-oss 20B at **58 tok/s**, deepseek-r1 14B at **20 tok/s**. Each sits below its theoretical ceiling for the same reasons. **But the order of magnitude is set by memory bandwidth (and active-parameter count for MoEs), not by the GPU's compute power.**
 
 This is why **decode is memory-bandwidth-bound**, not compute-bound. The tensor cores spend most of their time waiting for weights to arrive from memory. Adding more tensor cores would not help. Adding more memory bandwidth would.
 
 If you remember one number from this entire week, it's this: **Spark's 273 GB/s memory bandwidth divided by your model's bytes in memory ≈ your decode tok/s.**
 
-### The asterisk: speculative decoding can beat that math
-
-The "one memory read per token" floor isn't absolute. There's a class of tricks called **speculative decoding** that lets you generate multiple tokens per read.
-
-The basic version: a small "draft" model proposes the next 4-8 tokens cheaply. The big "target" model validates them in one forward pass. If the draft was right (which it often is on coherent text), you got 4-8 tokens for the price of one memory read. If wrong, you fall back to standard decode.
-
-A newer variant, **Multi-Token Prediction (MTP)**, doesn't even need a separate draft model. The main model itself has auxiliary heads that predict the next 2-3 tokens during a single forward pass. DeepSeek V3 was the most-cited early example; some later DeepSeek and Qwen releases have followed. Check each model card for explicit MTP-head support before assuming - the feature is per-checkpoint, not per-family. **llama.cpp** supports MTP via `--spec-type draft-mtp --spec-draft-n-max 2`. Community measurements on similar-class models show speedups in the **+50% to +80%** range *[various forum reports, check the specific model + flag combo before quoting]*.
-
-The bandwidth math still applies for the raw model reads. Speculative decoding amortizes one read across multiple output tokens. That's the loophole.
-
----
+**Decode in plain words:** the model writes the answer one token at a time. Each token is predicted from the KV cache (everything seen so far) plus one full read of the model's weights from memory. The tokens come out in sequence, each waiting for the last, until an end token appears. Because every token costs a trip to memory, **decode speed is set by memory bandwidth, and decode is the part you feel as "typing speed" (tok/s).**
 
 ![Diagram 6: Decode, single token at a time, memory-bandwidth-bound](/img/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step/d2-5-decode-bandwidth.png)
 
@@ -196,7 +299,7 @@ When you have 16 users in flight, you read the entire model from memory to produ
 
 The model read cost is amortized across all requests. Per-request latency stays **roughly similar until you saturate** the GPU. You can watch it drift down by a few percent as concurrency rises in the table below, then drop harder once you cross the saturation point. Aggregate throughput, meanwhile, climbs almost linearly until saturation.
 
-I measured this directly on this Spark *[my measurement, captured 2026-05-21]*. Gemma 4 31B IT in NVFP4, served via vLLM, max_tokens=512:
+I measured this directly on my DGX Spark. Gemma 4 31B IT in NVFP4, served via vLLM, max_tokens=512:
 
 | Concurrent requests | Aggregate tok/s | Per-request tok/s |
 |---|---|---|
@@ -210,7 +313,7 @@ Same model, same hardware, same prompt. **Aggregate scales roughly linearly with
 
 *[An earlier 2026-05-08 capture of this same setup labeled c=4 numbers as c=8 (and so on, drifting one concurrency level too low). The 2026-05-21 numbers above are canonical for this series.]*
 
-Memory bandwidth amortization is the most important performance lever you have on Spark. **Always batch if your workload can.**
+Memory bandwidth amortization is the most important performance lever you have on Spark. **Batch whenever your workload can tolerate it.**
 
 ---
 
@@ -220,7 +323,7 @@ Memory bandwidth amortization is the most important performance lever you have o
 
 ### A short peek at what serving engines do on top
 
-Continuous batching is one of several tricks production serving engines use to stretch the same memory bandwidth further. Robert Nishihara (Anyscale / Ray co-founder) has a nice walking-and-talking explainer that lines up well with the mental model above. Four other tricks worth knowing by name, even if Day 2 doesn't deep-dive them:
+Continuous batching is one of several tricks production serving engines use to stretch the same memory bandwidth further. Four other tricks are worth knowing by name, even if Day 2 doesn't deep-dive them:
 
 - **Prefill / decode disaggregation.** Prefill is compute-bound and likes big batches; decode is bandwidth-bound and likes small responsive batches. Run them on separate GPU pools and hand off the KV cache between them, so one phase doesn't jitter the other. (Mostly an SGLang and TensorRT-LLM concern; covered briefly on Day 5.)
 - **Paged KV cache (PagedAttention).** Instead of a contiguous KV block per request, treat the cache like virtual memory pages. Fragmentation drops, packing improves, larger effective batches fit. vLLM's original contribution; we open it up properly on Day 5.
@@ -274,7 +377,7 @@ Say you send a 500-token prompt to Llama 3.1 8B Q4 on a Spark, and ask for a 200
 
 The user perceives "I waited 66ms for the first character, then it streamed in at ~38 tok/s." That's **time-to-first-token (TTFT) = 66 ms** and **output rate = 38 tok/s**.
 
-Now imagine the same prompt at 16 concurrent users with vLLM batching. TTFT is roughly the same (66 ms each). For an actual measured comparison, the same Spark serving Qwen2.5-3B BF16 jumps from 26 tok/s single-user to **477 tok/s aggregate at c=16** *[my measurement, captured 2026-05-21]*. For Gemma 4 31B NVFP4 the comparable jump is 6 → 92 tok/s aggregate. **You serve 16 users in roughly the same wall time as one** - the exact multiplier depends on the model, but the shape always holds.
+Now imagine the same prompt at 16 concurrent users with vLLM batching. TTFT is roughly the same (66 ms each). For an actual measured comparison, my DGX Spark serving Qwen2.5-3B BF16 jumps from 26 tok/s single-user to **477 tok/s aggregate at c=16**. For Gemma 4 31B NVFP4 the comparable jump is 6 → 92 tok/s aggregate. **Serving 16 users is much closer to serving one user than your intuition expects** - the exact multiplier depends on the model, but the shape always holds.
 
 That's the local LLM serving game.
 
@@ -288,7 +391,7 @@ That's the local LLM serving game.
 
 If you've followed this far, you understand the hardware question.
 
-The single most important spec for LLM inference on a workstation isn't tensor core peak FLOPS. It's **memory bandwidth**. A B200 with 8 TB/s blows away a Spark's 273 GB/s on decode. An RTX 5090 with 1,792 GB/s beats a Spark too, but only on models that fit in its 32 GB.
+The single most important spec for LLM inference on a workstation isn't tensor core peak FLOPS. It's **memory bandwidth**. A single B200-class Blackwell GPU has up to about 8 TB/s of memory bandwidth, which is a different tier from Spark's 273 GB/s. An RTX 5090 with 1,792 GB/s beats a Spark on bandwidth too, but only for models that fit in its 32 GB.
 
 The Spark's pitch: **you trade some bandwidth for a lot of capacity.** 128 GB at 273 GB/s lets you run 70B-class and 120B-class models that simply won't fit on a 5090. The decode is slower per user. The capacity is unmatched at this price.
 
@@ -310,4 +413,4 @@ See you in the next post.
 
 ---
 
-*References for this post: [Ollama: NVIDIA DGX Spark performance](https://ollama.com/blog/nvidia-spark-performance) for the published prefill and decode numbers, [vLLM documentation](https://docs.vllm.ai) for batching and KV cache concepts, [Frank Denneman: Understanding Unified Memory on DGX Spark](https://frankdenneman.ai/posts/2026-03-23-understanding-unified-memory-dgx-spark-nemoclaw-nemotron/). The concurrency sweep tables are from my own measurements on this Spark on 2026-05-21 (Gemma 4 31B IT NVFP4 + Qwen2.5-3B BF16 via vLLM at max_tokens=512). An earlier 2026-05-08 sweep had a concurrency-label drift; the 2026-05-21 values are canonical.*
+*References for this post: [Ollama: NVIDIA DGX Spark performance](https://ollama.com/blog/nvidia-spark-performance) for the published prefill and decode numbers, [vLLM documentation](https://docs.vllm.ai) for batching and KV cache concepts. The concurrency sweep tables are from my own measurements on this Spark on 2026-05-21 (Gemma 4 31B IT NVFP4 + Qwen2.5-3B BF16 via vLLM at max_tokens=512). An earlier 2026-05-08 sweep had a concurrency-label drift; the 2026-05-21 values are canonical.*
