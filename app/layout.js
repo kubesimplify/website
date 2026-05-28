@@ -188,6 +188,12 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Cloudflare Web Analytics — privacy-friendly, no cookies */}
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "fd84aab7fecc4b96a32ec36f2ef3e43f"}'
+        />
       </head>
       <body className="font-sans noise-overlay">
         <Navbar />
