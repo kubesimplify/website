@@ -1,0 +1,12 @@
+<svg viewBox="0 0 160 224" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="224" rx="8" fill="#0f172a"/>
+  <rect x="8" y="8" width="144" height="208" rx="4" fill="#1e293b" stroke="url(#vis-g)" stroke-width="1"/>
+  <text x="80" y="75" text-anchor="middle" fill="#f9fafb" font-family="system-ui" font-weight="700" font-size="11">Cloud Native</text>
+  <text x="80" y="95" text-anchor="middle" fill="url(#vis-g)" font-family="system-ui" font-weight="800" font-size="14">Visuals</text>
+  <text x="80" y="115" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-weight="400" font-size="8">Kubesimplify</text>
+  <path d="M65 130h30M72 137h16" stroke="#05CAFF" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+  <circle cx="68" cy="160" r="8" fill="none" stroke="#05CAFF" stroke-width="1.2" opacity="0.6"/>
+  <rect x="82" y="154" width="14" height="14" rx="2" fill="none" stroke="#5CFF68" stroke-width="1.2" opacity="0.6"/>
+  <polygon points="80,176 74,186 86,186" fill="none" stroke="url(#vis-g)" stroke-width="1.2" stroke-linejoin="round" opacity="0.6"/>
+  <defs><linearGradient id="vis-g" x1="0" y1="0" x2="160" y2="224" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#5CFF68"/><stop offset="100%" stop-color="#05CAFF"/></linearGradient></defs>
+</svg>
