@@ -6,7 +6,7 @@ datePublished: 2026-05-29T00:00:00.000Z
 slug: mlxcel-rust-native-inference-engine-tested-on-m1-max
 author: saiyam-pathak
 tags: ["mlx", "apple-silicon", "local-ai", "llm", "rust", "inference", "ollama"]
-cover: /img/blog/mlxcel-rust-native-inference-engine-tested-on-m1-max/runtime-stack.png
+cover: /img/blog/mlxcel-rust-native-inference-engine-tested-on-m1-max/cover.png
 ---
 
 There is a new entry in the local-LLM-on-Mac arena. It is called `mlxcel`, it shipped its first stable release (v0.1.0) on **May 28, 2026**, and unlike most of the field, it is not a Python project. It is a Rust binary that calls into Apple's MLX C++ runtime directly, exposes an OpenAI-compatible HTTP server out of the box, and ships as a single Homebrew formula.
