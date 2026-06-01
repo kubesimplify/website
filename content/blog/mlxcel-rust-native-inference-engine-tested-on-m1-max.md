@@ -20,7 +20,7 @@ I spent the afternoon installing it on my M1 Max, running it against the same ch
 > - **On Llama 3.2 3B, mlxcel decode beats Ollama by ~1.3x on the same hardware** (mlxcel 63.33 vs Ollama 48.73 tok/s, averaged over 3 runs each in the 2026-05-31 clean sweep). The MLX-vs-llama.cpp-Metal kernel architectural gap is real but smaller than my earlier session showed; see the methodology note at the bottom.
 > - Held up at 7B: on Qwen 2.5 7B 4-bit, mlxcel hit 31.33 tok/s vs mlx-lm 31.80 vs Ollama 24.23 (sweep averages). Decode parity with mlx-lm again; ~29% faster than Ollama.
 > - The OpenAI-compatible server starts in seconds and serves `/v1/chat/completions` with continuous batching and prompt caching.
-> - The headline "2.70x prefill" speedup in the README is M5 Max specific. On M1 hardware, prefill behavior is more mixed (Ollama actually wins prefill big, mlx-lm wins on small prompts, mlxcel wins on others). Decode parity is the load-bearing claim.
+> - The headline "2.70x prefill" speedup in the README is M5 Max specific. On M1 Max in the 2026-06-01 long-prompt re-sweep, prefill is roughly even across the three runtimes (~420-440 tok/s on a 120-word prompt), with mlxcel showing wider run-to-run variance (298-592 across 3 runs). Decode parity vs mlx-lm is the load-bearing claim.
 > - TurboQuant 4-bit KV cache is exciting on paper but **slowed M1 Max generation by ~3.6x** in my test (FP16 default 63.33 tok/s vs fp16+turbo4 17.48 tok/s). The docs are honest that older Apple Silicon paths "may have different bottlenecks." Believe them.
 > - If you want a clean, native, dependency-light way to run MLX models on a Mac and serve them over HTTP, this is the most interesting new option I have looked at all year.
 
@@ -263,20 +263,20 @@ To stress prefill harder, I ran a 120-word Kubernetes design review brief throug
 
 | Runtime | Prompt tokens | Prefill (tok/s) | Decode (tok/s) |
 |---------|--------------:|----------------:|---------------:|
-| **mlxcel** 0.1.2 | 147 | **325.82** | **127.71** |
-| **mlx-lm** | 181 | **700.37** | 104.61 |
-| **Ollama** | 171 | 211.61 | 39.50 |
+| **mlxcel** 0.1.2 | 156 | **~430** | **~55** |
+| **mlx-lm** | 190 | **423** | 52.5 |
+| **Ollama** | 180 | **440** (cold) | 41.8 |
 
 
 *Note: the mlxcel row above used `--no-chat-template` to keep the prompt-token count comparable to mlx-lm and Ollama for this prefill comparison.*
 
 Three observations.
 
-**Decode keeps holding.** mlxcel stayed at ~128 tok/s as the prompt grew, mlx-lm dropped to 105, Ollama stayed at 40. The decode gap to Ollama is a steady 3.2x in mlxcel's favor.
+**Decode holds the same broad pattern as the short-prompt test.** mlxcel ~55, mlx-lm ~52, Ollama ~42 tok/s on the 120-word prompt (2026-06-01 sweep). The mlxcel-vs-Ollama gap stays at ~1.3x on long prompts, very close to the ~1.3x at short prompts. mlxcel-vs-mlx-lm is parity within ~5%.
 
-**Prefill is the one place mlxcel is genuinely behind on my M1 Max.** mlx-lm prefilled this 181-token prompt at 700 tok/s, more than 2x mlxcel's 326. This contradicts the project's "2.70x prefill" headline, but that headline is M5 Max specific. The README's own benchmark table shows 1.76x on M1 Ultra and explicitly warns that "older Apple Silicon generations may have different bottlenecks." Believe the warning, not the headline.
+**Prefill is roughly even on M1 Max at this prompt size.** All three runtimes landed in the ~420-440 tok/s neighborhood, with mlxcel showing wider run-to-run variance (3 runs measured: 298, 392, 592). The project's "2.70x prefill speedup" headline is M5 Max specific; the README's own benchmark table shows 1.76x on M1 Ultra and explicitly warns that "older Apple Silicon generations may have different bottlenecks." On M1 Max in this sweep, mlxcel does not show a prefill deficit; it just has more variance than mlx-lm or Ollama.
 
-**Prompt token counts differ between runtimes** (147 / 181 / 171). They tokenize special tokens and chat-template wrappers differently. The throughput numbers (tokens per second) are still directly comparable. Absolute token counts are not.
+**Prompt token counts differ between runtimes** (156 / 190 / 180). Each tokenizer applies different chat-template wrappers and special tokens. The throughput numbers (tokens per second) are still directly comparable. Absolute token counts are not.
 
 ### Qwen 2.5 7B Instruct (4-bit), short prompt: does the gap hold at scale?
 
@@ -472,7 +472,7 @@ Apple Silicon inference has been a Python-centric story for a long time. `mlxcel
 
 ## References and reproducibility
 
-All benchmarks above were re-captured on 2026-05-31 in a clean systematic sweep on the same M1 Max. An earlier session showed substantially higher mlxcel/mlx-lm rates on Llama 3.2 3B (~130 tok/s instead of ~65) that did not reproduce in the clean re-test; the numbers above reflect the reproducible re-test. To reproduce yourself:
+All benchmarks above were re-captured in clean systematic sweeps on the same M1 Max: short-prompt 3B and 7B on 2026-05-31, long-prompt 3B on 2026-06-01. An earlier 2026-05-29 session showed substantially higher mlxcel/mlx-lm rates on Llama 3.2 3B (~130 tok/s short, ~128 long) that did not reproduce in either clean sweep; the numbers above reflect the reproducible re-tests. To reproduce yourself:
 
 - **Hardware:** Apple M1 Max, 64 GB unified memory, macOS 26.2 (build 25C56)
 - **mlxcel:** 0.1.2, installed via `brew install lablup/tap/mlxcel` (v0.1.3 shipped right after these tests, on 2026-05-30; it is a CLI + security release with no kernel changes, so the numbers above should hold on 0.1.3 as well)
