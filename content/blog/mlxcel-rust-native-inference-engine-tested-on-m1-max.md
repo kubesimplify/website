@@ -297,7 +297,7 @@ A 4 GiB model with 56 GiB of headroom on a 64 GB M1 Max. Run results:
 
 | Runtime | Format | Prefill (tok/s) | Decode (tok/s) | Peak mem |
 |---------|--------|----------------:|---------------:|---------:|
-| **mlxcel** 0.1.2 | MLX 4-bit | (not re-captured) | **31.33** | not reported |
+| **mlxcel** 0.1.2 | MLX 4-bit | 96.62 | **31.33** | not reported |
 | **mlx-lm** | MLX 4-bit | 102.15 | **31.80** | 4.44 GB |
 | **Ollama** 0.20.7 | GGUF Q4_K_M | 125.85 | **24.23** | not reported |
 
@@ -305,7 +305,7 @@ The big-model picture flips one number but keeps the headline.
 
 **Decode parity vs mlx-lm holds**: 31.33 vs 31.80, a 98% match. Same checkpoint, same MLX backend, very close throughput. This is exactly what the project claims and it shows up at 7B too.
 
-**On prefill, the 2026-05-31 re-sweep did not capture mlxcel's prefill rate separately**, so I am leaving the original-session mlxcel prefill figure out of this table and only reporting decode (where the clean re-test data is solid). The mlx-lm prefill shown (102.15) is from the 2026-05-31 sweep; the original session's mlx-lm 7B prefill was 81.89, so prefill has improved here too.
+**On prefill at 7B, mlxcel and mlx-lm are roughly even** in the 2026-06-02 re-test (mlxcel ~97 tok/s as a 3-run mean with wide cold-start variance: 56 / 110 / 124, vs mlx-lm 102.15 from the 2026-05-31 sweep). Ollama leads modestly at 125.85. The original session had mlxcel ahead of mlx-lm on 7B prefill (111.60 vs 81.89); today the difference collapses to parity.
 
 **Ollama's prefill on the 2026-05-31 sweep was 125.85 tok/s** for this prompt, much lower than the 383.92 the original session captured (likely due to prompt length / chat-template differences across runs). Decode still favors mlxcel (31.33) over Ollama (24.23) by ~29%. For 200-token generations the decode dominates wall time, so mlxcel still finishes the full request faster.
 
@@ -460,7 +460,7 @@ After running all three runtimes side by side, here is my mental model.
 
 ## Production readiness, honestly
 
-This is v0.1.0, shipped on May 28, 2026. The repository is at 71 stars and 15 forks at the time I am writing this, climbing fast off the announcement. The roadmap is visible in the issue tracker; the test surface and benchmark methodology are documented; the architecture and code organization are clean.
+This is v0.1.0, shipped on May 28, 2026. The repository is at 77 stars and 15 forks at the time I am writing this, climbing fast off the announcement. The roadmap is visible in the issue tracker; the test surface and benchmark methodology are documented; the architecture and code organization are clean.
 
 What that buys you is a runtime that is small enough to read end-to-end, opinionated enough to take production seriously (the scheduler, batching, prompt cache, and KV-cache modes are not toy implementations), and honest enough about its limitations that you will not be surprised. The TurboQuant docs alone are a better example of "how to ship an experimental feature responsibly" than most production runtimes manage.
 
