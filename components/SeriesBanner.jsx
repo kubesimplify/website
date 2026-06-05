@@ -10,6 +10,7 @@ export default function SeriesBanner({ info }) {
   const { series, position, total, prev, next } = info;
   const prevPost = prev ? getPostBySlug(prev) : null;
   const nextPost = next ? getPostBySlug(next) : null;
+  const hasPlannedNext = !nextPost && position < total;
 
   return (
     <aside
@@ -91,7 +92,7 @@ export default function SeriesBanner({ info }) {
           ) : (
             <div className="text-sm opacity-50 sm:text-right">
               <p className="text-[11px] uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-muted)' }}>
-                End of series
+                {hasPlannedNext ? 'More coming soon' : 'End of series'}
               </p>
             </div>
           )}

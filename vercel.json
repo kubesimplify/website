@@ -247,6 +247,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists",
+      "destination": "https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists",
+      "permanent": true
+    },
+    {
       "source": "/blog/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
       "destination": "https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world",
       "permanent": true
@@ -702,6 +707,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/mlxcel-rust-native-inference-engine-tested-on-m1-max",
+      "destination": "https://blog.kubesimplify.com/mlxcel-rust-native-inference-engine-tested-on-m1-max",
+      "permanent": true
+    },
+    {
       "source": "/blog/moving-code-between-git-repositories-with-copybara",
       "destination": "https://blog.kubesimplify.com/moving-code-between-git-repositories-with-copybara",
       "permanent": true
@@ -924,6 +934,11 @@
     {
       "source": "/blog/understanding-the-ins-and-outs-of-git-using-github",
       "destination": "https://blog.kubesimplify.com/understanding-the-ins-and-outs-of-git-using-github",
+      "permanent": true
+    },
+    {
+      "source": "/blog/wandler-local-openai-compatible-inference-transformersjs-webgpu",
+      "destination": "https://blog.kubesimplify.com/wandler-local-openai-compatible-inference-transformersjs-webgpu",
       "permanent": true
     },
     {
@@ -1377,6 +1392,17 @@
     {
       "source": "/day-3-stop-writing-dockerfiles-from-scratch",
       "destination": "https://blog.kubesimplify.com/day-3-stop-writing-dockerfiles-from-scratch",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists",
+      "destination": "https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists",
       "permanent": true,
       "has": [
         {
@@ -2387,6 +2413,17 @@
       ]
     },
     {
+      "source": "/mlxcel-rust-native-inference-engine-tested-on-m1-max",
+      "destination": "https://blog.kubesimplify.com/mlxcel-rust-native-inference-engine-tested-on-m1-max",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
       "source": "/moving-code-between-git-repositories-with-copybara",
       "destination": "https://blog.kubesimplify.com/moving-code-between-git-repositories-with-copybara",
       "permanent": true,
@@ -2873,6 +2910,17 @@
     {
       "source": "/understanding-the-ins-and-outs-of-git-using-github",
       "destination": "https://blog.kubesimplify.com/understanding-the-ins-and-outs-of-git-using-github",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/wandler-local-openai-compatible-inference-transformersjs-webgpu",
+      "destination": "https://blog.kubesimplify.com/wandler-local-openai-compatible-inference-transformersjs-webgpu",
       "permanent": true,
       "has": [
         {
