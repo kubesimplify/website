@@ -5,11 +5,24 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-06-05T14:34:33.009Z</updated>
+  <updated>2026-06-05T14:58:29.178Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>Day 3: The DGX Spark Unpacked. GB10, Unified Memory, sm_121, and the One Reason This Hardware Exists</title>
+    <link href="https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists"/>
+    <id>https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists</id>
+    <updated>2026-06-05T00:00:00.000Z</updated>
+    <published>2026-06-05T00:00:00.000Z</published>
+    <summary>A practical teardown of NVIDIA DGX Spark&apos;s GB10 Grace Blackwell Superchip, unified memory, sm_121, NVFP4 tensor cores, memory reporting, and decode limits.</summary>
+    <category term="nvidia"/>
+    <category term="dgxspark"/>
+    <category term="local-ai"/>
+    <category term="llm"/>
+    <category term="ai-hardware"/>
+  </entry>
   <entry>
     <title>Wandler: Local OpenAI-Compatible Inference With Transformers.js and WebGPU</title>
     <link href="https://blog.kubesimplify.com/wandler-local-openai-compatible-inference-transformersjs-webgpu"/>
@@ -37,19 +50,6 @@
     <category term="rust"/>
     <category term="inference"/>
     <category term="ollama"/>
-  </entry>
-  <entry>
-    <title>Day 3: The DGX Spark Unpacked. GB10, Unified Memory, sm_121, and the One Reason This Hardware Exists</title>
-    <link href="https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists"/>
-    <id>https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists</id>
-    <updated>2026-05-28T00:00:00.000Z</updated>
-    <published>2026-05-28T00:00:00.000Z</published>
-    <summary>A practical teardown of NVIDIA DGX Spark&apos;s GB10 Grace Blackwell Superchip, unified memory, sm_121, NVFP4 tensor cores, memory reporting, and decode limits.</summary>
-    <category term="nvidia"/>
-    <category term="dgxspark"/>
-    <category term="local-ai"/>
-    <category term="llm"/>
-    <category term="ai-hardware"/>
   </entry>
   <entry>
     <title>Day 2: Anatomy of an LLM Inference Request. From Prompt to Answer, Step by Step</title>

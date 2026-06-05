@@ -2,7 +2,7 @@
 title: "Day 3: The DGX Spark Unpacked. GB10, Unified Memory, sm_121, and the One Reason This Hardware Exists"
 seoTitle: "Day 3: DGX Spark Unpacked. GB10, Unified Memory, sm_121, and NVFP4"
 seoDescription: "A practical teardown of NVIDIA DGX Spark's GB10 Grace Blackwell Superchip, unified memory, sm_121, NVFP4 tensor cores, memory reporting, and decode limits."
-datePublished: 2026-05-28T00:00:00.000Z
+datePublished: 2026-06-05T00:00:00.000Z
 slug: day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists
 author: saiyam-pathak
 tags: ["nvidia", "dgxspark", "local-ai", "llm", "ai-hardware"]
