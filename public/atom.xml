@@ -5,11 +5,24 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-06-05T14:58:29.178Z</updated>
+  <updated>2026-06-10T16:34:05.627Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>Day 4: Quantization Demystified. BF16, FP8, NVFP4, MXFP4, INT4, GGUF, and Why It All Matters</title>
+    <link href="https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters"/>
+    <id>https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters</id>
+    <updated>2026-06-10T00:00:00.000Z</updated>
+    <published>2026-06-10T00:00:00.000Z</published>
+    <summary>A practical, beginner-friendly guide to BF16, FP8, NVFP4, MXFP4, INT4, and GGUF Q4_K_M on NVIDIA DGX Spark. Bytes per parameter, quality vs size, and which format to pick when.</summary>
+    <category term="nvidia"/>
+    <category term="dgxspark"/>
+    <category term="local-ai"/>
+    <category term="llm"/>
+    <category term="quantization"/>
+  </entry>
   <entry>
     <title>Day 3: The DGX Spark Unpacked. GB10, Unified Memory, sm_121, and the One Reason This Hardware Exists</title>
     <link href="https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists"/>
