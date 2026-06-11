@@ -11,6 +11,15 @@ export default {
     const path = url.pathname.replace(/\/$/, '') || '/';
     const search = url.search;
 
+    // 0. Normalize .html suffixes to clean URLs (Pagefind result URLs and
+    //    old direct links point at the raw static files, which only exist
+    //    under /blog/<slug>.html and would otherwise 404 after the prefix
+    //    strip below).
+    if (path.endsWith('.html')) {
+      const clean = path.slice(0, -5).replace(/\/index$/, '') || '/';
+      return Response.redirect(url.origin + clean + search, 301);
+    }
+
     // 1. Strip /blog/ prefix FIRST — before asset detection. Otherwise
     //    /blog/rss.xml looks like an asset, gets a 404 (no file at that path),
     //    and the Next.js 404 page's JS loops back to /blog/rss.xml.

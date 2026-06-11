@@ -17,6 +17,17 @@ export default function BlogSearch({ placeholder = 'Search posts…' }) {
   const pagefind = useRef(null);
   const debounceRef = useRef(null);
 
+  // Pagefind indexes the raw static output, so result URLs look like
+  // /blog/<slug>.html. The live site serves posts at /<slug> (the edge
+  // worker strips the /blog prefix and only knows clean URLs), so .html
+  // links 404. Normalize to the canonical clean URL.
+  function toCleanUrl(raw) {
+    let u = (raw || '').replace(/\.html$/, '');
+    if (u === '/blog') return '/';
+    if (u.startsWith('/blog/')) u = u.slice('/blog'.length);
+    return u || '/';
+  }
+
   useEffect(() => {
     let cancelled = false;
     async function init() {
@@ -52,7 +63,7 @@ export default function BlogSearch({ placeholder = 'Search posts…' }) {
         const top = await Promise.all(
           search.results.slice(0, 8).map((r) => r.data())
         );
-        setResults(top);
+        setResults(top.map((r) => ({ ...r, url: toCleanUrl(r.url) })));
       } catch {
         setResults([]);
       } finally {
