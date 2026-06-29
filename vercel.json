@@ -212,6 +212,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/controlling-mcp-tools-with-agentgateway-on-kubernetes",
+      "destination": "https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes",
+      "permanent": true
+    },
+    {
       "source": "/blog/coolify",
       "destination": "https://blog.kubesimplify.com/coolify",
       "permanent": true
@@ -1320,6 +1325,17 @@
     {
       "source": "/container-and-kubernetes-security",
       "destination": "https://blog.kubesimplify.com/container-and-kubernetes-security",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/controlling-mcp-tools-with-agentgateway-on-kubernetes",
+      "destination": "https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes",
       "permanent": true,
       "has": [
         {

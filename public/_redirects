@@ -45,6 +45,7 @@
 /blog/cloud-native-buildpacks-concepts                                                 /cloud-native-buildpacks-concepts  301!
 /blog/confidential-containers-running-on-kubernetes                                    /confidential-containers-running-on-kubernetes  301!
 /blog/container-and-kubernetes-security                                                /container-and-kubernetes-security  301!
+/blog/controlling-mcp-tools-with-agentgateway-on-kubernetes                            /controlling-mcp-tools-with-agentgateway-on-kubernetes  301!
 /blog/coolify                                                                          /coolify  301!
 /blog/creating-multi-node-kubernetes-cluster-locally                                   /creating-multi-node-kubernetes-cluster-locally  301!
 /blog/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter      /day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter  301!
@@ -251,6 +252,7 @@
 /cloud-native-buildpacks-concepts                                                 /blog/cloud-native-buildpacks-concepts  200!
 /confidential-containers-running-on-kubernetes                                    /blog/confidential-containers-running-on-kubernetes  200!
 /container-and-kubernetes-security                                                /blog/container-and-kubernetes-security  200!
+/controlling-mcp-tools-with-agentgateway-on-kubernetes                            /blog/controlling-mcp-tools-with-agentgateway-on-kubernetes  200!
 /coolify                                                                          /blog/coolify  200!
 /creating-multi-node-kubernetes-cluster-locally                                   /blog/creating-multi-node-kubernetes-cluster-locally  200!
 /day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter      /blog/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter  200!

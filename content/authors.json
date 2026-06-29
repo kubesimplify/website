@@ -1,4 +1,14 @@
 {
+  "shubham-katara": {
+    "handle": "shubham-katara",
+    "name": "Shubham Katara",
+    "avatar": "/img/authors/shubham-katara.jpg",
+    "bio": "Building Hybrid K8s Platforms @trivago | Tech Author & Speaker (freeCodeCamp, SREDays) | vCluster Ambassador | RHCA & GCP DevOps Professional",
+    "socials": {
+      "linkedin": "https://linkedin.com/in/shubhamkatara",
+      "github": "https://github.com/shkatara"
+    }
+  },
   "engin-diri": {
     "handle": "engin-diri",
     "name": "Engin Diri",
