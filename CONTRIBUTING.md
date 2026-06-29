@@ -3,6 +3,10 @@
 
 At Kubesimplify, we warmly welcome contributions through collaboration. We are excited to see that you want to contribute!. There are many ways in which one could contribute to Kubesimplify and every contribution is equally appreciated here. Navigate through the following to understand more about contributing here.
 
+> **Want to write a blog post?** See the detailed, step-by-step guide in **[WRITING-A-BLOG.md](WRITING-A-BLOG.md)**. It covers authoring a post, frontmatter, images, previewing locally, and opening your PR.
+>
+> Note: the website now runs on **Next.js with npm** (blog posts are Markdown files in `content/blog/`). The Docusaurus and Yarn instructions in the sections below are outdated and apply to an earlier version of the site.
+
 # Before you get started
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting [our discord community](https://kubesimplify.com/discord)
