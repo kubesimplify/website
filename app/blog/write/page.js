@@ -60,6 +60,18 @@ export default function WriteForUs() {
           <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
             Join {authorCount}+ contributors publishing in-depth, practitioner-led technical writing on Kubernetes, AI infrastructure, and cloud-native.
           </p>
+          <p className="text-sm mt-4" style={{ color: 'var(--text-secondary)' }}>
+            Prefer the full, do-it-yourself walkthrough?{' '}
+            <a
+              href={`${githubUrl}/blob/main/WRITING-A-BLOG.md`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--accent)] hover:underline font-semibold"
+            >
+              Read the detailed step-by-step guide
+            </a>
+            .
+          </p>
         </div>
 
         <section className="glass-card rounded-2xl p-6 md:p-8 mb-10">
@@ -193,10 +205,22 @@ export default function WriteForUs() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <a
-              href={`${githubUrl}/tree/main/content/blog`}
+              href={`${githubUrl}/blob/main/WRITING-A-BLOG.md`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white gradient-bg transition-transform hover:scale-105"
+            >
+              Step-by-step guide
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <a
+              href={`${githubUrl}/tree/main/content/blog`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-[var(--accent)]/10"
+              style={{ borderColor: 'var(--border-medium)', color: 'var(--text-primary)' }}
             >
               Browse existing posts
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
