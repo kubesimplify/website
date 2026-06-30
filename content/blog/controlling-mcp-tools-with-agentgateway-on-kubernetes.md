@@ -12,6 +12,8 @@ draft: true
 
 This is Part 1 of a two-part series. In this part you stand up **agentgateway** on Kubernetes, put a Google ADK agent behind it so the agent holds zero secrets, and enforce tool-level access control that you can watch block a tool in real time. Part 2 adds cost and observability: Prometheus, Grafana, and a live token-spend dashboard.
 
+The available artifacts are available at  https://github.com/shkatara/agentgateway-security-observability.git
+
 agentgateway is an open source, AI-native proxy. By the end of this part, your agent will talk to its tools (over MCP) and its model (over an OpenAI-compatible API) through the gateway, hold none of its own credentials, and be unable to call a tool you have not explicitly allowed.
 
 Who this is for:
