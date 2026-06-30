@@ -6,8 +6,16 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 10 Jun 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 29 Jun 2026 10:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>Controlling MCP Tools with agentgateway on Kubernetes (Part 1)</title>
+      <link>https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes</guid>
+      <pubDate>Mon, 29 Jun 2026 10:00:00 GMT</pubDate>
+      <description>Run AI agents behind agentgateway on Kubernetes: route their LLM and MCP tool calls through one proxy, keep secrets out of the agent, and block tools by policy.</description>
+      <category>kubernetes</category><category>ai-agents</category><category>mcp</category><category>platform-engineering</category>
+    </item>
     <item>
       <title>Day 4: Quantization Demystified. BF16, FP8, NVFP4, MXFP4, INT4, GGUF, and Why It All Matters</title>
       <link>https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters</link>

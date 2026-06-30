@@ -5,11 +5,23 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-06-10T16:34:05.627Z</updated>
+  <updated>2026-06-29T20:14:38.552Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>Controlling MCP Tools with agentgateway on Kubernetes (Part 1)</title>
+    <link href="https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes"/>
+    <id>https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes</id>
+    <updated>2026-06-29T10:00:00.000Z</updated>
+    <published>2026-06-29T10:00:00.000Z</published>
+    <summary>Run AI agents behind agentgateway on Kubernetes: route their LLM and MCP tool calls through one proxy, keep secrets out of the agent, and block tools by policy.</summary>
+    <category term="kubernetes"/>
+    <category term="ai-agents"/>
+    <category term="mcp"/>
+    <category term="platform-engineering"/>
+  </entry>
   <entry>
     <title>Day 4: Quantization Demystified. BF16, FP8, NVFP4, MXFP4, INT4, GGUF, and Why It All Matters</title>
     <link href="https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters"/>
