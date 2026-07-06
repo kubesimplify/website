@@ -97,6 +97,7 @@
 /blog/ing-switch-119-annotations-gateway-api-traefik-impact-ratings                    /ing-switch-119-annotations-gateway-api-traefik-impact-ratings  301!
 /blog/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days /ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days  301!
 /blog/installing-prometheus-with-selinux                                               /installing-prometheus-with-selinux  301!
+/blog/introducing-kiac-kubernetes-in-apple-containers                                  /introducing-kiac-kubernetes-in-apple-containers  301!
 /blog/introducing-unikraft-lightweight-virtualization-using-unikernels                 /introducing-unikraft-lightweight-virtualization-using-unikernels  301!
 /blog/introduction-of-jenkins-pipeline                                                 /introduction-of-jenkins-pipeline  301!
 /blog/introduction-to-cicd-and-cicd-pipeline                                           /introduction-to-cicd-and-cicd-pipeline  301!
@@ -208,6 +209,7 @@
 /workshops             https://kubesimplify.com/workshops       301!
 /partnerships          https://kubesimplify.com/partnerships    301!
 /resources             https://kubesimplify.com/resources       301!
+/discord               https://discord.gg/26Z384WSPB            302!
 
 # ── 3. Serve blog content under clean URLs (URL stays as-is).
 #       `200!` forces the rewrite even when a static file would win
@@ -305,6 +307,7 @@
 /ing-switch-119-annotations-gateway-api-traefik-impact-ratings                    /blog/ing-switch-119-annotations-gateway-api-traefik-impact-ratings  200!
 /ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days /blog/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days  200!
 /installing-prometheus-with-selinux                                               /blog/installing-prometheus-with-selinux  200!
+/introducing-kiac-kubernetes-in-apple-containers                                  /blog/introducing-kiac-kubernetes-in-apple-containers  200!
 /introducing-unikraft-lightweight-virtualization-using-unikernels                 /blog/introducing-unikraft-lightweight-virtualization-using-unikernels  200!
 /introduction-of-jenkins-pipeline                                                 /blog/introduction-of-jenkins-pipeline  200!
 /introduction-to-cicd-and-cicd-pipeline                                           /blog/introduction-to-cicd-and-cicd-pipeline  200!

@@ -4,7 +4,7 @@
 
 ## About
 
-Kubesimplify is a community-driven publication on cloud-native technologies, with 187 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+Kubesimplify is a community-driven publication on cloud-native technologies, with 188 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
 
 Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
 
@@ -34,8 +34,9 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
 - Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
 
-## Recent posts (most recent 30 of 187)
+## Recent posts (most recent 30 of 188)
 
+- [Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM](https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers) (2026-07-06). kiac runs local Kubernetes on macOS where every node is its own lightweight VM via apple/container: kubeadm or k3s flavors, Cilium on a custom kernel, built-in LoadBalancer, Grafana, Gateway API, and clusters that survive reboots.
 - [LLM Costs and Observability with agentgateway on Kubernetes (Part 2)](https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes) (2026-06-30). Part 2: scrape agentgateway with Prometheus, build a Grafana dashboard of token cost and per-tool usage, see blocked tool calls, and alert on spend.
 - [Controlling MCP Tools with agentgateway on Kubernetes (Part 1)](https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes) (2026-06-29). Run AI agents behind agentgateway on Kubernetes: route their LLM and MCP tool calls through one proxy, keep secrets out of the agent, and block tools by policy.
 - [Day 4: Quantization Demystified. BF16, FP8, NVFP4, MXFP4, INT4, GGUF, and Why It All Matters](https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters) (2026-06-10). A practical, beginner-friendly guide to BF16, FP8, NVFP4, MXFP4, INT4, and GGUF Q4_K_M on NVIDIA DGX Spark. Bytes per parameter, quality vs size, and which format to pick when.
@@ -65,11 +66,10 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [Here's What I Learned About Nemotron 3 Super -I Ran a 120B Parameter Model on Nvidia DGX Spark](https://blog.kubesimplify.com/nemotron3-on-dgx-spark) (2026-03-14). Understand everything about Nvidia DGX spark along with hands on and benchmarks. 
 - [ing-switch: Migrate from Ingress NGINX to Traefik or Gateway API in Minutes, Not Days](https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days) (2026-02-25)
 - [Exploiting Metasploitable2 Using msfconsole (Kali Linux Lab)](https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab) (2026-01-17)
-- [Kubernetes v1.35 – What’s New, What’s Changing, and What You Should Know](https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know) (2025-12-19). Learn about the latest Kubenretes release Kubernetes 1.35
 
 ## Topics covered (auto-derived from tags)
 
-- kubernetes (94 articles): https://blog.kubesimplify.com/tag/kubernetes
+- kubernetes (95 articles): https://blog.kubesimplify.com/tag/kubernetes
 - devops (71 articles): https://blog.kubesimplify.com/tag/devops
 - docker (31 articles): https://blog.kubesimplify.com/tag/docker
 - k8s (27 articles): https://blog.kubesimplify.com/tag/k8s
@@ -97,7 +97,7 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 
 ## Top contributors
 
-- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (32 posts)
+- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (33 posts)
 - [Saloni Narang](https://blog.kubesimplify.com/author/saloni-narang) (24 posts)
 - [Kunal Verma](https://blog.kubesimplify.com/author/kunal-verma) (12 posts)
 - [Dipankar Das](https://blog.kubesimplify.com/author/dipankar-das) (9 posts)

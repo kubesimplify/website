@@ -2,6 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
+      "source": "/discord",
+      "destination": "https://discord.gg/26Z384WSPB",
+      "permanent": false
+    },
+    {
       "source": "/blog",
       "destination": "https://blog.kubesimplify.com/",
       "permanent": true
@@ -469,6 +474,11 @@
     {
       "source": "/blog/installing-prometheus-with-selinux",
       "destination": "https://blog.kubesimplify.com/installing-prometheus-with-selinux",
+      "permanent": true
+    },
+    {
+      "source": "/blog/introducing-kiac-kubernetes-in-apple-containers",
+      "destination": "https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers",
       "permanent": true
     },
     {
@@ -1902,6 +1912,17 @@
     {
       "source": "/installing-prometheus-with-selinux",
       "destination": "https://blog.kubesimplify.com/installing-prometheus-with-selinux",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/introducing-kiac-kubernetes-in-apple-containers",
+      "destination": "https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers",
       "permanent": true,
       "has": [
         {

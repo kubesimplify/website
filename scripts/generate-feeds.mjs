@@ -62,10 +62,13 @@ const posts = files
       datePublished: fm.datePublished,
       cover: fm.cover,
       tags: Array.isArray(fm.tags) ? fm.tags : [],
+      draft: fm.draft === 'true',
       body,
     };
   })
-  .filter((p) => p && p.datePublished)
+  // Drafts never ship in feeds: lib/blog.js hides them from the production
+  // site, so a feed entry would be a dead link (and leak unpublished work).
+  .filter((p) => p && p.datePublished && !p.draft)
   .sort((a, b) => new Date(b.datePublished) - new Date(a.datePublished));
 
 const buildDate = new Date().toUTCString();

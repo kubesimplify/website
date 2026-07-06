@@ -5,11 +5,24 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-07-06T12:14:30.534Z</updated>
+  <updated>2026-07-06T14:35:05.272Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>
+    <link href="https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers"/>
+    <id>https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers</id>
+    <updated>2026-07-06T14:00:00.000Z</updated>
+    <published>2026-07-06T14:00:00.000Z</published>
+    <summary>kiac runs local Kubernetes on macOS where every node is its own lightweight VM via apple/container: kubeadm or k3s flavors, Cilium on a custom kernel, built-in LoadBalancer, Grafana, Gateway API, and clusters that survive reboots.</summary>
+    <category term="kubernetes"/>
+    <category term="macos"/>
+    <category term="apple-container"/>
+    <category term="cilium"/>
+    <category term="local-development"/>
+  </entry>
   <entry>
     <title>LLM Costs and Observability with agentgateway on Kubernetes (Part 2)</title>
     <link href="https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes"/>

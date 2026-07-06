@@ -94,11 +94,16 @@ export default function Navbar() {
                 onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
               >{link.label}</a>
             ) : (
-              <Link key={link.href} href={link.href}
+              // Plain <a>, not next/link: on blog.kubesimplify.com a <Link>
+              // to an absolute same-origin URL client-navigates to the "/"
+              // ROUTE (the marketing homepage component) instead of doing a
+              // full navigation that lets the edge worker serve the blog
+              // index. Full page loads are the point of these absolute URLs.
+              <a key={link.href} href={link.href}
                 className={cls} style={{ color: 'var(--text-secondary)' }}
                 onMouseEnter={e => e.target.style.color = 'var(--text-primary)'}
                 onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
-              >{link.label}</Link>
+              >{link.label}</a>
             );
           })}
           <ThemeToggle />
@@ -147,10 +152,11 @@ export default function Navbar() {
                     className={cls} style={{ color: 'var(--text-secondary)' }}
                   >{link.label}</a>
                 ) : (
-                  <Link key={link.href} href={link.href}
+                  // Plain <a> for the same reason as the desktop nav above.
+                  <a key={link.href} href={link.href}
                     onClick={() => setMobileOpen(false)}
                     className={cls} style={{ color: 'var(--text-secondary)' }}
-                  >{link.label}</Link>
+                  >{link.label}</a>
                 );
               })}
               <a

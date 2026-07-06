@@ -42,12 +42,17 @@ function parseFm(raw) {
 }
 
 const files = readdirSync(CONTENT).filter((f) => f.endsWith('.md'));
+// Skip drafts: lib/blog.js filters draft posts out of the production build,
+// so routing entries for them would point at pages that don't exist —
+// direct hits then bounce through the 301/rewrite chain into a 404 loop.
 const slugs = files
-  .map((f) => parseFm(readFileSync(join(CONTENT, f), 'utf8')).slug || f.replace(/\.md$/, ''))
+  .map((f) => ({ f, fm: parseFm(readFileSync(join(CONTENT, f), 'utf8')) }))
+  .filter(({ fm }) => fm.draft !== 'true')
+  .map(({ f, fm }) => fm.slug || f.replace(/\.md$/, ''))
   .filter(Boolean)
   .sort();
 
-console.log(`Found ${slugs.length} slugs.`);
+console.log(`Found ${slugs.length} slugs (drafts excluded).`);
 
 // ── vercel.json (kubesimplify.com) ───────────────────────────────────────
 //
@@ -57,9 +62,12 @@ console.log(`Found ${slugs.length} slugs.`);
 // Eliminates duplicate-content concerns; consolidates link equity on the
 // blog subdomain (where every backlink already points).
 const BLOG = 'https://blog.kubesimplify.com';
+const DISCORD = 'https://discord.gg/26Z384WSPB';
 const vercelConfig = {
   $schema: 'https://openapi.vercel.sh/vercel.json',
   redirects: [
+    // Community shortlink
+    { source: '/discord', destination: DISCORD, permanent: false },
     // Blog index → blog subdomain
     { source: '/blog', destination: BLOG + '/', permanent: true },
     { source: '/blogs', destination: BLOG + '/', permanent: true },
@@ -122,6 +130,7 @@ const lines = [
   '/workshops             https://kubesimplify.com/workshops       301!',
   '/partnerships          https://kubesimplify.com/partnerships    301!',
   '/resources             https://kubesimplify.com/resources       301!',
+  '/discord               https://discord.gg/26Z384WSPB            302!',
   '',
   '# ── 3. Serve blog content under clean URLs (URL stays as-is).',
   '#       `200!` forces the rewrite even when a static file would win',
@@ -199,6 +208,11 @@ export default {
     // 3. Main-site routes don't belong on the blog subdomain
     if (KUBESIMPLIFY_ROUTES.has(path)) {
       return Response.redirect('https://kubesimplify.com' + path + search, 301);
+    }
+
+    // Community shortlink (temporary redirect: invite links can rotate)
+    if (path === '/discord') {
+      return Response.redirect('https://discord.gg/26Z384WSPB', 302);
     }
 
     // 4. Legacy index → /
