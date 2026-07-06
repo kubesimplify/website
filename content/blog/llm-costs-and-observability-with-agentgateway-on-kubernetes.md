@@ -7,7 +7,6 @@ slug: llm-costs-and-observability-with-agentgateway-on-kubernetes
 author: shubham-katara
 cover: /img/blog/llm-costs-and-observability-with-agentgateway-on-kubernetes/cover.png
 tags: ["kubernetes", "ai-agents", "observability", "prometheus", "grafana"]
-draft: true
 ---
 
 This is Part 2 of a two-part series. In [Part 1](https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes) you put a Google ADK agent behind **agentgateway** on Kubernetes: the agent holds zero secrets, its model and tool calls flow through one proxy, and a policy blocks any tool you have not allowed. That is the governance half. This part is the question governance cannot answer on its own: what is all of this actually costing you, and can you see when an agent misbehaves?
