@@ -5,11 +5,24 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-06-29T20:14:38.552Z</updated>
+  <updated>2026-07-06T12:14:30.534Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>LLM Costs and Observability with agentgateway on Kubernetes (Part 2)</title>
+    <link href="https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes"/>
+    <id>https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes</id>
+    <updated>2026-06-30T10:00:00.000Z</updated>
+    <published>2026-06-30T10:00:00.000Z</published>
+    <summary>Part 2: scrape agentgateway with Prometheus, build a Grafana dashboard of token cost and per-tool usage, see blocked tool calls, and alert on spend.</summary>
+    <category term="kubernetes"/>
+    <category term="ai-agents"/>
+    <category term="observability"/>
+    <category term="prometheus"/>
+    <category term="grafana"/>
+  </entry>
   <entry>
     <title>Controlling MCP Tools with agentgateway on Kubernetes (Part 1)</title>
     <link href="https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes"/>

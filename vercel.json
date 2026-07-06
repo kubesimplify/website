@@ -697,6 +697,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/llm-costs-and-observability-with-agentgateway-on-kubernetes",
+      "destination": "https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes",
+      "permanent": true
+    },
+    {
       "source": "/blog/managing-contexts-in-kubernetes-with-plugins",
       "destination": "https://blog.kubesimplify.com/managing-contexts-in-kubernetes-with-plugins",
       "permanent": true
@@ -2392,6 +2397,17 @@
     {
       "source": "/linux-system-directories-explained",
       "destination": "https://blog.kubesimplify.com/linux-system-directories-explained",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/llm-costs-and-observability-with-agentgateway-on-kubernetes",
+      "destination": "https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes",
       "permanent": true,
       "has": [
         {
