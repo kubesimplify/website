@@ -4,7 +4,7 @@
 
 ## About
 
-Kubesimplify is a community-driven publication on cloud-native technologies, with 186 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+Kubesimplify is a community-driven publication on cloud-native technologies, with 187 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
 
 Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
 
@@ -34,8 +34,9 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
 - Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
 
-## Recent posts (most recent 30 of 186)
+## Recent posts (most recent 30 of 187)
 
+- [LLM Costs and Observability with agentgateway on Kubernetes (Part 2)](https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes) (2026-06-30). Part 2: scrape agentgateway with Prometheus, build a Grafana dashboard of token cost and per-tool usage, see blocked tool calls, and alert on spend.
 - [Controlling MCP Tools with agentgateway on Kubernetes (Part 1)](https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes) (2026-06-29). Run AI agents behind agentgateway on Kubernetes: route their LLM and MCP tool calls through one proxy, keep secrets out of the agent, and block tools by policy.
 - [Day 4: Quantization Demystified. BF16, FP8, NVFP4, MXFP4, INT4, GGUF, and Why It All Matters](https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters) (2026-06-10). A practical, beginner-friendly guide to BF16, FP8, NVFP4, MXFP4, INT4, and GGUF Q4_K_M on NVIDIA DGX Spark. Bytes per parameter, quality vs size, and which format to pick when.
 - [Day 3: The DGX Spark Unpacked. GB10, Unified Memory, sm_121, and the One Reason This Hardware Exists](https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists) (2026-06-05). A practical teardown of NVIDIA DGX Spark's GB10 Grace Blackwell Superchip, unified memory, sm_121, NVFP4 tensor cores, memory reporting, and decode limits.
@@ -65,11 +66,10 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [ing-switch: Migrate from Ingress NGINX to Traefik or Gateway API in Minutes, Not Days](https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days) (2026-02-25)
 - [Exploiting Metasploitable2 Using msfconsole (Kali Linux Lab)](https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab) (2026-01-17)
 - [Kubernetes v1.35 – What’s New, What’s Changing, and What You Should Know](https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know) (2025-12-19). Learn about the latest Kubenretes release Kubernetes 1.35
-- [Ditch the Overheating Laptop: Supercharge Your Docker Workflow with Docker Offload](https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload) (2025-08-26). Running multiple Docker containers can slow down your laptop and drain your battery. In this blog, we explore Docker Offload — a game-changing feature
 
 ## Topics covered (auto-derived from tags)
 
-- kubernetes (93 articles): https://blog.kubesimplify.com/tag/kubernetes
+- kubernetes (94 articles): https://blog.kubesimplify.com/tag/kubernetes
 - devops (71 articles): https://blog.kubesimplify.com/tag/devops
 - docker (31 articles): https://blog.kubesimplify.com/tag/docker
 - k8s (27 articles): https://blog.kubesimplify.com/tag/k8s

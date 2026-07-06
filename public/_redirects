@@ -142,6 +142,7 @@
 /blog/lets-talk-about-ansible                                                          /lets-talk-about-ansible  301!
 /blog/linux-boot-process-simplified                                                    /linux-boot-process-simplified  301!
 /blog/linux-system-directories-explained                                               /linux-system-directories-explained  301!
+/blog/llm-costs-and-observability-with-agentgateway-on-kubernetes                      /llm-costs-and-observability-with-agentgateway-on-kubernetes  301!
 /blog/managing-contexts-in-kubernetes-with-plugins                                     /managing-contexts-in-kubernetes-with-plugins  301!
 /blog/managing-your-operating-system-with-package-managers                             /managing-your-operating-system-with-package-managers  301!
 /blog/mastering-kubernetes-costs-from-monitoring-to-automation                         /mastering-kubernetes-costs-from-monitoring-to-automation  301!
@@ -349,6 +350,7 @@
 /lets-talk-about-ansible                                                          /blog/lets-talk-about-ansible  200!
 /linux-boot-process-simplified                                                    /blog/linux-boot-process-simplified  200!
 /linux-system-directories-explained                                               /blog/linux-system-directories-explained  200!
+/llm-costs-and-observability-with-agentgateway-on-kubernetes                      /blog/llm-costs-and-observability-with-agentgateway-on-kubernetes  200!
 /managing-contexts-in-kubernetes-with-plugins                                     /blog/managing-contexts-in-kubernetes-with-plugins  200!
 /managing-your-operating-system-with-package-managers                             /blog/managing-your-operating-system-with-package-managers  200!
 /mastering-kubernetes-costs-from-monitoring-to-automation                         /blog/mastering-kubernetes-costs-from-monitoring-to-automation  200!
