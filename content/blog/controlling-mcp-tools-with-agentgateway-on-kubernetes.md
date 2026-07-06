@@ -7,7 +7,6 @@ slug: controlling-mcp-tools-with-agentgateway-on-kubernetes
 author: shubham-katara
 cover: /img/blog/controlling-mcp-tools-with-agentgateway-on-kubernetes/cover.png
 tags: ["kubernetes", "ai-agents", "mcp", "platform-engineering"]
-draft: true
 ---
 
 This is Part 1 of a two-part series. In this part you stand up **agentgateway** on Kubernetes, put a Google ADK agent behind it so the agent holds zero secrets, and enforce tool-level access control that you can watch block a tool in real time. Part 2 adds cost and observability: Prometheus, Grafana, and a live token-spend dashboard.
