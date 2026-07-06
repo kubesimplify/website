@@ -41,9 +41,13 @@ function parseFm(raw) {
   return fm;
 }
 
+// Drafts are hidden on the blog subdomain, so a redirect stub for one
+// would both 404 and leak the unpublished slug on kubesimplify.com.
 const slugs = readdirSync(CONTENT)
   .filter((f) => f.endsWith('.md'))
-  .map((f) => parseFm(readFileSync(join(CONTENT, f), 'utf8')).slug || f.replace(/\.md$/, ''))
+  .map((f) => ({ f, fm: parseFm(readFileSync(join(CONTENT, f), 'utf8')) }))
+  .filter(({ fm }) => fm.draft !== 'true')
+  .map(({ f, fm }) => fm.slug || f.replace(/\.md$/, ''))
   .filter(Boolean);
 
 function redirectHtml(targetUrl) {
@@ -78,6 +82,10 @@ count++;
 
 // 2. /blogs (legacy) → blog subdomain root
 writeRedirect(join(OUT, 'blogs.html'), `${BLOG}/`);
+count++;
+
+// 2b. /discord community shortlink
+writeRedirect(join(OUT, 'discord.html'), 'https://discord.gg/26Z384WSPB');
 count++;
 
 // 3. /blog/<slug>.html + legacy /<slug>.html → blog subdomain
