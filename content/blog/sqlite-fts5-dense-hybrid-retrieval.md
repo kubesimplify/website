@@ -17,11 +17,17 @@ In this article, we'll walk through why dense-only RAG pipelines fail in special
 
 ---
 
-## 🏛️ The Architecture Overview
+## The Architecture Overview
 
 Instead of spinning up a heavy vector database container, we can decouple the storage and indices into a local SQLite database and an in-memory cache. 
 
-Here is the multi-stage hybrid retrieval pipeline:
+Here is the visual representation of our multi-stage hybrid retrieval pipeline:
+
+![SQLite FTS5 + Dense Hybrid Retrieval Pipeline Architecture](/img/blog/sqlite-fts5-dense-hybrid-retrieval/architecture.png)
+
+*Figure: Hybrid retrieval pipeline flow combining keyword matching and vector search.*
+
+And here is the flow representation in text form:
 
 ```
                 Query
@@ -46,7 +52,7 @@ This pipeline runs entirely on a Node.js backend. The LLM remains almost unchang
 
 ---
 
-## 🧠 Why Vector-Only Retrieval Fails on Domain Data
+## Why Vector-Only Retrieval Fails on Domain Data
 
 To understand the need for hybrid search, consider the following query asked to a dense-only legal retrieval prototype:
 
@@ -76,11 +82,11 @@ Because "forgery" and "counterfeit" ended up close in embedding space, the retri
 ### System Bloat & Overlap
 In a standard RAG prototype, developers load embedding coordinates alongside large raw text strings (document metadata and full content) directly into application memory. 
 
-For a corpus of 4,000+ files, this linear JSON search array causes the Node.js process to consume over **320 MB of RAM** at startup. Additionally, redundant sections across different categories clutter the LLM's context window, degrading synthesis accuracy.
+For a corpus of approximately 4,900 legal sections, this linear JSON search array causes the Node.js process to consume over **320 MB of RAM** at startup. Additionally, redundant sections across different categories clutter the LLM's context window, degrading synthesis accuracy.
 
 ---
 
-## ⚙️ Building the Hybrid Solution
+## Building the Hybrid Solution
 
 A robust retrieval system requires two search indexes working in parallel:
 1.  **Sparse Index (Lexical/Keyword):** Captures exact terms, section numbers, and names using traditional TF-IDF or BM25 ranking.
@@ -93,22 +99,23 @@ We define our SQLite tables like this:
 
 ```sql
 -- Structured store for legal acts and metadata
-CREATE TABLE IF NOT EXISTS sections (
+CREATE TABLE IF NOT EXISTS laws (
     id TEXT PRIMARY KEY,
     law_name TEXT NOT NULL,
+    law_code TEXT NOT NULL,
     chapter TEXT,
     title TEXT NOT NULL,
     content TEXT NOT NULL
 );
 
 -- Virtual table for exact BM25 keyword matching
-CREATE VIRTUAL TABLE IF NOT EXISTS sections_fts USING fts5(
+CREATE VIRTUAL TABLE IF NOT EXISTS laws_fts USING fts5(
     id UNINDEXED,
     law_name,
     chapter,
     title,
     content,
-    content='sections',
+    content='laws',
     content_rowid='rowid'
 );
 ```
@@ -116,11 +123,44 @@ CREATE VIRTUAL TABLE IF NOT EXISTS sections_fts USING fts5(
 When a query is received, we run a virtual FTS5 match query, which executes in single-digit milliseconds and guarantees that exact keywords (like *"forgery"*, *"signature"*, or *"Section 65"*) rank highly:
 
 ```sql
-SELECT id, BM25(sections_fts) as rank 
-FROM sections_fts 
-WHERE sections_fts MATCH ? 
+SELECT id, BM25(laws_fts) as rank 
+FROM laws_fts 
+WHERE laws_fts MATCH ? 
 ORDER BY rank 
 LIMIT 50;
+```
+
+#### Synchronizing the FTS5 Virtual Table
+Because `laws_fts` is defined as an external-content table (`content='laws'`), the virtual table does not duplicate the content text itself, saving disk space. However, we must ensure that any insertions, deletions, or updates to the `laws` table are propagated to the virtual table index.
+
+In production, we can keep the index in sync automatically using standard SQLite triggers:
+
+```sql
+-- Trigger to sync insertions
+CREATE TRIGGER IF NOT EXISTS laws_ai AFTER INSERT ON laws BEGIN
+  INSERT INTO laws_fts(rowid, law_name, chapter, title, content) 
+  VALUES (new.rowid, new.law_name, new.chapter, new.title, new.content);
+END;
+
+-- Trigger to sync deletions
+CREATE TRIGGER IF NOT EXISTS laws_ad AFTER DELETE ON laws BEGIN
+  INSERT INTO laws_fts(laws_fts, rowid, law_name, chapter, title, content) 
+  VALUES ('delete', old.rowid, old.law_name, old.chapter, old.title, old.content);
+END;
+
+-- Trigger to sync updates
+CREATE TRIGGER IF NOT EXISTS laws_au AFTER UPDATE ON laws BEGIN
+  INSERT INTO laws_fts(laws_fts, rowid, law_name, chapter, title, content) 
+  VALUES ('delete', old.rowid, old.law_name, old.chapter, old.title, old.content);
+  INSERT INTO laws_fts(rowid, law_name, chapter, title, content) 
+  VALUES (new.rowid, new.law_name, new.chapter, new.title, new.content);
+END;
+```
+
+If you prefer to load data in batches (for instance, via a nightly migration process), you can disable triggers to speed up writes and manually rebuild the search index in a single command afterwards:
+
+```sql
+INSERT INTO laws_fts(laws_fts) VALUES('rebuild');
 ```
 
 ### 2. Lightweight In-Memory Vector Cache
@@ -141,9 +181,11 @@ We now have two lists of rankings: the top 50 matches from FTS5 (sparse) and the
 
 BM25 and cosine similarity produce scores on completely different scales. Rather than trying to normalize incompatible scores, Reciprocal Rank Fusion (RRF) ignores the score values entirely and combines only ranking positions. This makes it robust across heterogeneous retrieval systems by summing the reciprocal rank of each item across both runs:
 
-$$RRF\_Score(d) = \sum_{m \in M} \frac{1}{k + \text{rank}_m(d)}$$
+```text
+RRF_Score(d) = Sum_{m in M} (1 / (k + rank_m(d)))
+```
 
-Where $k$ is a constant (typically 60) that dampens the influence of high-ranking outliers. Here is the JavaScript implementation:
+Where `d` represents a document, `M` is the set of retrieval channels (FTS5 and dense vector search), `rank_m(d)` is the 1-based rank of the document in channel `m`, and `k` is a constant (typically `60`) that dampens the influence of high-ranking outliers. Here is the JavaScript implementation:
 
 ```javascript
 const rrfScores = new Map();
@@ -184,7 +226,7 @@ if (isDocumentForgeryRelated) {
 
 ---
 
-## 📊 Performance & System Latency
+## Performance and System Latency
 
 To evaluate the redesign, I assembled a benchmark of 100 manually verified legal queries spanning criminal law, cybercrime, family law, consumer protection, and procedural law.
 
@@ -198,6 +240,15 @@ To evaluate the redesign, I assembled a benchmark of 100 manually verified legal
 
 *Latency is based on 100 benchmark queries. Memory is process-level heap size at startup. Accuracy is evaluated on top-5 target matches using a manually verified benchmark dataset of 100 queries.*
 
+### Benchmark Methodology and System Context
+To ensure these performance and quality metrics are fully reproducible, here is the technical context under which they were measured:
+*   **Corpus Size:** Approximately 4,900 legal sections spanning various Indian legal acts (e.g., Bharatiya Nyaya Sanhita (BNS), Bharatiya Nagarik Suraksha Sanhita (BNSS), Information Technology Act, Evidence Act, and personal laws).
+*   **Hardware Profile:** Benchmark executed locally on an AMD Ryzen 5 5600H CPU with 16 GB RAM.
+*   **Software Stack:** Node.js v22.x and SQLite v3.x (accessed via the synchronous `better-sqlite3` driver).
+*   **Embedding Model:** Xenova's `all-MiniLM-L6-v2` ONNX pipeline generating 384-dimensional dense vectors.
+*   **Query Construction:** The benchmark dataset consists of 100 distinct queries created to reflect realistic user legal inquiries across criminal, family, cyber, and procedural law.
+*   **Relevance Judgment:** Retrieval is marked successful if the target statutory code (manually pre-mapped as the correct provision by legal domain review) is returned within the top 5 slots of the fused ranking.
+
 None of these improvements required changing the language model. The gains came almost entirely from retrieval engineering. For the signature forgery query, the top retrieved references aligned with the expected legal provisions:
 1.  **BNS 340:** Forged document and using it as genuine
 2.  **BNS 336:** Forgery definition and penalty
@@ -207,41 +258,42 @@ None of these improvements required changing the language model. The gains came 
 
 ---
 
-## 🖥️ Screen Demonstrations
+## System Screen Demonstrations
 
-### 1️⃣ User Chat Interface
+### User Chat Interface
 Clean, legal explanation interface for end users:
 ![LawDecoder Streamlit user chat landing page showing response layout](/img/blog/sqlite-fts5-dense-hybrid-retrieval/landing_page.png)
 
-### 2️⃣ Structured Offence & Citation Details
+### Structured Offence and Citation Details
 Deduplicated citations with developer metrics visible in Developer Mode:
 ![LawDecoder citation view in developer mode displaying RRF ranks and selection reasons](/img/blog/sqlite-fts5-dense-hybrid-retrieval/citations_view.png)
 
-### 3️⃣ System Evaluation Dashboard
+### System Evaluation Dashboard
 Performance comparisons and technical architecture story:
 ![LawDecoder developer dashboard showing performance latency and accuracy benchmarks comparison table](/img/blog/sqlite-fts5-dense-hybrid-retrieval/developer_notes_tab.png)
 
 ---
 
-## ⚖️ Architectural Tradeoffs: When to use SQLite
+## Operational Fit and Architectural Tradeoffs
 
 ### When this architecture makes sense
-This approach works well when:
-*   **Corpus <100k–500k documents:** Linear typed scans and local FTS5 are highly optimal in single-digit milliseconds.
-*   **Local-first applications:** Fits desktop applications, edge agents, and serverless backends due to standalone execution.
-*   **Low operational complexity:** Zero databases, servers, or external services to manage.
-*   **Deterministic keyword matching:** Absolute accuracy for specific statutory codes, IDs, or identifiers.
+This approach is highly suitable under the following parameters:
+*   **Corpus <100k–500k documents:** Linear typed array scans and SQLite FTS5 index scans are highly efficient, completing in single-digit milliseconds without needing complex parallel indexing trees.
+*   **Local-First / Edge Applications:** The entire search database resides inside a single file. This is highly suitable for desktop apps, edge nodes (e.g. Fly.io, Cloudflare Workers, Vercel Serverless with persistent mounts), or local CLI utilities because it eliminates network roundtrip times.
+*   **Kubernetes Workloads with Ephemeral/Local Storage:** Fits beautifully inside a Kubernetes pod using local volumes or Persistent Volume Claims (PVC). By keeping the database embedded in the application container, you avoid provisioning, configuring, and monitoring secondary database container pods (like Qdrant or Milvus), saving hundreds of megabytes of RAM per deployment.
+*   **Serverless and Low RAM Constraints:** Perfect for serverless compute models (e.g. AWS Lambda, Google Cloud Run) where memory is restricted. An optimized 48 MB footprint keeps containers small, minimizes execution costs, and avoids out-of-memory errors during concurrent requests.
+*   **Low Operational Complexity:** No servers to provision, no connection pools to manage, and zero maintenance overhead.
 
-### When to use dedicated Vector Databases (Elasticsearch/Qdrant/Milvus)
-Consider distributed systems when:
-*   **Millions of documents:** Scans require true parallel HNSW vector indexing.
-*   **Distributed indexing:** Independent compute scaling is needed between vector calculation and storage.
-*   **High write throughput:** Frequent real-time writes require background index segmentation.
-*   **Horizontal scaling:** Needs replication, high availability clusters, or cloud management.
+### When to graduate to dedicated Vector Databases (Elasticsearch/Qdrant/Milvus)
+Consider migrating to a distributed search architecture when:
+*   **Millions of documents:** The corpus exceeds memory boundaries, and you need highly parallelized vector indices like HNSW.
+*   **Decoupled Scaling:** The index compute needs to scale independently from storage.
+*   **High Write Throughput:** The app requires concurrent, real-time background indexing and streaming text updates.
+*   **Horizontal Availability:** The database must support replicas, high availability clustering, or managed cloud services.
 
 ---
 
-## 💡 Key Takeaways
+## Key Takeaways
 
 Modern RAG systems are increasingly becoming search systems with an LLM attached. If retrieval returns the wrong documents, no prompt or model can recover the missing information. Investing in indexing, ranking, and retrieval architecture often yields larger gains than changing the model itself.
 
