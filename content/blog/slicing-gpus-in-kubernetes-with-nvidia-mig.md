@@ -59,7 +59,7 @@ To follow along, you'll need root access to a GPU node and admin access to a Kub
 - **GPUs:** 8x NVIDIA RTX PRO 6000 Blackwell Server Edition (96GB VRAM, 188 Streaming Multiprocessors / SMs per card).
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi -L
+root@gpu-rtxpro6000-8:~# nvidia-smi -L
 GPU 0: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-8b89b58e-b427-108d-ac50-06138d78fe78)
 GPU 1: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-03a041b7-8abf-360a-d1a2-dfd70188cd5f)
 GPU 2: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-ba09367f-dd50-32ca-e988-7ff66bece885)
@@ -179,12 +179,12 @@ On enterprise systems, two main background services hold active handles on GPU d
 To safely apply static partitioning, temporarily disable the blocker services, slice, then bring them back:
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# sudo systemctl stop nvidia-persistenced
+root@gpu-rtxpro6000-8:~# sudo systemctl stop nvidia-persistenced
 # Execute reset and slicing
-root@utho-gpu-rtxpro6000-8-62383:~# sudo nvidia-smi -i 0 -mig 1
-root@utho-gpu-rtxpro6000-8-62383:~# sudo nvidia-smi mig -i 0 -cgi 1g.24gb,1g.24gb,1g.24gb,1g.24gb -C
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi -i 0 -mig 1
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -i 0 -cgi 1g.24gb,1g.24gb,1g.24gb,1g.24gb -C
 # Re-enable the persistence daemon
-root@utho-gpu-rtxpro6000-8-62383:~# sudo systemctl start nvidia-persistenced
+root@gpu-rtxpro6000-8:~# sudo systemctl start nvidia-persistenced
 ```
 
 ### How to Verify the Slicing
@@ -192,7 +192,7 @@ root@utho-gpu-rtxpro6000-8-62383:~# sudo systemctl start nvidia-persistenced
 To verify the slicing worked, use the `nvidia-smi -L` command:
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# sudo nvidia-smi -L
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi -L
 
 GPU 0: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-8b89b58e-b427-108d-ac50-06138d78fe78)
   MIG 1g.24gb     Device  0: (UUID: MIG-445da789-865d-5fd1-b2b6-32a48bf66c39)
@@ -325,7 +325,7 @@ If the `nvidia-mig-manager` pod is active and detects no configuration label on 
 **The fix:** apply the appropriate label to your node so it aligns with the operator's config:
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl label node <node-name> nvidia.com/mig.config=all-1g.24gb --overwrite
+root@gpu-rtxpro6000-8:~# kubectl label node <node-name> nvidia.com/mig.config=all-1g.24gb --overwrite
 ```
 
 Once labeled, the MIG Manager automatically orchestrates the dynamic partitioning lifecycle through a structured 6-step loop:
@@ -347,12 +347,12 @@ If you manually delete or modify MIG profiles directly on the host using the `nv
 
 ```sh
 # Option 1: Restart the MIG Manager daemonset pod
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl rollout restart daemonset -n gpu-operator nvidia-mig-manager
+root@gpu-rtxpro6000-8:~# kubectl rollout restart daemonset -n gpu-operator nvidia-mig-manager
 
 # Option 2: Toggle the node label to trigger the watch loop
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl label node <node-name> nvidia.com/mig.config=all-disabled --overwrite
+root@gpu-rtxpro6000-8:~# kubectl label node <node-name> nvidia.com/mig.config=all-disabled --overwrite
 # Wait 10 seconds, then re-apply:
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl label node <node-name> nvidia.com/mig.config=all-1g.24gb --overwrite
+root@gpu-rtxpro6000-8:~# kubectl label node <node-name> nvidia.com/mig.config=all-1g.24gb --overwrite
 ```
 
 ### Pitfall D: Forcing Kubelet Discovery for Manual MIG Configurations
@@ -366,7 +366,7 @@ Maybe you want the opposite arrangement: manage MIG slices manually on the host,
 1. **Disable the MIG Manager in Helm.** Deploy or upgrade the GPU Operator with the MIG Manager disabled to prevent the operator from wiping your manual settings:
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# helm upgrade --install gpu-operator nvidia/gpu-operator \
+root@gpu-rtxpro6000-8:~# helm upgrade --install gpu-operator nvidia/gpu-operator \
   -n gpu-operator \
   --set migManager.enabled=false \
   [other-existing-overrides...]
@@ -377,7 +377,7 @@ root@utho-gpu-rtxpro6000-8-62383:~# helm upgrade --install gpu-operator nvidia/g
 3. **Force Kubelet discovery.** Manually notify the Kubelet of the updated resources by restarting the device plugin daemonset:
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl rollout restart daemonset -n gpu-operator nvidia-device-plugin-daemonset
+root@gpu-rtxpro6000-8:~# kubectl rollout restart daemonset -n gpu-operator nvidia-device-plugin-daemonset
 ```
 
 ## How to Monitor GPU Slices with Prometheus and Grafana
@@ -389,10 +389,10 @@ To achieve this, deploy the Prometheus community stack and hook it into the low-
 **Step 1: Install the kube-prometheus-stack.** Use Helm to deploy Prometheus and Grafana into a dedicated `monitoring` namespace:
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-root@utho-gpu-rtxpro6000-8-62383:~# helm repo update
+root@gpu-rtxpro6000-8:~# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+root@gpu-rtxpro6000-8:~# helm repo update
 
-root@utho-gpu-rtxpro6000-8-62383:~# helm install prometheus prometheus-community/kube-prometheus-stack \
+root@gpu-rtxpro6000-8:~# helm install prometheus prometheus-community/kube-prometheus-stack \
   -n monitoring --create-namespace
 ```
 
@@ -429,7 +429,7 @@ spec:
 Apply this file to configure the scraping loop:
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl apply -f nvidia-servicemonitor.yaml
+root@gpu-rtxpro6000-8:~# kubectl apply -f nvidia-servicemonitor.yaml
 ```
 
 **Step 3: Configure the Grafana dashboard.** Rather than building charts manually, NVIDIA maintains an official dashboard designed for DCGM exporter metrics:
@@ -516,7 +516,7 @@ spec:
 Once the pod is running, exec into the container and run `nvidia-smi`. You will observe exactly **one GPU** with **24 GB VRAM**. The container is isolated from the other physical GPUs and slices, verifying secure and efficient hardware-level multi-tenancy:
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl exec -it pytorch-mig-demo-c9f7c8b49-sl5qh -- bash
+root@gpu-rtxpro6000-8:~# kubectl exec -it pytorch-mig-demo-c9f7c8b49-sl5qh -- bash
 root@pytorch-mig-demo-c9f7c8b49-sl5qh:/workspace# nvidia-smi 
 Tue Jul 14 19:44:18 2026       
 +-----------------------------------------------------------------------------------------+
@@ -558,7 +558,7 @@ While the application is running in the pod using the slice, the same activity i
 On the host, we can see the same stats as inside the container. (Skipping some MIG slices and GPUs to keep the output short.)
 
 ```sh
-root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi 
+root@gpu-rtxpro6000-8:~# nvidia-smi 
 
 Tue Jul 14 19:52:39 2026       
 +-----------------------------------------------------------------------------------------+
