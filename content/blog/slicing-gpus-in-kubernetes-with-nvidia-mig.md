@@ -441,6 +441,8 @@ root@gpu-rtxpro6000-8:~# kubectl apply -f nvidia-servicemonitor.yaml
 
 This loads an interactive visualization panel showing real-time health and performance across all 32 partitions.
 
+![GPU Observability Dashboard](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/gpu-observability.jpg)
+
 ## How to Run Workloads on Blackwell (sm_120)
 
 There's one final trap waiting at the workload layer.
