@@ -157,6 +157,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/bonsai-27b-rtx-pro-6000-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark",
+      "permanent": true
+    },
+    {
       "source": "/blog/breaking-down-docker",
       "destination": "https://blog.kubesimplify.com/breaking-down-docker",
       "permanent": true
@@ -1208,6 +1213,17 @@
     {
       "source": "/best-devops-tools-2025",
       "destination": "https://blog.kubesimplify.com/best-devops-tools-2025",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/bonsai-27b-rtx-pro-6000-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark",
       "permanent": true,
       "has": [
         {
