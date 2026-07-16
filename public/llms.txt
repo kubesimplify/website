@@ -4,7 +4,7 @@
 
 ## About
 
-Kubesimplify is a community-driven publication on cloud-native technologies, with 188 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+Kubesimplify is a community-driven publication on cloud-native technologies, with 189 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
 
 Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
 
@@ -34,8 +34,9 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
 - Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
 
-## Recent posts (most recent 30 of 188)
+## Recent posts (most recent 30 of 189)
 
+- [Bonsai 27B on RTX PRO 6000 vs DGX Spark: what actually works](https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark) (2026-07-16). Real Bonsai 27B benchmarks on an RTX PRO 6000 and a DGX Spark, including the supported llama.cpp setup, ternary vs 1-bit results, and speculative decoding.
 - [Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM](https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers) (2026-07-06). kiac runs local Kubernetes on macOS where every node is its own lightweight VM via apple/container: kubeadm or k3s flavors, Cilium on a custom kernel, built-in LoadBalancer, Grafana, Gateway API, and clusters that survive reboots.
 - [LLM Costs and Observability with agentgateway on Kubernetes (Part 2)](https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes) (2026-06-30). Part 2: scrape agentgateway with Prometheus, build a Grafana dashboard of token cost and per-tool usage, see blocked tool calls, and alert on spend.
 - [Controlling MCP Tools with agentgateway on Kubernetes (Part 1)](https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes) (2026-06-29). Run AI agents behind agentgateway on Kubernetes: route their LLM and MCP tool calls through one proxy, keep secrets out of the agent, and block tools by policy.
@@ -65,7 +66,6 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [clawspark: Your Private OpenClaw AI Assistant That Never Phones Home](https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home) (2026-03-15). Clawspark provides a way to Install openclaw on your device in a secure way with a single command. 
 - [Here's What I Learned About Nemotron 3 Super -I Ran a 120B Parameter Model on Nvidia DGX Spark](https://blog.kubesimplify.com/nemotron3-on-dgx-spark) (2026-03-14). Understand everything about Nvidia DGX spark along with hands on and benchmarks. 
 - [ing-switch: Migrate from Ingress NGINX to Traefik or Gateway API in Minutes, Not Days](https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days) (2026-02-25)
-- [Exploiting Metasploitable2 Using msfconsole (Kali Linux Lab)](https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab) (2026-01-17)
 
 ## Topics covered (auto-derived from tags)
 
@@ -79,7 +79,7 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - aws (12 articles): https://blog.kubesimplify.com/tag/aws
 - cloud-native (11 articles): https://blog.kubesimplify.com/tag/cloud-native
 - security (11 articles): https://blog.kubesimplify.com/tag/security
-- llm (9 articles): https://blog.kubesimplify.com/tag/llm
+- llm (10 articles): https://blog.kubesimplify.com/tag/llm
 - go (9 articles): https://blog.kubesimplify.com/tag/go
 - git (9 articles): https://blog.kubesimplify.com/tag/git
 - linux-for-beginners (9 articles): https://blog.kubesimplify.com/tag/linux-for-beginners
@@ -89,15 +89,15 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - docker-images (7 articles): https://blog.kubesimplify.com/tag/docker-images
 - kubesimplify (7 articles): https://blog.kubesimplify.com/tag/kubesimplify
 - linux-basics (7 articles): https://blog.kubesimplify.com/tag/linux-basics
+- ai (6 articles): https://blog.kubesimplify.com/tag/ai
 - dgxspark (6 articles): https://blog.kubesimplify.com/tag/dgxspark
 - local-ai (6 articles): https://blog.kubesimplify.com/tag/local-ai
 - opensource (6 articles): https://blog.kubesimplify.com/tag/opensource
 - docker-desktop (6 articles): https://blog.kubesimplify.com/tag/docker-desktop
-- ai (5 articles): https://blog.kubesimplify.com/tag/ai
 
 ## Top contributors
 
-- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (33 posts)
+- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (34 posts)
 - [Saloni Narang](https://blog.kubesimplify.com/author/saloni-narang) (24 posts)
 - [Kunal Verma](https://blog.kubesimplify.com/author/kunal-verma) (12 posts)
 - [Dipankar Das](https://blog.kubesimplify.com/author/dipankar-das) (9 posts)

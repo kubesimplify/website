@@ -5,11 +5,24 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-07-06T14:35:05.272Z</updated>
+  <updated>2026-07-16T11:57:41.141Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>Bonsai 27B on RTX PRO 6000 vs DGX Spark: what actually works</title>
+    <link href="https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark"/>
+    <id>https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark</id>
+    <updated>2026-07-16T00:00:00.000Z</updated>
+    <published>2026-07-16T00:00:00.000Z</published>
+    <summary>Real Bonsai 27B benchmarks on an RTX PRO 6000 and a DGX Spark, including the supported llama.cpp setup, ternary vs 1-bit results, and speculative decoding.</summary>
+    <category term="ai"/>
+    <category term="gpu"/>
+    <category term="llm"/>
+    <category term="inference"/>
+    <category term="benchmarks"/>
+  </entry>
   <entry>
     <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>
     <link href="https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers"/>

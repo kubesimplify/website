@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="760" height="430" fill="#fcfcfb"/>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#898781"/>
+    </marker>
+  </defs>
+
+  <text x="24" y="34" font-size="17" font-weight="600" fill="#0b0b0b">Which file + which llama.cpp build? (NVIDIA GPUs)</text>
+
+  <!-- start node -->
+  <rect x="280" y="56" width="200" height="44" rx="8" fill="none" stroke="#0b0b0b" stroke-width="1.5"/>
+  <text x="380" y="83" font-size="13.5" font-weight="600" fill="#0b0b0b" text-anchor="middle">What do you want?</text>
+
+  <!-- branch arrows -->
+  <line x1="330" y1="100" x2="190" y2="140" stroke="#898781" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="430" y1="100" x2="570" y2="140" stroke="#898781" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- left: quality -->
+  <text x="190" y="132" font-size="12" fill="#52514e" text-anchor="middle">best quality</text>
+  <rect x="50" y="144" width="280" height="112" rx="8" fill="none" stroke="#2a78d6" stroke-width="2"/>
+  <text x="66" y="170" font-size="13.5" font-weight="600" fill="#0b0b0b">Ternary Bonsai (1.71 bits)</text>
+  <text x="66" y="192" font-size="12.5" fill="#0b0b0b">file: Ternary-Bonsai-27B-Q2_0.gguf</text>
+  <text x="66" y="212" font-size="12.5" fill="#0b0b0b">build: PrismML fork, branch “prism”</text>
+  <text x="66" y="232" font-size="12.5" fill="#52514e">6.7 GB · 120.7 tok/s on RTX PRO 6000,</text>
+  <text x="66" y="248" font-size="12.5" fill="#52514e">28.5 tok/s on DGX Spark</text>
+
+  <!-- right: speed -->
+  <text x="570" y="132" font-size="12" fill="#52514e" text-anchor="middle">max speed, smallest file</text>
+  <rect x="430" y="144" width="280" height="112" rx="8" fill="none" stroke="#2a78d6" stroke-width="2"/>
+  <text x="446" y="170" font-size="13.5" font-weight="600" fill="#0b0b0b">1-bit Bonsai (1.125 bits)</text>
+  <text x="446" y="192" font-size="12.5" fill="#0b0b0b">file: Bonsai-27B-Q1_0.gguf</text>
+  <text x="446" y="212" font-size="12.5" fill="#0b0b0b">build: official llama.cpp (mainline)</text>
+  <text x="446" y="232" font-size="12.5" fill="#52514e">3.8 GB · 133.7 tok/s on RTX PRO 6000,</text>
+  <text x="446" y="248" font-size="12.5" fill="#52514e">42.8 tok/s on DGX Spark</text>
+
+  <!-- drafter add-on under left box -->
+  <line x1="190" y1="256" x2="190" y2="288" stroke="#898781" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="50" y="292" width="280" height="66" rx="8" fill="none" stroke="#c3c2b7" stroke-width="1.5"/>
+  <text x="66" y="314" font-size="12.5" font-weight="600" fill="#0b0b0b">Add the dspark drafter?</text>
+  <text x="66" y="333" font-size="12.5" fill="#006300">Big GPU: yes, +33% (120.7 → 156.4 tok/s)</text>
+  <text x="66" y="350" font-size="12.5" fill="#d03b3b">DGX Spark: no, −37% (28.5 → 17.6 tok/s)</text>
+
+  <!-- avoid box -->
+  <rect x="430" y="292" width="280" height="112" rx="8" fill="none" stroke="#d03b3b" stroke-width="1.5"/>
+  <text x="446" y="314" font-size="12.5" font-weight="600" fill="#d03b3b">✗ Avoid on NVIDIA GPUs</text>
+  <text x="446" y="334" font-size="12" fill="#0b0b0b">Q2_g64 on mainline: runs 40–400x slow</text>
+  <text x="446" y="352" font-size="12" fill="#0b0b0b">PQ2_0.gguf: loads on no CUDA build</text>
+  <text x="446" y="370" font-size="12" fill="#0b0b0b">“prism-launch” branch: decoy, won’t load Q2_0</text>
+  <text x="446" y="388" font-size="12" fill="#0b0b0b">Ollama / LM Studio / vLLM: no ternary support yet</text>
+</svg>
