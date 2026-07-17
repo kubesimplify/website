@@ -9,7 +9,7 @@ tags: ["nvidia", "dgxspark", "local-ai", "llm", "ai-hardware"]
 cover: /img/blog/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists/cover.webp
 ---
 
-*Day 3 of "7 Days of DGX Spark". A field guide to running serious LLMs on a $4,699 box on your desk.*
+*Day 3 of "7 Days of Local LLM". A field guide to running serious LLMs on a $4,699 box on your desk.*
 
 ---
 

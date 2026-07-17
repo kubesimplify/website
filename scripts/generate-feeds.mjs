@@ -192,7 +192,7 @@ const llmsLines = [
   '## Multi-part series',
   '',
   `- 7 Days of Docker: ${SITE_URL}/series/7-days-of-docker (7-part deep dive by Saloni Narang)`,
-  `- 7 Days of DGX Spark: ${SITE_URL}/series/7-days-of-dgx-spark (upcoming, by Saiyam Pathak)`,
+  `- 7 Days of Local LLM: ${SITE_URL}/series/7-days-of-dgx-spark (in progress, by Saiyam Pathak)`,
   '',
   '## Curated topic hubs (canonical entry points)',
   '',

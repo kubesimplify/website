@@ -282,6 +282,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/day-5-local-llm-inference-engines-wrappers-and-what-to-pick",
+      "destination": "https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick",
+      "permanent": true
+    },
+    {
       "source": "/blog/day-6-run-an-llm-on-your-laptop-with-docker",
       "destination": "https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker",
       "permanent": true
@@ -1488,6 +1493,17 @@
     {
       "source": "/day-5-docker-compose-how-docker-actually-gets-used",
       "destination": "https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-5-local-llm-inference-engines-wrappers-and-what-to-pick",
+      "destination": "https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick",
       "permanent": true,
       "has": [
         {

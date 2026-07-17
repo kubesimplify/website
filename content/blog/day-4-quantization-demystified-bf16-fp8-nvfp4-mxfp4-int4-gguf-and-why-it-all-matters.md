@@ -9,7 +9,7 @@ tags: ["nvidia", "dgxspark", "local-ai", "llm", "quantization"]
 cover: /img/blog/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters/cover.webp
 ---
 
-*Day 4 of "7 Days of DGX Spark". A field guide to running serious LLMs on a $4,699 box on your desk.*
+*Day 4 of "7 Days of Local LLM". A field guide to running serious LLMs on a $4,699 box on your desk.*
 
 ---
 

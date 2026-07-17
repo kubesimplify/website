@@ -9,7 +9,7 @@ tags: ["nvidia", "dgxspark", "local-ai", "llm", "ai-inference"]
 cover: /img/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step/cover-day-2-llm-request-v2.png
 ---
 
-*Day 2 of "7 Days of DGX Spark". A field guide to running serious LLMs on a $4,699 box on your desk.*
+*Day 2 of "7 Days of Local LLM". A field guide to running serious LLMs on a $4,699 box on your desk.*
 
 ---
 

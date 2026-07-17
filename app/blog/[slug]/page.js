@@ -13,7 +13,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import AuthorSocials from '@/components/AuthorSocials';
 import Comments from '@/components/Comments';
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
