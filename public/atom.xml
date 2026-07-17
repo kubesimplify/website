@@ -5,7 +5,7 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-07-15T11:58:38.779Z</updated>
+  <updated>2026-07-17T10:42:54.182Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
@@ -16,7 +16,7 @@
     <id>https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig</id>
     <updated>2026-07-15T10:00:00.000Z</updated>
     <published>2026-07-15T10:00:00.000Z</published>
-    <summary>Partition NVIDIA Blackwell GPUs into hardware-isolated MIG slices on Kubernetes: host-level slicing, GPU Operator automation, production pitfalls, and DCGM monitoring.</summary>
+    <summary>GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring.</summary>
     <category term="kubernetes"/>
     <category term="gpu"/>
     <category term="nvidia"/>

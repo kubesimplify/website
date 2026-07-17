@@ -1,62 +1,80 @@
 ---
 title: "Slicing GPUs in Kubernetes with NVIDIA Multi-Instance GPU (MIG)"
-seoTitle: "NVIDIA MIG on Kubernetes: Slice 8 Blackwell GPUs into 32 Isolated Instances"
-seoDescription: "Partition NVIDIA Blackwell GPUs into hardware-isolated MIG slices on Kubernetes: host-level slicing, GPU Operator automation, production pitfalls, and DCGM monitoring."
+seoTitle: "NVIDIA MIG on Kubernetes: GPU Sharing Done Right, From 8 GPUs to 32 Isolated Slices"
+seoDescription: "GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring."
 datePublished: 2026-07-15T10:00:00.000Z
 slug: slicing-gpus-in-kubernetes-with-nvidia-mig
 author: shubham-katara
-cover: /img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/cover.jpg
+cover: /img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/cover.png
 tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
 ---
 
-In this post you slice 8 monolithic NVIDIA Blackwell GPUs into 32 fully isolated, independent 24GB GPU instances inside a Kubernetes cluster using **Multi-Instance GPU (MIG)**, so multiple tenants can share expensive silicon without stepping on each other. By the end, a PyTorch workload will be running on a single hardware-isolated slice, and you'll be able to prove the isolation from both inside and outside the container.
+GPUs are the most expensive thing in your cluster and the worst shared. A CPU can be divided into millicores. Memory can be requested byte by byte. But ask Kubernetes for a GPU and you get the whole card, all 96GB of it, even if your model needs 20GB.
+
+This post is the story of fixing that. We take a node with **8x NVIDIA RTX PRO 6000 Blackwell GPUs** (768GB of VRAM in total) and slice it into **32 fully isolated 24GB GPU instances** using **Multi-Instance GPU (MIG)**. First by hand with `nvidia-smi`, one card at a time, so you see every command including how to undo everything. Then across all 8 cards at once. Then declaratively with the NVIDIA GPU Operator so it survives beyond a single SSH session.
 
 Who this is for:
 
 - Platform engineers and SREs who run GPU nodes in Kubernetes and are tired of watching 96GB cards sit mostly idle.
-- Teams that need hard multi-tenancy on shared AI infrastructure while keeping finance happy about utilization and ROI.
+- Teams that need hardware-level tenant isolation on shared AI infrastructure while keeping finance happy about utilization.
 
-What you'll build:
-
-- 32 hardware-isolated `1g.24gb` MIG slices carved out of 8 Blackwell cards, first by hand with `nvidia-smi`, then declaratively with the NVIDIA GPU Operator.
-- A mental model for MIG's GPU Instances and Compute Instances that actually sticks.
-- Fixes for four production pitfalls that will bite you the moment you mix manual slicing with the Operator.
-- A Prometheus + Grafana telemetry stack scraping per-slice DCGM metrics.
-- A verified PyTorch workload pinned to a single Blackwell (`sm_120`) MIG slice.
+By the end, a PyTorch workload will be running on a single hardware-isolated slice, and you will be able to prove the isolation from both inside and outside the container.
 
 While this setup was tested on a single node, nothing here is single-node specific. It works the same regardless of how many GPU nodes you have.
 
-## Why Whole-GPU Scheduling Wastes Your Money
+## The Problem: Kubernetes Hands Out GPUs Whole
 
-Here's a scenario that plays out on GPU clusters everywhere.
+Here is a scenario that plays out on GPU clusters everywhere.
 
-Your team provisions a node equipped with **8x NVIDIA RTX PRO 6000 Blackwell GPUs**, a massive 768GB VRAM compute pool. You deploy the standard Kubernetes GPU Operator, which registers the node resources as `nvidia.com/gpu: 8`.
+Your team provisions a node equipped with 8x NVIDIA RTX PRO 6000 Blackwell GPUs. You deploy the standard Kubernetes GPU Operator, which registers the node resources as `nvidia.com/gpu: 8`.
 
-Then a developer deploys a lightweight LLM inference pod or a PyTorch training job. Kubernetes assigns them a whole GPU. The workload claims the entire 96GB Blackwell card but only uses 20GB.
+Then a developer deploys a lightweight LLM inference pod or a small PyTorch training job. Kubernetes assigns them a whole GPU. The workload claims the entire 96GB Blackwell card but only uses 20GB.
 
 The remaining 76GB sits idle.
 
 Because standard GPUs are scheduled as indivisible resources, eight small workloads lock down eight entire cards. Your platform is left with zero schedulable GPU capacity, artificially high queue latency, and a cluster operating at a fraction of its financial and compute potential.
 
-Now you're stuck answering an uncomfortable question: how do you justify low cluster utilization to finance while your development teams are complaining about lack of GPU availability?
+Now you are stuck answering an uncomfortable question: how do you justify low cluster utilization to finance while your development teams are complaining about lack of GPU availability?
 
-As a platform engineer, your mandate is to design and maintain cost-efficient, high-performance developer platforms. When you're managing expensive AI infrastructure, your core metrics are resource utilization, return on investment (ROI), and strict multi-tenancy SLAs.
+The fix is GPU sharing. But "sharing a GPU" means very different things depending on how you do it, and picking the wrong mechanism is how you end up with one tenant's memory leak crashing another tenant's training job.
 
-The fix is a robust partitioning strategy. That's what the rest of this guide walks through, step by step.
+## The Three Ways to Share a GPU
+
+NVIDIA gives you three mechanisms to put more than one workload on a card. They differ in one crucial dimension: how much one workload can hurt another.
+
+![The GPU sharing spectrum: time-slicing, MPS, and MIG compared](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/gpu-sharing-spectrum.png)
+
+**1. Time-slicing.** The GPU rapidly context-switches between processes, the same way a single CPU core runs many threads. The device plugin can advertise one GPU as, say, 4 "replicas", and Kubernetes happily schedules 4 pods onto it. But there is no isolation at all: every process sees the full VRAM, nothing stops one pod from allocating all of it, and a single out-of-memory error can take down every workload on the card. Context switching also wastes cycles. Time-slicing is fine for dev clusters and bursty, trusted workloads. It is not a tenant isolation story.
+
+**2. MPS (Multi-Process Service).** MPS lets multiple processes submit work to the GPU concurrently instead of taking turns, which improves utilization for many small kernels. You can cap each client's compute and memory. But all clients share a single GPU context: memory limits are opt-in rather than enforced by hardware, and a crashing client can still corrupt the shared context and bring down its neighbors. Better throughput than time-slicing, still soft isolation.
+
+**3. MIG (Multi-Instance GPU).** MIG partitions the physical GPU at the silicon level. Each instance gets its own dedicated VRAM slice with its own memory controllers, its own Streaming Multiprocessors, and its own fault domain. A crash in one instance cannot touch the others. An OOM in one instance is contained to that instance. To the workload, the slice looks like a smaller dedicated GPU with a stable, predictable performance profile.
+
+| | Time-slicing | MPS | MIG |
+| --- | --- | --- | --- |
+| Isolation | None | Software (shared context) | Hardware (silicon level) |
+| Memory protection | None | Opt-in limits | Enforced by hardware |
+| Fault blast radius | Whole card | Whole card | One slice |
+| Performance | Variable, context-switch overhead | Good for small kernels | Predictable, dedicated units |
+| Best for | Dev/test, trusted bursty jobs | Many small kernels from one team | Shared platforms with real tenant boundaries |
+
+If you are building a platform where different teams, customers, or environments share the same silicon, MIG is the only option of the three that gives you a hardware guarantee instead of a promise. That is the mechanism this post is about.
+
+One caveat before you commit: MIG needs supported hardware (A100/A30 Ampere onwards, Hopper, Blackwell including the RTX PRO 6000 Server Edition we use here), and a MIG slice cannot exceed one physical card. If your model needs more than 96GB, MIG is not your problem to solve; multi-GPU is.
 
 ## Prerequisites
 
-To follow along, you'll need root access to a GPU node and admin access to a Kubernetes cluster. Here's the exact infrastructure used in this setup:
+To follow along, you will need root access to a GPU node and admin access to a Kubernetes cluster. Here is the exact infrastructure used in this setup:
 
 - **Host OS:** Enterprise Linux VM (Ubuntu-based) on Utho Cloud.
 - **Cloud Provider:** Utho Cloud.
 - **Kubernetes:** v1.35.6
 - **GPU Operator Chart:** gpu-operator-v26.3.3
-- **GPU Operator Version:** v26.3.3
 - **Container Runtime:** `containerd`.
 - **CPUs:** 64 Cores.
 - **RAM:** 1259GB.
 - **GPUs:** 8x NVIDIA RTX PRO 6000 Blackwell Server Edition (96GB VRAM, 188 Streaming Multiprocessors / SMs per card).
+- **NVIDIA Host Driver:** `610.43.02` with **CUDA:** `13.3`.
 
 ```sh
 root@gpu-rtxpro6000-8:~# nvidia-smi -L
@@ -70,129 +88,304 @@ GPU 6: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-f4f5db98-143f-0a8
 GPU 7: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-f4c61521-240a-da09-2787-e576034e197e)
 ```
 
-- **NVIDIA Host Driver:** `610.43.02` with **CUDA:** `13.3`.
+## The MIG Mental Model: GPU Instances and Compute Instances
 
-## How GPU Integration Works in Kubernetes
-
-Before you slice anything, it helps to understand what you're slicing into.
-
-To run GPU workloads inside containers, the software stack operates in three distinct, interconnected layers. In a standard setup, manually configuring, upgrading, and maintaining these layers across multiple nodes introduces significant operational overhead.
-
-To solve this, platform teams deploy the **NVIDIA GPU Operator**. The Operator acts as a Kubernetes-native controller that dynamically bootstraps, configures, and manages the lifecycle of all three layers automatically:
-
-```
-┌────────────────────────────────────────────────────────┐
-│ 3. ORCHESTRATION LAYER (Kubernetes Device Plugin)      │
-│    - Deployed & Managed by the GPU Operator            │
-│    - Registers GPU capacity with Kubelet               │
-│    - Schedules Pods to specific GPU indices/slices     │
-├────────────────────────────────────────────────────────┤
-│ 2. INTEGRATION LAYER (NVIDIA Container Toolkit)        │
-│    - Deployed & Configured by the GPU Operator         │
-│    - Wrapper around container engine (containerd)      │
-│    - Injects 'libcuda.so' and '/dev/nvidia*' paths     │
-├────────────────────────────────────────────────────────┤
-│ 1. HARDWARE LAYER (NVIDIA Kernel Driver)               │
-│    - Optionally containerized by the GPU Operator      │
-│    - OS kernel modules (/lib/modules/...)              │
-│    - Translates assembly code to physical silicon      │
-└────────────────────────────────────────────────────────┘
-```
-
-**Layer 1: The Host Kernel Driver.** This is installed directly on the host operating system. It interfaces with the physical PCIe silicon and exposes character device files such as `/dev/nvidia0` and `/dev/nvidiactl`. The driver operates independently of containers and orchestration. It doesn't know or care that Kubernetes exists.
-
-**Layer 2: The Container Toolkit (the OCI integration).** Standard container runtimes (such as `containerd`) can partition CPU and memory resources, but they cannot natively manage GPUs. The **NVIDIA Container Toolkit** acts as a hook wrapper in containerd (`config.toml`). When a container requests a GPU, the toolkit intercepts the container creation, calls the host libraries, and mounts the driver files (`/dev/nvidia*` and `libcuda.so`) directly into the container's namespace.
-
-**Layer 3: The Kubernetes Device Plugin.** This is a DaemonSet that runs inside the cluster. It queries the host driver, counts the available GPUs (or MIG slices), and advertises them to the Kubelet as schedulable capacity (for example, `nvidia.com/gpu: 8`). When a pod requests a GPU, the scheduler assigns a device index, which the Kubelet passes to the Container Toolkit during initialization.
-
-## What Multi-Instance GPU (MIG) Actually Is
-
-By default, the GPU Operator exposes the physical cards directly (`nvidia.com/gpu: 8`). If a workload only requires a fraction of the hardware, it still claims the entire 96GB card, underutilizing the resource and blocking everyone else.
-
-**Multi-Instance GPU (MIG)** solves this by partitioning a physical GPU into isolated virtual hardware instances. Not software isolation. Not time-sharing. Actual partitioning at the silicon level.
-
-### The Parent-Child Hierarchy: GPU Instance and Compute Instance
-
-Before slicing a GPU using MIG, it's crucial to understand what a slice actually contains.
+Before slicing a GPU, it is crucial to understand what a slice actually contains.
 
 Every slice consists of a **GPU Instance (GI)** and a **Compute Instance (CI)**. The easiest way to think about them:
 
-1. **The GPU Instance (GI) is the plot of land.** When you create a GI, you carve out a physical chunk of VRAM and its memory controllers. This "land" is securely fenced off at the silicon level. No other partition or process on the GPU can cross this boundary or access this memory.
+1. **The GPU Instance (GI) is the plot of land.** When you create a GI, you carve out a physical chunk of VRAM and its memory controllers. This land is securely fenced off at the silicon level. No other partition or process on the GPU can cross this boundary or access this memory.
 2. **The Compute Instance (CI) is the building built on that land.** The building houses the execution machinery: the Streaming Multiprocessors (SMs) and Tensor Cores that perform the actual mathematical computations.
 
-![GPU Instance and Compute Instance Relationship](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/gi-ci-relationship.jpg)
+![GPU Instance is the plot of land, Compute Instance is the building on it](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/gi-ci-relationship.png)
 
 The relationship between a GI and a CI is strictly hierarchical:
 
 - **No building without land.** You cannot establish a Compute Instance without first creating a parent GPU Instance. Execution units must have a dedicated memory boundary to run in.
 - **Size constraints.** The capacity of the building (CI) cannot exceed the size of the plot of land (GI). You cannot allocate more compute slices (SMs) than the parent VRAM slice naturally supports.
-- **Sub-division for multi-tenancy.** You can build a single large structure (one CI matching the full GI) or divide the plot to support multiple smaller buildings (multiple smaller CIs). In the latter scenario, those compute instances run in parallel, sharing the same VRAM pool of the parent GI while keeping their execution cores strictly isolated.
-- **Teardown order matters.** You cannot clear the plot of land (destroy the GI) while the building is still standing (the CI exists). The driver will reject the command. You must demolish the building first (destroy all CIs), then reclaim the land (destroy the parent GI).
+- **Sub-division.** You can build a single large structure (one CI matching the full GI) or divide the plot to support multiple smaller buildings (multiple smaller CIs). In the latter scenario, those compute instances run in parallel, sharing the same VRAM pool of the parent GI while keeping their execution cores strictly isolated.
+- **Teardown order matters.** You cannot clear the plot of land (destroy the GI) while the building is still standing (the CI exists). The driver will reject the command. You must demolish the building first (destroy all CIs), then reclaim the land (destroy the parent GI). This rule shows up again below in the hands-on teardown steps.
 
-### Why Slicing a GPU Requires Splitting Both Memory and Compute
-
-To put it in everyday terms, a GPU has two fundamental responsibilities:
-
-1. **Storing data (Memory / VRAM):** the workspace where your AI models and numbers sit.
-2. **Processing data (Compute / SM cores):** the active brainpower (or hands) that perform the calculations.
-
-Why not just split one of them?
-
-If you only partitioned the memory (GI) and left the compute cores unpartitioned, you would have multiple isolated storage units but only one set of hands trying to access all of them at once, causing traffic jams.
-
-Conversely, if you only partitioned the compute cores (CI) but kept a shared, unpartitioned memory pool, you would have 4 independent workers trying to write on the exact same sheet of paper at the same time, causing conflicts and data corruption.
-
-By slicing **both** memory (GI) and compute (CI), you give each tenant their own locked filing cabinet (VRAM) and their own dedicated worker (compute cores) to run jobs in parallel without interfering with anyone else.
-
-### Why You'd Want to Customize These Slices
-
-Depending on your workloads, you might want to allocate these resources differently:
-
-- **Slicing for isolation (large VRAM, small compute):** You want to run a massive Language Model (LLM) that requires 80GB of VRAM just to fit in memory, but it doesn't need to answer questions at lightning speed. You allocate a large memory slice (80GB GI) but pair it with only a small slice of compute cores (for example, a 2g CI) to save processing power for others.
-- **Slicing for speed (small VRAM, large compute):** You are running a small, real-time object detection model. It only needs 10GB of VRAM to store its parameters, but it must process video frames at 60 FPS. You allocate a small memory slice (10GB GI) but assign all available compute cores inside it (100% of the GI's capacity as a CI) so it runs as fast as possible.
+Why split both memory and compute? If you only partitioned the memory and left the compute cores shared, you would have multiple isolated storage units but one set of hands trying to access all of them at once, causing traffic jams. If you only partitioned the compute cores but kept a shared memory pool, you would have independent workers writing on the same sheet of paper, causing conflicts and corruption. By slicing both, every tenant gets their own locked filing cabinet and their own dedicated worker.
 
 ### How to Read MIG Profile Names
 
-A Blackwell architecture GPU like the **NVIDIA RTX 6000** has 188 SMs in total, and the hardware divides the silicon into **4 base compute slices**.
-
-NVIDIA profiles follow the naming scheme `{X}g.{Y}gb`, where:
+NVIDIA profiles follow the naming scheme `{X}g.{Y}gb`:
 
 - **`{Y}gb`** is the VRAM partition (the GI layer).
-- **`{X}`** is the compute slice multiplier.
+- **`{X}g`** is the compute slice count.
 
-So a **`1g.24gb`** slice gets exactly **1/4th of the card's compute resources**: **47 SMs** (which contain 6,016 CUDA Cores and 188 Tensor Cores), paired with a 24GB VRAM partition.
+The RTX PRO 6000 Blackwell has 188 SMs and divides its silicon into **4 base compute slices**. So a **`1g.24gb`** slice gets 1/4th of the card: roughly 47 SMs paired with a 24GB VRAM partition. A `2g.48gb` slice gets half the card, and `4g.96gb` is the full card expressed as a single MIG instance.
 
-## How to Slice GPUs Manually on the Host
+You will also see suffixed variants like `1g.24gb+me` (includes the media engines for video decode/encode) and `1g.24gb-me` (pure compute, no media units). We will see the full list straight from the driver in a moment.
 
-When configuring MIG, there are two operations that look similar but behave very differently under load: **toggling MIG mode** and **carving the physical slices**.
+## Hands-On Part 1: Slice One GPU, End to End
 
-- **Toggling MIG mode (`nvidia-smi -mig 1`):** On older architectures (like Ampere A100), enabling MIG forced a disruptive hardware-level reset. Starting with **Hopper (H100/H200)** and **Blackwell (RTX PRO 6000)**, enabling MIG is now a **non-disruptive logical toggle** in the driver. No physical hardware reset is triggered. You can flip the master MIG switch on-the-fly, even while active CUDA applications (like Ollama) are actively hogging VRAM.
-- **Carving the slices (`nvidia-smi mig -cgi ...`):** This is where physical reality hits. The command forces the GPU's memory controllers to physically partition the memory crossbars on the silicon. If a process holds even a single megabyte of VRAM, the memory controllers are locked. The driver cannot rewrite these hardware boundary lines while active allocations exist, and the command will fail 100% of the time with a `Device or resource busy` error. To recover, the driver must execute a hardware-level reset (`nvidia-smi --gpu-reset`), which is itself blocked until all GPU clients are stopped.
+Everything in this section happens on the host, with no Kubernetes involved. We will take GPU 0 through the complete lifecycle: check, enable, inspect, carve, verify, run, and then tear it all back down. If you understand this section, the rest of the post is just automation.
 
-### The Blocker Daemons You Need to Stop First
+### Step 0: Check the current MIG mode
 
-On enterprise systems, two main background services hold active handles on GPU device files:
+```sh
+root@gpu-rtxpro6000-8:~# nvidia-smi -i 0 --query-gpu=index,name,mig.mode.current --format=csv
+index, name, mig.mode.current
+0, NVIDIA RTX PRO 6000 Blackwell Server Edition, Disabled
+```
 
-1. **`nvidia-persistenced` (Persistence Daemon):** keeps the driver loaded in kernel memory to avoid launch latency when starting new CUDA processes.
-2. **`nvidia-fabricmanager` (Fabric Manager):** used on multi-GPU systems connected via high-speed **NVSwitches** (such as HGX baseboards). *Note: if the GPUs are slotted directly into standard PCIe slots on a motherboard, this service is not needed or present.*
+`-i 0` targets GPU index 0. Drop the `-i` flag and the same query prints the state of every card in the box.
 
-To safely apply static partitioning, temporarily disable the blocker services, slice, then bring them back:
+### Step 1: Stop the daemons holding the GPU
+
+Two operations here look similar but behave very differently under load:
+
+- **Toggling MIG mode (`nvidia-smi -mig 1`):** on older architectures like the Ampere A100, enabling MIG forced a disruptive GPU reset. Starting with Hopper and Blackwell, this is a non-disruptive logical toggle in the driver.
+- **Carving the slices (`nvidia-smi mig -cgi ...`):** this is where physical reality hits. The command forces the GPU's memory controllers to partition the memory crossbars on the silicon. If any process holds even a single megabyte of VRAM, the operation fails with `Device or resource busy`.
+
+On enterprise systems, two background services commonly hold handles on GPU device files:
+
+1. **`nvidia-persistenced`:** keeps the driver loaded in kernel memory to avoid launch latency for new CUDA processes.
+2. **`nvidia-fabricmanager`:** used on multi-GPU systems connected via NVSwitches (HGX baseboards). If your GPUs are slotted directly into PCIe like ours, this service is not present.
+
+Stop what applies to you:
 
 ```sh
 root@gpu-rtxpro6000-8:~# sudo systemctl stop nvidia-persistenced
-# Execute reset and slicing
+```
+
+Also make sure no CUDA workload (an Ollama server, a Jupyter kernel, anything) is running on the GPU you are about to slice. `nvidia-smi` shows active processes at the bottom of its output.
+
+### Step 2: Enable MIG mode on GPU 0
+
+```sh
 root@gpu-rtxpro6000-8:~# sudo nvidia-smi -i 0 -mig 1
+Enabled MIG Mode for GPU 00000000:01:00.0
+All done.
+```
+
+If the driver cannot flip the mode because a client is still attached, it reports the GPU as being in a *pending enable* state instead. Kill the remaining clients (or reboot) and the mode activates.
+
+At this point the GPU is in MIG mode but has zero slices, which means **no CUDA workload can use it at all** until you carve instances. An enabled-but-empty MIG GPU is effectively offline for compute. Do not stop halfway.
+
+### Step 3: See what profiles the card supports
+
+Ask the driver what shapes it can cut:
+
+```sh
+root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lgip
++-----------------------------------------------------------------------------+
+| GPU instance profiles:                                                      |
+| GPU   Name             ID    Instances   Memory     P2P    SM    DEC   ENC  |
+|                              Free/Total   GiB              CE    JPEG  OFA  |
+|=============================================================================|
+|   0  MIG 1g.24gb       14     4/4        23.62      No     46     1     1   |
+|                                                             1     1     0   |
++-----------------------------------------------------------------------------+
+|   0  MIG 1g.24gb+me    21     1/1        23.62      No     46     1     1   |
+|                                                             1     1     1   |
++-----------------------------------------------------------------------------+
+|   0  MIG 1g.24gb-me    67     4/4        23.62      No     46     0     0   |
+|                                                             1     0     0   |
++-----------------------------------------------------------------------------+
+|   0  MIG 2g.48gb        5     2/2        47.38      No     94     2     2   |
+|                                                             2     2     0   |
++-----------------------------------------------------------------------------+
+|   0  MIG 4g.96gb        0     1/1        95.00      No    188     4     4   |
+|                                                             4     4     1   |
++-----------------------------------------------------------------------------+
+```
+
+(Output trimmed; the card also lists `+gfx` and `+me.all` variants.)
+
+Read this table carefully, it is the source of truth for your card:
+
+- **ID** is the numeric profile ID you can use in create commands (`14` and the name `1g.24gb` are interchangeable).
+- **Instances Free/Total** tells you how many of each profile fit: four 1g.24gb slices, or two 2g.48gb, or one 4g.96gb.
+- **SM** confirms the compute split: 46/94/188 SMs.
+
+You can also ask where those slices physically land on the card:
+
+```sh
+root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lgipp
+GPU  0 Profile ID 14 Placements: {0,1,2,3}:1
+GPU  0 Profile ID  5 Placements: {0,2}:2
+GPU  0 Profile ID  0 Placements: {0}:4
+```
+
+The notation `{0,1,2,3}:1` means a 1-slice profile can start at positions 0 through 3. This matters when you mix profile sizes: a 2g.48gb slice can only start at position 0 or 2, so a bad creation order can leave holes you cannot fill.
+
+### Step 4: Carve the slices
+
+Create four `1g.24gb` GPU instances, each with its compute instance, in one command. `-cgi` creates the GPU Instances (the land), and the `-C` flag immediately builds the matching Compute Instance (the building) inside each one:
+
+```sh
 root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -i 0 -cgi 1g.24gb,1g.24gb,1g.24gb,1g.24gb -C
-# Re-enable the persistence daemon
+Successfully created GPU instance ID  3 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  3 using profile MIG 1g.24gb (ID  0)
+Successfully created GPU instance ID  4 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  4 using profile MIG 1g.24gb (ID  0)
+Successfully created GPU instance ID  5 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  5 using profile MIG 1g.24gb (ID  0)
+Successfully created GPU instance ID  6 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  6 using profile MIG 1g.24gb (ID  0)
+```
+
+`sudo nvidia-smi mig -i 0 -cgi 14,14,14,14 -C` does exactly the same thing using the profile IDs from the table above.
+
+You do not have to make them all the same size. Want one big tenant and two small ones on the same card? Mix profiles:
+
+```sh
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -i 0 -cgi 2g.48gb,1g.24gb,1g.24gb -C
+```
+
+That yields one 48GB half-card slice plus two 24GB quarter-card slices. This is how you serve a large LLM and two small inference services from a single physical GPU with hard boundaries between them.
+
+### Step 5: Verify the slices exist
+
+Three views of the same truth. The device list:
+
+```sh
+root@gpu-rtxpro6000-8:~# nvidia-smi -L
+GPU 0: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-8b89b58e-b427-108d-ac50-06138d78fe78)
+  MIG 1g.24gb     Device  0: (UUID: MIG-445da789-865d-5fd1-b2b6-32a48bf66c39)
+  MIG 1g.24gb     Device  1: (UUID: MIG-e78fd5d2-f2de-5632-8961-9a368cec8080)
+  MIG 1g.24gb     Device  2: (UUID: MIG-b8861912-6285-56a1-99ca-297ac0f38ddb)
+  MIG 1g.24gb     Device  3: (UUID: MIG-f46c5ab9-40ef-54a2-b796-a2101a6ed56d)
+GPU 1: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-03a041b7-8abf-360a-d1a2-dfd70188cd5f)
+...
+```
+
+Every MIG device has its own UUID. This is exactly how the Kubernetes device plugin will identify and schedule the slices later.
+
+The GPU instances (the land plots) with their physical placements:
+
+```sh
+root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lgi
++-------------------------------------------------------+
+| GPU instances:                                        |
+| GPU   Name             Profile  Instance   Placement  |
+|                          ID       ID       Start:Size |
+|=======================================================|
+|   0  MIG 1g.24gb         14        3          0:1     |
+|   0  MIG 1g.24gb         14        4          1:1     |
+|   0  MIG 1g.24gb         14        5          2:1     |
+|   0  MIG 1g.24gb         14        6          3:1     |
++-------------------------------------------------------+
+```
+
+And the compute instances (the buildings) inside them:
+
+```sh
+root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lci
++--------------------------------------------------------------------+
+| Compute instances:                                                 |
+| GPU     GPU       Name             Profile   Instance   Placement  |
+|       Instance                       ID        ID       Start:Size |
+|         ID                                                         |
+|====================================================================|
+|   0      3       MIG 1g.24gb          0*        0          0:1     |
+|   0      4       MIG 1g.24gb          0*        0          0:1     |
+|   0      5       MIG 1g.24gb          0*        0          0:1     |
+|   0      6       MIG 1g.24gb          0*        0          0:1     |
++--------------------------------------------------------------------+
+```
+
+### Step 6: Run something on a slice (no Kubernetes needed)
+
+MIG slices are addressable directly from the host via their UUID. This is handy for smoke-testing before the cluster ever gets involved:
+
+```sh
+root@gpu-rtxpro6000-8:~# CUDA_VISIBLE_DEVICES=MIG-445da789-865d-5fd1-b2b6-32a48bf66c39 python3 -c \
+  "import torch; print(torch.cuda.get_device_name(0))"
+NVIDIA RTX PRO 6000 Blackwell Server Edition MIG 1g.24gb
+```
+
+The process sees one device that identifies itself as a `1g.24gb` slice, not the 96GB card. Isolation is already in force at the host level.
+
+Finally, bring back the persistence daemon:
+
+```sh
 root@gpu-rtxpro6000-8:~# sudo systemctl start nvidia-persistenced
 ```
 
-### How to Verify the Slicing
+### Step 7: Tear it all down (disable MIG)
 
-To verify the slicing worked, use the `nvidia-smi -L` command:
+You will reconfigure slices far more often than you think: profile sizes change, tenants come and go, and sometimes you just want the whole card back for one big training run. Remember the hierarchy rule: buildings before land. Compute instances first, then GPU instances, then the mode itself.
+
+Destroy the compute instances on GPU 0:
 
 ```sh
-root@gpu-rtxpro6000-8:~# sudo nvidia-smi -L
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -i 0 -dci
+Successfully destroyed compute instance ID  0 from GPU  0 GPU instance ID  3
+Successfully destroyed compute instance ID  0 from GPU  0 GPU instance ID  4
+Successfully destroyed compute instance ID  0 from GPU  0 GPU instance ID  5
+Successfully destroyed compute instance ID  0 from GPU  0 GPU instance ID  6
+```
+
+Then the GPU instances:
+
+```sh
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -i 0 -dgi
+Successfully destroyed GPU instance ID  3 from GPU  0
+Successfully destroyed GPU instance ID  4 from GPU  0
+Successfully destroyed GPU instance ID  5 from GPU  0
+Successfully destroyed GPU instance ID  6 from GPU  0
+```
+
+If you run `-dgi` before `-dci`, the driver rejects it with an *In use by another client* error. That is the land-and-building rule enforced in silicon.
+
+Also note: a slice with a running workload cannot be destroyed. Stop the pods or processes using it first, otherwise `-dci` fails with the same *In use by another client* error.
+
+Now disable MIG mode:
+
+```sh
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi -i 0 -mig 0
+Disabled MIG Mode for GPU 00000000:01:00.0
+All done.
+```
+
+And confirm the card is whole again:
+
+```sh
+root@gpu-rtxpro6000-8:~# nvidia-smi -i 0 --query-gpu=index,mig.mode.current --format=csv
+index, mig.mode.current
+0, Disabled
+
+root@gpu-rtxpro6000-8:~# nvidia-smi -L | head -1
+GPU 0: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-8b89b58e-b427-108d-ac50-06138d78fe78)
+```
+
+One GPU, full lifecycle, both directions. That is the entire mechanical core of MIG.
+
+## Hands-On Part 2: All 8 GPUs at Once
+
+Everything above used `-i 0` to target one card. The scaling trick is almost embarrassing: **drop the `-i` flag and every command applies to all GPUs**.
+
+Enable MIG everywhere:
+
+```sh
+root@gpu-rtxpro6000-8:~# sudo systemctl stop nvidia-persistenced
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi -mig 1
+Enabled MIG Mode for GPU 00000000:01:00.0
+Enabled MIG Mode for GPU 00000000:21:00.0
+Enabled MIG Mode for GPU 00000000:41:00.0
+Enabled MIG Mode for GPU 00000000:61:00.0
+Enabled MIG Mode for GPU 00000000:81:00.0
+Enabled MIG Mode for GPU 00000000:A1:00.0
+Enabled MIG Mode for GPU 00000000:C1:00.0
+Enabled MIG Mode for GPU 00000000:E1:00.0
+All done.
+```
+
+Carve four slices on every MIG-enabled card in one command, then bring back the persistence daemon:
+
+```sh
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -cgi 1g.24gb,1g.24gb,1g.24gb,1g.24gb -C
+root@gpu-rtxpro6000-8:~# sudo systemctl start nvidia-persistenced
+```
+
+And verify. This is the money shot, 8 physical cards now presenting as 32 isolated devices:
+
+```sh
+root@gpu-rtxpro6000-8:~# nvidia-smi -L
 
 GPU 0: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-8b89b58e-b427-108d-ac50-06138d78fe78)
   MIG 1g.24gb     Device  0: (UUID: MIG-445da789-865d-5fd1-b2b6-32a48bf66c39)
@@ -236,24 +429,65 @@ GPU 7: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-f4c61521-240a-da0
   MIG 1g.24gb     Device  3: (UUID: MIG-0f8a469f-1116-5095-9e94-65e7809b554d)
 ```
 
-Each GPU now exposes 4 MIG devices, each following the `1g.24gb` profile: one compute slice paired with 24GB of dedicated VRAM. Every device has its own unique UUID, which is exactly how the Kubernetes device plugin will identify and schedule them later.
+Each physical card can now serve 4 tenants independently, each with a hardware-isolated slice. Across 8 cards, that is 32 schedulable GPUs where you previously had 8, and you did not buy a single new card.
 
-This means each physical card can now serve 4 tenants independently, each with their own hardware-isolated slice. Across 8 cards, that's 32 schedulable GPUs where you previously had 8.
+The fleet-wide teardown is the same story without `-i`, in the same strict order:
 
-That's a huge saving on the financial side of AI infrastructure, and you didn't buy a single new card.
+```sh
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -dci      # destroy all compute instances, all GPUs
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -dgi      # destroy all GPU instances, all GPUs
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi -mig 0        # disable MIG mode everywhere
+root@gpu-rtxpro6000-8:~# nvidia-smi --query-gpu=index,mig.mode.current --format=csv
+index, mig.mode.current
+0, Disabled
+1, Disabled
+2, Disabled
+3, Disabled
+4, Disabled
+5, Disabled
+6, Disabled
+7, Disabled
+```
 
-## How the NVIDIA GPU Operator Automates the Stack
+Eight whole GPUs again, as if nothing happened.
 
-Everything we just did by hand works. It also doesn't scale.
+## Bringing Kubernetes In: The GPU Operator
 
-There's no way to GitOps a series of `nvidia-smi` commands and maintain them across a fleet in the long run. This is why NVIDIA provides the **NVIDIA GPU Operator**, a controller that turns all of this host-level surgery into declarative Kubernetes configuration.
+Everything we just did by hand works. It also does not scale. There is no way to GitOps a series of `nvidia-smi` commands and maintain them across a fleet. And the host slices are invisible to Kubernetes until something advertises them to the Kubelet.
 
-The operator deploys several critical components within the `gpu-operator` namespace:
+To run GPU workloads inside containers, three distinct layers have to cooperate, and the **NVIDIA GPU Operator** manages all of them for you:
 
-- **`gpu-operator` (Controller):** the central management controller. It monitors the Kubernetes API server for custom resource configurations (like `ClusterPolicy` definitions) and automatically deploys, configures, and reconciles the necessary daemonsets and services on nodes containing GPUs.
-- **`node-feature-discovery (NFD)`:** a hardware scanner deployed in a master-worker configuration. The worker daemon scans the host physical PCI hardware (such as CPU, kernel, and PCIe slots) to identify the presence of GPUs, and coordinates with the NFD master to apply labels (for example, `nvidia.com/gpu.present=true`) directly to the Kubernetes node object.
-- **`gpu-feature-discovery (GFD)`:** a specialized extension of NFD. It scrapes detailed GPU hardware telemetry from the host driver (such as specific memory size, GPU models like RTX 6000 Blackwell, and active MIG profiles) and applies fine-grained node labels (for example, `nvidia.com/mig.config=all-1g.24gb`) so pods can target specific architectures.
-- **`nvidia-container-toolkit`:** modifies the host's containerd configuration (`config.toml`) to register custom runtime classes, allowing containerized workloads to interface with the host drivers. It appends the following runtime configuration blocks to `/etc/containerd/config.toml`:
+![The three-layer Kubernetes GPU stack managed by the GPU Operator](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/k8s-gpu-stack.png)
+
+**Layer 1: The Host Kernel Driver.** Installed directly on the host OS. It interfaces with the physical PCIe silicon and exposes character device files such as `/dev/nvidia0` and `/dev/nvidiactl`. It does not know or care that Kubernetes exists.
+
+**Layer 2: The Container Toolkit (the OCI integration).** Container runtimes like `containerd` can partition CPU and memory, but they cannot natively manage GPUs. The **NVIDIA Container Toolkit** hooks into containerd: when a container requests a GPU, it mounts the driver files (`/dev/nvidia*`, `libcuda.so`) into the container's namespace.
+
+**Layer 3: The Kubernetes Device Plugin.** A DaemonSet that queries the host driver, counts the available GPUs or MIG slices, and advertises them to the Kubelet as schedulable capacity.
+
+Install the operator with Helm:
+
+```sh
+root@gpu-rtxpro6000-8:~# helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+root@gpu-rtxpro6000-8:~# helm repo update
+root@gpu-rtxpro6000-8:~# helm install gpu-operator nvidia/gpu-operator \
+  -n gpu-operator --create-namespace \
+  --set mig.strategy=mixed
+```
+
+About that `mig.strategy` flag, it controls how slices show up as Kubernetes resources:
+
+- **`single`** (the default): all GPUs on the node carry one uniform profile, and slices are advertised as plain `nvidia.com/gpu`. Workloads do not even know MIG is involved.
+- **`mixed`:** each profile is advertised as its own resource, like `nvidia.com/mig-1g.24gb` or `nvidia.com/mig-2g.48gb`. This is what you want when different cards carry different geometries, or when workloads should explicitly pick a slice size.
+
+We use `mixed` in this post so the slice type is visible end to end.
+
+The operator deploys these components in the `gpu-operator` namespace:
+
+- **`gpu-operator` (controller):** watches `ClusterPolicy` custom resources and reconciles all the DaemonSets below on every GPU node.
+- **`node-feature-discovery (NFD)`:** scans host hardware and labels nodes (for example, `nvidia.com/gpu.present=true`).
+- **`gpu-feature-discovery (GFD)`:** adds fine-grained GPU labels such as memory size, model, and active MIG profiles (for example, `nvidia.com/mig.config=all-1g.24gb`).
+- **`nvidia-container-toolkit`:** registers the `nvidia` runtime class in `/etc/containerd/config.toml`:
 
 ```toml
 [plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.'nvidia']
@@ -262,39 +496,64 @@ The operator deploys several critical components within the `gpu-operator` names
 [plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.'nvidia'.options]
   BinaryName = "/usr/local/nvidia/toolkit/nvidia-container-runtime"
   SystemdCgroup = true
-
-[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.'nvidia-cdi']
-  runtime_type = "io.containerd.runc.v2"
-
-[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.'nvidia-cdi'.options]
-  BinaryName = "/usr/local/nvidia/toolkit/nvidia-container-runtime.cdi"
 ```
 
-- **`nvidia-device-plugin`:** the gRPC daemon that registers the GPU slices with the Kubelet. It queries the host driver's NVML library, identifies the UUIDs of the active MIG slices, and advertises them to the Kubelet as allocatable capacity (for example, `nvidia.com/mig-1g.24gb: 32`). This allows the scheduler to bind Pods to specific slices.
-- **`nvidia-dcgm-exporter`:** a metrics collector agent that interfaces with NVIDIA's low-level Data Center GPU Manager (DCGM) engine on the host. It reads real-time hardware telemetry (such as power consumption, temperature, SM clock speeds, and Tensor Core utilization ratios) and exposes them on a Prometheus `/metrics` HTTP endpoint for Grafana dashboards.
-- **`nvidia-operator-validator`:** an audit manager that launches validation steps (including container runtime verification and a one-shot `cuda-validator` Job that runs matrix math workloads on the GPU) to verify the entire software-to-hardware pipeline is working cleanly before letting user pods deploy.
+- **`nvidia-device-plugin`:** queries the driver's NVML library for MIG slice UUIDs and advertises them to the Kubelet (for example, `nvidia.com/mig-1g.24gb: 32`).
+- **`nvidia-mig-manager`:** watches the `nvidia.com/mig.config` node label and reconfigures MIG geometry declaratively. More on this next.
+- **`nvidia-dcgm-exporter`:** exposes per-slice hardware telemetry on a Prometheus `/metrics` endpoint.
+- **`nvidia-operator-validator`:** runs a one-shot CUDA job to verify the whole software-to-hardware pipeline before user pods land.
+
+### Declarative MIG: One Label Instead of All Those Commands
+
+With the operator in place, the entire hands-on section above compresses into a single node label:
+
+```sh
+root@gpu-rtxpro6000-8:~# kubectl label node <node-name> nvidia.com/mig.config=all-1g.24gb --overwrite
+```
+
+The MIG Manager notices the label and orchestrates the full lifecycle through a structured loop:
+
+1. **Evicts GPU workloads:** sets the node's GPU allocatable to `0` and drains GPU pods to release device locks.
+2. **Stops telemetry daemons:** pauses the device plugin and DCGM exporter so NVML has no clients.
+3. **Resets state:** clears VRAM and any existing MIG geometry.
+4. **Applies the new geometry:** enables MIG mode and carves GIs and CIs exactly like our manual commands did.
+5. **Regenerates CDI specs:** writes new Container Device Interface configs so the runtime can inject the new devices.
+6. **Restores the stack:** restarts the device plugin and exporter, which advertise the 32 new slices to the Kubelet.
+
+Verify from the cluster side:
+
+```sh
+root@gpu-rtxpro6000-8:~# kubectl describe node <node-name> | grep mig-1g.24gb
+  nvidia.com/mig-1g.24gb:  32
+```
+
+To go back to whole GPUs, the disable path is also just a label. `all-disabled` destroys every slice and turns MIG mode off, and the node advertises `nvidia.com/gpu: 8` again:
+
+```sh
+root@gpu-rtxpro6000-8:~# kubectl label node <node-name> nvidia.com/mig.config=all-disabled --overwrite
+```
+
+Mixed geometries are possible too: built-in profiles like `all-balanced`, or a custom layout in the `mig-parted` ConfigMap that gives different cards different shapes. Everything we did with `-cgi 2g.48gb,1g.24gb,1g.24gb` has a declarative equivalent.
 
 ### How the NVIDIA Runtime Injects GPUs into Containers
 
-To understand why those containerd configuration blocks are necessary, here's the operational flow of how the standard `nvidia` runtime acts as a bridge between containerd and runc:
+To understand why those containerd configuration blocks are necessary, here is the flow when a pod actually starts:
 
-![How the Standard NVIDIA Runtime Works](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/nvidia-runtime-flow.jpg)
+![How the NVIDIA runtime injects GPU devices into a container](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/nvidia-runtime-flow.png)
 
-The injection happens in 5 steps:
-
-1. **Pod submission:** a developer submits a Pod manifest requesting a GPU (for example, `nvidia.com/gpu: 1` or a specific MIG slice).
-2. **containerd interception:** the container engine (`containerd`) reads the Pod specification, identifies that it is configured to use the custom `"nvidia"` runtime class, and prepares to initialize the container.
-3. **nvidia-runtime (the middleman) invocation:** instead of calling the standard runner immediately, containerd invokes the `nvidia-container-runtime`. This wrapper reads the container's environment variables (such as `NVIDIA_VISIBLE_DEVICES=0` or the unique MIG UUID), interrogates the host operating system to locate the requested physical GPU device files (under `/dev/nvidia*`) and target driver library files (like `libcuda.so` and `libnvidia-ml.so`), and dynamically injects these hardware device nodes and library paths into the container's OCI runtime specification file (`config.json`).
-4. **runc execution:** the wrapper hands the modified container specification back to `runc` (the standard low-level container executor). `runc` initializes the namespaces, sets up cgroups, executes the mounts, and starts the container's initialization process.
-5. **Active workload execution:** the containerized application boots up. Because the driver libraries and device files were dynamically injected during the handshake phase, the machine learning framework (such as PyTorch or TensorFlow) can interact with the GPU slice natively.
+1. **Pod submission:** a developer submits a Pod requesting a GPU (`nvidia.com/gpu: 1` or a specific MIG resource).
+2. **containerd interception:** containerd sees the pod uses the `nvidia` runtime class and prepares the container.
+3. **nvidia-container-runtime (the middleman):** reads the container's environment (such as `NVIDIA_VISIBLE_DEVICES` carrying the MIG UUID), locates the matching device files under `/dev/nvidia*` and driver libraries like `libcuda.so` on the host, and injects them into the container's OCI spec.
+4. **runc execution:** the modified spec goes to `runc`, which sets up namespaces, cgroups, and mounts, then starts the container.
+5. **Workload runs:** PyTorch or TensorFlow inside the container talks to its GPU slice natively, because the devices and libraries were injected during the handshake.
 
 ## Common Production Pitfalls and How to Solve Them
 
-Here's the quick-reference version, the way you'll hit these at 2 AM:
+Here is the quick-reference version, the way you will hit these at 2 AM:
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Toolkit can't find containerd, or runtime class never appears | Non-standard containerd paths (RKE2/K3s) | Point the toolkit at the right socket and config via Helm env overrides (Pitfall A) |
+| Toolkit cannot find containerd, or runtime class never appears | Non-standard containerd paths (RKE2/K3s) | Point the toolkit at the right socket and config via Helm env overrides (Pitfall A) |
 | Your manual slices vanish after installing the Operator | MIG Manager defaults to `all-disabled` when no node label exists | Label the node with the matching `nvidia.com/mig.config` profile (Pitfall B) |
 | You changed slices on the host but Kubernetes shows the old layout, Operator logs frozen | MIG Manager only reacts to node label events, it never polls the hardware | Restart the MIG Manager pod or toggle the label to force reconciliation (Pitfall C) |
 | Manual MIG mode: Kubelet never discovers new slices | Nothing tells the device plugin the hardware changed | Disable `migManager` in Helm and restart the device plugin daemonset (Pitfall D) |
@@ -328,25 +587,16 @@ If the `nvidia-mig-manager` pod is active and detects no configuration label on 
 root@gpu-rtxpro6000-8:~# kubectl label node <node-name> nvidia.com/mig.config=all-1g.24gb --overwrite
 ```
 
-Once labeled, the MIG Manager automatically orchestrates the dynamic partitioning lifecycle through a structured 6-step loop:
-
-1. **Evicting workloads:** it updates the node's GPU allocatable limits to `0`, forcing the Kubernetes scheduler to gracefully evict and terminate all running GPU-dependent Pods to release device locks.
-2. **Stopping telemetry daemons:** it pauses internal services like the `nvidia-device-plugin` and `dcgm-exporter` that query the GPU, ensuring NVML (NVIDIA Management Library) is completely free of client connections.
-3. **Resetting the hardware:** it executes an `nvidia-smi --gpu-reset` on all registered GPUs on the node, wiping the VRAM clean and resetting the PCIe state.
-4. **Applying new geometries:** it communicates with the host driver to enable MIG mode on the GPUs and carves out the physical GPU Instances (GIs) and Compute Instances (CIs) according to the requested profile (`all-1g.24gb`).
-5. **Re-generating CDI specifications:** it writes new Container Device Interface (CDI) configurations on the host, exposing the new virtual devices to the OCI runtime.
-6. **Restoring the stack:** it restarts the device plugin and dcgm-exporter, which read the new layout and report the 32 newly created `nvidia.com/mig-1g.24gb` slices back to the Kubelet.
-
 ### Pitfall C: Host-Level State Drift Undetected by MIG Manager
 
 If you manually delete or modify MIG profiles directly on the host using the `nvidia-smi` CLI, the changes will not be reflected in Kubernetes, and the operator will appear completely silent about it.
 
-**The root cause:** the `nvidia-mig-manager` watches for **Kubernetes Node Label events** (such as changing the label value). It does not poll the host's physical GPU registers continuously. Because your manual host modifications do not trigger Kubernetes events, the manager remains idle, thinking the old state is still successfully applied (its logs will remain frozen).
+**The root cause:** the `nvidia-mig-manager` watches for **Kubernetes node label events**. It does not poll the host's physical GPU registers continuously. Because your manual host modifications do not trigger Kubernetes events, the manager remains idle, thinking the old state is still successfully applied (its logs will remain frozen).
 
-**The fix (for operator-managed MIG):** trigger a reconciliation event. You can do this by either restarting the MIG Manager pod (which forces a full check on boot) or toggling the node label back and forth to emit Kubernetes events:
+**The fix (for operator-managed MIG):** trigger a reconciliation event. Either restart the MIG Manager pod (which forces a full check on boot) or toggle the node label back and forth:
 
 ```sh
-# Option 1: Restart the MIG Manager daemonset pod
+# Option 1: Restart the MIG Manager daemonset
 root@gpu-rtxpro6000-8:~# kubectl rollout restart daemonset -n gpu-operator nvidia-mig-manager
 
 # Option 2: Toggle the node label to trigger the watch loop
@@ -357,24 +607,24 @@ root@gpu-rtxpro6000-8:~# kubectl label node <node-name> nvidia.com/mig.config=al
 
 ### Pitfall D: Forcing Kubelet Discovery for Manual MIG Configurations
 
-Maybe you want the opposite arrangement: manage MIG slices manually on the host, prevent the GPU Operator from ever overwriting them, but still have Kubernetes discover and schedule workloads on those manual slices. You'll hit resource discovery issues where the cluster does not automatically detect your updates.
+Maybe you want the opposite arrangement: manage MIG slices manually on the host with the exact commands from the hands-on sections, prevent the GPU Operator from ever overwriting them, but still have Kubernetes discover and schedule workloads on those manual slices.
 
-**The root cause:** when the automatic `nvidia-mig-manager` is disabled to allow manual slicing, there is no automated trigger to notify the Kubelet when the host-level physical MIG configuration changes.
+**The root cause:** when the automatic `nvidia-mig-manager` is disabled to allow manual slicing, there is no automated trigger to notify the Kubelet when the host-level MIG configuration changes.
 
 **The fix (force Kubelet discovery):**
 
-1. **Disable the MIG Manager in Helm.** Deploy or upgrade the GPU Operator with the MIG Manager disabled to prevent the operator from wiping your manual settings:
+1. **Disable the MIG Manager in Helm** so the operator never wipes your manual settings:
 
 ```sh
 root@gpu-rtxpro6000-8:~# helm upgrade --install gpu-operator nvidia/gpu-operator \
   -n gpu-operator \
   --set migManager.enabled=false \
-  [other-existing-overrides...]
+  --set mig.strategy=mixed
 ```
 
-2. **Provision host slices.** Create your MIG slices manually on the host using standard `nvidia-smi` CLI commands.
+2. **Provision host slices** manually with the `nvidia-smi mig -cgi ... -C` commands from Part 1 and Part 2.
 
-3. **Force Kubelet discovery.** Manually notify the Kubelet of the updated resources by restarting the device plugin daemonset:
+3. **Force Kubelet discovery** by restarting the device plugin daemonset:
 
 ```sh
 root@gpu-rtxpro6000-8:~# kubectl rollout restart daemonset -n gpu-operator nvidia-device-plugin-daemonset
@@ -384,9 +634,9 @@ root@gpu-rtxpro6000-8:~# kubectl rollout restart daemonset -n gpu-operator nvidi
 
 A platform is only as good as its observability. Once your 32 GPU slices are registered, you need a centralized dashboard to monitor metrics like VRAM usage, temperature, and Tensor Core utilization.
 
-To achieve this, deploy the Prometheus community stack and hook it into the low-level telemetry streams of the `nvidia-dcgm-exporter`.
+To achieve this, deploy the Prometheus community stack and hook it into the telemetry streams of the `nvidia-dcgm-exporter`.
 
-**Step 1: Install the kube-prometheus-stack.** Use Helm to deploy Prometheus and Grafana into a dedicated `monitoring` namespace:
+**Step 1: Install the kube-prometheus-stack.**
 
 ```sh
 root@gpu-rtxpro6000-8:~# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -396,9 +646,7 @@ root@gpu-rtxpro6000-8:~# helm install prometheus prometheus-community/kube-prome
   -n monitoring --create-namespace
 ```
 
-**Step 2: Apply the ServiceMonitor.** The Prometheus Operator uses custom resources called `ServiceMonitors` to dynamically discover scrapers. By default, Prometheus only scans its own namespace (`monitoring`).
-
-To scrape the exporter in the `gpu-operator` namespace, deploy the following manifest in the `monitoring` namespace. It uses a `namespaceSelector` to target the `nvidia-dcgm-exporter` Service inside the `gpu-operator` namespace:
+**Step 2: Apply the ServiceMonitor.** By default, Prometheus only scans its own namespace. This manifest uses a `namespaceSelector` to target the `nvidia-dcgm-exporter` Service inside the `gpu-operator` namespace:
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -426,36 +674,36 @@ spec:
     path: /metrics
 ```
 
-Apply this file to configure the scraping loop:
+Apply it:
 
 ```sh
 root@gpu-rtxpro6000-8:~# kubectl apply -f nvidia-servicemonitor.yaml
 ```
 
-**Step 3: Configure the Grafana dashboard.** Rather than building charts manually, NVIDIA maintains an official dashboard designed for DCGM exporter metrics:
+**Step 3: Configure the Grafana dashboard.** NVIDIA maintains an official dashboard for DCGM exporter metrics:
 
 1. Log into your Grafana UI.
 2. Navigate to **Dashboards** -> **Import**.
 3. Import **Dashboard ID: `22515`**.
 4. Select your Prometheus data source and click **Import**.
 
-This loads an interactive visualization panel showing real-time health and performance across all 32 partitions.
+This loads an interactive panel showing real-time health and performance across all 32 partitions:
 
-![GPU Observability Dashboard](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/gpu-observability.jpg)
+![Grafana NVIDIA DCGM dashboard showing per-GPU power, memory, temperature, and Tensor Core utilization](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/gpu-observability.jpg)
 
-## How to Run Workloads on Blackwell (sm_120)
+## Run a Real Workload on a Slice (Blackwell, sm_120)
 
-There's one final trap waiting at the workload layer.
+There is one final trap waiting at the workload layer.
 
-The NVIDIA Blackwell architecture uses a new compute capability version: **Compute Capability 12.0 (`sm_120`)**. If you use older container images (such as `pytorch:2.1.2-cuda12.1`), the execution will crash with the following error:
+The NVIDIA Blackwell architecture uses a new compute capability version: **Compute Capability 12.0 (`sm_120`)**. If you use older container images (such as `pytorch:2.1.2-cuda12.1`), execution crashes with:
 
 ```
 RuntimeError: CUDA error: no kernel image is available for execution on the device
 ```
 
-This occurs because older PyTorch binaries do not contain compiled kernels for `sm_120`. To resolve this, always use a modern PyTorch image compiled with CUDA 12.8+ or use the official **NVIDIA NGC PyTorch containers** (version `25.01-py3` or later), which natively support Blackwell.
+Older PyTorch binaries simply do not contain compiled kernels for `sm_120`. Use a modern PyTorch image compiled with CUDA 12.8+ or the official **NVIDIA NGC PyTorch containers** (version `25.01-py3` or later), which natively support Blackwell.
 
-Here is the final verified Deployment manifest to run a matrix multiplication load on a single `24GB` Blackwell MIG slice:
+Here is the verified Deployment manifest that runs a matrix multiplication load on a single 24GB Blackwell MIG slice. Note the resource request: `nvidia.com/mig-1g.24gb`, the mixed-strategy resource name our device plugin advertises:
 
 ```yaml
 apiVersion: apps/v1
@@ -477,8 +725,8 @@ spec:
       runtimeClassName: nvidia
       containers:
       - name: pytorch
-        # Using NVIDIA's official PyTorch NGC container (25.01 or later)
-        # which is explicitly compiled to support Blackwell architecture (sm_120)
+        # NVIDIA's official PyTorch NGC container (25.01 or later)
+        # compiled to support the Blackwell architecture (sm_120)
         image: nvcr.io/nvidia/pytorch:25.01-py3
         command: ["python3", "-c"]
         args:
@@ -492,13 +740,13 @@ spec:
               print("Device Name:", torch.cuda.get_device_name(0))
               print("Device Capability:", torch.cuda.get_device_capability(0))
               print("CUDA Device Count:", torch.cuda.device_count())
-              
+
               # Allocate memory and perform matrix multiplication to generate GPU load
               print("Allocating tensors on GPU and starting matrix math load...")
               device = torch.device("cuda")
               x = torch.randn(10000, 10000, device=device)
               y = torch.randn(10000, 10000, device=device)
-              
+
               # Keep running matrix multiplications to hold the CUDA context and load
               while True:
                   z = torch.matmul(x, y)
@@ -513,14 +761,14 @@ spec:
             nvidia.com/mig-1g.24gb: 1
 ```
 
-### How to Verify Hardware-Level Isolation
+### Prove the Isolation, From Both Sides
 
-Once the pod is running, exec into the container and run `nvidia-smi`. You will observe exactly **one GPU** with **24 GB VRAM**. The container is isolated from the other physical GPUs and slices, verifying secure and efficient hardware-level multi-tenancy:
+Once the pod is running, exec into the container and run `nvidia-smi`. You will observe exactly **one GPU** with **24GB VRAM**. The container cannot see the other 7 physical cards or the other 31 slices:
 
 ```sh
 root@gpu-rtxpro6000-8:~# kubectl exec -it pytorch-mig-demo-c9f7c8b49-sl5qh -- bash
-root@pytorch-mig-demo-c9f7c8b49-sl5qh:/workspace# nvidia-smi 
-Tue Jul 14 19:44:18 2026       
+root@pytorch-mig-demo-c9f7c8b49-sl5qh:/workspace# nvidia-smi
+Tue Jul 14 19:44:18 2026
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 610.43.02              KMD Version: 610.43.02     CUDA UMD Version: 13.3     |
 +-----------------------------------------+------------------------+----------------------+
@@ -553,16 +801,14 @@ Tue Jul 14 19:44:18 2026
 +-----------------------------------------------------------------------------------------+
 ```
 
-The pod only sees the `1g.24gb` slice that has been given to it and nothing else. We get the 24Gi memory with this slice, as seen under the MIG devices section.
+The pod only sees the `1g.24gb` slice that has been given to it and nothing else, with its 24GiB of memory shown under the MIG devices section.
 
-While the application is running in the pod using the slice, the same activity is visible from the host `nvidia-smi` output. The `MIG devices` section clearly indicates that a `1g.24gb` slice is being used by the application. This is the beauty of MIG.
-
-On the host, we can see the same stats as inside the container. (Skipping some MIG slices and GPUs to keep the output short.)
+Now look at the same moment from the host. The host sees everything: all cards, all slices, and the exact same `python3` process burning memory on one specific slice (output trimmed to two GPUs to keep it readable):
 
 ```sh
-root@gpu-rtxpro6000-8:~# nvidia-smi 
+root@gpu-rtxpro6000-8:~# nvidia-smi
 
-Tue Jul 14 19:52:39 2026       
+Tue Jul 14 19:52:39 2026
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 610.43.02              KMD Version: 610.43.02     CUDA UMD Version: 13.3     |
 +-----------------------------------------+------------------------+----------------------+
@@ -618,11 +864,11 @@ Tue Jul 14 19:52:39 2026
 +-----------------------------------------------------------------------------------------+
 ```
 
-You can see the same `python3` process consuming GPU memory in both snippets (the container view and the host view) because both are looking at the same hardware-isolated MIG slice.
+Same `python3` process, same 1714MiB, visible in both views because both are looking at the same hardware-isolated MIG slice. The other slices on that card show 64MiB of idle overhead each, completely untouched by the running workload. This is the beauty of MIG.
 
 ## The Platform Properties Compared
 
-Here's the before-and-after, the way your finance and platform teams will evaluate it:
+Here is the before-and-after, the way your finance and platform teams will evaluate it:
 
 | Property | 8 whole GPUs | 32 MIG slices |
 | --- | --- | --- |
@@ -635,18 +881,19 @@ Here's the before-and-after, the way your finance and platform teams will evalua
 
 ## Conclusion
 
-By architecting with Multi-Instance GPU (MIG) slicing, you transition your infrastructure from a series of monolithic, underutilized hardware blocks into an agile, multi-tenant AI developer platform.
+GPU sharing is a spectrum. Time-slicing shares by taking turns, MPS shares by trusting neighbors, and MIG shares by building walls in silicon. When the tenants are real (different teams, different customers, different blast radii), MIG is the one that lets you sleep.
 
-Here's what you accomplished in this tutorial:
+Here is what you accomplished in this walkthrough:
 
-1. Understood the three-layer stack (kernel driver, container toolkit, device plugin) that connects Kubernetes to physical GPUs, and how the GPU Operator manages all of it.
-2. Learned the GPU Instance / Compute Instance hierarchy and why MIG must partition both memory and compute to deliver true isolation.
-3. Sliced 8 Blackwell cards into 32 hardware-isolated `1g.24gb` instances using host-level `nvidia-smi` commands.
-4. Deployed the NVIDIA GPU Operator to make the whole configuration declarative and GitOps-friendly.
-5. Diagnosed and fixed four real production pitfalls: non-standard containerd paths, MIG Manager overwrites, host-level state drift, and manual-mode Kubelet discovery.
-6. Wired DCGM telemetry into a Prometheus + Grafana dashboard for slice-level observability.
-7. Verified hardware-level multi-tenancy by running a PyTorch workload on a single `sm_120` slice and confirming isolation from both inside and outside the container.
+1. Understood the three GPU sharing mechanisms and why only MIG gives hardware-enforced tenant isolation.
+2. Learned the GPU Instance / Compute Instance hierarchy and why MIG must partition both memory and compute.
+3. Took a single GPU through the full MIG lifecycle by hand: enable, inspect profiles, carve slices, verify, run a workload, and tear everything back down to a whole card.
+4. Scaled the same commands to all 8 GPUs by dropping one flag, producing 32 hardware-isolated `1g.24gb` instances.
+5. Deployed the NVIDIA GPU Operator to make the whole configuration declarative and GitOps-friendly, with a single node label replacing the manual command sequence.
+6. Diagnosed and fixed four real production pitfalls: non-standard containerd paths, MIG Manager overwrites, host-level state drift, and manual-mode Kubelet discovery.
+7. Wired DCGM telemetry into a Prometheus + Grafana dashboard for slice-level observability.
+8. Verified the isolation from both sides by running a PyTorch workload on a single `sm_120` slice.
 
-Building a high-efficiency GPU platform is not just about having the fastest silicon. It's about managing and distributing that compute pool effectively. Slicing the Blackwell architecture with MIG gives you the balance of strict isolation, cost optimization, and developer self-service that makes the platform actually work.
+Building a high-efficiency GPU platform is not just about having the fastest silicon. It is about managing and distributing that compute pool effectively. Slicing the Blackwell architecture with MIG gives you the balance of strict isolation, cost optimization, and developer self-service that makes the platform actually work.
 
 If this was useful, the NVIDIA GPU Operator lives at [docs.nvidia.com](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html) and on [GitHub](https://github.com/NVIDIA/gpu-operator), and the full MIG user guide is at [docs.nvidia.com/datacenter/tesla/mig-user-guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/).
