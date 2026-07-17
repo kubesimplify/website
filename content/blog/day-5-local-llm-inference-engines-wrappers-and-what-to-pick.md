@@ -6,7 +6,7 @@ datePublished: 2026-07-17T00:00:00.000Z
 slug: day-5-local-llm-inference-engines-wrappers-and-what-to-pick
 author: saiyam-pathak
 tags: ["nvidia", "dgxspark", "local-ai", "llm", "inference"]
-cover: /img/blog/day-5-local-llm-inference-engines-wrappers-and-what-to-pick/cover.svg
+cover: /img/blog/day-5-local-llm-inference-engines-wrappers-and-what-to-pick/cover.png
 draft: false
 ---
 
