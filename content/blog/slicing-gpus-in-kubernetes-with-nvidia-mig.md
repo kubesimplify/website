@@ -7,6 +7,7 @@ slug: slicing-gpus-in-kubernetes-with-nvidia-mig
 author: shubham-katara
 cover: /img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/cover.png
 tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
+draft: true
 ---
 
 GPUs are the most expensive thing in your cluster and the worst shared. A CPU can be divided into millicores. Memory can be requested byte by byte. But ask Kubernetes for a GPU and you get the whole card, all 96GB of it, even if your model needs 20GB.
@@ -71,7 +72,7 @@ To follow along, you will need root access to a GPU node and admin access to a K
 - **Kubernetes:** v1.35.6
 - **GPU Operator Chart:** gpu-operator-v26.3.3
 - **Container Runtime:** `containerd`.
-- **CPUs:** 64 Cores.
+- **CPUs:** 256 Cores.
 - **RAM:** 1259GB.
 - **GPUs:** 8x NVIDIA RTX PRO 6000 Blackwell Server Edition (96GB VRAM, 188 Streaming Multiprocessors / SMs per card).
 - **NVIDIA Host Driver:** `610.43.02` with **CUDA:** `13.3`.
@@ -158,10 +159,12 @@ Also make sure no CUDA workload (an Ollama server, a Jupyter kernel, anything) i
 ```sh
 root@gpu-rtxpro6000-8:~# sudo nvidia-smi -i 0 -mig 1
 Enabled MIG Mode for GPU 00000000:01:00.0
+
+Warning: persistence mode is disabled on device 00000000:01:00.0. See the Known Issues section of the nvidia-smi(1) man page for more information. Run with [--help | -h] switch to get more information on how to enable persistence mode.
 All done.
 ```
 
-If the driver cannot flip the mode because a client is still attached, it reports the GPU as being in a *pending enable* state instead. Kill the remaining clients (or reboot) and the mode activates.
+The warning is expected: we stopped `nvidia-persistenced` ourselves one step ago, and the driver is just pointing that out. If the driver cannot flip the mode because a client is still attached, it reports the GPU as being in a *pending enable* state instead. Kill the remaining clients (or reboot) and the mode activates.
 
 At this point the GPU is in MIG mode but has zero slices, which means **no CUDA workload can use it at all** until you carve instances. An enabled-but-empty MIG GPU is effectively offline for compute. Do not stop halfway.
 
@@ -171,46 +174,71 @@ Ask the driver what shapes it can cut:
 
 ```sh
 root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lgip
-+-----------------------------------------------------------------------------+
-| GPU instance profiles:                                                      |
-| GPU   Name             ID    Instances   Memory     P2P    SM    DEC   ENC  |
-|                              Free/Total   GiB              CE    JPEG  OFA  |
-|=============================================================================|
-|   0  MIG 1g.24gb       14     4/4        23.62      No     46     1     1   |
-|                                                             1     1     0   |
-+-----------------------------------------------------------------------------+
-|   0  MIG 1g.24gb+me    21     1/1        23.62      No     46     1     1   |
-|                                                             1     1     1   |
-+-----------------------------------------------------------------------------+
-|   0  MIG 1g.24gb-me    67     4/4        23.62      No     46     0     0   |
-|                                                             1     0     0   |
-+-----------------------------------------------------------------------------+
-|   0  MIG 2g.48gb        5     2/2        47.38      No     94     2     2   |
-|                                                             2     2     0   |
-+-----------------------------------------------------------------------------+
-|   0  MIG 4g.96gb        0     1/1        95.00      No    188     4     4   |
-|                                                             4     4     1   |
-+-----------------------------------------------------------------------------+
++-------------------------------------------------------------------------------+
+| GPU instance profiles:                                                        |
+| GPU   Name               ID    Instances   Memory     P2P    SM    DEC   ENC  |
+|                                Free/Total   GiB              CE    JPEG  OFA  |
+|===============================================================================|
+|   0  MIG 1g.24gb         14     4/4        23.62      No     46     1     1   |
+|                                                               1     1     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.24gb+me      21     1/1        23.62      No     46     1     1   |
+|                                                               1     1     1   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.24gb+gfx     47     4/4        23.62      No     46     1     1   |
+|                                                               1     1     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.24gb+me.all  65     1/1        23.62      No     46     4     4   |
+|                                                               1     4     1   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.24gb-me      67     4/4        23.62      No     46     0     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 2g.48gb          5     2/2        47.38      No     94     2     2   |
+|                                                               2     2     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 2g.48gb+gfx     35     2/2        47.38      No     94     2     2   |
+|                                                               2     2     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 2g.48gb+me.all  64     1/1        47.38      No     94     4     4   |
+|                                                               2     4     1   |
++-------------------------------------------------------------------------------+
+|   0  MIG 2g.48gb-me      66     2/2        47.38      No     94     0     0   |
+|                                                               2     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 4g.96gb          0     1/1        95.12      No     188    4     4   |
+|                                                               4     4     1   |
++-------------------------------------------------------------------------------+
+|   0  MIG 4g.96gb+gfx     32     1/1        95.12      No     188    4     4   |
+|                                                               4     4     1   |
++-------------------------------------------------------------------------------+
 ```
-
-(Output trimmed; the card also lists `+gfx` and `+me.all` variants.)
 
 Read this table carefully, it is the source of truth for your card:
 
 - **ID** is the numeric profile ID you can use in create commands (`14` and the name `1g.24gb` are interchangeable).
 - **Instances Free/Total** tells you how many of each profile fit: four 1g.24gb slices, or two 2g.48gb, or one 4g.96gb.
 - **SM** confirms the compute split: 46/94/188 SMs.
+- The suffixed variants control the media engines and graphics support: `+me` bundles the video decode/encode units (only one instance can own them, hence 1/1), `+me.all` grabs all four of them, `-me` is pure compute, and `+gfx` (new on Blackwell) enables graphics APIs inside the slice.
 
 You can also ask where those slices physically land on the card:
 
 ```sh
 root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lgipp
-GPU  0 Profile ID 14 Placements: {0,1,2,3}:1
-GPU  0 Profile ID  5 Placements: {0,2}:2
-GPU  0 Profile ID  0 Placements: {0}:4
+GPU  0 Profile ID 14 Placements: {0,3,6,9}:3
+GPU  0 Profile ID 21 Placements: {0,3,6,9}:3
+GPU  0 Profile ID 47 Placements: {0,3,6,9}:3
+GPU  0 Profile ID 65 Placements: {0,3,6,9}:3
+GPU  0 Profile ID 67 Placements: {0,3,6,9}:3
+GPU  0 Profile ID  5 Placements: {0,6}:6
+GPU  0 Profile ID 35 Placements: {0,6}:6
+GPU  0 Profile ID 64 Placements: {0,6}:6
+GPU  0 Profile ID 66 Placements: {0,6}:6
+GPU  0 Profile ID  0 Placement : {0}:12
+GPU  0 Profile ID 32 Placement : {0}:12
 ```
 
-The notation `{0,1,2,3}:1` means a 1-slice profile can start at positions 0 through 3. This matters when you mix profile sizes: a 2g.48gb slice can only start at position 0 or 2, so a bad creation order can leave holes you cannot fill.
+The card's memory is organized as a grid of 12 placement units. The notation `{0,3,6,9}:3` means a `1g.24gb` slice occupies 3 units and can start at position 0, 3, 6, or 9. A `2g.48gb` occupies 6 units and can only start at 0 or 6, and the full-card `4g.96gb` takes all 12. This matters when you mix profile sizes: create slices in the wrong order and you can fragment the grid so a big slice no longer fits, even though enough total memory is free.
 
 ### Step 4: Carve the slices
 
@@ -234,9 +262,28 @@ You do not have to make them all the same size. Want one big tenant and two smal
 
 ```sh
 root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -i 0 -cgi 2g.48gb,1g.24gb,1g.24gb -C
+Successfully created GPU instance ID  1 on GPU  0 using profile MIG 2g.48gb (ID  5)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  1 using profile MIG 2g.48gb (ID  1)
+Successfully created GPU instance ID  5 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  5 using profile MIG 1g.24gb (ID  0)
+Successfully created GPU instance ID  6 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  6 using profile MIG 1g.24gb (ID  0)
+
+root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lgi
++---------------------------------------------------------+
+| GPU instances:                                          |
+| GPU   Name               Profile  Instance   Placement  |
+|                            ID       ID       Start:Size |
+|=========================================================|
+|   0  MIG 1g.24gb           14        5          6:3     |
++---------------------------------------------------------+
+|   0  MIG 1g.24gb           14        6          9:3     |
++---------------------------------------------------------+
+|   0  MIG 2g.48gb            5        1          0:6     |
++---------------------------------------------------------+
 ```
 
-That yields one 48GB half-card slice plus two 24GB quarter-card slices. This is how you serve a large LLM and two small inference services from a single physical GPU with hard boundaries between them.
+One 48GB half-card slice (placement 0:6) plus two 24GB quarter-card slices (6:3 and 9:3), and the placement grid adds up to exactly 12. This is how you serve a large LLM and two small inference services from a single physical GPU with hard boundaries between them. For the rest of this walkthrough we stick with the uniform four-slice layout, so tear the mixed one down (`-dci`, then `-dgi`) and recreate the four `1g.24gb` slices if you followed along.
 
 ### Step 5: Verify the slices exist
 
@@ -259,19 +306,22 @@ The GPU instances (the land plots) with their physical placements:
 
 ```sh
 root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lgi
-+-------------------------------------------------------+
-| GPU instances:                                        |
-| GPU   Name             Profile  Instance   Placement  |
-|                          ID       ID       Start:Size |
-|=======================================================|
-|   0  MIG 1g.24gb         14        3          0:1     |
-|   0  MIG 1g.24gb         14        4          1:1     |
-|   0  MIG 1g.24gb         14        5          2:1     |
-|   0  MIG 1g.24gb         14        6          3:1     |
-+-------------------------------------------------------+
++---------------------------------------------------------+
+| GPU instances:                                          |
+| GPU   Name               Profile  Instance   Placement  |
+|                            ID       ID       Start:Size |
+|=========================================================|
+|   0  MIG 1g.24gb           14        3          0:3     |
++---------------------------------------------------------+
+|   0  MIG 1g.24gb           14        4          3:3     |
++---------------------------------------------------------+
+|   0  MIG 1g.24gb           14        5          6:3     |
++---------------------------------------------------------+
+|   0  MIG 1g.24gb           14        6          9:3     |
++---------------------------------------------------------+
 ```
 
-And the compute instances (the buildings) inside them:
+Each instance occupies 3 units of the 12-unit placement grid, exactly as `-lgipp` promised. And the compute instances (the buildings) inside them:
 
 ```sh
 root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lci
@@ -281,30 +331,32 @@ root@gpu-rtxpro6000-8:~# nvidia-smi mig -i 0 -lci
 |       Instance                       ID        ID       Start:Size |
 |         ID                                                         |
 |====================================================================|
-|   0      3       MIG 1g.24gb          0*        0          0:1     |
-|   0      4       MIG 1g.24gb          0*        0          0:1     |
-|   0      5       MIG 1g.24gb          0*        0          0:1     |
-|   0      6       MIG 1g.24gb          0*        0          0:1     |
+|   0      3       MIG 1g.24gb          0         0          0:1     |
++--------------------------------------------------------------------+
+|   0      4       MIG 1g.24gb          0         0          0:1     |
++--------------------------------------------------------------------+
+|   0      5       MIG 1g.24gb          0         0          0:1     |
++--------------------------------------------------------------------+
+|   0      6       MIG 1g.24gb          0         0          0:1     |
 +--------------------------------------------------------------------+
 ```
 
 ### Step 6: Run something on a slice (no Kubernetes needed)
 
-MIG slices are addressable directly from the host via their UUID. This is handy for smoke-testing before the cluster ever gets involved:
+MIG slices are addressable directly from the host via their UUID. This is handy for smoke-testing before the cluster ever gets involved. With PyTorch available on the host (a quick `python3 -m venv` plus `pip install torch --index-url https://download.pytorch.org/whl/cu130` is enough), pin a process to the first slice's UUID from `nvidia-smi -L`:
 
 ```sh
-root@gpu-rtxpro6000-8:~# CUDA_VISIBLE_DEVICES=MIG-445da789-865d-5fd1-b2b6-32a48bf66c39 python3 -c \
-  "import torch; print(torch.cuda.get_device_name(0))"
-NVIDIA RTX PRO 6000 Blackwell Server Edition MIG 1g.24gb
+root@gpu-rtxpro6000-8:~# CUDA_VISIBLE_DEVICES=MIG-445da789-865d-5fd1-b2b6-32a48bf66c39 python3 -c "
+import torch
+print('device count:', torch.cuda.device_count())
+print('device name :', torch.cuda.get_device_name(0))
+print('total memory:', torch.cuda.get_device_properties(0).total_memory // 2**20, 'MiB')"
+device count: 1
+device name : NVIDIA RTX PRO 6000 Blackwell Server Edition MIG 1g.24gb
+total memory: 24192 MiB
 ```
 
-The process sees one device that identifies itself as a `1g.24gb` slice, not the 96GB card. Isolation is already in force at the host level.
-
-Finally, bring back the persistence daemon:
-
-```sh
-root@gpu-rtxpro6000-8:~# sudo systemctl start nvidia-persistenced
-```
+The process sees exactly one device, it identifies itself as a `1g.24gb` slice, and it has 24192 MiB, not the 97887 MiB of the full card. Isolation is already in force at the host level, no Kubernetes required.
 
 ### Step 7: Tear it all down (disable MIG)
 
@@ -330,7 +382,15 @@ Successfully destroyed GPU instance ID  5 from GPU  0
 Successfully destroyed GPU instance ID  6 from GPU  0
 ```
 
-If you run `-dgi` before `-dci`, the driver rejects it with an *In use by another client* error. That is the land-and-building rule enforced in silicon.
+If you run `-dgi` before `-dci`, the driver rejects it. This is what actually happens if you try:
+
+```sh
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -i 0 -dgi
+Unable to destroy GPU instance ID  3 from GPU  0: In use by another client
+Failed to destroy GPU instances: In use by another client
+```
+
+That is the land-and-building rule enforced in silicon: the CI still standing on GI 3 is the "another client".
 
 Also note: a slice with a running workload cannot be destroyed. Stop the pods or processes using it first, otherwise `-dci` fails with the same *In use by another client* error.
 
@@ -339,10 +399,12 @@ Now disable MIG mode:
 ```sh
 root@gpu-rtxpro6000-8:~# sudo nvidia-smi -i 0 -mig 0
 Disabled MIG Mode for GPU 00000000:01:00.0
+
+Warning: persistence mode is disabled on device 00000000:01:00.0. See the Known Issues section of the nvidia-smi(1) man page for more information. Run with [--help | -h] switch to get more information on how to enable persistence mode.
 All done.
 ```
 
-And confirm the card is whole again:
+And confirm the card is whole again, then bring back the persistence daemon we stopped in Step 1:
 
 ```sh
 root@gpu-rtxpro6000-8:~# nvidia-smi -i 0 --query-gpu=index,mig.mode.current --format=csv
@@ -351,6 +413,8 @@ index, mig.mode.current
 
 root@gpu-rtxpro6000-8:~# nvidia-smi -L | head -1
 GPU 0: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-8b89b58e-b427-108d-ac50-06138d78fe78)
+
+root@gpu-rtxpro6000-8:~# sudo systemctl start nvidia-persistenced
 ```
 
 One GPU, full lifecycle, both directions. That is the entire mechanical core of MIG.
@@ -375,10 +439,22 @@ Enabled MIG Mode for GPU 00000000:E1:00.0
 All done.
 ```
 
-Carve four slices on every MIG-enabled card in one command, then bring back the persistence daemon:
+(The per-GPU persistence-mode warnings are trimmed here; they are the same one we saw in Part 1.)
+
+Carve four slices on every MIG-enabled card in one command. The same GI IDs 3 through 6 appear on each of the 8 GPUs:
 
 ```sh
 root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -cgi 1g.24gb,1g.24gb,1g.24gb,1g.24gb -C
+Successfully created GPU instance ID  3 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  3 using profile MIG 1g.24gb (ID  0)
+Successfully created GPU instance ID  4 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  4 using profile MIG 1g.24gb (ID  0)
+Successfully created GPU instance ID  5 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  5 using profile MIG 1g.24gb (ID  0)
+Successfully created GPU instance ID  6 on GPU  0 using profile MIG 1g.24gb (ID 14)
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  6 using profile MIG 1g.24gb (ID  0)
+... (identical output repeats for GPU 1 through GPU 7) ...
+
 root@gpu-rtxpro6000-8:~# sudo systemctl start nvidia-persistenced
 ```
 
@@ -431,12 +507,34 @@ GPU 7: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-f4c61521-240a-da0
 
 Each physical card can now serve 4 tenants independently, each with a hardware-isolated slice. Across 8 cards, that is 32 schedulable GPUs where you previously had 8, and you did not buy a single new card.
 
-The fleet-wide teardown is the same story without `-i`, in the same strict order:
+The fleet-wide teardown is the same story without `-i`, in the same strict order. First all compute instances, then all GPU instances (32 "Successfully destroyed" lines each, trimmed to the last GPU here), then the mode itself:
 
 ```sh
-root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -dci      # destroy all compute instances, all GPUs
-root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -dgi      # destroy all GPU instances, all GPUs
-root@gpu-rtxpro6000-8:~# sudo nvidia-smi -mig 0        # disable MIG mode everywhere
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -dci
+...
+Successfully destroyed compute instance ID  0 from GPU  7 GPU instance ID  3
+Successfully destroyed compute instance ID  0 from GPU  7 GPU instance ID  4
+Successfully destroyed compute instance ID  0 from GPU  7 GPU instance ID  5
+Successfully destroyed compute instance ID  0 from GPU  7 GPU instance ID  6
+
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi mig -dgi
+...
+Successfully destroyed GPU instance ID  3 from GPU  7
+Successfully destroyed GPU instance ID  4 from GPU  7
+Successfully destroyed GPU instance ID  5 from GPU  7
+Successfully destroyed GPU instance ID  6 from GPU  7
+
+root@gpu-rtxpro6000-8:~# sudo nvidia-smi -mig 0
+Disabled MIG Mode for GPU 00000000:01:00.0
+Disabled MIG Mode for GPU 00000000:21:00.0
+Disabled MIG Mode for GPU 00000000:41:00.0
+Disabled MIG Mode for GPU 00000000:61:00.0
+Disabled MIG Mode for GPU 00000000:81:00.0
+Disabled MIG Mode for GPU 00000000:A1:00.0
+Disabled MIG Mode for GPU 00000000:C1:00.0
+Disabled MIG Mode for GPU 00000000:E1:00.0
+All done.
+
 root@gpu-rtxpro6000-8:~# nvidia-smi --query-gpu=index,mig.mode.current --format=csv
 index, mig.mode.current
 0, Disabled

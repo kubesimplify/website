@@ -176,7 +176,6 @@
 /blog/rancher-desktop-evolution                                                        /rancher-desktop-evolution  301!
 /blog/ready-for-wasm-day-2023                                                          /ready-for-wasm-day-2023  301!
 /blog/simplified-introduction-to-bacalhau                                              /simplified-introduction-to-bacalhau  301!
-/blog/slicing-gpus-in-kubernetes-with-nvidia-mig                                       /slicing-gpus-in-kubernetes-with-nvidia-mig  301!
 /blog/speeding-up-using-microk8s                                                       /speeding-up-using-microk8s  301!
 /blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale               /ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale  301!
 /blog/starting-your-devops-journey-as-a-windows-user                                   /starting-your-devops-journey-as-a-windows-user  301!
@@ -387,7 +386,6 @@
 /rancher-desktop-evolution                                                        /blog/rancher-desktop-evolution  200!
 /ready-for-wasm-day-2023                                                          /blog/ready-for-wasm-day-2023  200!
 /simplified-introduction-to-bacalhau                                              /blog/simplified-introduction-to-bacalhau  200!
-/slicing-gpus-in-kubernetes-with-nvidia-mig                                       /blog/slicing-gpus-in-kubernetes-with-nvidia-mig  200!
 /speeding-up-using-microk8s                                                       /blog/speeding-up-using-microk8s  200!
 /ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale               /blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale  200!
 /starting-your-devops-journey-as-a-windows-user                                   /blog/starting-your-devops-journey-as-a-windows-user  200!
