@@ -872,11 +872,6 @@
       "permanent": true
     },
     {
-      "source": "/blog/slicing-gpus-in-kubernetes-with-nvidia-mig",
-      "destination": "https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig",
-      "permanent": true
-    },
-    {
       "source": "/blog/speeding-up-using-microk8s",
       "destination": "https://blog.kubesimplify.com/speeding-up-using-microk8s",
       "permanent": true
@@ -2786,17 +2781,6 @@
     {
       "source": "/simplified-introduction-to-bacalhau",
       "destination": "https://blog.kubesimplify.com/simplified-introduction-to-bacalhau",
-      "permanent": true,
-      "has": [
-        {
-          "type": "host",
-          "value": "kubesimplify.com"
-        }
-      ]
-    },
-    {
-      "source": "/slicing-gpus-in-kubernetes-with-nvidia-mig",
-      "destination": "https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig",
       "permanent": true,
       "has": [
         {
