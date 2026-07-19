@@ -41,23 +41,51 @@ The fix is GPU sharing. But "sharing a GPU" means very different things dependin
 
 ## The Three Ways to Share a GPU
 
-NVIDIA gives you three mechanisms to put more than one workload on a card. They differ in one crucial dimension: how much one workload can hurt another.
+NVIDIA gives you three mechanisms to put more than one workload on a card. To understand why they behave so differently, you first need to know what actually happens when a process uses a GPU.
+
+### First: How a Process Talks to a GPU
+
+When a program calls its first CUDA function (a PyTorch `tensor.cuda()`, a TensorFlow session, anything), the driver creates a **CUDA context** for it on the GPU. Think of the context as the GPU-side equivalent of an operating system process: it owns the program's VRAM allocations and their page tables, its streams, and its pending kernel launches. Every CUDA process gets its own context, and contexts cannot see into each other's memory.
+
+When that program launches a kernel, the work is chopped into thread blocks, and the GPU's scheduler sprays those blocks across the Streaming Multiprocessors (SMs), the hardware units that execute the math.
+
+Here is the detail that makes GPU sharing interesting: **by default, only one CUDA context executes on the GPU at a time.** If your kernel only keeps 20 of the card's 188 SMs busy, the other 168 sit idle anyway, because they belong to your context's turn. Another process's kernels cannot sneak onto the idle SMs; that process's whole context has to wait for its own turn. A GPU is, out of the box, a single-tenant machine.
+
+Every sharing mechanism is an answer to this one problem, and each answers it at a different layer:
 
 ![The GPU sharing spectrum: time-slicing, MPS, and MIG compared](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/gpu-sharing-spectrum.png)
 
-**1. Time-slicing.** The GPU rapidly context-switches between processes, the same way a single CPU core runs many threads. The device plugin can advertise one GPU as, say, 4 "replicas", and Kubernetes happily schedules 4 pods onto it. But there is no isolation at all: every process sees the full VRAM, nothing stops one pod from allocating all of it, and a single out-of-memory error can take down every workload on the card. Context switching also wastes cycles. Time-slicing is fine for dev clusters and bursty, trusted workloads. It is not a tenant isolation story.
+### Time-Slicing: Contexts Take Turns
 
-**2. MPS (Multi-Process Service).** MPS lets multiple processes submit work to the GPU concurrently instead of taking turns, which improves utilization for many small kernels. You can cap each client's compute and memory. But all clients share a single GPU context: memory limits are opt-in rather than enforced by hardware, and a crashing client can still corrupt the shared context and bring down its neighbors. Better throughput than time-slicing, still soft isolation.
+Time-slicing accepts the one-context-at-a-time rule and just makes the turns short. The driver rapidly context-switches the GPU between processes, exactly the way a single CPU core runs many threads. In Kubernetes, the device plugin can advertise one GPU as, say, 4 "replicas", and 4 pods land on it, each with its own CUDA context taking turns on the whole card.
 
-**3. MIG (Multi-Instance GPU).** MIG partitions the physical GPU at the silicon level. Each instance gets its own dedicated VRAM slice with its own memory controllers, its own Streaming Multiprocessors, and its own fault domain. A crash in one instance cannot touch the others. An OOM in one instance is contained to that instance. To the workload, the slice looks like a smaller dedicated GPU with a stable, predictable performance profile.
+Concretely: pod A runs its kernels for a scheduling quantum while pods B and C are frozen, then the GPU performs a full context switch (drain A's work, swap in B's state) and B gets the card. Nothing runs in parallel. The context switches themselves burn cycles, and a pod that launches one long-running kernel can sit on its turn while everyone else's latency spikes.
+
+The bigger problem is what is *not* partitioned: memory. All those contexts allocate from the same 96GB VRAM pool with no quota. If pod A leaks memory until the pool is exhausted, pod B's next `cudaMalloc` fails and B crashes, even though B did nothing wrong. And a fatal fault that forces a GPU reset takes down every pod on the card. Time-slicing is fine for dev clusters and bursty, trusted workloads. It is not a tenant isolation story.
+
+### MPS: Many Processes Pretend to Be One
+
+MPS (Multi-Process Service) attacks the idle-SM waste directly with a clever trick: if only one context can execute at a time, then let everyone share **one context**. An MPS server process sits between the clients and the GPU. Client processes hand their kernel launches to the server, and the server submits all of them through its own single GPU context. From the hardware's point of view there is just one well-behaved tenant; in reality its work is a merge of everybody's kernels.
+
+Because it all lives in one context, kernels from different processes now genuinely run **at the same time on different SMs**. Three inference services that each keep 20% of the SMs busy stack up to 60% utilization instead of each waiting for a turn. This is space-sharing instead of time-sharing, and for lots of small kernels it is a real throughput win.
+
+But the same trick is also the weakness. The isolation you normally get from separate contexts is gone, replaced by bookkeeping inside the MPS server. Per-client SM and memory caps exist (`CUDA_MPS_ACTIVE_THREAD_PERCENTAGE`, `CUDA_MPS_PINNED_DEVICE_MEM_LIMIT`), but they are opt-in environment variables, not hardware walls. And the fault domain is shared: one client hitting a fatal error (an illegal memory access, say) can bring down the MPS server itself, and when the server dies, every client's "GPU" disappears mid-flight. Better throughput than time-slicing, still soft isolation, best kept inside a single trust boundary, one team sharing a card with itself.
+
+### MIG: Split the Silicon
+
+MIG (Multi-Instance GPU) stops playing scheduling games and changes the hardware answer instead. It partitions the physical GPU at the silicon level: each instance gets its own dedicated VRAM slice with its own memory controllers and L2 cache portion, its own set of SMs, and its own fault domain. Each slice runs its *own* CUDA contexts, concurrently with the other slices, because each slice genuinely is a smaller GPU as far as the execution hardware is concerned.
+
+That changes all three failure stories at once. OOM? A slice's contexts allocate only from that slice's 24GB; exhaust it and only that tenant fails. Noisy neighbor? A slice's kernels physically cannot touch another slice's SMs, and because the memory bandwidth is partitioned too, your latency does not jitter when the neighbor gets busy. Crash? Fault containment is per slice; the other slices never notice. To the workload, the slice just looks like a smaller dedicated GPU with a stable, predictable performance profile.
 
 | | Time-slicing | MPS | MIG |
 | --- | --- | --- | --- |
+| The trick | Contexts take turns, fast | Everyone shares one context | Split the hardware itself |
+| Parallelism | None (serialized turns) | Real (space-sharing SMs) | Real (separate silicon) |
 | Isolation | None | Software (shared context) | Hardware (silicon level) |
-| Memory protection | None | Opt-in limits | Enforced by hardware |
-| Fault blast radius | Whole card | Whole card | One slice |
+| Memory protection | None, one shared pool | Opt-in limits | Enforced by hardware |
+| Fault blast radius | Whole card | Whole card (server dies, all die) | One slice |
 | Performance | Variable, context-switch overhead | Good for small kernels | Predictable, dedicated units |
-| Best for | Dev/test, trusted bursty jobs | Many small kernels from one team | Shared platforms with real tenant boundaries |
+| Best for | Dev/test, trusted bursty jobs | One team packing its own card | Shared platforms with real tenant boundaries |
 
 If you are building a platform where different teams, customers, or environments share the same silicon, MIG is the only option of the three that gives you a hardware guarantee instead of a promise. That is the mechanism this post is about.
 
