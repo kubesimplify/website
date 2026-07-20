@@ -11,7 +11,7 @@ tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
 draft: true
 sponsor:
   name: Utho
-  url: "https://utho.com/?utm_source=Kubesimplify&utm_medium=docs&utm_campaign=S"
+  url: "https://utho.com/?utm_source=Kubesimplify&utm_medium=docs&utm_campaign=Saiyam"
   # logoLight = navy mark (shown on light theme); logoDark = white mark (shown on dark theme)
   logoLight: /img/sponsors/utho-logo-light.png
   logoDark: /img/sponsors/utho-logo-dark.png
