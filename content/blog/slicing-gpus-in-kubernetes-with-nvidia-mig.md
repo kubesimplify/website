@@ -2,7 +2,7 @@
 title: "Slicing GPUs in Kubernetes with NVIDIA Multi-Instance GPU (MIG)"
 seoTitle: "NVIDIA MIG on Kubernetes: GPU Sharing Done Right, From 8 GPUs to 32 Isolated Slices"
 seoDescription: "GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring."
-datePublished: 2026-07-15T10:00:00.000Z
+datePublished: 2026-07-20T10:00:00.000Z
 slug: slicing-gpus-in-kubernetes-with-nvidia-mig
 author: shubham-katara
 authors: ["shubham-katara", "saiyam-pathak"]

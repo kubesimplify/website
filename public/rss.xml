@@ -6,8 +6,16 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 17 Jul 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 20 Jul 2026 10:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>Slicing GPUs in Kubernetes with NVIDIA Multi-Instance GPU (MIG)</title>
+      <link>https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig</guid>
+      <pubDate>Mon, 20 Jul 2026 10:00:00 GMT</pubDate>
+      <description>GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring.</description>
+      <category>kubernetes</category><category>gpu</category><category>nvidia</category><category>platform-engineering</category>
+    </item>
     <item>
       <title>Day 5: Local LLM Inference Engines, Wrappers, and What to Pick</title>
       <link>https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick</link>
@@ -23,14 +31,6 @@
       <pubDate>Thu, 16 Jul 2026 00:00:00 GMT</pubDate>
       <description>Real Bonsai 27B benchmarks on an RTX PRO 6000 and a DGX Spark, including the supported llama.cpp setup, ternary vs 1-bit results, and speculative decoding.</description>
       <category>ai</category><category>gpu</category><category>llm</category><category>inference</category><category>benchmarks</category>
-    </item>
-    <item>
-      <title>Slicing GPUs in Kubernetes with NVIDIA Multi-Instance GPU (MIG)</title>
-      <link>https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig</link>
-      <guid isPermaLink="true">https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig</guid>
-      <pubDate>Wed, 15 Jul 2026 10:00:00 GMT</pubDate>
-      <description>GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring.</description>
-      <category>kubernetes</category><category>gpu</category><category>nvidia</category><category>platform-engineering</category>
     </item>
     <item>
       <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>
