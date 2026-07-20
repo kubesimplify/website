@@ -12,9 +12,9 @@ draft: true
 sponsor:
   name: Utho
   url: "https://utho.com/?utm_source=Kubesimplify&utm_medium=docs&utm_campaign=S"
-  # logoLight = dark-navy mark (shown on light theme); logoDark = white mark (shown on dark theme)
-  logoLight: /img/sponsors/utho-dark.svg
-  logoDark: /img/sponsors/utho-light.svg
+  # logoLight = navy mark (shown on light theme); logoDark = white mark (shown on dark theme)
+  logoLight: /img/sponsors/utho-logo-light.png
+  logoDark: /img/sponsors/utho-logo-dark.png
   blurb: "This deep dive ran on an 8x NVIDIA RTX PRO 6000 Blackwell node from Utho Cloud. If you need GPU infrastructure to run workloads like these, take a look."
 ---
 
