@@ -1,0 +1,49 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Day 5 local LLM inference engines cover</title>
+  <desc id="desc">Cover art showing the same local LLM served through Ollama, llama.cpp, Docker Model Runner, vLLM, SGLang, and TensorRT-LLM on DGX Spark.</desc>
+  <rect width="1200" height="630" fill="#07111f"/>
+  <circle cx="1020" cy="95" r="220" fill="#76B900" opacity="0.14"/>
+  <circle cx="118" cy="560" r="260" fill="#0ea5e9" opacity="0.14"/>
+  <path d="M0 444 C 190 360, 358 396, 540 314 C 715 235, 892 240, 1200 126" stroke="#76B900" stroke-width="2" opacity="0.35"/>
+  <path d="M0 485 C 220 392, 400 430, 595 335 C 780 246, 928 268, 1200 166" stroke="#38BDF8" stroke-width="2" opacity="0.22"/>
+
+  <g transform="translate(78 78)">
+    <text x="0" y="20" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800" fill="#76B900">7 Days of Local LLM</text>
+    <text x="0" y="100" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="950" fill="#F8FAFC">Day 5:</text>
+    <text x="0" y="180" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="950" fill="#F8FAFC">Inference</text>
+    <text x="0" y="260" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="950" fill="#F8FAFC">Engines</text>
+    <text x="0" y="330" font-family="Inter, Arial, sans-serif" font-size="27" font-weight="650" fill="#CBD5E1">Same Qwen model. Six serving paths.</text>
+    <text x="0" y="366" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="650" fill="#CBD5E1">From first token to production throughput</text>
+    <text x="0" y="488" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="900" fill="#F8FAFC">Kubesimplify</text>
+  </g>
+
+  <g transform="translate(690 118)">
+    <rect x="0" y="0" width="390" height="390" rx="22" fill="#111827" stroke="#334155" stroke-width="2"/>
+    <rect x="38" y="38" width="314" height="54" rx="10" fill="#172554" stroke="#38BDF8" stroke-width="2"/>
+    <text x="195" y="72" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900" fill="#E0F2FE">OpenAI-style API</text>
+
+    <rect x="52" y="132" width="125" height="62" rx="10" fill="#16340d" stroke="#76B900" stroke-width="2"/>
+    <text x="114" y="169" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="900" fill="#ECFCCB">Ollama</text>
+
+    <rect x="213" y="132" width="125" height="62" rx="10" fill="#14213d" stroke="#38BDF8" stroke-width="2"/>
+    <text x="276" y="169" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="900" fill="#E0F2FE">vLLM</text>
+
+    <rect x="52" y="224" width="125" height="62" rx="10" fill="#2b1948" stroke="#A855F7" stroke-width="2"/>
+    <text x="114" y="261" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="900" fill="#F3E8FF">SGLang</text>
+
+    <rect x="213" y="224" width="125" height="62" rx="10" fill="#3b2104" stroke="#F59E0B" stroke-width="2"/>
+    <text x="276" y="251" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900" fill="#FEF3C7">TRT-LLM</text>
+    <text x="276" y="273" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900" fill="#FEF3C7">NIM</text>
+
+    <rect x="95" y="325" width="200" height="38" rx="9" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+    <text x="195" y="350" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="850" fill="#F8FAFC">DGX Spark GB10</text>
+
+    <path d="M195 92 V118" stroke="#64748B" stroke-width="3"/>
+    <path d="M195 118 H114 V132" stroke="#64748B" stroke-width="3"/>
+    <path d="M195 118 H276 V132" stroke="#64748B" stroke-width="3"/>
+    <path d="M114 194 V224" stroke="#64748B" stroke-width="3"/>
+    <path d="M276 194 V224" stroke="#64748B" stroke-width="3"/>
+    <path d="M114 286 V325" stroke="#64748B" stroke-width="3"/>
+    <path d="M276 286 V325" stroke="#64748B" stroke-width="3"/>
+  </g>
+</svg>

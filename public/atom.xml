@@ -5,11 +5,37 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-07-17T17:31:01.043Z</updated>
+  <updated>2026-07-20T06:20:48.459Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>Day 5: Local LLM Inference Engines, Wrappers, and What to Pick</title>
+    <link href="https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick"/>
+    <id>https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick</id>
+    <updated>2026-07-17T00:00:00.000Z</updated>
+    <published>2026-07-17T00:00:00.000Z</published>
+    <summary>A beginner-friendly guide to local LLM inference, with the same Qwen model tested through Ollama, llama.cpp, Docker Model Runner, vLLM, SGLang, and TensorRT-LLM on NVIDIA DGX Spark.</summary>
+    <category term="nvidia"/>
+    <category term="dgxspark"/>
+    <category term="local-ai"/>
+    <category term="llm"/>
+    <category term="inference"/>
+  </entry>
+  <entry>
+    <title>Bonsai 27B on RTX PRO 6000 vs DGX Spark: what actually works</title>
+    <link href="https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark"/>
+    <id>https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark</id>
+    <updated>2026-07-16T00:00:00.000Z</updated>
+    <published>2026-07-16T00:00:00.000Z</published>
+    <summary>Real Bonsai 27B benchmarks on an RTX PRO 6000 and a DGX Spark, including the supported llama.cpp setup, ternary vs 1-bit results, and speculative decoding.</summary>
+    <category term="ai"/>
+    <category term="gpu"/>
+    <category term="llm"/>
+    <category term="inference"/>
+    <category term="benchmarks"/>
+  </entry>
   <entry>
     <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>
     <link href="https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers"/>

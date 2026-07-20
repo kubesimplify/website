@@ -9,7 +9,7 @@ tags: ["nvidia", "dgxspark", "local-ai", "llm", "ai-infrastructure"]
 cover: /img/blog/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter/cover.png
 ---
 
-*Day 1 of "7 Days of DGX Spark". A field guide to running serious LLMs on a $4,699 box on your desk. Real concepts, real demos, real numbers.*
+*Day 1 of "7 Days of Local LLM". A field guide to running serious LLMs on a $4,699 box on your desk. Real concepts, real demos, real numbers.*
 
 ---
 
@@ -17,7 +17,7 @@ In 2019, training a model the size of GPT-2 cost about $43,000 and took a multi-
 
 That sentence has been waiting to be true for a long time. Let me show you why it is, what changed, and what your desk now does that used to need a datacenter.
 
-This series, "7 Days of DGX Spark," is going to walk you through the local LLM revolution from the ground up. Today is the why. Next, we look at what actually happens inside a single LLM request, then we open the Spark itself. By the end of the week you'll know enough to set up your own local AI lab, pick the right model for the right job, and tell the difference between marketing tok/s and real-world tok/s.
+This series, "7 Days of Local LLM," is going to walk you through the local LLM revolution from the ground up. Today is the why. Next, we look at what actually happens inside a single LLM request, then we open the Spark itself. By the end of the week you'll know enough to set up your own local AI lab, pick the right model for the right job, and tell the difference between marketing tok/s and real-world tok/s.
 
 **Quick refresher (skip if you already know this).** A Large Language Model is a neural network trained on huge amounts of text. The model holds billions of learned numbers called **parameters** (or **weights**). When you give it a prompt, it produces output one **token** at a time (a token is a small chunk of text, roughly 3-4 characters). When people say "Llama 3.3 70B," the 70B means 70 billion parameters: bigger usually means smarter but slower and hungrier for memory. Running the model on your hardware is called **inference**, and the speed is measured in tokens per second (**tok/s**). We'll unpack request mechanics, number formats like BF16, and model sizing later in the series.
 

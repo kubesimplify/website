@@ -157,6 +157,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/bonsai-27b-rtx-pro-6000-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark",
+      "permanent": true
+    },
+    {
       "source": "/blog/breaking-down-docker",
       "destination": "https://blog.kubesimplify.com/breaking-down-docker",
       "permanent": true
@@ -274,6 +279,11 @@
     {
       "source": "/blog/day-5-docker-compose-how-docker-actually-gets-used",
       "destination": "https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used",
+      "permanent": true
+    },
+    {
+      "source": "/blog/day-5-local-llm-inference-engines-wrappers-and-what-to-pick",
+      "destination": "https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick",
       "permanent": true
     },
     {
@@ -1217,6 +1227,17 @@
       ]
     },
     {
+      "source": "/bonsai-27b-rtx-pro-6000-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
       "source": "/breaking-down-docker",
       "destination": "https://blog.kubesimplify.com/breaking-down-docker",
       "permanent": true,
@@ -1472,6 +1493,17 @@
     {
       "source": "/day-5-docker-compose-how-docker-actually-gets-used",
       "destination": "https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/day-5-local-llm-inference-engines-wrappers-and-what-to-pick",
+      "destination": "https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick",
       "permanent": true,
       "has": [
         {

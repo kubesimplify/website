@@ -33,6 +33,7 @@
 /blog/bake-your-container-images-with-bake                                             /bake-your-container-images-with-bake  301!
 /blog/become-a-hashicorp-certified-terraform-associate-preparation-guide               /become-a-hashicorp-certified-terraform-associate-preparation-guide  301!
 /blog/best-devops-tools-2025                                                           /best-devops-tools-2025  301!
+/blog/bonsai-27b-rtx-pro-6000-dgx-spark                                                /bonsai-27b-rtx-pro-6000-dgx-spark  301!
 /blog/breaking-down-docker                                                             /breaking-down-docker  301!
 /blog/building-a-zero-cve-strategy                                                     /building-a-zero-cve-strategy  301!
 /blog/building-apigateway-with-lambda-using-pulumi                                     /building-apigateway-with-lambda-using-pulumi  301!
@@ -57,6 +58,7 @@
 /blog/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world          /day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world  301!
 /blog/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters /day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters  301!
 /blog/day-5-docker-compose-how-docker-actually-gets-used                               /day-5-docker-compose-how-docker-actually-gets-used  301!
+/blog/day-5-local-llm-inference-engines-wrappers-and-what-to-pick                      /day-5-local-llm-inference-engines-wrappers-and-what-to-pick  301!
 /blog/day-6-run-an-llm-on-your-laptop-with-docker                                      /day-6-run-an-llm-on-your-laptop-with-docker  301!
 /blog/day-7-ship-it-and-what-comes-next                                                /day-7-ship-it-and-what-comes-next  301!
 /blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws                  /deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws  301!
@@ -243,6 +245,7 @@
 /bake-your-container-images-with-bake                                             /blog/bake-your-container-images-with-bake  200!
 /become-a-hashicorp-certified-terraform-associate-preparation-guide               /blog/become-a-hashicorp-certified-terraform-associate-preparation-guide  200!
 /best-devops-tools-2025                                                           /blog/best-devops-tools-2025  200!
+/bonsai-27b-rtx-pro-6000-dgx-spark                                                /blog/bonsai-27b-rtx-pro-6000-dgx-spark  200!
 /breaking-down-docker                                                             /blog/breaking-down-docker  200!
 /building-a-zero-cve-strategy                                                     /blog/building-a-zero-cve-strategy  200!
 /building-apigateway-with-lambda-using-pulumi                                     /blog/building-apigateway-with-lambda-using-pulumi  200!
@@ -267,6 +270,7 @@
 /day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world          /blog/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world  200!
 /day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters /blog/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters  200!
 /day-5-docker-compose-how-docker-actually-gets-used                               /blog/day-5-docker-compose-how-docker-actually-gets-used  200!
+/day-5-local-llm-inference-engines-wrappers-and-what-to-pick                      /blog/day-5-local-llm-inference-engines-wrappers-and-what-to-pick  200!
 /day-6-run-an-llm-on-your-laptop-with-docker                                      /blog/day-6-run-an-llm-on-your-laptop-with-docker  200!
 /day-7-ship-it-and-what-comes-next                                                /blog/day-7-ship-it-and-what-comes-next  200!
 /deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws                  /blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws  200!

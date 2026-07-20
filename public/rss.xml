@@ -6,8 +6,24 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 06 Jul 2026 14:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 17 Jul 2026 00:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>Day 5: Local LLM Inference Engines, Wrappers, and What to Pick</title>
+      <link>https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick</guid>
+      <pubDate>Fri, 17 Jul 2026 00:00:00 GMT</pubDate>
+      <description>A beginner-friendly guide to local LLM inference, with the same Qwen model tested through Ollama, llama.cpp, Docker Model Runner, vLLM, SGLang, and TensorRT-LLM on NVIDIA DGX Spark.</description>
+      <category>nvidia</category><category>dgxspark</category><category>local-ai</category><category>llm</category><category>inference</category>
+    </item>
+    <item>
+      <title>Bonsai 27B on RTX PRO 6000 vs DGX Spark: what actually works</title>
+      <link>https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark</guid>
+      <pubDate>Thu, 16 Jul 2026 00:00:00 GMT</pubDate>
+      <description>Real Bonsai 27B benchmarks on an RTX PRO 6000 and a DGX Spark, including the supported llama.cpp setup, ternary vs 1-bit results, and speculative decoding.</description>
+      <category>ai</category><category>gpu</category><category>llm</category><category>inference</category><category>benchmarks</category>
+    </item>
     <item>
       <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>
       <link>https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers</link>
