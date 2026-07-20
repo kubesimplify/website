@@ -5,6 +5,7 @@ seoDescription: "GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG
 datePublished: 2026-07-15T10:00:00.000Z
 slug: slicing-gpus-in-kubernetes-with-nvidia-mig
 author: shubham-katara
+authors: ["shubham-katara", "saiyam-pathak"]
 cover: /img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/cover.png
 tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
 draft: true
