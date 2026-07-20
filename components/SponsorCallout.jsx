@@ -13,7 +13,8 @@
  */
 export default function SponsorCallout({ sponsor, variant = 'strip' }) {
   if (!sponsor || !sponsor.name || !sponsor.url) return null;
-  const { name, url, blurb } = sponsor;
+  const { name, url, blurb, logoLight, logoDark } = sponsor;
+  const hasLogo = logoLight && logoDark;
 
   if (variant === 'strip') {
     return (
@@ -57,9 +58,18 @@ export default function SponsorCallout({ sponsor, variant = 'strip' }) {
       >
         Thanks to our hardware partner
       </p>
-      <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
-        {name}
-      </h3>
+      {hasLogo ? (
+        <div className="mb-4 flex justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoLight} alt={name} className="sponsor-logo--light h-10 w-auto" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoDark} alt={name} className="sponsor-logo--dark h-10 w-auto" />
+        </div>
+      ) : (
+        <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+          {name}
+        </h3>
+      )}
       {blurb && (
         <p className="text-base mb-6 max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
           {blurb}

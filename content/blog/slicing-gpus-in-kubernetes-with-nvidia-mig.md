@@ -11,8 +11,10 @@ tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
 draft: true
 sponsor:
   name: Utho
-  # TODO: replace with the full Utho UTM link before publishing
-  url: https://utho.com
+  url: "https://utho.com/?utm_source=Kubesimplify&utm_medium=docs&utm_campaign=S"
+  # logoLight = dark-navy mark (shown on light theme); logoDark = white mark (shown on dark theme)
+  logoLight: /img/sponsors/utho-dark.svg
+  logoDark: /img/sponsors/utho-light.svg
   blurb: "This deep dive ran on an 8x NVIDIA RTX PRO 6000 Blackwell node from Utho Cloud. If you need GPU infrastructure to run workloads like these, take a look."
 ---
 
