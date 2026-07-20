@@ -10,6 +10,7 @@ import BlogToc from '@/components/BlogToc';
 import BlogShareBar from '@/components/BlogShareBar';
 import CodeBlockEnhancer from '@/components/CodeBlockEnhancer';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import SponsorCallout from '@/components/SponsorCallout';
 import AuthorSocials from '@/components/AuthorSocials';
 import Comments from '@/components/Comments';
 
@@ -238,6 +239,8 @@ export default async function BlogPost({ params }) {
                 />
               )}
 
+              <SponsorCallout sponsor={post.sponsor} variant="strip" />
+
               <SeriesBanner info={seriesInfo} />
 
               {/* Mobile TOC (desktop has it in the right sidebar) */}
@@ -285,6 +288,8 @@ export default async function BlogPost({ params }) {
                   </div>
                 </section>
               ))}
+
+              <SponsorCallout sponsor={post.sponsor} variant="cta" />
 
               <NewsletterCTA variant="inline" />
 

@@ -9,6 +9,11 @@ authors: ["shubham-katara", "saiyam-pathak"]
 cover: /img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/cover.png
 tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
 draft: true
+sponsor:
+  name: Utho
+  # TODO: replace with the full Utho UTM link before publishing
+  url: https://utho.com
+  blurb: "This deep dive ran on an 8x NVIDIA RTX PRO 6000 Blackwell node from Utho Cloud. If you need GPU infrastructure to run workloads like these, take a look."
 ---
 
 GPUs are the most expensive thing in your cluster and the worst shared. A CPU can be divided into millicores. Memory can be requested byte by byte. But ask Kubernetes for a GPU and you get the whole card, all 96GB of it, even if your model needs 20GB.
@@ -151,9 +156,9 @@ NVIDIA profiles follow the naming scheme `{X}g.{Y}gb`:
 - **`{Y}gb`** is the VRAM partition (the GI layer).
 - **`{X}g`** is the compute slice count.
 
-The RTX PRO 6000 Blackwell has 188 SMs and divides its silicon into **4 base compute slices**. So a **`1g.24gb`** slice gets 1/4th of the card: roughly 47 SMs paired with a 24GB VRAM partition. A `2g.48gb` slice gets half the card, and `4g.96gb` is the full card expressed as a single MIG instance.
+The RTX PRO 6000 Blackwell has 188 SMs and divides its silicon into **4 base compute slices**. So a **`1g.24gb`** slice gets roughly 1/4th of the card: **46 SMs** paired with a 24GB VRAM partition. (It is a hair under a clean quarter because the driver holds a few SMs back, so four slices use 184 of the 188.) A `2g.48gb` slice gets half the card, and `4g.96gb` is the full card expressed as a single MIG instance.
 
-You will also see suffixed variants like `1g.24gb+me` (includes the media engines for video decode/encode) and `1g.24gb-me` (pure compute, no media units). We will see the full list straight from the driver in a moment.
+You will also see suffixed variants like `1g.24gb-me` (a pure-compute slice with the video decode/encode engines stripped out) and `1g.24gb+me.all` (one slice that grabs all of the card's media engines). We will see the full list straight from the driver in a moment.
 
 ## Hands-On Part 1: Slice One GPU, End to End
 
@@ -254,7 +259,7 @@ Read this table carefully, it is the source of truth for your card:
 - **ID** is the numeric profile ID you can use in create commands (`14` and the name `1g.24gb` are interchangeable).
 - **Instances Free/Total** tells you how many of each profile fit: four 1g.24gb slices, or two 2g.48gb, or one 4g.96gb.
 - **SM** confirms the compute split: 46/94/188 SMs.
-- The suffixed variants control the media engines and graphics support: `+me` bundles the video decode/encode units (only one instance can own them, hence 1/1), `+me.all` grabs all four of them, `-me` is pure compute, and `+gfx` (new on Blackwell) enables graphics APIs inside the slice.
+- The suffixed variants redistribute the media engines and graphics support. Every plain slice already gets a proportional share of the media engines (the `1g.24gb` row shows one NVDEC and one NVENC). The suffixes change that: `-me` strips them out for a pure-compute slice, `+me.all` hands a single slice all of the card's decode/encode engines (hence it is limited to 1/1), and `+gfx` (new on Blackwell) enables graphics APIs inside the slice.
 
 You can also ask where those slices physically land on the card:
 
