@@ -267,6 +267,8 @@ export default async function BlogPost({ params }) {
 
               <hr className="my-12" style={{ borderColor: 'var(--border-subtle)' }} />
 
+              <SponsorCallout sponsor={post.sponsor} variant="cta" />
+
               {post.authors.map((a) => (
                 <section key={a.handle} className="glass-card rounded-2xl p-6 mb-10 flex items-start gap-4 flex-wrap">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -288,8 +290,6 @@ export default async function BlogPost({ params }) {
                   </div>
                 </section>
               ))}
-
-              <SponsorCallout sponsor={post.sponsor} variant="cta" />
 
               <NewsletterCTA variant="inline" />
 
