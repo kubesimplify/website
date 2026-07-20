@@ -522,3 +522,9 @@ a:focus-visible, button:focus-visible {
   border-right: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
 }
+
+/* Sponsor logo: show the dark-colored mark on light theme, the white mark on dark theme */
+.sponsor-logo--light { display: inline-block; }
+.sponsor-logo--dark { display: none; }
+.dark .sponsor-logo--light { display: none; }
+.dark .sponsor-logo--dark { display: inline-block; }

@@ -5,7 +5,7 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-07-17T06:43:12.515Z</updated>
+  <updated>2026-07-20T12:12:17.309Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
@@ -35,6 +35,18 @@
     <category term="llm"/>
     <category term="inference"/>
     <category term="benchmarks"/>
+  </entry>
+  <entry>
+    <title>Slicing GPUs in Kubernetes with NVIDIA Multi-Instance GPU (MIG)</title>
+    <link href="https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig"/>
+    <id>https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig</id>
+    <updated>2026-07-15T10:00:00.000Z</updated>
+    <published>2026-07-15T10:00:00.000Z</published>
+    <summary>GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring.</summary>
+    <category term="kubernetes"/>
+    <category term="gpu"/>
+    <category term="nvidia"/>
+    <category term="platform-engineering"/>
   </entry>
   <entry>
     <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>

@@ -10,6 +10,7 @@ import BlogToc from '@/components/BlogToc';
 import BlogShareBar from '@/components/BlogShareBar';
 import CodeBlockEnhancer from '@/components/CodeBlockEnhancer';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import SponsorCallout from '@/components/SponsorCallout';
 import AuthorSocials from '@/components/AuthorSocials';
 import Comments from '@/components/Comments';
 
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }) {
     title: post.seoTitle || post.title,
     description: post.seoDescription || undefined,
     keywords: post.tags,
-    authors: [{ name: post.author.name, url: post.author.url }],
+    authors: post.authors.map((a) => ({ name: a.name, url: a.url })),
     alternates: { canonical: url },
     openGraph: {
       type: 'article',
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }) {
       siteName: SITE.name,
       images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }],
       publishedTime: post.datePublished,
-      authors: [post.author.name],
+      authors: post.authors.map((a) => a.name),
       tags: post.tags,
     },
     twitter: {
@@ -84,15 +85,15 @@ export default async function BlogPost({ params }) {
     dateModified: post.datePublished,
     inLanguage: 'en-US',
     isAccessibleForFree: true,
-    author: {
+    author: post.authors.map((a) => ({
       '@type': 'Person',
-      '@id': post.author.url,
-      name: post.author.name,
-      url: post.author.url,
-      image: post.author.avatar?.startsWith('http') ? post.author.avatar : `${SITE.url}${post.author.avatar}`,
-      sameAs: post.author.sameAs?.length ? post.author.sameAs : undefined,
-      ...(post.author.bio ? { description: post.author.bio } : {}),
-    },
+      '@id': a.url,
+      name: a.name,
+      url: a.url,
+      image: a.avatar?.startsWith('http') ? a.avatar : `${SITE.url}${a.avatar}`,
+      sameAs: a.sameAs?.length ? a.sameAs : undefined,
+      ...(a.bio ? { description: a.bio } : {}),
+    })),
     publisher: {
       '@type': 'Organization',
       '@id': 'https://kubesimplify.com#org',
@@ -189,16 +190,31 @@ export default async function BlogPost({ params }) {
                   </p>
                 )}
                 <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--text-muted)' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={post.author.avatar} alt="" className="w-8 h-8 rounded-full" />
+                  <div className="flex -space-x-2">
+                    {post.authors.map((a) => (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        key={a.handle}
+                        src={a.avatar}
+                        alt=""
+                        className="w-8 h-8 rounded-full ring-2"
+                        style={{ '--tw-ring-color': 'var(--bg-base)' }}
+                      />
+                    ))}
+                  </div>
                   <div>
-                    <Link
-                      href={`/blog/author/${post.author.handle}`}
-                      className="font-semibold hover:text-[var(--accent)] transition-colors"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
-                      {post.author.name}
-                    </Link>
+                    {post.authors.map((a, i) => (
+                      <span key={a.handle}>
+                        {i > 0 && <span className="mx-1">&amp;</span>}
+                        <Link
+                          href={`/blog/author/${a.handle}`}
+                          className="font-semibold hover:text-[var(--accent)] transition-colors"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
+                          {a.name}
+                        </Link>
+                      </span>
+                    ))}
                     <span className="mx-2">·</span>
                     <time dateTime={post.datePublished}>{formatDate(post.datePublished)}</time>
                     <span className="mx-2">·</span>
@@ -222,6 +238,8 @@ export default async function BlogPost({ params }) {
                   itemProp="image"
                 />
               )}
+
+              <SponsorCallout sponsor={post.sponsor} variant="cta" />
 
               <SeriesBanner info={seriesInfo} />
 
@@ -249,25 +267,29 @@ export default async function BlogPost({ params }) {
 
               <hr className="my-12" style={{ borderColor: 'var(--border-subtle)' }} />
 
-              <section className="glass-card rounded-2xl p-6 mb-10 flex items-start gap-4 flex-wrap">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={post.author.avatar} alt="" className="w-14 h-14 rounded-full object-cover" />
-                <div className="flex-1 min-w-0">
-                  <Link
-                    href={`/blog/author/${post.author.handle}`}
-                    className="font-bold mb-1 inline-block hover:text-[var(--accent)] transition-colors"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    {post.author.name}
-                  </Link>
-                  {post.author.bio && (
-                    <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-                      {post.author.bio}
-                    </p>
-                  )}
-                  <AuthorSocials socials={post.author.socials} />
-                </div>
-              </section>
+              <SponsorCallout sponsor={post.sponsor} variant="cta" />
+
+              {post.authors.map((a) => (
+                <section key={a.handle} className="glass-card rounded-2xl p-6 mb-10 flex items-start gap-4 flex-wrap">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={a.avatar} alt="" className="w-14 h-14 rounded-full object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      href={`/blog/author/${a.handle}`}
+                      className="font-bold mb-1 inline-block hover:text-[var(--accent)] transition-colors"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {a.name}
+                    </Link>
+                    {a.bio && (
+                      <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+                        {a.bio}
+                      </p>
+                    )}
+                    <AuthorSocials socials={a.socials} />
+                  </div>
+                </section>
+              ))}
 
               <NewsletterCTA variant="inline" />
 

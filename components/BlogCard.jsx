@@ -53,10 +53,14 @@ export default function BlogCard({ post, featured = false }) {
         )}
         <div className="mt-auto pt-3 border-t flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
           <div className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={post.author.avatar} alt={post.author.name} className="w-5 h-5 rounded-full object-cover" />
+            <div className="flex -space-x-1.5">
+              {(post.authors || [post.author]).map((a) => (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img key={a.handle} src={a.avatar} alt={a.name} className="w-5 h-5 rounded-full object-cover" />
+              ))}
+            </div>
             <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-              {post.author.name} · {post.readMinutes} min
+              {(post.authors || [post.author]).map((a) => a.name).join(' & ')} · {post.readMinutes} min
             </span>
           </div>
           <span className="text-xs font-semibold text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity">
