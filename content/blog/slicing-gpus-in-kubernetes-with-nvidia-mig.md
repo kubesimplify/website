@@ -53,51 +53,53 @@ NVIDIA gives you three mechanisms to put more than one workload on a card. To un
 
 ### First: How a Process Talks to a GPU
 
-When a program calls its first CUDA function (a PyTorch `tensor.cuda()`, a TensorFlow session, anything), the driver creates a **CUDA context** for it on the GPU. Think of the context as the GPU-side equivalent of an operating system process: it owns the program's VRAM allocations and their page tables, its streams, and its pending kernel launches. Every CUDA process gets its own context, and contexts cannot see into each other's memory.
+A GPU is a big box of tiny workers. Our card has 188 of them (NVIDIA calls each one a **Streaming Multiprocessor**, or **SM**), and they all crunch numbers at the same time. That parallelism is the whole reason GPUs are fast.
 
-When that program launches a kernel, the work is chopped into thread blocks, and the GPU's scheduler sprays those blocks across the Streaming Multiprocessors (SMs), the hardware units that execute the math.
+Your actual program runs on the CPU. When it needs the GPU, it opens a **session** with the card (the technical name is a *CUDA context*). That session is the program's private workspace on the GPU: it holds the program's data in GPU memory, plus the small GPU programs it wants to run (each of those is called a **kernel**). Every program gets its own session, and one session can never read another's memory.
 
-Here is the detail that makes GPU sharing interesting: **by default, only one CUDA context executes on the GPU at a time.** If your kernel only keeps 20 of the card's 188 SMs busy, the other 168 sit idle anyway, because they belong to your context's turn. Another process's kernels cannot sneak onto the idle SMs; that process's whole context has to wait for its own turn. A GPU is, out of the box, a single-tenant machine.
+Here is the catch that makes sharing hard: **by default, the GPU runs only one session at a time.** Suppose your program is light and only keeps 20 of the 188 workers busy. The other 168 do not get handed to anyone else, they just sit idle, because it is your turn and the whole card is yours until you finish. A second program cannot squeeze its work onto the free workers; it waits in line.
 
-Every sharing mechanism is an answer to this one problem, and each answers it at a different layer:
+So a GPU, out of the box, is a single-tenant machine: one program at a time, everyone else waiting. Every method below is a different way to attack that one problem.
 
 ![The GPU sharing spectrum: time-slicing, MPS, and MIG compared](/img/blog/slicing-gpus-in-kubernetes-with-nvidia-mig/gpu-sharing-spectrum.png)
 
-### Time-Slicing: Contexts Take Turns
+### Time-Slicing: Take Turns, Fast
 
-Time-slicing accepts the one-context-at-a-time rule and makes the turns short. It sounds like how a CPU core runs many threads, but the comparison hides a crucial asymmetry: a CPU thread switch means saving a few registers, while a GPU context switch means draining the pipelines and spilling the on-chip state of every SM (register files and shared memory, tens of megabytes on a card this size) out to VRAM, then loading someone else's back in. It is orders of magnitude more expensive, and GPUs were historically designed to never do it.
+Time-slicing keeps the "one at a time" rule but makes the turns very short, so it *feels* like sharing. Picture one meeting room and three teams: team A uses it for a few minutes, steps out, team B goes in, then team C, and around again. A GPU does the same thing: program A gets the whole card for a moment, then it is frozen and program B gets it, then C, then back to A. They rotate. Nothing ever runs side by side.
 
-In fact, for years they could not do it at all. Before the Pascal architecture (2016), a running kernel was uninterruptible: the GPU could only switch contexts at kernel boundaries, so process A's kernel ran to completion, then process B's kernel ran, and the interleaving merely *looked* parallel. One long-running kernel meant everyone else waited, full stop. Pascal introduced **instruction-level compute preemption**: the driver can now stop a kernel mid-flight, snapshot its context to GPU DRAM, and swap in another one. Refined through Turing, Ampere, Hopper, and Blackwell, this is the machinery that makes time-slicing usable today. In practice short kernels still mostly interleave at kernel boundaries (they finish before the time slice expires, which is the cheap path), and preemption is the expensive escape hatch that stops a long kernel from hogging the card.
+Two things go wrong with this.
 
-In Kubernetes, the device plugin's time-slicing feature adds nothing at the GPU level. It just advertises one GPU as, say, 4 "replicas", lands 4 pods on it, and lets the driver's native context multiplexing sort it out. Pod A runs its kernels for a slice while B and C are frozen, then the heavy switch happens and B gets the card. Nothing ever truly runs in parallel, and the switching tax is paid on every turn.
+**Switching costs real time.** Every time the card changes hands, it has to save everything the current program was in the middle of and load in the next one's. There is a lot of that state on a GPU, so the hand-off itself burns time that could have gone to actual work.
 
-The name also over-promises. CPU time-slicing means enforced fair quanta: every process gets its turn, guaranteed by the kernel. GPU "time-slicing" guarantees nothing: no fixed quantum you can rely on, no priorities, no fair scheduler. A pod that keeps launching heavy kernels dominates the card while its neighbors starve. A more honest name would be GPU oversubscription: Kubernetes believes there are 4 GPUs, the silicon knows there is 1.
+**Nobody enforces fairness.** On a CPU, the operating system forces everyone to take fair turns, so no single program can hog the machine. GPU time-slicing has no such referee: no guaranteed turn length, no priorities. A program that keeps the card busy with back-to-back work simply keeps holding it, and the others starve. (Older GPUs were worse: the card could only change hands once a program *finished* the piece of work it had started, so one long job froze everyone until it was done. Newer GPUs can cut a long job off partway, which helps, but there is still no promise of a fair share.)
 
-This is also why training and inference are such different sharing stories. Training pushes long, dense, back-to-back kernels that saturate the SMs, so time-slicing just splits a saturated card into slower turns while adding switch overhead: everyone loses. Inference is short kernel bursts with idle gaps in between, which is exactly the shape that turn-taking (and, better, MPS below) can pack efficiently.
+There is also a practical split worth knowing: this hurts training and inference differently. A training job runs long, heavy work that keeps the whole card busy, so forcing it to take turns just makes everyone slower. Inference usually runs in short bursts with gaps in between, which packs into shared turns much more comfortably.
 
-The bigger problem is what is *not* partitioned: memory. Every context sees the full 96GB as allocatable, all of them draw from the same physical pool, and nothing (not the driver, not Kubernetes) tracks who was supposed to get how much. If pod A allocates or leaks until the pool is exhausted, pod B's next `cudaMalloc` fails and B crashes, even though B did nothing wrong. And a fatal fault that forces a GPU reset takes down every pod on the card. Time-slicing is fine for dev clusters and bursty, trusted workloads. It is not a tenant isolation story.
+This is why the Kubernetes "time-slicing" feature is a bit of a misnomer. It does not divide time fairly; it just tells Kubernetes "this one GPU is really four," lets four pods land on it, and leaves them to fight over turns. A more honest name is oversubscription: Kubernetes thinks there are four GPUs, the hardware knows there is one.
 
-### MPS: Many Processes Pretend to Be One
+And the biggest gap is memory, which is not divided at all. Every pod draws from the same pool of GPU memory, and nothing tracks who is supposed to get how much. If one pod uses it all (or leaks), the next pod that asks the GPU for memory is refused and crashes, through no fault of its own. Time-slicing is fine for a dev box or bursty, trusted jobs. It is not real isolation.
 
-MPS (Multi-Process Service) attacks the idle-SM waste directly with a clever trick: if only one context can execute at a time, then let everyone share **one context**. An MPS server process sits between the clients and the GPU. Client processes hand their kernel launches to the server, and the server submits all of them through its own single GPU context. From the hardware's point of view there is just one well-behaved tenant; in reality its work is a merge of everybody's kernels.
+### MPS: Everyone Shares One Session
 
-Because it all lives in one context, kernels from different processes now genuinely run **at the same time on different SMs**. Three inference services that each keep 20% of the SMs busy stack up to 60% utilization instead of each waiting for a turn. This is space-sharing instead of time-sharing, and for lots of small kernels it is a real throughput win.
+Time-slicing leaves all those workers idle during each turn. MPS (Multi-Process Service) goes straight after that waste with a trick: if the GPU only runs one session at a time, then put *everyone* in the same session.
 
-But the same trick is also the weakness. The isolation you normally get from separate contexts is gone, replaced by bookkeeping inside the MPS server. Since the Volta architecture, MPS clients do keep separate GPU address spaces, so one client cannot simply read another's memory. What stays shared is everything else: per-client SM and memory caps exist (`CUDA_MPS_ACTIVE_THREAD_PERCENTAGE`, `CUDA_MPS_PINNED_DEVICE_MEM_LIMIT`), but they are opt-in environment variables, not hardware walls, and the fault domain is one big shared boat. A client hitting a fatal error (an illegal memory access, say) can bring down the MPS server itself, and when the server dies, every client's "GPU" disappears mid-flight. Better throughput than time-slicing, still soft isolation, best kept inside a single trust boundary, one team sharing a card with itself.
+A helper process sits in front of the card. Every program hands its work to that helper, and the helper feeds all of it to the GPU as though it came from a single, well-behaved program. Because it is now one session, work from different programs really does run at the same time on different workers. Three light services that each need 20% of the card can run together and fill it, instead of taking turns and leaving most of it idle. For lots of small jobs, that is a real speed-up.
 
-### MIG: Split the Silicon
+The catch is the flip side of the same trick. Once everyone is in one shared session, the natural walls between programs are gone. You *can* ask MPS to cap how much of the card or memory each program gets, but those caps are limits you opt into, not walls the hardware enforces. And everyone shares one fate: if a single program crashes hard, it can take down the shared helper, and when that dies, every program's GPU work dies with it. (Modern GPUs at least stop one program from reading another's data.) MPS shines when one team is packing its own jobs onto a card. It is not where you put an untrusted stranger.
 
-MIG (Multi-Instance GPU) stops playing scheduling games and changes the hardware answer instead. It partitions the physical GPU at the silicon level: each instance gets its own dedicated VRAM slice with its own memory controllers and L2 cache portion, its own set of SMs, and its own fault domain. Each slice runs its *own* CUDA contexts, concurrently with the other slices, because each slice genuinely is a smaller GPU as far as the execution hardware is concerned.
+### MIG: Split the Card for Real
 
-That changes all three failure stories at once. OOM? A slice's contexts allocate only from that slice's 24GB; exhaust it and only that tenant fails. Noisy neighbor? A slice's kernels physically cannot touch another slice's SMs, and because the memory bandwidth is partitioned too, your latency does not jitter when the neighbor gets busy. Crash? Fault containment is per slice; the other slices never notice. To the workload, the slice just looks like a smaller dedicated GPU with a stable, predictable performance profile.
+MIG (Multi-Instance GPU) stops playing turn-taking games and physically splits the card into several smaller GPUs. Each one gets its own fixed chunk of memory and its own fixed set of workers, walled off from the rest. Each mini-GPU runs its own sessions at the same time as the others, because as far as the hardware is concerned it genuinely *is* a separate, smaller GPU.
+
+That fixes all three problems at once. Run out of memory? You only exhaust *your* slice's memory; the neighbors never notice. Noisy neighbor hogging the card? Cannot happen, because their workers are literally different workers from yours, and their memory traffic runs on separate lanes, so your speed stays steady. A crash? It stays inside your slice. To your workload, a slice just looks like a smaller GPU that behaves predictably.
 
 | | Time-slicing | MPS | MIG |
 | --- | --- | --- | --- |
-| The trick | Contexts take turns, fast | Everyone shares one context | Split the hardware itself |
-| Parallelism | None (serialized turns) | Real (space-sharing SMs) | Real (separate silicon) |
-| Isolation | None | Software (shared context) | Hardware (silicon level) |
+| The trick | Take turns, fast | Everyone shares one session | Split the hardware itself |
+| Parallelism | None (take turns) | Real (share the workers) | Real (separate hardware) |
+| Isolation | None | Software (shared session) | Hardware (silicon level) |
 | Memory protection | None, one shared pool | Opt-in limits | Enforced by hardware |
-| Fault blast radius | Whole card | Whole card (server dies, all die) | One slice |
+| Fault blast radius | Whole card | Whole card (helper dies, all die) | One slice |
 | Performance | Variable, context-switch overhead | Good for small kernels | Predictable, dedicated units |
 | Best for | Dev/test, trusted bursty jobs | One team packing its own card | Shared platforms with real tenant boundaries |
 
@@ -280,7 +282,9 @@ GPU  0 Profile ID  0 Placement : {0}:12
 GPU  0 Profile ID 32 Placement : {0}:12
 ```
 
-The card's memory is organized as a grid of 12 placement units. The notation `{0,3,6,9}:3` means a `1g.24gb` slice occupies 3 units and can start at position 0, 3, 6, or 9. A `2g.48gb` occupies 6 units and can only start at 0 or 6, and the full-card `4g.96gb` takes all 12. This matters when you mix profile sizes: create slices in the wrong order and you can fragment the grid so a big slice no longer fits, even though enough total memory is free.
+Think of the card's memory as a row of 12 equal parking spots. A `1g.24gb` slice is a small car that takes 3 spots, a `2g.48gb` is a longer car that takes 6, and the whole-card `4g.96gb` takes all 12. The `{0,3,6,9}:3` notation just lists where each size is allowed to park: a small slice can start at spot 0, 3, 6, or 9; a `2g.48gb` needs 6 spots in a row, so it can only start at 0 or 6.
+
+This is where fragmentation bites. Say you park one small slice starting at spot 3 and another at spot 6. You have used 6 of the 12 spots, so half the card looks free, but the free spots are 0-2 and 9-11: two separate gaps of 3. A `2g.48gb` needs 6 in a row, and there is no run of 6 left, so it will not fit even though half the memory is idle. The fix is to plan the layout up front (carve the big slices first, or make every slice the same size) instead of adding slices ad hoc and painting yourself into a corner.
 
 ### Step 4: Carve the slices
 
