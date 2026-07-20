@@ -239,7 +239,7 @@ export default async function BlogPost({ params }) {
                 />
               )}
 
-              <SponsorCallout sponsor={post.sponsor} variant="strip" />
+              <SponsorCallout sponsor={post.sponsor} variant="cta" />
 
               <SeriesBanner info={seriesInfo} />
 
