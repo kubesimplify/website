@@ -381,24 +381,9 @@ FAILED at tensor 3
 CUDA out of memory. Tried to allocate 1.49 GiB. GPU 0 has a total capacity of 7.81 GiB ...
 ```
 
-Read that `HAMi-core ERROR` line carefully, because it's the entire architecture in one log entry. The allocation would have pushed the container to 9,185,657,856 bytes against a limit of 8,388,608,000 bytes (exactly 8000 MiB), so `hami-core`'s allocator rejected the call itself. PyTorch then reports "GPU 0 has a total capacity of 7.81 GiB": that's the virtualized 8000 MiB total, not the card's real 96GB. The physical GPU had roughly 80GB free at that moment. The OOM is a software verdict, not a hardware condition.
+Read that `HAMi-core ERROR` line carefully, because it's the entire architecture in one log entry. The allocation would have pushed the container to 9,185,657,856 bytes against a limit of 8,388,608,000 bytes (exactly 8000 MiB), so `hami-core`'s allocator rejected the call itself. 
 
-### Step 2: Watch the blast radius from three vantage points, at the same time
-
-```bash
-# 1. This pod's own (virtualized) GPU view: total should read ~8000 MiB, not 97887 MiB,
-#    because hami-core hooks NVML's memory-info calls too.
-kubectl exec -it <pod-name> -- nvidia-smi
-
-# 2. The host's real view of both processes sharing the card.
-nvidia-smi --query-compute-apps=pid,used_memory --format=csv -l 1
-
-# 3. The neighboring pod, to confirm it never noticed anything happened.
-kubectl logs -f <other-pod-name>
-
-# 4. HAMi's own enforcement/violation logging for the specific container.
-kubectl logs -n hami-system <hami-device-plugin-pod> -c vgpu-monitor -f
-```
+PyTorch then reports "GPU 0 has a total capacity of 7.81 GiB": that's the virtualized 8000 MiB total, not the card's real 96GB. The physical GPU had roughly 80GB free at that moment. The OOM is a software verdict, not a hardware condition.
 
 Here's the offending pod's own view at the peak of the spike, alongside the failing run:
 
@@ -409,7 +394,6 @@ What the captured run shows:
 - **The offending pod**: its own `nvidia-smi` reports 7235MiB used of an 8000MiB total, with both of its python processes accounted (the original matmul loop plus the spike script). The OOM it hits is scoped to a number far below the card's actual capacity: proof the limit is enforced per-container, not derived from real GPU pressure.
 - **The neighboring pod**: kept printing its matmul loop the entire time, still holding its steady ~2107MiB of its own 8000MiB grant. It shares the same physical GPU, but its `cudaMalloc` calls are accounted separately by `hami-core`, so another container's overreach doesn't starve it.
 - **The host**: the card's real free memory (plenty, even with two 8000 MiB tenants on a 97887 MiB card) was irrelevant to whether the call succeeded. The allocation attempt never reached the real driver.
-- **Failure mode inside the pod**: whether the _pod itself_ dies (`CrashLoopBackOff`) or just the Python process raises and exits cleanly depends entirely on whether the workload catches the exception. That's an application-level concern, not something HAMi controls. Catching the `RuntimeError` (as in Step 1's script) keeps the process alive so you can inspect state right after the failure instead of losing your exec session.
 
 The result: HAMi's isolation is real and per-container, but it's a software contract enforced by a shared library sitting in the same process space as the workload, a meaningfully different guarantee than MIG's silicon-level partition, even though both stop one tenant's memory use from crashing another's.
 
@@ -433,7 +417,9 @@ curl http://<gpu-node-ip>:9394/metrics
 
 This is the enforcement-side counterpart: actual VRAM and core utilization per container versus its granted limit. A tenant sitting permanently at 95% of its `gpumem` grant is a resize conversation waiting to happen; a tenant at 5% is stranded capacity you can reclaim.
 
-Wire the scheduler endpoint into Prometheus and a few panels give you the dashboard a shared-GPU platform actually needs. Here's ours during the test: 8 physical GPUs, 2 vGPU containers on 1 shared card, each holding a 7.81 GiB / 10% grant, and the per-GPU allocation sitting miles under the physical limit line:
+Wire the scheduler endpoint into Prometheus and a few panels give you the dashboard a shared-GPU platform actually needs. 
+
+Here's ours during the test: 8 physical GPUs, 2 vGPU containers on 1 shared card, each holding a 7.81 GiB / 10% grant, and the per-GPU allocation sitting miles under the physical limit line:
 
 ![Grafana dashboard built from HAMi scheduler metrics: fleet stats, per-pod slices, and per-GPU allocation against the physical limit](/img/blog/sharing-gpus-in-kubernetes-with-hami/hami-grafana-dashboard.png)
 
