@@ -877,6 +877,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/sharing-gpus-in-kubernetes-with-hami",
+      "destination": "https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami",
+      "permanent": true
+    },
+    {
       "source": "/blog/simplified-introduction-to-bacalhau",
       "destination": "https://blog.kubesimplify.com/simplified-introduction-to-bacalhau",
       "permanent": true
@@ -2807,6 +2812,17 @@
     {
       "source": "/ready-for-wasm-day-2023",
       "destination": "https://blog.kubesimplify.com/ready-for-wasm-day-2023",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/sharing-gpus-in-kubernetes-with-hami",
+      "destination": "https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami",
       "permanent": true,
       "has": [
         {

@@ -8,7 +8,7 @@ author: shubham-katara
 authors: ["shubham-katara", "saiyam-pathak"]
 cover: /img/blog/sharing-gpus-in-kubernetes-with-hami/cover.png
 tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
-draft: true
+draft: false
 sponsor:
   name: Utho
   url: "https://utho.com/?utm_source=Kubesimplify&utm_medium=docs&utm_campaign=Saiyam"
