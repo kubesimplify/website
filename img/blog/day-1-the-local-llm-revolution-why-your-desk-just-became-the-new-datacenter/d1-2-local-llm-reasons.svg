@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Five reasons local LLMs win over cloud APIs</title>
+  <desc id="desc">Privacy, cost at scale, latency control, customization, and reliability around a local LLM node.</desc>
+  <style>
+    text{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+    .title{font-size:42px;font-weight:800;fill:#0f172a}
+    .sub{font-size:21px;fill:#475569}
+    .label{font-size:24px;font-weight:800;fill:#0f172a}
+    .body{font-size:17px;fill:#334155}
+    .center{font-size:30px;font-weight:800;fill:#ffffff}
+    .center-small{font-size:17px;fill:#cbd5e1}
+  </style>
+  <rect width="1200" height="760" rx="30" fill="#f8fafc"/>
+  <text x="600" y="82" text-anchor="middle" class="title">Why run models locally?</text>
+  <text x="600" y="118" text-anchor="middle" class="sub">Cloud APIs are convenient. Local models win when control matters.</text>
+
+  <g transform="translate(441 286)">
+    <rect width="318" height="180" rx="28" fill="#0f172a"/>
+    <text x="159" y="72" text-anchor="middle" class="center">Local LLM</text>
+    <text x="159" y="105" text-anchor="middle" class="center-small">model + data + app</text>
+    <text x="159" y="134" text-anchor="middle" class="center-small">on your machine</text>
+  </g>
+
+  <g transform="translate(84 184)">
+    <rect width="300" height="130" rx="18" fill="#ecfeff" stroke="#06b6d4" stroke-width="3"/>
+    <text x="28" y="45" class="label">Privacy</text>
+    <text x="28" y="78" class="body">Sensitive data never leaves</text>
+    <text x="28" y="104" class="body">your network.</text>
+  </g>
+  <g transform="translate(816 184)">
+    <rect width="300" height="130" rx="18" fill="#f0fdf4" stroke="#22c55e" stroke-width="3"/>
+    <text x="28" y="45" class="label">Cost at scale</text>
+    <text x="28" y="78" class="body">High token volume can make</text>
+    <text x="28" y="104" class="body">hardware pay for itself.</text>
+  </g>
+  <g transform="translate(84 444)">
+    <rect width="300" height="130" rx="18" fill="#fff7ed" stroke="#f97316" stroke-width="3"/>
+    <text x="28" y="45" class="label">Latency control</text>
+    <text x="28" y="78" class="body">Remove the internet round trip</text>
+    <text x="28" y="104" class="body">from agentic loops.</text>
+  </g>
+  <g transform="translate(816 444)">
+    <rect width="300" height="130" rx="18" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="3"/>
+    <text x="28" y="45" class="label">Customization</text>
+    <text x="28" y="78" class="body">Tune, quantize, and serve the</text>
+    <text x="28" y="104" class="body">model the way you need.</text>
+  </g>
+  <g transform="translate(450 590)">
+    <rect width="300" height="118" rx="18" fill="#fdf2f8" stroke="#ec4899" stroke-width="3"/>
+    <text x="28" y="45" class="label">Reliability</text>
+    <text x="28" y="78" class="body">Your workflow still answers when</text>
+    <text x="28" y="104" class="body">a cloud service or network fails.</text>
+  </g>
+
+  <path d="M384 256 C412 282 426 302 441 338" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M816 256 C788 282 774 302 759 338" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M384 509 C412 484 426 464 441 414" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M816 509 C788 484 774 464 759 414" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M600 590 C600 548 600 514 600 466" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+</svg>

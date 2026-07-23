@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="1120" viewBox="0 0 1560 1120">
+  <rect width="1560" height="1120" fill="#ffffff"/>
+  <style>
+    .title { font: 900 44px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #172033; }
+    .subtitle { font: 600 24px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #64748b; }
+    .h { font: 900 34px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+    .body { font: 600 27px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #334155; }
+    .chip { font: 850 25px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+    .note { font: 850 24px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #9a3412; }
+  </style>
+
+  <text x="780" y="76" class="title" text-anchor="middle">Inference and training prefer different formats</text>
+  <text x="780" y="118" class="subtitle" text-anchor="middle">Serving mainly reads weights. Training must update weights safely.</text>
+
+  <g transform="translate(90 185)">
+    <rect width="660" height="560" rx="22" fill="#f0fdf4" stroke="#76b900" stroke-width="2"/>
+    <text x="50" y="64" class="h" fill="#166534">Inference on Spark</text>
+    <text x="50" y="125" class="body">Goal: read the model quickly</text>
+    <text x="50" y="162" class="body">and generate tokens.</text>
+    <text x="50" y="215" class="body">Smaller weights reduce memory traffic,</text>
+    <text x="50" y="252" class="body">so the right low-precision format can win.</text>
+
+    <rect x="50" y="330" width="520" height="86" rx="14" fill="#dcfce7" stroke="#76b900" stroke-width="2"/>
+    <text x="80" y="366" class="chip" fill="#166534">Good picks</text>
+    <text x="80" y="397" class="chip" fill="#166534">NVFP4 / FP8 / GGUF Q4_K_M</text>
+
+    <rect x="50" y="450" width="520" height="70" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="80" y="494" class="chip" fill="#334155">Engine support decides real speed</text>
+  </g>
+
+  <g transform="translate(810 185)">
+    <rect width="660" height="560" rx="22" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+    <text x="50" y="64" class="h" fill="#1e3a8a">Training on Spark</text>
+    <text x="50" y="125" class="body">Goal: update weights safely.</text>
+    <text x="50" y="178" class="body">Gradients need range and detail,</text>
+    <text x="50" y="215" class="body">so BF16 is still the sane default</text>
+    <text x="50" y="252" class="body">unless the recipe proves otherwise.</text>
+
+    <rect x="50" y="330" width="520" height="86" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+    <text x="80" y="366" class="chip" fill="#1e3a8a">Good pick</text>
+    <text x="80" y="397" class="chip" fill="#1e3a8a">BF16 base + LoRA adapters</text>
+
+    <rect x="50" y="450" width="520" height="86" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="80" y="486" class="chip" fill="#334155">Test low-precision</text>
+    <text x="80" y="518" class="chip" fill="#334155">trainable bases first</text>
+  </g>
+
+  <rect x="205" y="820" width="1150" height="120" rx="20" fill="#fff7ed" stroke="#f97316" stroke-width="2"/>
+  <text x="780" y="870" class="note" text-anchor="middle">Nanochat forum data on a single DGX Spark:</text>
+  <text x="780" y="910" class="note" text-anchor="middle">BF16 was faster than NVFP4 for that specific training recipe.</text>
+</svg>

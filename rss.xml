@@ -1,0 +1,1548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kubesimplify Blog</title>
+    <link>https://blog.kubesimplify.com</link>
+    <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
+    <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 23 Jul 2026 10:00:00 GMT</lastBuildDate>
+    <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>How to Share GPUs in Kubernetes at Scale with HAMi (Software vGPU Slicing)</title>
+      <link>https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami</guid>
+      <pubDate>Thu, 23 Jul 2026 10:00:00 GMT</pubDate>
+      <description>Share NVIDIA GPUs in Kubernetes with HAMi software vGPU slicing: memory and compute limits, Helm configuration, a verified PyTorch manifest, a real RTX PRO 6000 OOM test, and Prometheus monitoring.</description>
+      <category>kubernetes</category><category>gpu</category><category>nvidia</category><category>platform-engineering</category>
+    </item>
+    <item>
+      <title>Slicing GPUs in Kubernetes with NVIDIA Multi-Instance GPU (MIG)</title>
+      <link>https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig</guid>
+      <pubDate>Mon, 20 Jul 2026 10:00:00 GMT</pubDate>
+      <description>GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring.</description>
+      <category>kubernetes</category><category>gpu</category><category>nvidia</category><category>platform-engineering</category>
+    </item>
+    <item>
+      <title>Day 5: Local LLM Inference Engines, Wrappers, and What to Pick</title>
+      <link>https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick</guid>
+      <pubDate>Fri, 17 Jul 2026 00:00:00 GMT</pubDate>
+      <description>A beginner-friendly guide to local LLM inference, with the same Qwen model tested through Ollama, llama.cpp, Docker Model Runner, vLLM, SGLang, and TensorRT-LLM on NVIDIA DGX Spark.</description>
+      <category>nvidia</category><category>dgxspark</category><category>local-ai</category><category>llm</category><category>inference</category>
+    </item>
+    <item>
+      <title>Bonsai 27B on RTX PRO 6000 vs DGX Spark: what actually works</title>
+      <link>https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark</guid>
+      <pubDate>Thu, 16 Jul 2026 00:00:00 GMT</pubDate>
+      <description>Real Bonsai 27B benchmarks on an RTX PRO 6000 and a DGX Spark, including the supported llama.cpp setup, ternary vs 1-bit results, and speculative decoding.</description>
+      <category>ai</category><category>gpu</category><category>llm</category><category>inference</category><category>benchmarks</category>
+    </item>
+    <item>
+      <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>
+      <link>https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers</guid>
+      <pubDate>Mon, 06 Jul 2026 14:00:00 GMT</pubDate>
+      <description>kiac runs local Kubernetes on macOS where every node is its own lightweight VM via apple/container: kubeadm or k3s flavors, Cilium on a custom kernel, built-in LoadBalancer, Grafana, Gateway API, and clusters that survive reboots.</description>
+      <category>kubernetes</category><category>macos</category><category>apple-container</category><category>cilium</category><category>local-development</category>
+    </item>
+    <item>
+      <title>LLM Costs and Observability with agentgateway on Kubernetes (Part 2)</title>
+      <link>https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes</guid>
+      <pubDate>Tue, 30 Jun 2026 10:00:00 GMT</pubDate>
+      <description>Part 2: scrape agentgateway with Prometheus, build a Grafana dashboard of token cost and per-tool usage, see blocked tool calls, and alert on spend.</description>
+      <category>kubernetes</category><category>ai-agents</category><category>observability</category><category>prometheus</category><category>grafana</category>
+    </item>
+    <item>
+      <title>Controlling MCP Tools with agentgateway on Kubernetes (Part 1)</title>
+      <link>https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes</guid>
+      <pubDate>Mon, 29 Jun 2026 10:00:00 GMT</pubDate>
+      <description>Run AI agents behind agentgateway on Kubernetes: route their LLM and MCP tool calls through one proxy, keep secrets out of the agent, and block tools by policy.</description>
+      <category>kubernetes</category><category>ai-agents</category><category>mcp</category><category>platform-engineering</category>
+    </item>
+    <item>
+      <title>Day 4: Quantization Demystified. BF16, FP8, NVFP4, MXFP4, INT4, GGUF, and Why It All Matters</title>
+      <link>https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters</guid>
+      <pubDate>Wed, 10 Jun 2026 00:00:00 GMT</pubDate>
+      <description>A practical, beginner-friendly guide to BF16, FP8, NVFP4, MXFP4, INT4, and GGUF Q4_K_M on NVIDIA DGX Spark. Bytes per parameter, quality vs size, and which format to pick when.</description>
+      <category>nvidia</category><category>dgxspark</category><category>local-ai</category><category>llm</category><category>quantization</category>
+    </item>
+    <item>
+      <title>Day 3: The DGX Spark Unpacked. GB10, Unified Memory, sm_121, and the One Reason This Hardware Exists</title>
+      <link>https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists</guid>
+      <pubDate>Fri, 05 Jun 2026 00:00:00 GMT</pubDate>
+      <description>A practical teardown of NVIDIA DGX Spark&apos;s GB10 Grace Blackwell Superchip, unified memory, sm_121, NVFP4 tensor cores, memory reporting, and decode limits.</description>
+      <category>nvidia</category><category>dgxspark</category><category>local-ai</category><category>llm</category><category>ai-hardware</category>
+    </item>
+    <item>
+      <title>Wandler: Local OpenAI-Compatible Inference With Transformers.js and WebGPU</title>
+      <link>https://blog.kubesimplify.com/wandler-local-openai-compatible-inference-transformersjs-webgpu</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/wandler-local-openai-compatible-inference-transformersjs-webgpu</guid>
+      <pubDate>Wed, 03 Jun 2026 00:00:00 GMT</pubDate>
+      <description>A practical Wandler deep dive with a local M1 Max WebGPU demo, real latency numbers, architecture diagrams, and getting-started commands.</description>
+      <category>wandler</category><category>webgpu</category><category>local-ai</category><category>transformersjs</category><category>onnx</category>
+    </item>
+    <item>
+      <title>mlxcel: A Rust-Native Inference Engine for Apple Silicon, Tested on My M1 Max</title>
+      <link>https://blog.kubesimplify.com/mlxcel-rust-native-inference-engine-tested-on-m1-max</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/mlxcel-rust-native-inference-engine-tested-on-m1-max</guid>
+      <pubDate>Fri, 29 May 2026 00:00:00 GMT</pubDate>
+      <description>Day-one deep dive into mlxcel v0.1.0, a Rust-native MLX inference engine. Real M1 Max benchmarks vs mlx-lm and Ollama on Llama 3.2 3B and Qwen 2.5 7B, with architecture diagrams and an honest take on TurboQuant.</description>
+      <category>mlx</category><category>apple-silicon</category><category>local-ai</category><category>llm</category><category>rust</category><category>inference</category><category>ollama</category>
+    </item>
+    <item>
+      <title>Day 2: Anatomy of an LLM Inference Request. From Prompt to Answer, Step by Step</title>
+      <link>https://blog.kubesimplify.com/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step</guid>
+      <pubDate>Wed, 27 May 2026 00:00:00 GMT</pubDate>
+      <description>A beginner-friendly walkthrough of tokenization, prefill, KV cache, decode, batching, TTFT, and why memory bandwidth shapes local LLM performance on NVIDIA DGX Spark.</description>
+      <category>nvidia</category><category>dgxspark</category><category>local-ai</category><category>llm</category><category>ai-inference</category>
+    </item>
+    <item>
+      <title>How kube-proxy Actually Works: iptables, IPVS, and nftables Inside Out</title>
+      <link>https://blog.kubesimplify.com/kube-proxy-deep-dive</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kube-proxy-deep-dive</guid>
+      <pubDate>Mon, 25 May 2026 13:00:00 GMT</pubDate>
+      <description>How kube-proxy turns Kubernetes Services into kernel rules. iptables, IPVS, nftables packet paths and which to pick in 2026. Verified against k/k 1.36 source.</description>
+      <category>kubernetes</category><category>kube-proxy</category><category>iptables</category><category>nftables</category><category>networking</category>
+    </item>
+    <item>
+      <title>Day 1: The Local LLM Revolution. Why Your Desk Just Became the New Datacenter</title>
+      <link>https://blog.kubesimplify.com/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter</guid>
+      <pubDate>Mon, 25 May 2026 00:00:00 GMT</pubDate>
+      <description>Why local LLMs are becoming practical in 2026, what changed across open weights, hardware, and inference software, and why DGX Spark makes the desk feel like a small AI lab.</description>
+      <category>nvidia</category><category>dgxspark</category><category>local-ai</category><category>llm</category><category>ai-infrastructure</category>
+    </item>
+    <item>
+      <title>How Kubernetes EndpointSlices Actually Work (and Why Endpoints Had to Die)</title>
+      <link>https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die</guid>
+      <pubDate>Mon, 11 May 2026 17:09:39 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>devops</category><category>networking</category><category>kube-proxy</category><category>endpointslices</category>
+    </item>
+    <item>
+      <title>NVCF Is Now Open Source: Inside NVIDIA&apos;s GPU Function Platform</title>
+      <link>https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform</guid>
+      <pubDate>Mon, 11 May 2026 13:04:44 GMT</pubDate>
+      <description></description>
+      <category>opensource</category><category>kubernetes</category><category>nvidia</category><category>gpu</category><category>cloudnative</category>
+    </item>
+    <item>
+      <title>How a Kubernetes Service Actually Works (and All 5 Types You Need)</title>
+      <link>https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need</guid>
+      <pubDate>Tue, 05 May 2026 06:55:18 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>service</category><category>devops</category><category>networking</category><category>cloud-native</category>
+    </item>
+    <item>
+      <title>Day 7: Ship It - and What Comes Next</title>
+      <link>https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next</guid>
+      <pubDate>Mon, 04 May 2026 05:35:33 GMT</pubDate>
+      <description>Your container runs as root and has 18 CVEs. A Docker Captain&apos;s guide to hardening, Scout policies, DHI, Sandboxes, and what comes after Docker. </description>
+      <category>docker</category><category>security</category><category>devops</category><category>cloud-native</category><category>production-ready</category><category>docker-scout</category><category>hardenedimages</category><category>learndocker</category><category>dockercaptain</category>
+    </item>
+    <item>
+      <title>Day 6: Run an LLM on Your Laptop - With Docker</title>
+      <link>https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker</guid>
+      <pubDate>Thu, 30 Apr 2026 15:38:25 GMT</pubDate>
+      <description>\&quot;Pull AI models from Docker Hub, run them locally with GPU acceleration, and build an AI-powered app</description>
+      <category>ai</category><category>docker</category><category>devops</category><category>openai</category><category>llm</category><category>mlx</category><category>docker-model-runner</category>
+    </item>
+    <item>
+      <title>A Kubeconfig for GKE That Doesn&apos;t Need gcloud</title>
+      <link>https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud</guid>
+      <pubDate>Wed, 29 Apr 2026 05:56:22 GMT</pubDate>
+      <description></description>
+      
+    </item>
+    <item>
+      <title>Day 5: Docker Compose - How Docker Actually Gets Used</title>
+      <link>https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used</guid>
+      <pubDate>Tue, 28 Apr 2026 13:38:38 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>docker-compose</category><category>docker-images</category>
+    </item>
+    <item>
+      <title>What Actually Happens When kube-scheduler Picks a Node (13 Stages Inside Kubernetes)</title>
+      <link>https://blog.kubesimplify.com/kube-scheduler-deep-dive</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kube-scheduler-deep-dive</guid>
+      <pubDate>Tue, 28 Apr 2026 11:25:13 GMT</pubDate>
+      <description>How kube-scheduler picks a node: 13 framework stages, 14 Filter plugins, 9 Score plugins, live preemption demo.</description>
+      <category>kubernetes</category><category>devops</category><category>internals</category><category>scheduler</category><category>cloud-native</category>
+    </item>
+    <item>
+      <title>Day 4: Breaking Isolation on Purpose - Volumes, Networks, and the Real World</title>
+      <link>https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world</guid>
+      <pubDate>Mon, 27 Apr 2026 17:44:24 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>docker-images</category><category>docker-container</category><category>docker-network</category><category>docker-storage</category><category>docker-volume</category>
+    </item>
+    <item>
+      <title>Day 3: Stop Writing Dockerfiles From Scratch</title>
+      <link>https://blog.kubesimplify.com/day-3-stop-writing-dockerfiles-from-scratch</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-3-stop-writing-dockerfiles-from-scratch</guid>
+      <pubDate>Fri, 24 Apr 2026 17:10:21 GMT</pubDate>
+      <description>Stop writing Dockerfiles from scratch. A Docker Captain walks through docker init, layer caching, multi-stage builds, and docker debug for 2026.</description>
+      <category>docker</category><category>dockerfile</category><category>docker-images</category><category>docker-captain</category>
+    </item>
+    <item>
+      <title>What Actually Happens When You Run kubectl run nginx</title>
+      <link>https://blog.kubesimplify.com/kubectl-run-nginx-inside</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubectl-run-nginx-inside</guid>
+      <pubDate>Fri, 24 Apr 2026 11:30:41 GMT</pubDate>
+      <description>Every step of what happens when you run kubectl run nginx on Kubernetes. From argv to etcd Raft, scheduler, CRI, CNI, runc, and PLEG.</description>
+      <category>kubernetes</category><category>devops</category><category>containers</category><category>cloud-native</category><category>kubectl</category><category>pods</category>
+    </item>
+    <item>
+      <title>Day 2: Your Images Are a Supply Chain - and It&apos;s Probably Broken</title>
+      <link>https://blog.kubesimplify.com/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-2-your-images-are-a-supply-chain-and-it-s-probably-broken</guid>
+      <pubDate>Thu, 23 Apr 2026 09:33:10 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>opensource</category><category>2025toptools</category>
+    </item>
+    <item>
+      <title>Day 1: What Actually Happens When You Type docker run</title>
+      <link>https://blog.kubesimplify.com/day-1-what-actually-happens-when-you-type-docker-run</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/day-1-what-actually-happens-when-you-type-docker-run</guid>
+      <pubDate>Wed, 22 Apr 2026 10:38:27 GMT</pubDate>
+      <description>Containers aren&apos;t VMs. They&apos;re Linux processes. A Docker Captain explains namespaces, cgroups, and how Docker really works on your Mac in 2026.    </description>
+      <category>linux</category><category>docker</category><category>devops</category><category>containers</category><category>cloud-native</category><category>docker-desktop</category>
+    </item>
+    <item>
+      <title>\&quot;SSH Into Your DGX Spark From Anywhere in the World Using Tailscale</title>
+      <link>https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale</guid>
+      <pubDate>Tue, 07 Apr 2026 12:01:10 GMT</pubDate>
+      <description>Learn how to set up Tailscale on your NVIDIA DGX Spark for secure SSH access from anywhere in the world.</description>
+      <category>kubernetes</category><category>devops</category><category>ssh</category><category>nvidia</category><category>tailscale</category><category>dgxspark</category>
+    </item>
+    <item>
+      <title>What Claude Code&apos;s Leaked Source Actually Teaches Us About Building AI Agents</title>
+      <link>https://blog.kubesimplify.com/claude-code-leak-what-the-source-actually-teaches</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/claude-code-leak-what-the-source-actually-teaches</guid>
+      <pubDate>Wed, 01 Apr 2026 15:13:33 GMT</pubDate>
+      <description>512K lines of TypeScript, verified against actual source. The engineering patterns in Claude Code&apos;s leaked codebase that most coverage got wrong.</description>
+      <category>typescript</category><category>llm</category><category>ai-agents</category><category>ai-engineering</category><category>claude-code</category>
+    </item>
+    <item>
+      <title>The Ingress NGINX Migration Just Got Easier: 119 Annotations, 3 Targets, Impact Ratings</title>
+      <link>https://blog.kubesimplify.com/ing-switch-119-annotations-gateway-api-traefik-impact-ratings</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ing-switch-119-annotations-gateway-api-traefik-impact-ratings</guid>
+      <pubDate>Mon, 30 Mar 2026 12:30:00 GMT</pubDate>
+      <description>\&quot;Ingress NGINX was archived March 24, 2026. ing-switch maps all 119 NGINX annotations with</description>
+      <category>kubernetes</category><category>migration</category><category>devops</category><category>cloud-native</category><category>traefik</category><category>gateway-api</category><category>ingress-nginx</category>
+    </item>
+    <item>
+      <title>clawspark: Your Private OpenClaw AI Assistant That Never Phones Home</title>
+      <link>https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home</guid>
+      <pubDate>Sun, 15 Mar 2026 15:37:37 GMT</pubDate>
+      <description>Clawspark provides a way to Install openclaw on your device in a secure way with a single command. </description>
+      <category>ollama</category><category>ai-assistants</category><category>ai-agent</category><category>openclaw</category><category>clawspark</category>
+    </item>
+    <item>
+      <title>Here&apos;s What I Learned About Nemotron 3 Super -I Ran a 120B Parameter Model on Nvidia DGX Spark</title>
+      <link>https://blog.kubesimplify.com/nemotron3-on-dgx-spark</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/nemotron3-on-dgx-spark</guid>
+      <pubDate>Sat, 14 Mar 2026 12:44:36 GMT</pubDate>
+      <description>Understand everything about Nvidia DGX spark along with hands on and benchmarks. </description>
+      <category>nvidia</category><category>ai-agents</category><category>dgxspark</category><category>nemotron-3</category><category>nemotron</category>
+    </item>
+    <item>
+      <title>ing-switch: Migrate from Ingress NGINX to Traefik or Gateway API in Minutes, Not Days</title>
+      <link>https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days</guid>
+      <pubDate>Wed, 25 Feb 2026 17:24:43 GMT</pubDate>
+      <description></description>
+      
+    </item>
+    <item>
+      <title>Exploiting Metasploitable2 Using msfconsole (Kali Linux Lab)</title>
+      <link>https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/exploiting-metasploitable2-using-msfconsole-kali-linux-lab</guid>
+      <pubDate>Sat, 17 Jan 2026 16:15:22 GMT</pubDate>
+      <description></description>
+      <category>cybersecurity</category><category>msfconsole</category><category>web-exploitation</category><category>metasploitable2</category>
+    </item>
+    <item>
+      <title>Kubernetes v1.35 – What’s New, What’s Changing, and What You Should Know</title>
+      <link>https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-v135-whats-new-whats-changing-and-what-you-should-know</guid>
+      <pubDate>Fri, 19 Dec 2025 13:42:59 GMT</pubDate>
+      <description>Learn about the latest Kubenretes release Kubernetes 1.35</description>
+      <category>kubernetes</category><category>new</category><category>newrelease</category><category>release-updates</category><category>kuberntes-135</category>
+    </item>
+    <item>
+      <title>Ditch the Overheating Laptop: Supercharge Your Docker Workflow with Docker Offload</title>
+      <link>https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload</guid>
+      <pubDate>Tue, 26 Aug 2025 06:40:46 GMT</pubDate>
+      <description>Running multiple Docker containers can slow down your laptop and drain your battery. In this blog, we explore Docker Offload — a game-changing feature</description>
+      <category>ai</category><category>cloud</category><category>docker</category><category>docker-desktop</category>
+    </item>
+    <item>
+      <title>Docker MCP Catalog: Finding the Right AI Tools for Your Project</title>
+      <link>https://blog.kubesimplify.com/docker-mcp-catalog</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/docker-mcp-catalog</guid>
+      <pubDate>Thu, 26 Jun 2025 07:32:05 GMT</pubDate>
+      <description>This blog describes what Docker MCP is and how it</description>
+      <category>ai</category><category>docker</category><category>docker-images</category><category>docker-desktop</category><category>llm</category><category>mcp</category>
+    </item>
+    <item>
+      <title>Kubernetes v1.33: Key Features, Updates, and What You Need to Know</title>
+      <link>https://blog.kubesimplify.com/kubernetes-v133-key-features-updates-and-what-you-need-to-know</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-v133-key-features-updates-and-what-you-need-to-know</guid>
+      <pubDate>Tue, 10 Jun 2025 07:24:57 GMT</pubDate>
+      <description>\&quot;Kubernetes v1.33: Key Features, Updates, and What You Need to Know</description>
+      <category>kubernetes</category><category>devops</category><category>devrel</category><category>kubernetes-container</category><category>newrelease</category><category>v133</category>
+    </item>
+    <item>
+      <title>Ephemeral Pull Request environment using Vcluster.</title>
+      <link>https://blog.kubesimplify.com/ephemeral-pull-request-environment-using-vcluster</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ephemeral-pull-request-environment-using-vcluster</guid>
+      <pubDate>Thu, 10 Apr 2025 16:52:03 GMT</pubDate>
+      <description></description>
+      <category>demo</category><category>kubernetes</category><category>applications</category><category>pull-requests</category><category>cluster</category><category>ingress-controllers</category><category>vcluster</category>
+    </item>
+    <item>
+      <title>Multi tenancy in 2025 and beyond</title>
+      <link>https://blog.kubesimplify.com/multi-tenancy-in-2025-and-beyond</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/multi-tenancy-in-2025-and-beyond</guid>
+      <pubDate>Wed, 12 Mar 2025 06:11:58 GMT</pubDate>
+      <description>Multi-tenancy in Kubernetes has been an ongoing challenge for organizations looking to optimize their cloud-native infrastructure. Over the years, the appro</description>
+      <category>kubernetes</category><category>cluster</category><category>argocd</category><category>multitenancy</category>
+    </item>
+    <item>
+      <title>Testing Docker AI&apos;s \&quot;Gordon\&quot; – How Smart Is It?</title>
+      <link>https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/testing-docker-ais-gordon-how-smart-is-it</guid>
+      <pubDate>Fri, 21 Feb 2025 07:28:49 GMT</pubDate>
+      <description>Testing Docker AI&apos;s \&quot;Gordon\&quot; – How Smart Is It?</description>
+      <category>ai</category><category>docker</category><category>docker-desktop</category><category>ai-tools</category><category>dockerdesktop</category><category>docker-gordon</category>
+    </item>
+    <item>
+      <title>Understanding Docker Desktop: All-in-One Platform for Containers</title>
+      <link>https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/understanding-docker-desktop-all-in-one-platform-for-containers</guid>
+      <pubDate>Fri, 31 Jan 2025 10:56:37 GMT</pubDate>
+      <description>This is a blog on docker desktop which discusses about how to use it&apos;s features</description>
+      <category>docker</category><category>kubernetes</category><category>devrel</category><category>devops-journey</category><category>docker-desktop</category>
+    </item>
+    <item>
+      <title>Best DevOps Tools 2025</title>
+      <link>https://blog.kubesimplify.com/best-devops-tools-2025</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/best-devops-tools-2025</guid>
+      <pubDate>Mon, 13 Jan 2025 07:18:15 GMT</pubDate>
+      <description>Best DevOps tools in 2025</description>
+      <category>technology</category><category>kubernetes</category><category>devops</category><category>trending</category><category>2025</category>
+    </item>
+    <item>
+      <title>Becoming a Docker Captain</title>
+      <link>https://blog.kubesimplify.com/docker-captain-journey</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/docker-captain-journey</guid>
+      <pubDate>Tue, 17 Dec 2024 06:22:46 GMT</pubDate>
+      <description>This blog shares Saloni Narang&apos;s Journey on becoming Docker captain and also a quick introduction to docker desktop.</description>
+      <category>docker</category><category>kubernetes</category><category>docker-desktop</category><category>docker-captain</category>
+    </item>
+    <item>
+      <title>Mastering Kubernetes Costs: From Monitoring to Automation</title>
+      <link>https://blog.kubesimplify.com/mastering-kubernetes-costs-from-monitoring-to-automation</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/mastering-kubernetes-costs-from-monitoring-to-automation</guid>
+      <pubDate>Fri, 13 Dec 2024 12:48:18 GMT</pubDate>
+      <description>Discover how to optimize Kubernetes costs with advanced monitoring and automation. Learn actionable strategies, explore CAST AI&apos;s innovative solutions, and </description>
+      <category>kubernetes</category><category>monitoring</category><category>cost-optimisation</category><category>castai</category><category>kubernetes-costs</category>
+    </item>
+    <item>
+      <title>KubeCon + CloudNativeCon North America 2024 Recap: Themes, Innovations, and Community Spirit</title>
+      <link>https://blog.kubesimplify.com/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubecon-cloudnativecon-north-america-2024-recap-themes-innovations-and-community-spirit</guid>
+      <pubDate>Sat, 23 Nov 2024 10:41:18 GMT</pubDate>
+      <description>Here is my KubeCon NA 2024 recap. This KubeCon was filled with innovation, insightful sessions, and a vibrant community. Dive into all the highlights!</description>
+      <category>kubernetes</category><category>cncf</category><category>cloud-native</category><category>kubecon</category>
+    </item>
+    <item>
+      <title>Optimizing Kubernetes Costs: Balancing Spot and On-Demand Instances with Topology Spread Constraints</title>
+      <link>https://blog.kubesimplify.com/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints</guid>
+      <pubDate>Sat, 21 Sep 2024 08:41:43 GMT</pubDate>
+      <description>Addressing high Kubernetes costs and inefficient pod distribution, this article reveals how balancing spot and on-demand instances with Topology Spread Cons</description>
+      <category>kubernetes</category><category>devops</category><category>devops-articles</category><category>cost-optimisation</category><category>cloudcostmanagement</category>
+    </item>
+    <item>
+      <title>Kubernetes Adoption: Key Challenges in Migrating to Kubernetes</title>
+      <link>https://blog.kubesimplify.com/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-adoption-key-challenges-in-migrating-to-kubernetes</guid>
+      <pubDate>Tue, 10 Sep 2024 05:33:48 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>cncf</category>
+    </item>
+    <item>
+      <title>Kubernetes Scheduling - The Complete Guide</title>
+      <link>https://blog.kubesimplify.com/kubernetes-scheduling-the-complete-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-scheduling-the-complete-guide</guid>
+      <pubDate>Thu, 29 Aug 2024 08:45:04 GMT</pubDate>
+      <description>In this guide, we&apos;ll break down the essentials of scheduling in Kubernetes.</description>
+      <category>kubernetes</category><category>containers</category><category>scheduling</category>
+    </item>
+    <item>
+      <title>What is Reproducibility and why does it matter?</title>
+      <link>https://blog.kubesimplify.com/what-is-reproducibility-and-why-does-it-matter</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/what-is-reproducibility-and-why-does-it-matter</guid>
+      <pubDate>Mon, 26 Aug 2024 03:01:44 GMT</pubDate>
+      <description>In this blog, we&apos;ll explore how reproducible builds plays a significant role in securing the software supply chain.</description>
+      <category>security</category><category>vulnerability</category>
+    </item>
+    <item>
+      <title>Building APIGateway with Lambda using Pulumi</title>
+      <link>https://blog.kubesimplify.com/building-apigateway-with-lambda-using-pulumi</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/building-apigateway-with-lambda-using-pulumi</guid>
+      <pubDate>Wed, 07 Aug 2024 16:04:05 GMT</pubDate>
+      <description>In this post, I will guide you through creating an API Gateway with Lambda using Pulumi. I will also explain some of Pulumi&apos;s functionalities along the way.</description>
+      <category>aws</category><category>apis</category><category>devops</category><category>iac</category>
+    </item>
+    <item>
+      <title>Confidential Containers - Running on Kubernetes</title>
+      <link>https://blog.kubesimplify.com/confidential-containers-running-on-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/confidential-containers-running-on-kubernetes</guid>
+      <pubDate>Mon, 05 Aug 2024 17:35:50 GMT</pubDate>
+      <description></description>
+      <category>confidential</category><category>confidential-computing-consortium</category><category>confidential-containers</category><category>coco</category>
+    </item>
+    <item>
+      <title>K8sGPT Tutorial - When Kubernetes Meets AI</title>
+      <link>https://blog.kubesimplify.com/k8sgpt-tutorial-when-kubernetes-meets-ai</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/k8sgpt-tutorial-when-kubernetes-meets-ai</guid>
+      <pubDate>Wed, 31 Jul 2024 12:30:21 GMT</pubDate>
+      <description>In this blog we’ll explore k8sGPT, a powerful tool that brings the capabilities of AI to change the way you manage Kubernetes.</description>
+      <category>ai</category><category>kubernetes</category><category>openai</category><category>llm</category><category>ollama</category>
+    </item>
+    <item>
+      <title>Kubernetes Management with Rust - A Dive into Generic Client-Go, Controller Abstractions, and CRD Macros with Kube.rs</title>
+      <link>https://blog.kubesimplify.com/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers</guid>
+      <pubDate>Tue, 23 Jul 2024 12:30:43 GMT</pubDate>
+      <description>In this blog, we dive into Generic Client-Go, Controller Abstractions, and CRD Macros with Kube.rs.</description>
+      <category>kubernetes</category><category>rust</category><category>kubectl</category>
+    </item>
+    <item>
+      <title>Building a Zero CVE Strategy</title>
+      <link>https://blog.kubesimplify.com/building-a-zero-cve-strategy</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/building-a-zero-cve-strategy</guid>
+      <pubDate>Fri, 12 Jul 2024 12:25:50 GMT</pubDate>
+      <description>In this blog, we will delve into the primary causes of CVE fatigue and discuss some actionable strategies to minimize CVE fatigue.</description>
+      <category>security</category><category>nix</category><category>cve</category><category>dependabot</category>
+    </item>
+    <item>
+      <title>Supply Chain Security Using SLSA - Part 2 (The Framework)</title>
+      <link>https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-2-the-framework</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-2-the-framework</guid>
+      <pubDate>Thu, 13 Jun 2024 16:33:19 GMT</pubDate>
+      <description>In this article we&apos;ll discuss the Supply Chain Levels for Software Artifacts (SLSA) framework to achieve supply chain security in an organization.</description>
+      <category>framework</category><category>security</category><category>supplychainsecurity</category>
+    </item>
+    <item>
+      <title>Announcing BuildSafe: Your Path to Secure Software Supply Chain</title>
+      <link>https://blog.kubesimplify.com/announcing-buildsafe</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/announcing-buildsafe</guid>
+      <pubDate>Mon, 10 Jun 2024 11:26:08 GMT</pubDate>
+      <description>This post introduces BuildSafe that lets you build your application using nix with ease. It also helps you in securing your software supply chain.</description>
+      <category>security</category><category>cve</category><category>slsa</category><category>buildsafe</category><category>supply-chain-security</category>
+    </item>
+    <item>
+      <title>My Journey to Kubestronaut on Kubernetes 10th Birthday</title>
+      <link>https://blog.kubesimplify.com/my-journey-to-kubestronaut-on-kubernetes-10th-birthday</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/my-journey-to-kubestronaut-on-kubernetes-10th-birthday</guid>
+      <pubDate>Sat, 08 Jun 2024 08:14:58 GMT</pubDate>
+      <description>Journey to Kubestronaut, learning Kubernetes over the years and implementing at different organizations. </description>
+      <category>kubernetes</category><category>kubestronaut</category>
+    </item>
+    <item>
+      <title>Supply Chain Security Using SLSA - Part 1 (Fundamentals)</title>
+      <link>https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-1-fundamentals</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/supply-chain-security-using-slsa-part-1-fundamentals</guid>
+      <pubDate>Wed, 29 May 2024 12:04:59 GMT</pubDate>
+      <description>In this article, we will delve into the fundamental aspects of supply chain security and its increasing significance. </description>
+      <category>security</category><category>cloud-native</category><category>cybersecurity-1</category><category>supplychainsecurity</category>
+    </item>
+    <item>
+      <title>Perform CRUD Operations on Kubernetes Using Golang</title>
+      <link>https://blog.kubesimplify.com/perform-crud-operations-on-kubernetes-using-golang</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/perform-crud-operations-on-kubernetes-using-golang</guid>
+      <pubDate>Wed, 17 Apr 2024 11:30:47 GMT</pubDate>
+      <description>A step-by-step guide on performing basic CRUD operations on a Kubernetes resource, using Go as the programming language.</description>
+      <category>go</category><category>kubernetes</category><category>apis</category><category>crud-operations</category>
+    </item>
+    <item>
+      <title>Optimizing Scalability: A Deep Dive into Load Testing with Locust on EKS</title>
+      <link>https://blog.kubesimplify.com/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/optimizing-scalability-a-deep-dive-into-load-testing-with-locust-on-eks</guid>
+      <pubDate>Mon, 15 Apr 2024 11:30:23 GMT</pubDate>
+      <description>This article explores strategies for optimizing scalability using Locust for load testing on Amazon EKS.</description>
+      <category>aws</category><category>nodejs</category><category>kubernetes</category><category>scalability</category><category>eks</category><category>locust</category>
+    </item>
+    <item>
+      <title>Introducing Unikraft - Lightweight Virtualization Using Unikernels</title>
+      <link>https://blog.kubesimplify.com/introducing-unikraft-lightweight-virtualization-using-unikernels</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introducing-unikraft-lightweight-virtualization-using-unikernels</guid>
+      <pubDate>Mon, 08 Apr 2024 11:30:40 GMT</pubDate>
+      <description>Unikraft is a fast, secure and open-source Unikernel Development Kit which enables you to easily build minimal, ultra-lightweight virtual machines.</description>
+      <category>cloud</category><category>virtual-machine</category><category>containers</category><category>virtualization</category><category>unikernel</category>
+    </item>
+    <item>
+      <title>Kubernetes on Apple MacBooks (M Series)</title>
+      <link>https://blog.kubesimplify.com/kubernetes-on-apple-macbooks-m-series</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-on-apple-macbooks-m-series</guid>
+      <pubDate>Mon, 01 Apr 2024 11:30:31 GMT</pubDate>
+      <description>This article is a step-by-step walkthrough on how to install a Kubernetes cluster on a MacBook (M series) laptop using the kubeadm tool.</description>
+      <category>macbook</category><category>kubernetes</category><category>multipass</category><category>kubeadm</category>
+    </item>
+    <item>
+      <title>KubeCon + CloudNativeCon, Rejekts and Wasm I/O Wrap-Up: A Leap into the Future with WebAssembly, AI, and Sustainable Cloud Practices</title>
+      <link>https://blog.kubesimplify.com/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubecon-cloudnativecon-rejekts-and-wasm-io-wrap-up-a-leap-into-the-future-with-webassembly-ai-and-sustainable-cloud-practices</guid>
+      <pubDate>Wed, 27 Mar 2024 07:02:02 GMT</pubDate>
+      <description>Team Kubesimplify was at KubeCon and WasmIO. This blgo highlights the summary of both the events.</description>
+      <category>webassembly</category><category>kubernetes</category><category>wasm</category><category>kubecon</category><category>wasmio</category>
+    </item>
+    <item>
+      <title>Why are network policies in Kubernetes so hard to understand?</title>
+      <link>https://blog.kubesimplify.com/why-are-network-policies-in-kubernetes-so-hard-to-understand</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/why-are-network-policies-in-kubernetes-so-hard-to-understand</guid>
+      <pubDate>Sat, 23 Mar 2024 16:34:14 GMT</pubDate>
+      <description>This article explain in depth what network policies are with help of hands on examples to make the concepts clear. </description>
+      <category>kubernetes</category><category>k8s</category><category>kubernetes-network-policies</category><category>networkpolicy</category>
+    </item>
+    <item>
+      <title>Practical Guide to Kubernetes API</title>
+      <link>https://blog.kubesimplify.com/practical-guide-to-kubernetes-api</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/practical-guide-to-kubernetes-api</guid>
+      <pubDate>Tue, 19 Mar 2024 13:31:58 GMT</pubDate>
+      <description>In this practical guide, we&apos;ll cover the fundamental aspects of the Kubernetes API to help you navigate it confidently.</description>
+      <category>curl</category><category>http</category><category>kubernetes</category><category>rest-api</category><category>crud</category><category>kubectl</category><category>kubernetes-api</category>
+    </item>
+    <item>
+      <title>Kubesimplify at WasmIO and KubeCon EU 2024</title>
+      <link>https://blog.kubesimplify.com/kubesimplify-at-wasmio-and-kubecon-eu-2024</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubesimplify-at-wasmio-and-kubecon-eu-2024</guid>
+      <pubDate>Sat, 09 Mar 2024 14:26:15 GMT</pubDate>
+      <description>Meet the Kubesimplify team at Kubecon and WasmIO. Learn, connect and discuss the collaboration opportunities. </description>
+      <category>conference</category><category>kubernetes</category><category>wasm</category><category>kubecon</category><category>wasmio</category>
+    </item>
+    <item>
+      <title>Platform Engineering Demystified -  Navigating the Basics</title>
+      <link>https://blog.kubesimplify.com/platform-engineering-demystified-navigating-the-basics</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/platform-engineering-demystified-navigating-the-basics</guid>
+      <pubDate>Sat, 24 Feb 2024 17:30:50 GMT</pubDate>
+      <description>In this blog post, we’ll demystify the basic concepts of Platform Engineering by understanding how it’s a natural and necessary evolution to DevOps.</description>
+      <category>devops</category><category>platform-engineering</category>
+    </item>
+    <item>
+      <title>Automated GitHub Releases with GitHub Actions and Conventional Commits</title>
+      <link>https://blog.kubesimplify.com/automated-github-releases-with-github-actions-and-conventional-commits</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/automated-github-releases-with-github-actions-and-conventional-commits</guid>
+      <pubDate>Mon, 12 Feb 2024 12:30:45 GMT</pubDate>
+      <description></description>
+      <category>github</category><category>git</category><category>release-notes</category><category>github-actions-1</category><category>release-management</category>
+    </item>
+    <item>
+      <title>Reducing Image Size using Multi-stage builds for a Go application</title>
+      <link>https://blog.kubesimplify.com/multi-stage-docker-build</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/multi-stage-docker-build</guid>
+      <pubDate>Mon, 05 Feb 2024 04:30:18 GMT</pubDate>
+      <description>multi-stage docker builds</description>
+      <category>docker</category><category>go</category><category>devops</category><category>build</category><category>containers</category>
+    </item>
+    <item>
+      <title>Automate the creation of Kubernetes self-managed HA cluster</title>
+      <link>https://blog.kubesimplify.com/ha-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ha-kubernetes</guid>
+      <pubDate>Mon, 29 Jan 2024 12:30:51 GMT</pubDate>
+      <description>This tutorial will walk you step by step creation of a HA Kubernetes cluster on Compute nodes with external ETCD cluster and HA Proxy for Loadbalancing.</description>
+      <category>kubernetes</category><category>automation</category><category>cilium</category><category>etcd</category><category>kubeadm</category><category>ksctl</category>
+    </item>
+    <item>
+      <title>Ksctl: Making Kubernetes Easy Across Clouds</title>
+      <link>https://blog.kubesimplify.com/ksctl-making-kubernetes-easy-across-clouds</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ksctl-making-kubernetes-easy-across-clouds</guid>
+      <pubDate>Tue, 23 Jan 2024 05:23:05 GMT</pubDate>
+      <description>Discover Ksctl, the platform automation tool revolutionizing Kubernetes management. Learn how it solves multi-cloud challenges.</description>
+      <category>kubernetes</category><category>devops</category><category>kubesimplify</category><category>multicloud</category><category>ksctl</category>
+    </item>
+    <item>
+      <title>Pure Cilium : A Guide for Local Load Balancing and BGP</title>
+      <link>https://blog.kubesimplify.com/pure-cilium-a-guide-for-local-load-balancing-and-bgp</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/pure-cilium-a-guide-for-local-load-balancing-and-bgp</guid>
+      <pubDate>Mon, 22 Jan 2024 11:23:53 GMT</pubDate>
+      <description></description>
+      <category>bgp</category><category>cilium</category>
+    </item>
+    <item>
+      <title>The WebAssembly Course</title>
+      <link>https://blog.kubesimplify.com/the-webassembly-course</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/the-webassembly-course</guid>
+      <pubDate>Mon, 15 Jan 2024 12:35:49 GMT</pubDate>
+      <description>In this course you will learn all the constructs of Webassembly required to get you ready for creating wasm based apps and run them on Kubernetes.</description>
+      <category>webassembly</category><category>kubernetes</category><category>wasm</category><category>cloud-native</category>
+    </item>
+    <item>
+      <title>Tutorial: Build a Cloud Cost Monitoring System with Terraform, Ansible and Komiser</title>
+      <link>https://blog.kubesimplify.com/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/tutorial-build-a-cloud-cost-monitoring-system-with-terraform-ansible-and-komiser</guid>
+      <pubDate>Fri, 03 Nov 2023 05:39:27 GMT</pubDate>
+      <description></description>
+      <category>aws</category><category>ansible</category><category>terraform</category><category>cloudcostmanagement</category>
+    </item>
+    <item>
+      <title>Get Ready for Wasm Day at Kubecon NA 2023!</title>
+      <link>https://blog.kubesimplify.com/ready-for-wasm-day-2023</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ready-for-wasm-day-2023</guid>
+      <pubDate>Sat, 28 Oct 2023 12:30:09 GMT</pubDate>
+      <description></description>
+      <category>webassembly</category><category>kubernetes</category><category>devops</category><category>wasm</category><category>kubecon</category>
+    </item>
+    <item>
+      <title>The Complete Guide to the dd Command in Linux</title>
+      <link>https://blog.kubesimplify.com/the-complete-guide-to-the-dd-command-in-linux</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/the-complete-guide-to-the-dd-command-in-linux</guid>
+      <pubDate>Wed, 02 Aug 2023 05:58:28 GMT</pubDate>
+      <description>The dd command is an extremely powerful Linux utility. It is commonly referred to as the \&quot;disk destroyer\&quot;, “data definition”, “disk dump”</description>
+      <category>linux</category><category>linux-commands</category><category>dd-command</category>
+    </item>
+    <item>
+      <title>Simplified Introduction To Bacalhau</title>
+      <link>https://blog.kubesimplify.com/simplified-introduction-to-bacalhau</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/simplified-introduction-to-bacalhau</guid>
+      <pubDate>Sun, 09 Jul 2023 19:27:17 GMT</pubDate>
+      <description>Bacalhau is an open-source project wherein the existing workflows can be streamlined without rewriting by running Docker containers and Web Assembly (WASM)</description>
+      <category>decentralized</category><category>ipfs</category><category>bacalhau</category>
+    </item>
+    <item>
+      <title>Microservices</title>
+      <link>https://blog.kubesimplify.com/microservices</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/microservices</guid>
+      <pubDate>Mon, 05 Jun 2023 12:30:42 GMT</pubDate>
+      <description></description>
+      <category>microservices</category><category>kubernetes</category>
+    </item>
+    <item>
+      <title>The Ultimate Guide to Audit Logging in Kubernetes: From Setup to Analysis</title>
+      <link>https://blog.kubesimplify.com/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/the-ultimate-guide-to-audit-logging-in-kubernetes-from-setup-to-analysis</guid>
+      <pubDate>Mon, 15 May 2023 12:30:39 GMT</pubDate>
+      <description>Audit logging in Kubernetes and jq</description>
+      <category>security</category><category>kubernetes</category><category>devops</category><category>logging</category><category>devsecops</category>
+    </item>
+    <item>
+      <title>Docker Networking Demystified</title>
+      <link>https://blog.kubesimplify.com/docker-networking-demystified</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/docker-networking-demystified</guid>
+      <pubDate>Wed, 10 May 2023 12:30:39 GMT</pubDate>
+      <description></description>
+      <category>cloud</category><category>docker</category><category>kubernetes</category><category>devops</category><category>wemakedevs</category>
+    </item>
+    <item>
+      <title>Four Pillars Of Observability in Kubernetes</title>
+      <link>https://blog.kubesimplify.com/four-pillars-of-observability-in-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/four-pillars-of-observability-in-kubernetes</guid>
+      <pubDate>Mon, 01 May 2023 12:30:39 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>monitoring</category><category>devops</category><category>observability</category>
+    </item>
+    <item>
+      <title>Understanding How Containers Work Behind the Scenes</title>
+      <link>https://blog.kubesimplify.com/understanding-how-containers-work-behind-the-scenes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/understanding-how-containers-work-behind-the-scenes</guid>
+      <pubDate>Sat, 29 Apr 2023 12:30:41 GMT</pubDate>
+      <description></description>
+      <category>linux</category><category>docker</category><category>devops</category><category>cgroups</category>
+    </item>
+    <item>
+      <title>Implementing Kubernetes Network Policies: A Comprehensive Guide</title>
+      <link>https://blog.kubesimplify.com/implementing-kubernetes-network-policies-a-comprehensive-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/implementing-kubernetes-network-policies-a-comprehensive-guide</guid>
+      <pubDate>Fri, 07 Apr 2023 12:30:39 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category>
+    </item>
+    <item>
+      <title>How get started with Hashicorp Vault🛡️</title>
+      <link>https://blog.kubesimplify.com/how-get-started-with-hashicorp-vault</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/how-get-started-with-hashicorp-vault</guid>
+      <pubDate>Wed, 05 Apr 2023 12:30:39 GMT</pubDate>
+      <description>it provides how to setup vault, how to configure backend with S3 and more and finally how to make auto-seal work and HTTPS with self signed certificate</description>
+      <category>aws</category><category>security</category><category>secrets</category><category>hashicorp</category><category>hashicorp-vault</category>
+    </item>
+    <item>
+      <title>Iptables Firewall Demo: Learn How to Secure Your Network</title>
+      <link>https://blog.kubesimplify.com/iptables-demo</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/iptables-demo</guid>
+      <pubDate>Wed, 29 Mar 2023 12:30:39 GMT</pubDate>
+      <description>Secure your Linux network with an IPTABLES firewall demo. Learn about chains, rule matching, and extensions for improved security</description>
+      <category>tutorial</category><category>linux</category><category>firewall</category><category>cybersecurity-1</category><category>kubesimplify</category>
+    </item>
+    <item>
+      <title>Enhancing Runtime-Security with Falco: My Hands-On Experience</title>
+      <link>https://blog.kubesimplify.com/enhancing-runtime-security-with-falco-my-hands-on-experience</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/enhancing-runtime-security-with-falco-my-hands-on-experience</guid>
+      <pubDate>Mon, 27 Mar 2023 12:30:39 GMT</pubDate>
+      <description>Hands-on experience with working on the runtime-security tool Falco</description>
+      <category>kubernetes</category><category>containers</category><category>cybersecurity-1</category><category>falco</category><category>runtime-security</category>
+    </item>
+    <item>
+      <title>Getting Started with KinD: Creating a Multi-node  Local Kubernetes Cluster</title>
+      <link>https://blog.kubesimplify.com/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/getting-started-with-kind-creating-a-multi-node-local-kubernetes-cluster</guid>
+      <pubDate>Mon, 13 Mar 2023 12:30:39 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>devops</category><category>k8s</category><category>kind</category><category>learning-in-public</category>
+    </item>
+    <item>
+      <title>Operating Systems 101: Essential Knowledge for  DevOps/SRE Engineers</title>
+      <link>https://blog.kubesimplify.com/operating-systems-101-essential-knowledge-for-devopssre-engineers</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/operating-systems-101-essential-knowledge-for-devopssre-engineers</guid>
+      <pubDate>Thu, 09 Mar 2023 12:30:39 GMT</pubDate>
+      <description></description>
+      <category>operating-system</category><category>devops</category><category>sre</category>
+    </item>
+    <item>
+      <title>How to Install a Kubernetes Cluster with Kubeadm, Containerd, and Cilium: A Hands-On Guide</title>
+      <link>https://blog.kubesimplify.com/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/how-to-install-a-kubernetes-cluster-with-kubeadm-containerd-and-cilium-a-hands-on-guide</guid>
+      <pubDate>Tue, 07 Mar 2023 12:30:39 GMT</pubDate>
+      <description>cilium for kubeadm cluster</description>
+      <category>kubernetes</category><category>devops</category><category>containers</category><category>cilium</category><category>kubeadm</category>
+    </item>
+    <item>
+      <title>Speeding up using MicroK8s</title>
+      <link>https://blog.kubesimplify.com/speeding-up-using-microk8s</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/speeding-up-using-microk8s</guid>
+      <pubDate>Tue, 21 Feb 2023 12:30:38 GMT</pubDate>
+      <description></description>
+      <category>linux</category><category>kubernetes</category><category>microk8s</category>
+    </item>
+    <item>
+      <title>Deploy a Maven Project on a Tomcat Server Using Jenkins and AWS</title>
+      <link>https://blog.kubesimplify.com/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws</guid>
+      <pubDate>Sun, 19 Feb 2023 12:30:39 GMT</pubDate>
+      <description>Deploy a Maven Project on a Tomcat Server Using Jenkins and AWS</description>
+      <category>aws</category><category>maven</category><category>devops</category><category>jenkins</category><category>tomcat</category>
+    </item>
+    <item>
+      <title>StatefulSets</title>
+      <link>https://blog.kubesimplify.com/statefulsets</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/statefulsets</guid>
+      <pubDate>Thu, 16 Feb 2023 17:12:10 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>devops</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Become a Hashicorp Certified Terraform Associate - Preparation Guide</title>
+      <link>https://blog.kubesimplify.com/become-a-hashicorp-certified-terraform-associate-preparation-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/become-a-hashicorp-certified-terraform-associate-preparation-guide</guid>
+      <pubDate>Mon, 13 Feb 2023 12:30:39 GMT</pubDate>
+      <description>In this particular blog, we&apos;ll dig a bit deeper into the HashiCorp Terraform Certification and exactly what you need to pass it.</description>
+      <category>terraform</category><category>infrastructure-as-code</category><category>hashicorp</category>
+    </item>
+    <item>
+      <title>Understanding etcd in Kubernetes: A Beginner&apos;s Guide</title>
+      <link>https://blog.kubesimplify.com/understanding-etcd-in-kubernetes-a-beginners-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/understanding-etcd-in-kubernetes-a-beginners-guide</guid>
+      <pubDate>Sat, 11 Feb 2023 12:30:39 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category>
+    </item>
+    <item>
+      <title>GitOps - Demystified</title>
+      <link>https://blog.kubesimplify.com/gitops-demystified</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/gitops-demystified</guid>
+      <pubDate>Thu, 09 Feb 2023 12:30:39 GMT</pubDate>
+      <description>This blog explains GitOps in a simple way, going over what is gitops, the principles of gitops, and why use gitops in the realm of kubernetes.</description>
+      <category>kubernetes</category><category>git</category><category>devops</category><category>gitops</category>
+    </item>
+    <item>
+      <title>Understanding the Architecture of Kubernetes: A Beginner&apos;s Guide</title>
+      <link>https://blog.kubesimplify.com/understanding-the-architecture-of-kubernetes-a-beginners-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/understanding-the-architecture-of-kubernetes-a-beginners-guide</guid>
+      <pubDate>Mon, 30 Jan 2023 12:30:39 GMT</pubDate>
+      <description></description>
+      <category>virtual-machine</category><category>kubernetes</category><category>containers</category><category>kubectl</category><category>kubernetes-architecture</category>
+    </item>
+    <item>
+      <title>Introduction to Helm!</title>
+      <link>https://blog.kubesimplify.com/introduction-to-helm</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introduction-to-helm</guid>
+      <pubDate>Mon, 23 Jan 2023 12:36:08 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>helm</category><category>cloud-native</category><category>kubesimplify</category>
+    </item>
+    <item>
+      <title>An overview of GitOps and ArgoCD.</title>
+      <link>https://blog.kubesimplify.com/an-overview-of-gitops-and-argocd</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/an-overview-of-gitops-and-argocd</guid>
+      <pubDate>Mon, 16 Jan 2023 12:30:45 GMT</pubDate>
+      <description></description>
+      <category>devops</category><category>gitops</category><category>argocd</category>
+    </item>
+    <item>
+      <title>Deploying Java Application using Docker and Kubernetes- DevOps Project</title>
+      <link>https://blog.kubesimplify.com/deploying-java-application-using-docker-and-kubernetes-devops-project</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/deploying-java-application-using-docker-and-kubernetes-devops-project</guid>
+      <pubDate>Mon, 09 Jan 2023 12:30:42 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>java</category><category>kubernetes</category><category>devops</category><category>devopsproject</category>
+    </item>
+    <item>
+      <title>Firewall: A Network&apos;s Gatekeeper</title>
+      <link>https://blog.kubesimplify.com/firewall-a-networks-gatekeeper</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/firewall-a-networks-gatekeeper</guid>
+      <pubDate>Tue, 03 Jan 2023 12:30:42 GMT</pubDate>
+      <description></description>
+      <category>cloud-computing</category><category>firewall</category><category>cybersecurity-1</category><category>kubesimplify</category><category>computernetwork</category>
+    </item>
+    <item>
+      <title>Kubeflow Pipelines: Orchestrating Machine Learning Workflows - Part 3</title>
+      <link>https://blog.kubesimplify.com/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubeflow-pipelines-orchestrating-machine-learning-workflows-part-3</guid>
+      <pubDate>Tue, 27 Dec 2022 12:30:44 GMT</pubDate>
+      <description></description>
+      <category>machine-learning</category><category>kubernetes</category><category>kubeflow</category>
+    </item>
+    <item>
+      <title>Automate repetitive tasks - Shell Scripting</title>
+      <link>https://blog.kubesimplify.com/automate-repetitive-tasks-shell-scripting</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/automate-repetitive-tasks-shell-scripting</guid>
+      <pubDate>Wed, 21 Dec 2022 12:30:42 GMT</pubDate>
+      <description></description>
+      <category>shell</category><category>shell-scripting</category><category>shell-script</category><category>change-shells</category>
+    </item>
+    <item>
+      <title>Managing your Operating System with Package Managers.</title>
+      <link>https://blog.kubesimplify.com/managing-your-operating-system-with-package-managers</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/managing-your-operating-system-with-package-managers</guid>
+      <pubDate>Fri, 16 Dec 2022 13:30:44 GMT</pubDate>
+      <description></description>
+      <category>linux</category><category>package</category><category>devops</category><category>package-manager</category><category>technical-writing-1</category>
+    </item>
+    <item>
+      <title>Kubernetes 1.26 - The electrifying release setup</title>
+      <link>https://blog.kubesimplify.com/kubernetes-126</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-126</guid>
+      <pubDate>Wed, 14 Dec 2022 12:30:42 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>kubernetes-setup</category><category>kubernetes-126</category><category>kubeadm</category>
+    </item>
+    <item>
+      <title>Kubernetes Access Control with Authentication, Authorization &amp; Admission Control</title>
+      <link>https://blog.kubesimplify.com/kubernetes-access-control-with-authentication-authorization-admission-control</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-access-control-with-authentication-authorization-admission-control</guid>
+      <pubDate>Mon, 12 Dec 2022 12:30:42 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>devops</category><category>k8s</category><category>role-based-access-control</category>
+    </item>
+    <item>
+      <title>12 Practical Grep Command Examples In Linux</title>
+      <link>https://blog.kubesimplify.com/12-practical-grep-command-examples-in-linux</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/12-practical-grep-command-examples-in-linux</guid>
+      <pubDate>Tue, 06 Dec 2022 12:30:42 GMT</pubDate>
+      <description>In Linux command line, the grep command is a powerful tool for searching text within files.</description>
+      <category>ubuntu</category><category>linux</category><category>bash</category><category>basics</category><category>archlinux</category>
+    </item>
+    <item>
+      <title>Introduction to CRI</title>
+      <link>https://blog.kubesimplify.com/introduction-to-cri</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introduction-to-cri</guid>
+      <pubDate>Tue, 29 Nov 2022 12:30:42 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>containers</category><category>cncf</category><category>cri</category>
+    </item>
+    <item>
+      <title>How to setup your ftp server in Linux</title>
+      <link>https://blog.kubesimplify.com/how-to-setup-your-ftp-server-in-linux</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/how-to-setup-your-ftp-server-in-linux</guid>
+      <pubDate>Mon, 21 Nov 2022 12:30:42 GMT</pubDate>
+      <description>In this tutorial I&apos;m going to show you how you can setup your own ftp server on linux.</description>
+      <category>ftp</category><category>server</category><category>bash</category><category>kubernetes</category><category>li</category>
+    </item>
+    <item>
+      <title>Embed HTTP servers in WASM with Rust and CSharp</title>
+      <link>https://blog.kubesimplify.com/embed-http-servers-in-wasm-with-rust-and-csharp</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/embed-http-servers-in-wasm-with-rust-and-csharp</guid>
+      <pubDate>Mon, 07 Nov 2022 12:30:42 GMT</pubDate>
+      <description></description>
+      <category>csharp</category><category>webassembly</category><category>rust</category><category>wasm</category><category>wasi</category>
+    </item>
+    <item>
+      <title>Istio &amp; Service Mesh</title>
+      <link>https://blog.kubesimplify.com/istio-service-mesh</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/istio-service-mesh</guid>
+      <pubDate>Wed, 19 Oct 2022 12:30:45 GMT</pubDate>
+      <description></description>
+      <category>istio</category><category>servicemesh</category><category>kubesimplify</category>
+    </item>
+    <item>
+      <title>Container and Kubernetes Security</title>
+      <link>https://blog.kubesimplify.com/container-and-kubernetes-security</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/container-and-kubernetes-security</guid>
+      <pubDate>Mon, 17 Oct 2022 12:30:45 GMT</pubDate>
+      <description>A descriptive written piece that describes best practices that can be followed to secure your Kubernetes cluster and containers before or when in production</description>
+      <category>docker</category><category>kubernetes</category><category>containers</category><category>k8s</category><category>cloud-native</category>
+    </item>
+    <item>
+      <title>My First International conference- Open Source Summit-2022🎉</title>
+      <link>https://blog.kubesimplify.com/my-first-international-conference-open-source-summit-2022</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/my-first-international-conference-open-source-summit-2022</guid>
+      <pubDate>Tue, 11 Oct 2022 12:30:45 GMT</pubDate>
+      <description></description>
+      <category>conference</category><category>opensource-inactive</category><category>linux-foundation</category>
+    </item>
+    <item>
+      <title>Everything You Need to Know about Docker Compose</title>
+      <link>https://blog.kubesimplify.com/everything-you-need-to-know-about-docker-compose</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/everything-you-need-to-know-about-docker-compose</guid>
+      <pubDate>Fri, 23 Sep 2022 12:30:45 GMT</pubDate>
+      <description>Docker Compose is a tool that allows us to containerize an entire app with just one file saving us from the tedious task of running multiple containers.</description>
+      <category>docker</category><category>development</category><category>devops</category><category>developer-tools</category><category>docker-compose</category>
+    </item>
+    <item>
+      <title>Bake your Container Images with Bake 📦👨‍🍳</title>
+      <link>https://blog.kubesimplify.com/bake-your-container-images-with-bake</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/bake-your-container-images-with-bake</guid>
+      <pubDate>Mon, 05 Sep 2022 14:31:12 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>containers</category><category>buildx</category><category>docker-buildx</category><category>bake</category>
+    </item>
+    <item>
+      <title>About my PDF-Editor Project</title>
+      <link>https://blog.kubesimplify.com/about-my-pdf-editor-project</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/about-my-pdf-editor-project</guid>
+      <pubDate>Thu, 01 Sep 2022 11:30:01 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>aws</category><category>go</category><category>javascript</category><category>kubernetes</category>
+    </item>
+    <item>
+      <title>Kubernetes 1.25 + Dockerd</title>
+      <link>https://blog.kubesimplify.com/kubernetes-125-dockerd</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-125-dockerd</guid>
+      <pubDate>Wed, 24 Aug 2022 05:30:00 GMT</pubDate>
+      <description>Learn how to set up Kubernetes 1.25 using dockerd as the container runtime on Ubuntu 22.04 machines.</description>
+      <category>docker</category><category>kubernetes</category><category>devops</category><category>k8s</category><category>kubernetes-setup</category>
+    </item>
+    <item>
+      <title>Essential Linux Commands For DevOps</title>
+      <link>https://blog.kubesimplify.com/essential-linux-commands-for-devops</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/essential-linux-commands-for-devops</guid>
+      <pubDate>Thu, 18 Aug 2022 12:31:00 GMT</pubDate>
+      <description></description>
+      <category>linux</category><category>devops</category><category>linux-basics</category><category>linux-commands</category>
+    </item>
+    <item>
+      <title>Let&apos;s talk about Ansible</title>
+      <link>https://blog.kubesimplify.com/lets-talk-about-ansible</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/lets-talk-about-ansible</guid>
+      <pubDate>Thu, 18 Aug 2022 12:30:00 GMT</pubDate>
+      <description></description>
+      <category>ansible</category><category>kubernetes</category><category>terraform</category><category>iac</category>
+    </item>
+    <item>
+      <title>Progressive Rollouts with Argo CD &amp; Rollouts</title>
+      <link>https://blog.kubesimplify.com/progressive-rollouts-with-argo-cd-rollouts</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/progressive-rollouts-with-argo-cd-rollouts</guid>
+      <pubDate>Tue, 16 Aug 2022 12:31:00 GMT</pubDate>
+      <description></description>
+      <category>software-development</category><category>kubernetes</category><category>argocd</category><category>rollouts</category>
+    </item>
+    <item>
+      <title>Keptn: Getting started</title>
+      <link>https://blog.kubesimplify.com/keptn-getting-started</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/keptn-getting-started</guid>
+      <pubDate>Thu, 11 Aug 2022 12:35:30 GMT</pubDate>
+      <description></description>
+      <category>opensource</category>
+    </item>
+    <item>
+      <title>Kubeflow Notebooks: ML Experimentation Made Easier - Part 2</title>
+      <link>https://blog.kubesimplify.com/kubeflow-notebooks-ml-experimentation-made-easier-part-2</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubeflow-notebooks-ml-experimentation-made-easier-part-2</guid>
+      <pubDate>Mon, 08 Aug 2022 12:47:09 GMT</pubDate>
+      <description></description>
+      <category>machine-learning</category><category>kubernetes</category><category>kubeflow</category>
+    </item>
+    <item>
+      <title>Let&apos;s Simplify Golang : Part 3</title>
+      <link>https://blog.kubesimplify.com/lets-simplify-golang-part-3</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/lets-simplify-golang-part-3</guid>
+      <pubDate>Fri, 05 Aug 2022 09:32:50 GMT</pubDate>
+      <description></description>
+      <category>go</category><category>devops</category><category>programming-languages</category><category>kubesimplify</category>
+    </item>
+    <item>
+      <title>DIY: How To Build A Kubernetes Policy Engine</title>
+      <link>https://blog.kubesimplify.com/diy-how-to-build-a-kubernetes-policy-engine</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/diy-how-to-build-a-kubernetes-policy-engine</guid>
+      <pubDate>Thu, 28 Jul 2022 13:33:12 GMT</pubDate>
+      <description></description>
+      <category>go</category><category>development</category><category>security</category><category>kubernetes</category><category>devops</category>
+    </item>
+    <item>
+      <title>Kubeflow: Machine Learning on Kubernetes - Part 1</title>
+      <link>https://blog.kubesimplify.com/kubeflow-machine-learning-on-kubernetes-part-1</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubeflow-machine-learning-on-kubernetes-part-1</guid>
+      <pubDate>Tue, 26 Jul 2022 13:22:13 GMT</pubDate>
+      <description></description>
+      <category>machine-learning</category><category>kubernetes</category><category>devops</category><category>mlops</category><category>kubeflow</category>
+    </item>
+    <item>
+      <title>Yours Kindly Drone</title>
+      <link>https://blog.kubesimplify.com/yours-kindly-drone</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/yours-kindly-drone</guid>
+      <pubDate>Tue, 19 Jul 2022 12:14:23 GMT</pubDate>
+      <description></description>
+      <category>cloud</category><category>docker</category><category>kubernetes</category><category>cicd</category><category>drone</category>
+    </item>
+    <item>
+      <title>Linux Boot Process Simplified 🐧</title>
+      <link>https://blog.kubesimplify.com/linux-boot-process-simplified</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/linux-boot-process-simplified</guid>
+      <pubDate>Mon, 04 Jul 2022 12:35:28 GMT</pubDate>
+      <description>Linux boot process steps</description>
+      <category>operating-system</category><category>linux</category><category>devops</category><category>linux-for-beginners</category><category>linux-basics</category>
+    </item>
+    <item>
+      <title>Moving code between GIT repositories with Copybara</title>
+      <link>https://blog.kubesimplify.com/moving-code-between-git-repositories-with-copybara</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/moving-code-between-git-repositories-with-copybara</guid>
+      <pubDate>Mon, 27 Jun 2022 12:25:53 GMT</pubDate>
+      <description></description>
+      <category>github</category><category>opensource</category><category>git</category><category>copybara</category>
+    </item>
+    <item>
+      <title>Let&apos;s Simplify Golang : Part 2</title>
+      <link>https://blog.kubesimplify.com/lets-simplify-golang-part-2</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/lets-simplify-golang-part-2</guid>
+      <pubDate>Mon, 20 Jun 2022 12:56:03 GMT</pubDate>
+      <description></description>
+      <category>go</category><category>devops</category><category>programming-languages</category><category>devops-articles</category>
+    </item>
+    <item>
+      <title>Terraform Best Practices</title>
+      <link>https://blog.kubesimplify.com/terraform-best-practices</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/terraform-best-practices</guid>
+      <pubDate>Thu, 16 Jun 2022 12:34:32 GMT</pubDate>
+      <description>In this blog, I&apos;m going to discuss eight terraform best practices. It will improve your terraform workflows immediately and make you feel more confident</description>
+      <category>cloud</category><category>git</category><category>devops</category><category>terraform</category><category>ci-cd</category>
+    </item>
+    <item>
+      <title>Why DevOps-Case Study</title>
+      <link>https://blog.kubesimplify.com/why-devops-case-study</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/why-devops-case-study</guid>
+      <pubDate>Wed, 15 Jun 2022 12:26:43 GMT</pubDate>
+      <description></description>
+      <category>devops</category><category>devops-articles</category><category>devops-trends</category><category>why</category>
+    </item>
+    <item>
+      <title>Important concepts of Operating Systems</title>
+      <link>https://blog.kubesimplify.com/important-concepts-of-operating-systems</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/important-concepts-of-operating-systems</guid>
+      <pubDate>Tue, 14 Jun 2022 12:33:06 GMT</pubDate>
+      <description></description>
+      <category>operating-system</category><category>linux</category><category>thread</category><category>os</category><category>process</category>
+    </item>
+    <item>
+      <title>Avoid Overspending With Kubecost</title>
+      <link>https://blog.kubesimplify.com/avoid-overspending-with-kubecost</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/avoid-overspending-with-kubecost</guid>
+      <pubDate>Sun, 12 Jun 2022 12:27:33 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>devops</category><category>k8s</category><category>kubecost</category><category>cost-optimisation</category>
+    </item>
+    <item>
+      <title>What is Shell Scripting?</title>
+      <link>https://blog.kubesimplify.com/what-is-shell-scripting</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/what-is-shell-scripting</guid>
+      <pubDate>Fri, 10 Jun 2022 12:43:51 GMT</pubDate>
+      <description></description>
+      <category>ubuntu</category><category>linux</category><category>shell</category><category>programming-languages</category><category>learn-coding</category>
+    </item>
+    <item>
+      <title>Everything you need to know about the Linux &apos;ls&apos; command.</title>
+      <link>https://blog.kubesimplify.com/everything-you-need-to-know-about-the-linux-ls-command</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/everything-you-need-to-know-about-the-linux-ls-command</guid>
+      <pubDate>Thu, 09 Jun 2022 12:33:49 GMT</pubDate>
+      <description>The ls command is one of the most commonly used Linux commands for listing available files or directories from the command line.</description>
+      <category>linux</category><category>bash</category><category>shell</category><category>linux-for-beginners</category><category>shell-script</category>
+    </item>
+    <item>
+      <title>Cloud Computing</title>
+      <link>https://blog.kubesimplify.com/cloud-computing</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/cloud-computing</guid>
+      <pubDate>Wed, 08 Jun 2022 12:26:13 GMT</pubDate>
+      <description></description>
+      <category>cloud</category><category>paas</category><category>saas</category><category>cloud-computing</category><category>devops</category>
+    </item>
+    <item>
+      <title>Kubesimplify - A Journey to remember</title>
+      <link>https://blog.kubesimplify.com/kubesimplify-a-journey-to-remember</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubesimplify-a-journey-to-remember</guid>
+      <pubDate>Tue, 07 Jun 2022 12:31:00 GMT</pubDate>
+      <description>Kubesimplify is a community and a place to learn cloud-native in a simple way by working of projects and contributing your learning for others.</description>
+      <category>community</category><category>kubernetes</category><category>kubesimplify</category><category>clounative</category>
+    </item>
+    <item>
+      <title>WTF is Linux Shell Command substitution.</title>
+      <link>https://blog.kubesimplify.com/wtf-is-linux-shell-command-substitution</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/wtf-is-linux-shell-command-substitution</guid>
+      <pubDate>Mon, 06 Jun 2022 12:31:31 GMT</pubDate>
+      <description>Command substitution allows you to assign the output of a shell command to a variable. This one of the most useful feature of shell scripts.</description>
+      <category>linux</category><category>bash</category><category>shell</category><category>linux-for-beginners</category><category>shell-script</category>
+    </item>
+    <item>
+      <title>How to change Directory In Shell Scripts?</title>
+      <link>https://blog.kubesimplify.com/how-to-change-directory-in-shell-scripts</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/how-to-change-directory-in-shell-scripts</guid>
+      <pubDate>Thu, 02 Jun 2022 12:33:05 GMT</pubDate>
+      <description>For convenience, there are times you may want to run a shell script that changes your current working directory to another directory.</description>
+      <category>bash</category><category>shell</category><category>script</category><category>linux-for-beginners</category><category>linux-basics</category>
+    </item>
+    <item>
+      <title>Creating Multi Node Kubernetes cluster Locally</title>
+      <link>https://blog.kubesimplify.com/creating-multi-node-kubernetes-cluster-locally</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/creating-multi-node-kubernetes-cluster-locally</guid>
+      <pubDate>Wed, 01 Jun 2022 12:27:27 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>devops</category><category>k8s</category>
+    </item>
+    <item>
+      <title>My KubeCon EU(Virtual) Experience</title>
+      <link>https://blog.kubesimplify.com/my-kubecon-euvirtual-experience</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/my-kubecon-euvirtual-experience</guid>
+      <pubDate>Tue, 31 May 2022 12:29:31 GMT</pubDate>
+      <description></description>
+      <category>linux</category><category>kubernetes</category><category>events</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Introduction to developer platforms with Gimlet</title>
+      <link>https://blog.kubesimplify.com/introduction-to-developer-platforms-with-gimlet</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introduction-to-developer-platforms-with-gimlet</guid>
+      <pubDate>Mon, 30 May 2022 12:38:27 GMT</pubDate>
+      <description></description>
+      <category>nginx</category><category>kubernetes</category><category>devops</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Let&apos;s Simplify Golang : Part 1</title>
+      <link>https://blog.kubesimplify.com/lets-simplify-golang-part-1</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/lets-simplify-golang-part-1</guid>
+      <pubDate>Fri, 27 May 2022 12:34:12 GMT</pubDate>
+      <description>Golang is one of the most desired languages to learn, and it&apos;s also one of the most popular programming languages.</description>
+      <category>code</category><category>go</category><category>golang</category><category>beginner</category><category>devops</category>
+    </item>
+    <item>
+      <title>Linux System Directories Explained</title>
+      <link>https://blog.kubesimplify.com/linux-system-directories-explained</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/linux-system-directories-explained</guid>
+      <pubDate>Thu, 26 May 2022 12:14:55 GMT</pubDate>
+      <description>If you are a beginner and want to get familiar with the Linux file system. This blog is for you! Learn functionalities of Linux system Directories.</description>
+      <category>linux</category><category>devops</category><category>linux-for-beginners</category><category>linux-kernel</category><category>linux-basics</category>
+    </item>
+    <item>
+      <title>Let&apos;s Learn: Terraform</title>
+      <link>https://blog.kubesimplify.com/lets-learn-terraform</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/lets-learn-terraform</guid>
+      <pubDate>Wed, 25 May 2022 12:41:11 GMT</pubDate>
+      <description>About Terraform. It&apos;s components, workflow, expressions, state data, functions, workspaces and more.</description>
+      <category>cloud</category><category>cloud-computing</category><category>devops</category><category>terraform</category>
+    </item>
+    <item>
+      <title>Quick Bites of FluxCD: Health Assessment</title>
+      <link>https://blog.kubesimplify.com/quick-bites-of-fluxcd-health-assessment</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/quick-bites-of-fluxcd-health-assessment</guid>
+      <pubDate>Tue, 24 May 2022 12:19:00 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>git</category><category>developer</category><category>devops</category><category>infrastructure</category>
+    </item>
+    <item>
+      <title>AWS Elastic Cloud Compute</title>
+      <link>https://blog.kubesimplify.com/aws-elastic-cloud-compute</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/aws-elastic-cloud-compute</guid>
+      <pubDate>Mon, 23 May 2022 12:52:56 GMT</pubDate>
+      <description>Everything you need to know about an AWS EC2 instance.</description>
+      <category>cloud</category><category>ec2</category><category>aws</category><category>cloud-computing</category><category>devops</category>
+    </item>
+    <item>
+      <title>Getting started with ko: A fast container image builder for your Go applications</title>
+      <link>https://blog.kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/getting-started-with-ko-a-fast-container-image-builder-for-your-go-applications</guid>
+      <pubDate>Fri, 20 May 2022 11:35:25 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>go</category><category>kubernetes</category><category>k8s</category><category>docker-images</category>
+    </item>
+    <item>
+      <title>Networking Fundamentals For DevOps</title>
+      <link>https://blog.kubesimplify.com/networking-fundamentals-for-devops</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/networking-fundamentals-for-devops</guid>
+      <pubDate>Thu, 19 May 2022 12:21:54 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>devops</category><category>networking</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Kyverno CLI</title>
+      <link>https://blog.kubesimplify.com/kyverno-cli</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kyverno-cli</guid>
+      <pubDate>Wed, 18 May 2022 12:19:34 GMT</pubDate>
+      <description></description>
+      <category>tutorial</category><category>kubernetes</category><category>devops</category><category>developer-tools</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Arkade</title>
+      <link>https://blog.kubesimplify.com/arkade</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/arkade</guid>
+      <pubDate>Tue, 17 May 2022 12:15:29 GMT</pubDate>
+      <description></description>
+      <category>productivity</category><category>kubernetes</category><category>developer</category><category>devops</category><category>thw-cloud-computing</category>
+    </item>
+    <item>
+      <title>Installing Prometheus with SELinux</title>
+      <link>https://blog.kubesimplify.com/installing-prometheus-with-selinux</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/installing-prometheus-with-selinux</guid>
+      <pubDate>Mon, 16 May 2022 12:34:49 GMT</pubDate>
+      <description>Shows how to use SELinux to install Applications</description>
+      <category>linux</category><category>security</category><category>monitoring</category><category>k8s</category><category>thw-cloud-computing</category>
+    </item>
+    <item>
+      <title>Cloud native buildpacks concepts</title>
+      <link>https://blog.kubesimplify.com/cloud-native-buildpacks-concepts</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/cloud-native-buildpacks-concepts</guid>
+      <pubDate>Fri, 13 May 2022 12:32:34 GMT</pubDate>
+      <description>Cloud native buildpacks is a CNCF incubating project. It is a code to an image and run anywhere.</description>
+      <category>github</category><category>build-tool</category><category>devops</category><category>build</category><category>github-actions-1</category>
+    </item>
+    <item>
+      <title>Introduction to CI/CD &amp; CI/CD Pipeline</title>
+      <link>https://blog.kubesimplify.com/introduction-to-cicd-and-cicd-pipeline</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introduction-to-cicd-and-cicd-pipeline</guid>
+      <pubDate>Thu, 12 May 2022 12:32:29 GMT</pubDate>
+      <description>A Beginner&apos;s guide to CI/CD and CI/CD pipeline, with its advantages in the industry.</description>
+      <category>continuous-delivery</category><category>continuous-integration</category><category>continuous-deployment</category><category>cicd</category><category>thw-cloud-computing</category>
+    </item>
+    <item>
+      <title>Prometheus Explained</title>
+      <link>https://blog.kubesimplify.com/prometheus-explained</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/prometheus-explained</guid>
+      <pubDate>Wed, 11 May 2022 12:47:06 GMT</pubDate>
+      <description></description>
+      <category>kubernetes</category><category>monitoring</category><category>devops</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Deploy a simple server using AWS + Terraform</title>
+      <link>https://blog.kubesimplify.com/deploy-a-simple-server-using-aws-terraform</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/deploy-a-simple-server-using-aws-terraform</guid>
+      <pubDate>Tue, 10 May 2022 12:33:04 GMT</pubDate>
+      <description></description>
+      <category>ec2</category><category>aws</category><category>server</category><category>nginx</category><category>terraform</category>
+    </item>
+    <item>
+      <title>Breaking Down Docker</title>
+      <link>https://blog.kubesimplify.com/breaking-down-docker</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/breaking-down-docker</guid>
+      <pubDate>Mon, 09 May 2022 12:27:17 GMT</pubDate>
+      <description>Docker is the idea behind the container revolution, but how the idea came into play what are the underlying structure used to built up containers.</description>
+      <category>cloud</category><category>docker</category><category>kubernetes</category><category>containers</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Introduction of Jenkins pipeline</title>
+      <link>https://blog.kubesimplify.com/introduction-of-jenkins-pipeline</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introduction-of-jenkins-pipeline</guid>
+      <pubDate>Fri, 06 May 2022 11:50:35 GMT</pubDate>
+      <description>Jenkins Pipeline is a suite of plugins which supports implementing and integrating continuous delivery pipelines into Jenkins.</description>
+      <category>kubernetes</category><category>devops</category><category>jenkins</category><category>k8s</category><category>ci-cd</category>
+    </item>
+    <item>
+      <title>Kyverno And Cosign</title>
+      <link>https://blog.kubesimplify.com/kyverno-and-cosign</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kyverno-and-cosign</guid>
+      <pubDate>Thu, 05 May 2022 12:08:14 GMT</pubDate>
+      <description>Kyverno is a Kubernetes native policy engine, and cosign is a tool used for signing container images.</description>
+      <category>docker</category><category>kubernetes</category><category>devops</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Get Good At Git 💎</title>
+      <link>https://blog.kubesimplify.com/get-good-at-git</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/get-good-at-git</guid>
+      <pubDate>Wed, 04 May 2022 12:28:54 GMT</pubDate>
+      <description>This blog covers advanced git techniques and shortcuts. It breaks down advanced Git commands that everyone should know.</description>
+      <category>github</category><category>git</category><category>devops</category><category>advanced</category><category>technical-writing-1</category>
+    </item>
+    <item>
+      <title>✨ Introduction to Kubernetes ✨</title>
+      <link>https://blog.kubesimplify.com/introduction-to-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introduction-to-kubernetes</guid>
+      <pubDate>Tue, 03 May 2022 13:05:35 GMT</pubDate>
+      <description></description>
+      <category>aws</category><category>kubernetes</category><category>devops</category><category>containers</category><category>k8s</category>
+    </item>
+    <item>
+      <title>Package Managers Demystified</title>
+      <link>https://blog.kubesimplify.com/package-managers-demystified</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/package-managers-demystified</guid>
+      <pubDate>Mon, 02 May 2022 12:40:35 GMT</pubDate>
+      <description>Installing software on Linux is very important thing to know especially if you want to become proficient in Linux.  APT and other package managers help us.</description>
+      <category>ubuntu</category><category>linux</category><category>package</category><category>linux-for-beginners</category><category>linux-basics</category>
+    </item>
+    <item>
+      <title>A beginner&apos;s guide to Dualbooting Windows with Ubuntu: Part 2</title>
+      <link>https://blog.kubesimplify.com/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-2</guid>
+      <pubDate>Fri, 29 Apr 2022 12:41:10 GMT</pubDate>
+      <description></description>
+      <category>linux</category><category>linux-for-beginners</category><category>linux-basics</category><category>thw-cloud-computing</category>
+    </item>
+    <item>
+      <title>A beginner&apos;s guide to Dualbooting Windows with Ubuntu: Part 1</title>
+      <link>https://blog.kubesimplify.com/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/a-beginners-guide-to-dualbooting-windows-with-ubuntu-part-1</guid>
+      <pubDate>Thu, 28 Apr 2022 12:39:22 GMT</pubDate>
+      <description>It is a technique of keeping multiple live OS on a system.</description>
+      <category>linux</category><category>windows</category><category>linux-for-beginners</category><category>linux-basics</category><category>thw-cloud-computing</category>
+    </item>
+    <item>
+      <title>My Schedule for KubeCon + CloudNativeCon EU 2022</title>
+      <link>https://blog.kubesimplify.com/my-schedule-for-kubecon-cloudnativecon-eu-2022</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/my-schedule-for-kubecon-cloudnativecon-eu-2022</guid>
+      <pubDate>Wed, 27 Apr 2022 16:23:40 GMT</pubDate>
+      <description>KubeCon + CloudNativeCon is the best conference in the cloud native ecosystem. With the number of submissions that go in, the selection process and then the</description>
+      <category>cloud</category><category>conference</category><category>kubernetes</category><category>session</category><category>k8s</category>
+    </item>
+    <item>
+      <title>CKAD Exam - April 2022</title>
+      <link>https://blog.kubesimplify.com/ckad-exam-april-2022</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/ckad-exam-april-2022</guid>
+      <pubDate>Wed, 27 Apr 2022 14:05:52 GMT</pubDate>
+      <description>This exam focuses on all the aspects of K8S which is required by a developer/admin to build, deploy, scale, and do other useful pieces of stuff for the appl</description>
+      <category>kubernetes</category><category>devops</category><category>certification</category><category>k8s</category><category>technical-writing-1</category>
+    </item>
+    <item>
+      <title>Demystifying API Response in Go</title>
+      <link>https://blog.kubesimplify.com/api-response-in-go</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/api-response-in-go</guid>
+      <pubDate>Tue, 26 Apr 2022 06:37:04 GMT</pubDate>
+      <description>How to handle API response as text, HTML or JSON using GoLang.</description>
+      <category>programming-blogs</category><category>go</category><category>apis</category><category>programming-languages</category>
+    </item>
+    <item>
+      <title>How to backup Kubernetes with Kasten Community Edition?</title>
+      <link>https://blog.kubesimplify.com/how-to-backup-kubernetes-with-kasten-community-edition</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/how-to-backup-kubernetes-with-kasten-community-edition</guid>
+      <pubDate>Mon, 25 Apr 2022 12:33:35 GMT</pubDate>
+      <description>Data protection has become one of the fundamental aspects of IT security. The need to back up data is no longer just an \&quot;Enterprise endeavor\&quot;.</description>
+      <category>kubernetes</category><category>beginners</category><category>backup</category><category>k8s</category>
+    </item>
+    <item>
+      <title>10 Things You Might Not Know About K9s</title>
+      <link>https://blog.kubesimplify.com/10-things-you-might-not-know-about-k9s</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/10-things-you-might-not-know-about-k9s</guid>
+      <pubDate>Fri, 22 Apr 2022 12:27:59 GMT</pubDate>
+      <description>What is the most comfortable ways to access and interact with the Kubernetes API.</description>
+      <category>terminal</category><category>kubernetes</category><category>developer</category><category>devops</category><category>devlife</category>
+    </item>
+    <item>
+      <title>Pods in Kubernetes</title>
+      <link>https://blog.kubesimplify.com/pods-in-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/pods-in-kubernetes</guid>
+      <pubDate>Thu, 21 Apr 2022 12:38:28 GMT</pubDate>
+      <description>\&quot;It is the smallest deployable and schedulable unit that Kubernetes can manage.</description>
+      <category>tutorial</category><category>docker</category><category>kubernetes</category><category>k8s</category><category>docker-images</category>
+    </item>
+    <item>
+      <title>Certified Kubernetes Security Specialist (CKS) 2022 exam guide</title>
+      <link>https://blog.kubesimplify.com/certified-kubernetes-security-specialist-cks-2022-exam-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/certified-kubernetes-security-specialist-cks-2022-exam-guide</guid>
+      <pubDate>Wed, 20 Apr 2022 12:48:32 GMT</pubDate>
+      <description>Distributed systems comes with a lot of benefits but there are some downsides as well. One of the main downside of distributed system is security. No. of at</description>
+      <category>security</category><category>kubernetes</category><category>certification</category><category>k8s</category>
+    </item>
+    <item>
+      <title>A Complete walk through Of DevOps</title>
+      <link>https://blog.kubesimplify.com/a-complete-walk-through-of-devops</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/a-complete-walk-through-of-devops</guid>
+      <pubDate>Tue, 19 Apr 2022 12:53:59 GMT</pubDate>
+      <description>what happen before DevOps, the model used for software development was the “WATERFALL” Model and this model is best suited when all the requirements are pre</description>
+      <category>cloud</category><category>continuous-integration</category><category>continuous-deployment</category><category>devops</category><category>jenkins</category>
+    </item>
+    <item>
+      <title>Event-Driven Architecture Simplified: Monolith to Microservices</title>
+      <link>https://blog.kubesimplify.com/event-driven-architecture-simplified-monolith-to-microservices</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/event-driven-architecture-simplified-monolith-to-microservices</guid>
+      <pubDate>Mon, 18 Apr 2022 12:43:41 GMT</pubDate>
+      <description>Monolith is an ancient word that refers to a huge single block of stone. In software engineering, a monolithic architecture refers to a complete software ap</description>
+      <category>microservices</category><category>programming</category><category>computer-science</category><category>system-architecture</category><category>design-and-architecture</category>
+    </item>
+    <item>
+      <title>Starting your DevOps Journey as a Windows User</title>
+      <link>https://blog.kubesimplify.com/starting-your-devops-journey-as-a-windows-user</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/starting-your-devops-journey-as-a-windows-user</guid>
+      <pubDate>Fri, 15 Apr 2022 12:47:43 GMT</pubDate>
+      <description>Install WSL, DevOps in windows, installing Docker in windows, Minikube and Kubernetes for windows</description>
+      <category>docker</category><category>git</category><category>windows</category><category>devops</category><category>linux-for-beginners</category>
+    </item>
+    <item>
+      <title>Getting Started With Kyverno</title>
+      <link>https://blog.kubesimplify.com/getting-started-with-kyverno</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/getting-started-with-kyverno</guid>
+      <pubDate>Thu, 14 Apr 2022 10:11:51 GMT</pubDate>
+      <description>Kyverno in Greek means to govern and kyverno is a policy management tool for kubernetes.Other alternatives of kyverno is OPA which is a general purpose poli</description>
+      <category>kubernetes</category><category>devops</category><category>k8s</category>
+    </item>
+    <item>
+      <title>A simple way to Structure your Terraform code</title>
+      <link>https://blog.kubesimplify.com/a-simple-way-to-structure-your-terraform-code</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/a-simple-way-to-structure-your-terraform-code</guid>
+      <pubDate>Wed, 13 Apr 2022 12:29:23 GMT</pubDate>
+      <description>This article helps users structure their terraform code in a way that is easily readable and reduces the blast radius.</description>
+      <category>blogging</category><category>aws</category><category>devops</category><category>infrastructure</category><category>terraform</category>
+    </item>
+    <item>
+      <title>Managing Contexts In Kubernetes With Plugins</title>
+      <link>https://blog.kubesimplify.com/managing-contexts-in-kubernetes-with-plugins</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/managing-contexts-in-kubernetes-with-plugins</guid>
+      <pubDate>Tue, 12 Apr 2022 12:42:38 GMT</pubDate>
+      <description>You have your local kubernetes cluster and you connect that via your terminal using kubectl. By default kubectl searches your cluster config in the ~/.kube/</description>
+      <category>plugin</category><category>plugins</category><category>kubernetes</category><category>devops</category><category>k8s</category>
+    </item>
+    <item>
+      <title>A Simplified Guide To YAML</title>
+      <link>https://blog.kubesimplify.com/a-simplified-guide-to-yaml</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/a-simplified-guide-to-yaml</guid>
+      <pubDate>Sun, 10 Apr 2022 21:02:07 GMT</pubDate>
+      <description>One of the main reasons why YAML popularity has increased so much over the past few years is that it is super human-readable and intuitive which makes it a</description>
+      <category>cloud</category><category>tools</category><category>kubernetes</category><category>yaml</category><category>technical-writing-1</category>
+    </item>
+    <item>
+      <title>Nexus Repository Manager :  What is it &amp; how to configure it on a Digital Ocean Droplet?</title>
+      <link>https://blog.kubesimplify.com/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet</guid>
+      <pubDate>Fri, 08 Apr 2022 15:42:18 GMT</pubDate>
+      <description>Let&apos;s say you are building a Java-Maven application. It uses Maven Central Repository for resolving dependencies. Now if you want to use a package not provi</description>
+      <category>cloud</category><category>development</category><category>devops</category><category>technical-writing-1</category>
+    </item>
+    <item>
+      <title>Understanding the ins &amp; outs of Git using GitHub</title>
+      <link>https://blog.kubesimplify.com/understanding-the-ins-and-outs-of-git-using-github</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/understanding-the-ins-and-outs-of-git-using-github</guid>
+      <pubDate>Thu, 07 Apr 2022 10:27:44 GMT</pubDate>
+      <description>Using the git push command we can take these changes from our local machine to the remote server to preserve it. And the great part is, that we can work and</description>
+      <category>github</category><category>technology</category><category>git</category><category>devops</category><category>beginners</category>
+    </item>
+    <item>
+      <title>Kubernetes backup using CloudCasa</title>
+      <link>https://blog.kubesimplify.com/kubernetes-backup-using-cloudcasa</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-backup-using-cloudcasa</guid>
+      <pubDate>Wed, 06 Apr 2022 06:25:02 GMT</pubDate>
+      <description>Easy Kubernetes backup and restore using CloudCasa.</description>
+      <category>cloud</category><category>kubernetes</category><category>storage</category><category>backup</category>
+    </item>
+    <item>
+      <title>The secret gems behind building container images, Enter: BuildKit &amp; Docker Buildx</title>
+      <link>https://blog.kubesimplify.com/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/the-secret-gems-behind-building-container-images-enter-buildkit-and-docker-buildx</guid>
+      <pubDate>Tue, 05 Apr 2022 06:11:20 GMT</pubDate>
+      <description>In this post, we discussed various things about Buildkit, its internals, how to interact with BuildKit and its benefits in container image building. Feel fr</description>
+      <category>container</category><category>docker</category><category>build</category><category>containers</category><category>docker-images</category>
+    </item>
+    <item>
+      <title>✨ Introduction to Jenkins ✨</title>
+      <link>https://blog.kubesimplify.com/introduction-to-jenkins</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introduction-to-jenkins</guid>
+      <pubDate>Mon, 04 Apr 2022 12:40:39 GMT</pubDate>
+      <description>Jenkins is an automation tool written in Java with built-in plugins for continuous integration tasks. It is used to continuously build and test project</description>
+      <category>ci</category><category>aws</category><category>devops</category><category>jenkins</category><category>ci-cd</category>
+    </item>
+    <item>
+      <title>Cool Cool Coolify...</title>
+      <link>https://blog.kubesimplify.com/coolify</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/coolify</guid>
+      <pubDate>Thu, 31 Mar 2022 04:01:48 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>paas</category><category>heroku</category><category>netlify</category>
+    </item>
+    <item>
+      <title>Introduction to Terraform.</title>
+      <link>https://blog.kubesimplify.com/introduction-to-terraform</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/introduction-to-terraform</guid>
+      <pubDate>Wed, 30 Mar 2022 04:27:14 GMT</pubDate>
+      <description></description>
+      <category>automation</category><category>devops</category><category>terraform</category>
+    </item>
+    <item>
+      <title>GitHub Actions 101: What are Github Actions &amp; how to use them? A Beginner&apos;s Guide.</title>
+      <link>https://blog.kubesimplify.com/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide</guid>
+      <pubDate>Tue, 29 Mar 2022 04:22:54 GMT</pubDate>
+      <description></description>
+      <category>github</category><category>developer</category><category>automation</category><category>github-actions-1</category>
+    </item>
+    <item>
+      <title>CI/CD Pipeline: GitHub Actions with AWS ECS</title>
+      <link>https://blog.kubesimplify.com/cicd-pipeline-github-actions-with-aws-ecs</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/cicd-pipeline-github-actions-with-aws-ecs</guid>
+      <pubDate>Mon, 28 Mar 2022 03:12:27 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>aws</category><category>github</category><category>ci-cd</category><category>github-actions-1</category>
+    </item>
+    <item>
+      <title>Navigating through CNCF landscape</title>
+      <link>https://blog.kubesimplify.com/navigating-through-cncf-landscape</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/navigating-through-cncf-landscape</guid>
+      <pubDate>Sun, 27 Mar 2022 05:07:02 GMT</pubDate>
+      <description></description>
+      <category>opensource</category><category>kubernetes</category><category>beginners</category><category>ci-cd</category>
+    </item>
+    <item>
+      <title>Kubernetes 1.23 + CRI-O</title>
+      <link>https://blog.kubesimplify.com/kubernetes-crio</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-crio</guid>
+      <pubDate>Sat, 26 Mar 2022 04:35:26 GMT</pubDate>
+      <description></description>
+      <category>cloud</category><category>kubernetes</category><category>devops</category><category>containers</category>
+    </item>
+    <item>
+      <title>Rancher Desktop evolution</title>
+      <link>https://blog.kubesimplify.com/rancher-desktop-evolution</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/rancher-desktop-evolution</guid>
+      <pubDate>Fri, 25 Mar 2022 05:08:46 GMT</pubDate>
+      <description></description>
+      <category>docker</category><category>kubernetes</category><category>containers</category>
+    </item>
+    <item>
+      <title>Git &amp; Github : A Beginner&apos;s Guide</title>
+      <link>https://blog.kubesimplify.com/git-and-github-a-beginners-guide</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/git-and-github-a-beginners-guide</guid>
+      <pubDate>Thu, 24 Mar 2022 04:50:40 GMT</pubDate>
+      <description>Git &amp; Github Beginners Guide</description>
+      <category>github</category><category>opensource</category><category>version-control</category><category>git</category><category>beginners</category>
+    </item>
+    <item>
+      <title>Kubernetes 1.23 + containerd</title>
+      <link>https://blog.kubesimplify.com/kubernetes-containerd-setup</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-containerd-setup</guid>
+      <pubDate>Wed, 23 Mar 2022 11:50:48 GMT</pubDate>
+      <description>Setup Kubernetes 1.23 with containerd as the container runtime on Ubuntu 20.04 machines with single controlplane and three worker nodes.</description>
+      <category>cloud</category><category>ubuntu</category><category>kubernetes</category><category>containers</category><category>k8s</category>
+    </item>
+  </channel>
+</rss>
