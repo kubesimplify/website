@@ -353,7 +353,9 @@ When a container's tracked allocation would exceed its configured `nvidia.com/gp
 Here is the mechanism from one of the fresh 8,000 MiB / 10% test containers:
 
 ```bash
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl exec -n hami-blog-verify <pod> -- sh -c 'cat /etc/ld.so.preload; printf "CUDA_DEVICE_MEMORY_LIMIT_0=%s\n" "$CUDA_DEVICE_MEMORY_LIMIT_0"; printf "CUDA_DEVICE_SM_LIMIT=%s\n" "$CUDA_DEVICE_SM_LIMIT"'
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl exec \
+  -n hami-blog-verify pytorch-hami-demo-77b6f5dcd9-whrbg -- \
+  sh -c 'cat /etc/ld.so.preload; printf "CUDA_DEVICE_MEMORY_LIMIT_0=%s\n" "$CUDA_DEVICE_MEMORY_LIMIT_0"; printf "CUDA_DEVICE_SM_LIMIT=%s\n" "$CUDA_DEVICE_SM_LIMIT"'
 /usr/local/vgpu/libvgpu.so
 CUDA_DEVICE_MEMORY_LIMIT_0=8000m
 CUDA_DEVICE_SM_LIMIT=10
@@ -375,16 +377,9 @@ The arithmetic is `8 HAMi-registered whole GPUs × 10 possible sharing workloads
 
 The chart defaults to 10, but the right value is a concurrency choice, not a performance promise. A smaller number reduces how many containers can contend on one card. A larger number permits more tiny workloads, but adds more contexts, more neighbors, and more operational complexity. Setting it to `1` restores exclusive placement: only one workload can occupy each physical GPU.
 
-With `deviceMemoryScaling: 1` and `deviceCoreScaling: 1`, the scheduler also checks the real aggregate budget. It does not admit a pod merely because a count slot is free. To prove that, I pinned a 90,000 MiB request to GPU 5 while two 8,000 MiB slices were already reserved there. The count still had eight free slots, but the memory sum would have exceeded 97,887 MiB:
+With `deviceMemoryScaling: 1` and `deviceCoreScaling: 1`, the scheduler also checks the real aggregate budget. It does not admit a pod merely because a count slot is free. After deploying the two 8,000 MiB replicas in the next section, we prove this with a separate 90,000 MiB pod. Its complete manifest, commands, and captured `CardInsufficientMemory` event are included there.
 
-```text
-NAME             STATUS    SCHEDULER        NODE
-hami-too-large   Pending   hami-scheduler   <none>
-
-Warning  FilteringFailed  1 nodes CardInsufficientMemory(utho-gpu-rtxpro6000-8-62383)
-```
-
-That is an admission-time scheduling failure, not a runtime OOM. Runtime OOM is a different test: it happens when an already-admitted container actually allocates beyond its own grant, which we reproduce later.
+That scheduler decision is **not an OOM**: the rejected container never starts. A real runtime OOM happens when an admitted container allocates beyond its own grant. We reproduce that separately in [the blast-radius test](#testing-the-blast-radius-what-happens-when-a-pod-exceeds-its-memory-quota).
 
 The practical upside is density without fixed profile sizes. A notebook can request 8,000 MiB, a small inference replica 12,000 MiB, and another workload 20,000 MiB, as long as the total count, memory, and compute requests all fit. The practical costs are shared-hardware contention and a software isolation boundary, so latency-sensitive or adversarial tenants may still deserve MIG or dedicated GPUs.
 
@@ -529,42 +524,138 @@ spec:
 Apply it and wait for both replicas:
 
 ```bash
-kubectl apply -f pytorch-hami-demo.yaml
-kubectl rollout status deployment/pytorch-hami-demo -n hami-blog-verify --timeout=180s
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl apply -f pytorch-hami-demo.yaml
+deployment.apps/pytorch-hami-demo created
+
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl rollout status \
+  deployment/pytorch-hami-demo -n hami-blog-verify --timeout=180s
+deployment "pytorch-hami-demo" successfully rolled out
 ```
 
-The run returned:
+Read the startup logs:
 
-```text
-[pod/pytorch-hami-demo-7956dd68c4-lrh8r/pytorch] CUDA Available: True
-[pod/pytorch-hami-demo-7956dd68c4-lrh8r/pytorch] Device Name: NVIDIA RTX PRO 6000 Blackwell Server Edition
-[pod/pytorch-hami-demo-7956dd68c4-lrh8r/pytorch] Device Capability: (12, 0)
-[pod/pytorch-hami-demo-7956dd68c4-tj9rg/pytorch] CUDA Available: True
-[pod/pytorch-hami-demo-7956dd68c4-tj9rg/pytorch] Device Name: NVIDIA RTX PRO 6000 Blackwell Server Edition
-[pod/pytorch-hami-demo-7956dd68c4-tj9rg/pytorch] Device Capability: (12, 0)
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl logs \
+  -n hami-blog-verify -l app=pytorch-hami-demo \
+  --prefix --tail=20 \
+  | grep -E 'CUDA Available|Device Name|Device Capability|CUDA Device Count'
+[pod/pytorch-hami-demo-77b6f5dcd9-whrbg/pytorch] CUDA Available: True
+[pod/pytorch-hami-demo-77b6f5dcd9-whrbg/pytorch] Device Name: NVIDIA RTX PRO 6000 Blackwell Server Edition
+[pod/pytorch-hami-demo-77b6f5dcd9-whrbg/pytorch] Device Capability: (12, 0)
+[pod/pytorch-hami-demo-77b6f5dcd9-whrbg/pytorch] CUDA Device Count: 1
+[pod/pytorch-hami-demo-77b6f5dcd9-wx677/pytorch] CUDA Available: True
+[pod/pytorch-hami-demo-77b6f5dcd9-wx677/pytorch] Device Name: NVIDIA RTX PRO 6000 Blackwell Server Edition
+[pod/pytorch-hami-demo-77b6f5dcd9-wx677/pytorch] Device Capability: (12, 0)
+[pod/pytorch-hami-demo-77b6f5dcd9-wx677/pytorch] CUDA Device Count: 1
 ```
 
 Both placement annotations name GPU 5 and the same 8,000 MiB / 10% grant:
 
-```text
-pytorch-hami-demo-7956dd68c4-lrh8r  GPU-04dc48d7-...,NVIDIA,8000,10:;
-pytorch-hami-demo-7956dd68c4-tj9rg  GPU-04dc48d7-...,NVIDIA,8000,10:;
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl get pods \
+  -n hami-blog-verify -l app=pytorch-hami-demo \
+  -o custom-columns='NAME:.metadata.name,ALLOCATION:.metadata.annotations.hami\.io/vgpu-devices-allocated'
+NAME                                 ALLOCATION
+pytorch-hami-demo-77b6f5dcd9-whrbg   GPU-04dc48d7-7048-aef5-ad36-f5db716e7668,NVIDIA,8000,10:;
+pytorch-hami-demo-77b6f5dcd9-wx677   GPU-04dc48d7-7048-aef5-ad36-f5db716e7668,NVIDIA,8000,10:;
 ```
 
 Inside either container, `nvidia-smi` shows the virtualized view:
 
-```text
-GPU-04dc48d7-..., NVIDIA RTX PRO 6000 Blackwell Server Edition, 8000 MiB, 2107 MiB
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl exec \
+  -n hami-blog-verify pytorch-hami-demo-77b6f5dcd9-whrbg -- \
+  sh -c 'nvidia-smi --query-gpu=uuid,name,memory.total,memory.used --format=csv,noheader 2>/dev/null'
+GPU-04dc48d7-7048-aef5-ad36-f5db716e7668, NVIDIA RTX PRO 6000 Blackwell Server Edition, 8000 MiB, 2107 MiB
 ```
 
 The host sees the two real processes on the same physical UUID:
 
-```text
-GPU-04dc48d7-..., 1380219, 2110 MiB
-GPU-04dc48d7-..., 1380939, 2110 MiB
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi \
+  --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader \
+  | grep 'GPU-04dc48d7-7048-aef5-ad36-f5db716e7668'
+GPU-04dc48d7-7048-aef5-ad36-f5db716e7668, 1932078, 2110 MiB
+GPU-04dc48d7-7048-aef5-ad36-f5db716e7668, 1932782, 2110 MiB
 ```
 
 The few-MiB difference between in-container and host accounting is normal tool/accounting overhead. The important facts are the shared UUID and each container's separate 8,000 MiB view.
+
+### Prove that memory budget beats free count slots
+
+At this point, two of GPU 5's ten count slots are occupied. The allocation annotation proves that both 8,000 MiB reservations landed on the same physical card:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl get pods \
+  -n hami-blog-verify -l app=pytorch-hami-demo \
+  -o custom-columns='NAME:.metadata.name,ALLOCATION:.metadata.annotations.hami\.io/vgpu-devices-allocated'
+NAME                                 ALLOCATION
+pytorch-hami-demo-77b6f5dcd9-whrbg   GPU-04dc48d7-7048-aef5-ad36-f5db716e7668,NVIDIA,8000,10:;
+pytorch-hami-demo-77b6f5dcd9-wx677   GPU-04dc48d7-7048-aef5-ad36-f5db716e7668,NVIDIA,8000,10:;
+```
+
+Eight count slots are still free, but only `97,887 - 8,000 - 8,000 = 81,887 MiB` remains in HAMi's scheduling budget for that card. This third pod deliberately asks for 90,000 MiB:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-too-large
+  namespace: hami-blog-verify
+  annotations:
+    nvidia.com/use-gpuuuid: "GPU-04dc48d7-7048-aef5-ad36-f5db716e7668"
+spec:
+  restartPolicy: Never
+  containers:
+    - name: too-large
+      image: ubuntu:22.04
+      command: ["sleep", "3600"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 90000
+          nvidia.com/gpucores: 10
+        requests:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 90000
+          nvidia.com/gpucores: 10
+```
+
+Apply it, inspect placement, and read only this pod's events:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl apply -f hami-too-large.yaml
+pod/hami-too-large created
+
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl get pod hami-too-large \
+  -n hami-blog-verify \
+  -o custom-columns='NAME:.metadata.name,STATUS:.status.phase,SCHEDULER:.spec.schedulerName,NODE:.spec.nodeName'
+NAME             STATUS    SCHEDULER        NODE
+hami-too-large   Pending   hami-scheduler   <none>
+
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl get events \
+  -n hami-blog-verify \
+  --field-selector involvedObject.name=hami-too-large \
+  --sort-by=.lastTimestamp
+LAST SEEN   TYPE      REASON             OBJECT               MESSAGE
+18s         Warning   FailedScheduling   pod/hami-too-large   0/1 nodes are available: 1 NodeUnfitPod. no new claims to deallocate, preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod.
+18s         Warning   FailedScheduling   pod/hami-too-large   0/1 nodes are available: 1 NodeUnfitPod. no new claims to deallocate, preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod.
+18s         Warning   FilteringFailed    pod/hami-too-large   1 nodes CardInsufficientMemory(utho-gpu-rtxpro6000-8-62383)
+18s         Warning   FilteringFailed    pod/hami-too-large   1 nodes CardUuidMismatch(utho-gpu-rtxpro6000-8-62383)
+18s         Warning   FilteringFailed    pod/hami-too-large   no available node, 1 nodes do not meet
+```
+
+The HAMi scheduler log makes the per-card result unambiguous:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl logs \
+  -n hami-system -l app.kubernetes.io/component=hami-scheduler \
+  -c vgpu-scheduler-extender --tail=2000 \
+  | grep '"NodeUnfitPod".*hami-too-large' | tail -1
+I0723 10:27:23.686479       1 score.go:169] "NodeUnfitPod" pod="hami-blog-verify/hami-too-large" node="utho-gpu-rtxpro6000-8-62383" reason="7/8 CardUuidMismatch, 1/8 CardInsufficientMemory"
+```
+
+The UUID mismatch is expected for the seven cards excluded by the explicit GPU 5 pin. The matching card's decisive result is `CardInsufficientMemory`: `90,000 + 8,000 + 8,000 = 106,000 MiB`, which exceeds its 97,887 MiB scheduling budget. The pod remains Pending and has no node because HAMi rejects it during scheduling. No container starts, so there is no CUDA or HAMi-Core OOM message in this test.
 
 ### Fixed MiB or percentage?
 
@@ -625,7 +716,9 @@ This test covers a normal PyTorch/CUDA allocation path. It proves the configured
 No need to change the Deployment. Exec into one replica and retain 20,000 × 20,000 FP32 tensors until HAMi-Core refuses the next allocation. Each tensor contains 400 million four-byte values: 1.6 GB in decimal units, or about 1.49 GiB.
 
 ```bash
-kubectl exec -i -n hami-blog-verify <pod-name> -- python3 - <<'PY'
+POD=pytorch-hami-demo-77b6f5dcd9-whrbg
+
+kubectl exec -i -n hami-blog-verify "$POD" -- python3 - <<'PY'
 import torch
 
 tensors = []
@@ -651,21 +744,22 @@ The main matmul process already held about 2.06 GiB, and the exec process shared
 
 ```text
 Visible limit: 8000 MiB
-[HAMI-core ERROR (pid:603 ... allocator.c:52)]: Device 0 OOM 9185657856 / 8388608000
+[HAMI-core ERROR (pid:563 thread=134804753249792 allocator.c:52)]: Device 0 OOM 9185657856 / 8388608000
+[HAMI-core ERROR (pid:563 thread=134804753249792 allocator.c:52)]: Device 0 OOM 9185657856 / 8388608000
 block 1: 1526 MiB allocated
 block 2: 3052 MiB allocated
 block 3: 4578 MiB allocated
 HAMi boundary reached: CUDA out of memory
-CUDA out of memory. Tried to allocate 1.49 GiB. GPU 0 has a total capacity of 7.81 GiB of which 765.87 MiB is free.
+CUDA out of memory. Tried to allocate 1.49 GiB. GPU 0 has a total capacity of 7.81 GiB of which 765.87 MiB is free. Process 1 has 2.06 GiB memory in use. Including non-PyTorch memory, this process has 5.01 GiB memory in use.
 ```
 
-The first three new tensors succeeded. The fourth allocation would have pushed HAMi's tracked total to **9,185,657,856 bytes** against an **8,388,608,000-byte** limit, exactly 8,000 MiB. PyTorch sees 7.81 GiB because GiB uses powers of 1024. The card itself was nowhere near its 97,887 MiB physical limit, so this was a software quota verdict rather than a physical-card OOM.
+The two identical raw HAMi-Core lines came from the intercepted allocation path; the script then caught PyTorch's `OutOfMemoryError` and printed the readable summary. The first three new tensors succeeded. The fourth allocation would have pushed HAMi's tracked total to **9,185,657,856 bytes** against an **8,388,608,000-byte** limit, exactly 8,000 MiB. PyTorch sees 7.81 GiB because GiB uses powers of 1024. The card itself was nowhere near its 97,887 MiB physical limit, so this was a software quota verdict rather than a physical-card OOM.
 
 ### Step 2: Check the offending container, neighbor, and host
 
 ```bash
 # 1. Virtualized view inside the offending container.
-kubectl exec -n hami-blog-verify <pod-name> -- \
+kubectl exec -n hami-blog-verify pytorch-hami-demo-77b6f5dcd9-whrbg -- \
   nvidia-smi --query-gpu=uuid,memory.total,memory.used --format=csv
 
 # 2. Real processes and physical UUID from the host.
@@ -676,8 +770,8 @@ kubectl get pods -n hami-blog-verify -l app=pytorch-hami-demo \
   -o custom-columns='NAME:.metadata.name,STATUS:.status.phase,RESTARTS:.status.containerStatuses[0].restartCount'
 
 # 4. The neighbor's virtualized memory after the failed allocation.
-kubectl exec -n hami-blog-verify <other-pod-name> -- \
-  nvidia-smi --query-gpu=uuid,memory.total,memory.used --format=csv,noheader
+kubectl exec -n hami-blog-verify pytorch-hami-demo-77b6f5dcd9-wx677 -- \
+  sh -c 'nvidia-smi --query-gpu=uuid,memory.total,memory.used --format=csv,noheader 2>/dev/null'
 ```
 
 The terminal view below shows the same virtual capacity and rejected allocation:
@@ -688,10 +782,10 @@ The fresh post-test checks returned:
 
 ```text
 NAME                                 STATUS    RESTARTS
-pytorch-hami-demo-7956dd68c4-lrh8r   Running   0
-pytorch-hami-demo-7956dd68c4-tj9rg   Running   0
+pytorch-hami-demo-77b6f5dcd9-whrbg   Running   0
+pytorch-hami-demo-77b6f5dcd9-wx677   Running   0
 
-GPU-04dc48d7-..., 8000 MiB, 2107 MiB
+GPU-04dc48d7-7048-aef5-ad36-f5db716e7668, 8000 MiB, 2107 MiB
 ```
 
 - **Offending container:** HAMi-Core returned OOM at its 8,000 MiB account boundary.
