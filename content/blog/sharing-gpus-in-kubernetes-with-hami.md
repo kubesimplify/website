@@ -2,13 +2,12 @@
 title: "How to Share GPUs in Kubernetes at Scale with HAMi (Software vGPU Slicing)"
 seoTitle: "HAMi vGPU on Kubernetes: Software GPU Slicing From 8 GPUs to 80 Schedulable Slices"
 seoDescription: "Share NVIDIA GPUs in Kubernetes with HAMi software vGPU slicing: memory and compute limits, Helm configuration, a verified PyTorch manifest, a real RTX PRO 6000 OOM test, and Prometheus monitoring."
-datePublished: 2026-07-21T10:00:00.000Z
+datePublished: 2026-07-23T10:00:00.000Z
 slug: sharing-gpus-in-kubernetes-with-hami
 author: shubham-katara
 authors: ["shubham-katara", "saiyam-pathak"]
 cover: /img/blog/sharing-gpus-in-kubernetes-with-hami/cover.png
 tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
-draft: false
 sponsor:
   name: Utho
   url: "https://utho.com/?utm_source=Kubesimplify&utm_medium=docs&utm_campaign=Saiyam"
@@ -20,7 +19,9 @@ sponsor:
 
 Your platform team did everything right. You bought MIG-capable GPUs, carved them into hardware-isolated slices exactly like we did in [the MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig), and stopped handing a whole 96GB card to every notebook that asked for one. And yet the tickets keep coming.
 
-One team needs 8GB of VRAM, but the smallest MIG profile on our RTX PRO 6000 is `1g.24gb`. That leaves most of the slice unused. Another workload needs 30GB, which does not match the available 24GB or 48GB profiles cleanly. Changing a MIG geometry also means stopping workloads that occupy the instances you need to destroy and recreate. On Ampere GPUs, toggling MIG mode itself can additionally require a GPU reset; Hopper and newer GPUs no longer require that reset. NVIDIA documents the exact [RTX PRO 6000 profiles](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html#rtx-pro-6000-blackwell-mig-profiles) and the [generation-specific reset behavior](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/getting-started-with-mig.html#enable-mig-mode).
+One team needs 8GB of VRAM, but the smallest MIG profile on our RTX PRO 6000 is `1g.24gb`. That leaves most of the slice unused. Another workload needs 30GB, which does not match the available 24GB or 48GB profiles cleanly. Changing a MIG geometry also means stopping workloads that occupy the instances you need to destroy and recreate.
+
+On Ampere GPUs, toggling MIG mode itself can additionally require a GPU reset; Hopper and newer GPUs no longer require that reset. NVIDIA documents the exact [RTX PRO 6000 profiles](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html#rtx-pro-6000-blackwell-mig-profiles) and the [generation-specific reset behavior](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/getting-started-with-mig.html#enable-mig-mode).
 
 Then there is the rest of the fleet: NVIDIA cards that do not support MIG, or clusters where fixed hardware partitions are simply the wrong fit. Kubernetes normally treats a GPU as an indivisible extended resource, so a pod asking for one GPU can occupy a whole card even when it uses only a small part of the memory and compute.
 
@@ -30,7 +31,7 @@ Then there is the rest of the fleet: NVIDIA cards that do not support MIG, or cl
 - **How much memory may it use on each GPU?** `nvidia.com/gpumem`, in MiB
 - **How much compute time may it receive?** `nvidia.com/gpucores`, in 1% steps
 
-The scheduler checks that those requests fit before placing the pod. Inside the running container, HAMi-Core enforces supported CUDA and NVML paths through an injected user-space library. That is flexible and useful, but it is not the same security boundary as MIG's hardware partitions. HAMi is now a [CNCF Incubating project](https://www.cncf.io/projects/hami/), and its maintained [device support matrix](https://project-hami.io/docs/userguide/device-supported) covers NVIDIA plus several other accelerator families through vendor-specific plugins.
+HAMi is now a [CNCF Incubating project](https://www.cncf.io/projects/hami/), and its maintained [device support matrix](https://project-hami.io/docs/userguide/device-supported) covers NVIDIA plus several other accelerator families through vendor-specific plugins.
 
 This walkthrough runs on our actual test rig: **8 NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs**. All eight cards are in non-MIG mode, and `deviceSplitCount: 10` makes Kubelet report `8 × 10 = 80` logical scheduling slots. That does **not** create 80 GPUs or multiply the machine's VRAM. It creates 80 scheduling slots backed by the same eight cards. The exact live command and output appear below.
 
@@ -62,7 +63,7 @@ That creates its own friction:
 - Changing the profile layout requires destroying and recreating affected MIG instances. That is operationally heavier than changing a pod resource request.
 - MIG only works on supported GPUs and software combinations. It is not a universal sharing mechanism for every NVIDIA card.
 
-**HAMi** takes a different approach. Instead of partitioning the silicon, its NVIDIA path combines device-aware scheduling with HAMi-Core, an injected user-space library. The scheduler reserves a memory and compute budget; HAMi-Core tracks supported CUDA allocations and throttles compute while the container runs. The official [GPU virtualization walkthrough](https://project-hami.io/docs/core-concepts/gpu-virtualization) documents the complete webhook → scheduler → device plugin → HAMi-Core flow.
+**HAMi** takes a different approach. Instead of partitioning the silicon, its NVIDIA path combines device-aware scheduling with HAMi-Core, an injected user-space library. The `hami-scheduler` reserves a memory and compute budget; HAMi-Core tracks supported CUDA allocations and throttles compute while the container runs. The official [GPU virtualization walkthrough](https://project-hami.io/docs/core-concepts/gpu-virtualization) documents the complete webhook → scheduler → device plugin → HAMi-Core flow.
 
 That means:
 
@@ -203,9 +204,9 @@ utho-gpu-rtxpro6000-8-62383   Ready    v1.35.6      containerd://2.2.1
 
 ## RuntimeClass and GPU Operator: Which Path Are We Using?
 
-It is reasonable to expect an `nvidia` RuntimeClass if you normally install GPUs through the **NVIDIA GPU Operator**. Many Operator configurations create it. Older CDI configurations could also add `nvidia-cdi` and `nvidia-legacy`.
+It is reasonable to expect an `nvidia` RuntimeClass if you normally install GPUs through the **NVIDIA GPU Operator**. Many Operator configurations create it.
 
-That is not a universal rule anymore. In current GPU Operator releases, ordinary CDI-injected workloads do not need to name a RuntimeClass, and enabling the newer NRI plugin deliberately removes the `nvidia` RuntimeClass. NVIDIA documents those mode differences in its [CDI and NRI guide](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/cdi.html).
+That is not a universal rule anymore. In current GPU Operator releases, ordinary CDI (Container Device Interface)-injected workloads do not need to name a RuntimeClass, and enabling the newer NRI plugin deliberately removes the `nvidia` RuntimeClass. NVIDIA documents those mode differences in its [CDI and NRI guide](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/cdi.html).
 
 This lab does **not** install GPU Operator. The host already has the driver and Container Toolkit, and containerd's default runtime is `nvidia`. Therefore:
 
@@ -696,14 +697,14 @@ This is the tradeoff to internalize before using HAMi for multi-tenancy:
 
 ![Excalidraw-style comparison of NVIDIA time-slicing, HAMi software quotas, and MIG hardware partitions](/img/blog/sharing-gpus-in-kubernetes-with-hami/hami-isolation-spectrum.png)
 
-| | **NVIDIA time-slicing** | **HAMi (`hami-core`)** | **MIG** |
-| --- | --- | --- | --- |
-| Isolation boundary | No per-replica GPU memory/compute boundary | User-space interception through `libvgpu.so` and `/etc/ld.so.preload` | Hardware GPU instances with dedicated memory/compute resources |
-| Memory shape | Every replica sees the whole card | 1 MiB request granularity | Fixed profiles such as `1g.24gb` and `2g.48gb` |
-| Compute shape | Workloads take turns; no per-replica cap | 1% request granularity, implemented through time-based throttling | Fixed fraction of SMs in the profile |
-| What the container sees | Full physical GPU | Virtual total equal to its grant | Its MIG device/profile |
-| Reconfiguration | Change plugin config/redeploy affected pods | Change the workload request | Destroy/recreate affected instances; toggling mode may require a reset on Ampere |
-| Important limitation | One workload can consume free VRAM needed by another workload's later allocations | Direct-driver paths, Docker-in-Docker, or `CUDA_DISABLE_CONTROL=true` can bypass enforcement | Requires supported GPU, driver, and profile geometry |
+|                         | **NVIDIA time-slicing**                                                           | **HAMi (`hami-core`)**                                                                       | **MIG**                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Isolation boundary      | No per-replica GPU memory/compute boundary                                        | User-space interception through `libvgpu.so` and `/etc/ld.so.preload`                        | Hardware GPU instances with dedicated memory/compute resources                   |
+| Memory shape            | Every replica sees the whole card                                                 | 1 MiB request granularity                                                                    | Fixed profiles such as `1g.24gb` and `2g.48gb`                                   |
+| Compute shape           | Workloads take turns; no per-replica cap                                          | 1% request granularity, implemented through time-based throttling                            | Fixed fraction of SMs in the profile                                             |
+| What the container sees | Full physical GPU                                                                 | Virtual total equal to its grant                                                             | Its MIG device/profile                                                           |
+| Reconfiguration         | Change plugin config/redeploy affected pods                                       | Change the workload request                                                                  | Destroy/recreate affected instances; toggling mode may require a reset on Ampere |
+| Important limitation    | One workload can consume free VRAM needed by another workload's later allocations | Direct-driver paths, Docker-in-Docker, or `CUDA_DISABLE_CONTROL=true` can bypass enforcement | Requires supported GPU, driver, and profile geometry                             |
 
 Time-slicing does not automatically crash every neighbor when one process gets an OOM. The precise risk is that all replicas share the same physical memory pool without per-replica caps: one workload can consume the remaining VRAM, causing later allocations in other workloads to fail.
 
