@@ -32,7 +32,7 @@ Then there is the rest of the fleet: NVIDIA cards that do not support MIG, or cl
 
 The scheduler checks that those requests fit before placing the pod. Inside the running container, HAMi-Core enforces supported CUDA and NVML paths through an injected user-space library. That is flexible and useful, but it is not the same security boundary as MIG's hardware partitions. HAMi is now a [CNCF Incubating project](https://www.cncf.io/projects/hami/), and its maintained [device support matrix](https://project-hami.io/docs/userguide/device-supported) covers NVIDIA plus several other accelerator families through vendor-specific plugins.
 
-This walkthrough runs on our actual test rig: **8 NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs**. With `deviceSplitCount: 10`, an all-eight, non-MIG HAMi configuration can expose `8 × 10 = 80` logical scheduling slots. During the final live check, however, the node reported **70**, because one physical card was in MIG mode and HAMi registered the other seven as whole GPUs. Both numbers describe scheduling slots, not extra GPUs or extra VRAM. The exact live command and output appear below.
+This walkthrough runs on our actual test rig: **8 NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs**. All eight cards are in non-MIG mode, and `deviceSplitCount: 10` makes Kubelet report `8 × 10 = 80` logical scheduling slots. That does **not** create 80 GPUs or multiply the machine's VRAM. It creates 80 scheduling slots backed by the same eight cards. The exact live command and output appear below.
 
 For this guide, we rebuilt that node as a clean single-node Kubernetes v1.35.6 cluster, installed HAMi v2.9.0 as a new Helm release, and then ran the sharing and quota tests you will see below. The point is not merely to show the final YAML. It is to make every software layer between the physical GPU and the pod understandable.
 
@@ -266,10 +266,10 @@ The scheduler pod is cluster-wide. The device-plugin DaemonSet runs once on ever
 root@utho-gpu-rtxpro6000-8-62383:~# kubectl get node utho-gpu-rtxpro6000-8-62383 \
   -o custom-columns='NAME:.metadata.name,KUBERNETES:.status.nodeInfo.kubeletVersion,GPU-CAPACITY:.status.capacity.nvidia\.com/gpu,GPU-ALLOCATABLE:.status.allocatable.nvidia\.com/gpu'
 NAME                          KUBERNETES   GPU-CAPACITY   GPU-ALLOCATABLE
-utho-gpu-rtxpro6000-8-62383   v1.35.6      70             70
+utho-gpu-rtxpro6000-8-62383   v1.35.6      80             80
 ```
 
-That `70` is the real output. By this check, the release had subsequently been changed to `migStrategy: mixed`, and GPU 4 had MIG enabled. HAMi registered the other seven cards as whole GPUs, so the live arithmetic was `7 × 10 = 70`. If all eight cards are returned to non-MIG mode and registered by HAMi, the same split count produces the all-eight target of `8 × 10 = 80`.
+That `80` is the real output from the all-eight non-MIG configuration: eight registered physical cards, each contributing ten logical device IDs.
 
 ### Where did `nvidia.com/gpu` come from?
 
@@ -282,14 +282,13 @@ NAME                 READY   DESIRED   IMAGE
 hami-device-plugin   1       1         docker.io/projecthami/hami:v2.9.0
 ```
 
-The current live sequence is:
+The live sequence is:
 
 1. The host NVIDIA driver exposes eight physical GPUs.
-2. GPU 4 is in MIG mode, so the current mixed-mode HAMi configuration registers seven cards as whole GPUs.
-3. `hami-device-plugin` connects to Kubelet's Device Plugin API.
-4. It registers the configured resource name, `nvidia.com/gpu`.
-5. `deviceSplitCount: 10` makes each registered whole GPU contribute ten schedulable device IDs.
-6. Kubelet publishes `7 × 10 = 70` as the node's current `nvidia.com/gpu` capacity.
+2. `hami-device-plugin` discovers and registers all eight whole GPUs.
+3. It connects to Kubelet's Device Plugin API and registers the configured resource name, `nvidia.com/gpu`.
+4. `deviceSplitCount: 10` makes each registered whole GPU contribute ten schedulable device IDs.
+5. Kubelet publishes `8 × 10 = 80` as the node's `nvidia.com/gpu` capacity.
 
 This came from the **HAMi device-plugin container log**, not from Kubelet or the NVIDIA GPU Operator:
 
@@ -299,11 +298,12 @@ PLUGIN_POD=$(kubectl get pod -n hami-system \
   -o jsonpath='{.items[0].metadata.name}')
 
 kubectl logs -n hami-system "$PLUGIN_POD" -c device-plugin \
-  | grep -E 'Discovered [0-9]+ device\(s\) for registration'
-I0723 09:41:04.105846 1903188 register.go:197] Discovered 7 device(s) for registration
+  | grep -E 'Discovered [0-9]+ device\(s\) for registration' \
+  | tail -1
+I0723 09:53:36.227471 1910347 register.go:197] Discovered 8 device(s) for registration
 ```
 
-The node's current `hami.io/node-nvidia-register` annotation records `"count": 10` for each of those seven registered whole-GPU UUIDs. The physical inventory still contains eight cards:
+The node's `hami.io/node-nvidia-register` annotation records `"count": 10` for each of those eight registered GPU UUIDs. The physical inventory and MIG state agree:
 
 ```bash
 root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi \
@@ -312,13 +312,13 @@ root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi \
 1, NVIDIA RTX PRO 6000 Blackwell Server Edition, Disabled
 2, NVIDIA RTX PRO 6000 Blackwell Server Edition, Disabled
 3, NVIDIA RTX PRO 6000 Blackwell Server Edition, Disabled
-4, NVIDIA RTX PRO 6000 Blackwell Server Edition, Enabled
+4, NVIDIA RTX PRO 6000 Blackwell Server Edition, Disabled
 5, NVIDIA RTX PRO 6000 Blackwell Server Edition, Disabled
 6, NVIDIA RTX PRO 6000 Blackwell Server Edition, Disabled
 7, NVIDIA RTX PRO 6000 Blackwell Server Edition, Disabled
 ```
 
-That is why the host has eight GPUs while this live HAMi registration contributes 70 logical slots. Without either HAMi's device plugin or NVIDIA's official device plugin, `nvidia-smi` could work perfectly on the host while Kubernetes would advertise **no** `nvidia.com/gpu` capacity.
+That is why the host has eight GPUs while this live HAMi registration contributes 80 logical slots. Without either HAMi's device plugin or NVIDIA's official device plugin, `nvidia-smi` could work perfectly on the host while Kubernetes would advertise **no** `nvidia.com/gpu` capacity.
 
 This also explains the conflict warning above: HAMi's plugin and NVIDIA's official plugin should not both try to own `nvidia.com/gpu` on the same node.
 
@@ -359,15 +359,15 @@ CUDA_DEVICE_SM_LIMIT=10
 
 No `runtimeClassName` appears in our pod because the node uses `nvidia-container-runtime` by default and this chart was installed with `devicePlugin.createRuntimeClass: false`. HAMi still depends on the NVIDIA Container Toolkit/runtime; omitting the field does not mean that layer is unnecessary.
 
-## What Logical GPU Capacity Means on an Eight-GPU Node
+## What “80 GPUs” Means on an Eight-GPU Node
 
-This node currently advertises `nvidia.com/gpu: 70` even though `nvidia-smi -L` lists eight physical cards. The missing mental model is simple:
+This node advertises `nvidia.com/gpu: 80` even though `nvidia-smi -L` lists eight physical cards. The missing mental model is simple:
 
 - `deviceSplitCount: 10` means **up to ten separate workload containers may share one physical GPU**.
 - `nvidia.com/gpu: 1` means the container needs one physical GPU in its device set. It does not mean “one tenth of a GPU,” and a single container cannot request two logical slots from the same card by setting this to `2`.
 - `nvidia.com/gpumem` and `nvidia.com/gpucores` describe the per-GPU budget for that container.
 
-The current arithmetic is `7 HAMi-registered whole GPUs × 10 possible sharing workloads = 70 schedulable GPU units`. The eighth physical card is in MIG mode. In the all-eight non-MIG example, the arithmetic becomes `8 × 10 = 80`. In either case, the node still has only eight physical memory systems and eight sets of SMs.
+The arithmetic is `8 HAMi-registered whole GPUs × 10 possible sharing workloads = 80 schedulable GPU units`. The node still has only eight physical memory systems and eight sets of SMs.
 
 {{hami-slot-math-animation}}
 
@@ -388,24 +388,23 @@ The practical upside is density without fixed profile sizes. A notebook can requ
 
 ### Verify the count yourself
 
-The split factor appears in `hami.io/node-nvidia-register`, where each currently registered whole GPU has `"count": 10`. The simplest summary is the live node capacity:
+The split factor appears in `hami.io/node-nvidia-register`, where each registered whole GPU has `"count": 10`. The simplest summary is the live node capacity:
 
 ```bash
 root@utho-gpu-rtxpro6000-8-62383:~# kubectl get node utho-gpu-rtxpro6000-8-62383 \
   -o custom-columns='NAME:.metadata.name,KUBERNETES:.status.nodeInfo.kubeletVersion,GPU-CAPACITY:.status.capacity.nvidia\.com/gpu,GPU-ALLOCATABLE:.status.allocatable.nvidia\.com/gpu'
 NAME                          KUBERNETES   GPU-CAPACITY   GPU-ALLOCATABLE
-utho-gpu-rtxpro6000-8-62383   v1.35.6      70             70
+utho-gpu-rtxpro6000-8-62383   v1.35.6      80             80
 ```
 
-The node's capacity confirms `7 × 10 = 70`, while `nvidia-smi -L` remains the source of truth for the eight-card physical inventory.
+The node's capacity confirms `8 × 10 = 80`, while `nvidia-smi -L` remains the source of truth for the eight-card physical inventory.
 
 ## Reading the Helm Values That Control the Split
 
-The `count: 10` comes straight from the Helm release's computed values. Helm still retains the exact values from revision 1 used for the non-MIG walkthrough, even though revision 2 later changed the live node to mixed MIG mode. Here are only the revision 1 fields that affect this walkthrough; the full output also contains image, service, security-context, and vendor configuration:
+The `count: 10` comes straight from the live Helm release's computed values. Here are only the fields that affect this walkthrough; the full output also contains image, service, security-context, and vendor configuration:
 
 ```bash
-root@utho-gpu-rtxpro6000-8-62383:~# helm get values \
-  -n hami-system hami --revision 1 --all
+root@utho-gpu-rtxpro6000-8-62383:~# helm get values -n hami-system hami --all
 ```
 
 ```yaml
@@ -747,7 +746,7 @@ Wire both endpoints into Prometheus and a few panels give you the dashboard a sh
 
 ![Grafana dashboard built from HAMi scheduler metrics: fleet stats, per-pod slices, and per-GPU allocation against the physical limit](/img/blog/sharing-gpus-in-kubernetes-with-hami/hami-grafana-dashboard.png)
 
-The dashboard is useful because it keeps three different numbers separate: physical cards, logical sharing slots, and actual resource grants. Mixing those is how an eight-GPU node gets mistaken for a 70- or 80-GPU node.
+The dashboard is useful because it keeps three different numbers separate: physical cards, logical sharing slots, and actual resource grants. Mixing those is how an eight-GPU node gets mistaken for an 80-GPU node.
 
 Once the outputs were captured, the temporary workloads were removed while the clean HAMi installation remained running:
 
@@ -759,7 +758,7 @@ kubectl delete namespace hami-blog-verify --wait=true
 
 ### Pitfall A: Assuming `nvidia.com/gpu` Count Reflects Physical GPU Count
 
-The first time you see `nvidia.com/gpu: 70` on an 8-GPU node, it's easy to assume something is broken. Here, seven whole GPUs are registered and each contributes ten logical slots. An all-eight non-MIG registration would show 80. Check the `hami.io/node-nvidia-register` annotation before assuming a misconfiguration; the number of GPU entries and the `"count"` field per entry explain the capacity.
+The first time you see `nvidia.com/gpu: 80` on an 8-GPU node, it's easy to assume something is broken. Here, all eight whole GPUs are registered and each contributes ten logical slots. Check the `hami.io/node-nvidia-register` annotation before assuming a misconfiguration; the number of GPU entries and the `"count"` field per entry explain the capacity.
 
 ### Pitfall B: Expecting `nvidia.com/gpu: 1` Alone to Mean “One Tenth”
 
@@ -788,7 +787,7 @@ HAMi trades MIG's hardware boundary for flexibility: memory in 1 MiB units, comp
 Here's what this setup walked through:
 
 1. Built a clean Kubernetes v1.35.6 node, configured the NVIDIA default runtime, and installed HAMi v2.9.0 as Helm revision 1.
-2. Traced the live `nvidia.com/gpu: 70` to seven registered whole GPUs with `deviceSplitCount: 10`, and showed why an all-eight non-MIG configuration would expose 80 logical slots.
+2. Traced the live `nvidia.com/gpu: 80` to eight registered whole GPUs with `deviceSplitCount: 10`, separating logical concurrency from physical capacity.
 3. Ran two fresh PyTorch replicas on one explicitly pinned GPU, each with an 8,000 MiB / 10% grant.
 4. Proved that an unfit 90,000 MiB request stayed Pending with `CardInsufficientMemory`, even though logical count slots remained.
 5. Reproduced HAMi-Core rejecting an attempted 9,185,657,856-byte total against an 8,388,608,000-byte grant while the neighboring container remained Running with zero restarts.
