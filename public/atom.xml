@@ -16,7 +16,7 @@
     <id>https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami</id>
     <updated>2026-07-21T10:00:00.000Z</updated>
     <published>2026-07-21T10:00:00.000Z</published>
-    <summary>Share GPUs in Kubernetes with HAMi software vGPU slicing: arbitrary memory and core limits per pod, the Helm values that control the split, a verified PyTorch manifest, a real OOM blast-radius test, and Prometheus monitoring.</summary>
+    <summary>Share NVIDIA GPUs in Kubernetes with HAMi software vGPU slicing: memory and compute limits, Helm configuration, a verified PyTorch manifest, a real RTX PRO 6000 OOM test, and Prometheus monitoring.</summary>
     <category term="kubernetes"/>
     <category term="gpu"/>
     <category term="nvidia"/>

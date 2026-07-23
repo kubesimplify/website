@@ -1,7 +1,7 @@
 ---
 title: "How to Share GPUs in Kubernetes at Scale with HAMi (Software vGPU Slicing)"
 seoTitle: "HAMi vGPU on Kubernetes: Software GPU Slicing From 8 GPUs to 80 Schedulable Slices"
-seoDescription: "Share GPUs in Kubernetes with HAMi software vGPU slicing: arbitrary memory and core limits per pod, the Helm values that control the split, a verified PyTorch manifest, a real OOM blast-radius test, and Prometheus monitoring."
+seoDescription: "Share NVIDIA GPUs in Kubernetes with HAMi software vGPU slicing: memory and compute limits, Helm configuration, a verified PyTorch manifest, a real RTX PRO 6000 OOM test, and Prometheus monitoring."
 datePublished: 2026-07-21T10:00:00.000Z
 slug: sharing-gpus-in-kubernetes-with-hami
 author: shubham-katara
@@ -18,17 +18,23 @@ sponsor:
   blurb: "This deep dive ran on an 8x NVIDIA RTX PRO 6000 Blackwell node from Utho Cloud. If you need GPU infrastructure to run workloads like these, take a look."
 ---
 
-Your platform team did everything right. You bought MIG-capable GPUs, carved them into hardware-isolated slices exactly like we did in [the MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig), and stopped handing a whole 96GB card to every notebook session that asked for one. And yet the tickets keep coming.
+Your platform team did everything right. You bought MIG-capable GPUs, carved them into hardware-isolated slices exactly like we did in [the MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig), and stopped handing a whole 96GB card to every notebook that asked for one. And yet the tickets keep coming.
 
-A team needs 8GB of VRAM, but the smallest MIG profile your cards offer is 24GB, so two-thirds of every slice they get sits idle, and you're back to arguing about waste, just at a smaller scale. Another team's workload outgrew its slice, and resizing it means draining every workload on that card and repartitioning the silicon.
+One team needs 8GB of VRAM, but the smallest MIG profile on our RTX PRO 6000 is `1g.24gb`. That leaves most of the slice unused. Another workload needs 30GB, which does not match the available 24GB or 48GB profiles cleanly. Changing a MIG geometry also means stopping workloads that occupy the instances you need to destroy and recreate. On Ampere GPUs, toggling MIG mode itself can additionally require a GPU reset; Hopper and newer GPUs no longer require that reset. NVIDIA documents the exact [RTX PRO 6000 profiles](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html#rtx-pro-6000-blackwell-mig-profiles) and the [generation-specific reset behavior](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/getting-started-with-mig.html#enable-mig-mode).
 
-And then there's the rest of your fleet: the consumer and prosumer cards, the older datacenter parts. GPUs that don't support MIG at all and are still being handed out whole, one pod per card, because Kubernetes has no other way to share them.
+Then there is the rest of the fleet: NVIDIA cards that do not support MIG, or clusters where fixed hardware partitions are simply the wrong fit. Kubernetes normally treats a GPU as an indivisible extended resource, so a pod asking for one GPU can occupy a whole card even when it uses only a small part of the memory and compute.
 
-Hardware partitioning solved the problem it was designed for. What it can't give you is _flexibility_: arbitrary slice sizes, reconfiguration without downtime, and one sharing model across every GPU you own, MIG-capable or not.
+**HAMi (Heterogeneous AI Computing Virtualization Middleware)** adds a software sharing layer. In plain English, it gives Kubernetes three numbers to work with:
 
-In this article, you'll learn how to close that gap with **HAMi (Heterogeneous AI Computing Virtualization)**, a CNCF project which slices GPUs in software instead: any memory size, any compute percentage, enforced per container, on effectively any card. You'll see how to split physical GPUs into schedulable, memory-and-core-limited virtual GPUs inside a Kubernetes cluster, and what actually happens when one tenant tries to blow past its quota on a shared card. Not what should happen. We ran the test and captured it.
+- **How many physical GPUs does this container need?** `nvidia.com/gpu`
+- **How much memory may it use on each GPU?** `nvidia.com/gpumem`, in MiB
+- **How much compute time may it receive?** `nvidia.com/gpucores`, in 1% steps
 
-The walkthrough runs on our test rig: 8 NVIDIA RTX PRO 6000 Blackwell cards that Kubernetes sees as 80 schedulable vGPUs. That 10x split is not a hard limit or a magic number: it's one Helm value, covered below, and you can set it to whatever your workload mix calls for. The mechanics are identical whether you run 2 GPUs or 200.
+The scheduler checks that those requests fit before placing the pod. Inside the running container, HAMi-Core enforces supported CUDA and NVML paths through an injected user-space library. That is flexible and useful, but it is not the same security boundary as MIG's hardware partitions. HAMi is now a [CNCF Incubating project](https://www.cncf.io/projects/hami/), and its maintained [device support matrix](https://project-hami.io/docs/userguide/device-supported) covers NVIDIA plus several other accelerator families through vendor-specific plugins.
+
+This walkthrough runs on our actual test rig: **8 NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs**. HAMi advertises those eight cards to Kubernetes as 80 schedulable units because the configured sharing ceiling is 10 containers per physical GPU. That does **not** create 80 GPUs or multiply the machine's VRAM. It creates 80 scheduling slots backed by the same eight cards.
+
+For this guide, we rebuilt that node as a clean single-node Kubernetes v1.35.6 cluster, installed HAMi v2.9.0 as a new Helm release, and then ran the sharing and quota tests you will see below. The point is not merely to show the final YAML. It is to make every software layer between the physical GPU and the pod understandable.
 
 Who this is for:
 
@@ -37,42 +43,58 @@ Who this is for:
 
 What you'll get from this guide:
 
-- Why enterprises deliberately advertise a GPU node as having many times more schedulable units than it physically has, what actually bounds that number, and the pros and cons of running that config.
+- Why a GPU node may advertise more scheduling units than physical cards, what that number means, and what actually limits placement.
 - A mental model for how HAMi enforces memory and compute limits without touching the hardware's memory crossbars.
 - The exact Helm values that control the split factor, and how to size a workload's `nvidia.com/gpumem` / `nvidia.com/gpucores` requests.
 - A verified Deployment manifest running a PyTorch workload against a HAMi vGPU slice on a Blackwell (`sm_120`) card.
 - A concrete blast-radius test with captured output: one pod's process allocates past its memory grant while a second pod shares the same physical card.
 
-Everything below was tested on a single node, but nothing about it is single-node specific. HAMi's device plugin runs as a DaemonSet on every GPU node you label.
+The lab has one Kubernetes node, so this post does not pretend to benchmark multi-node scheduling. The same device-plugin architecture extends to every labeled GPU node, but cluster-scale policy and failure testing are separate exercises.
 
-## The Problem: Fixed Slices vs. Flexible Slices
+## The Problem: Fixed Hardware Profiles vs. Flexible Software Budgets
 
-MIG solves the "one pod locks a whole 96GB card" problem by carving the GPU into hardware-isolated partitions. But those partitions come in fixed profiles (`1g.24gb`, `2g.48gb`, and so on), decided at silicon-partition time, on hardware that supports MIG in the first place.
+MIG solves the "one pod locks a whole 96GB card" problem by carving the GPU into hardware-isolated partitions. On this RTX PRO 6000, those partitions come in fixed profiles such as `1g.24gb`, `2g.48gb`, and `4g.96gb`.
 
 That creates its own friction:
 
-- If a workload needs 8GB, the smallest MIG profile on this card is still 24GB. You're back to wasting VRAM, just less of it.
-- Reslicing means stopping every process on the card, disabling persistence daemons, and (on older architectures) resetting the GPU.
-- Cards without MIG support (most consumer and prosumer GPUs, and even some datacenter GPUs when running older drivers) simply can't do this at all.
+- If a workload needs 8GB, the smallest standard compute profile on this card is still 24GB. You waste less than with a whole card, but you still waste 16GB.
+- A workload that needs 30GB does not fit the 24GB profile, so it must take 48GB.
+- Changing the profile layout requires destroying and recreating affected MIG instances. That is operationally heavier than changing a pod resource request.
+- MIG only works on supported GPUs and software combinations. It is not a universal sharing mechanism for every NVIDIA card.
 
-**HAMi** takes a different approach: instead of partitioning silicon, it intercepts the calls a process makes (`hami-core` mode) to allocate GPU memory and enforces a memory/compute quota entirely in software. That means:
+**HAMi** takes a different approach. Instead of partitioning the silicon, its NVIDIA path combines device-aware scheduling with HAMi-Core, an injected user-space library. The scheduler reserves a memory and compute budget; HAMi-Core tracks supported CUDA allocations and throttles compute while the container runs. The official [GPU virtualization walkthrough](https://project-hami.io/docs/core-concepts/gpu-virtualization) documents the complete webhook → scheduler → device plugin → HAMi-Core flow.
 
-- Slices can be any size: `nvidia.com/gpumem: 8000` is a valid request, not just a fixed profile name.
+That means:
+
+- Memory can be requested in 1 MiB units: `nvidia.com/gpumem: 8000` is valid, rather than choosing a fixed profile name.
 - No GPU reset is required to change how a card is divided. The limits live in the pod spec, not the hardware.
-- The same device plugin can front NVIDIA, AMD, Huawei Ascend, Cambricon, and several other accelerator vendors under one scheduling model.
+- Compute can be requested in 1% steps with `nvidia.com/gpucores`.
+- HAMi provides a common scheduling model across multiple accelerator families, with capabilities and plugins that vary by vendor. This article tests only the NVIDIA HAMi-Core path.
 
-The tradeoff, covered later in this guide, is that the isolation is enforced at the driver-API layer, not the memory-controller layer, which changes what "blast radius" means when something goes wrong.
+The tradeoff is the boundary. HAMi's NVIDIA limits are enforced in user space by intercepting CUDA/NVML paths. MIG's memory and compute boundaries are implemented in hardware. Both can prevent an ordinary CUDA workload from consuming another tenant's allocation, but they are not equivalent isolation guarantees.
 
-## Prerequisites and System Specifications
+{{hami-request-flow-animation}}
 
-Same physical box used for [the MIG walkthrough](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig), just with a different piece of software layered on top:
+## Before Installing HAMi: The Four Layers
+
+GPU setup becomes confusing when four different jobs are described as if they were one installation. Keep this stack in your head:
+
+1. **NVIDIA driver:** lets Linux communicate with the physical GPU. `nvidia-smi` proves this layer works.
+2. **NVIDIA Container Toolkit:** lets a container runtime expose that GPU inside a container.
+3. **Kubernetes:** places pods on nodes and asks a device plugin for the devices assigned to each container.
+4. **HAMi:** replaces whole-GPU scheduling with device-aware placement plus software memory and compute limits.
+
+HAMi does not replace the driver, Container Toolkit, containerd, or Kubernetes. It builds on them.
+
+Our clean test node used:
 
 - **Host OS:** Ubuntu 24.04.4 LTS on Utho Cloud.
-- **Kubernetes:** v1.35.6, single control-plane node (`utho-gpu-rtxpro6000-8-62383`).
-- **Container Runtime:** `containerd://2.2.1`.
-- **CPUs:** 256 (248 allocatable).
-- **RAM:** ~1.3TB (`1320697592Ki` capacity).
-- **GPUs:** 8x NVIDIA RTX PRO 6000 Blackwell Server Edition (96GB VRAM / 97887 MiB each).
+- **Kubernetes:** v1.35.6, one control-plane node (`utho-gpu-rtxpro6000-8-62383`).
+- **Container runtime:** containerd 2.2.1.
+- **GPUs:** 8x NVIDIA RTX PRO 6000 Blackwell Server Edition.
+- **Memory per GPU:** 97,887 MiB reported by the driver.
+- **NVIDIA driver:** 610.43.02.
+- **NVIDIA Container Toolkit:** 1.19.1.
 
 ```bash
 root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi -L
@@ -86,93 +108,268 @@ GPU 6: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-f4f5db98-143f-0a8
 GPU 7: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-f4c61521-240a-da09-2787-e576034e197e)
 ```
 
-- **HAMi:** installed via Helm, release `hami`, chart `hami-2.9.0-a52b738`, in the `hami-system` namespace.
+## Build the Kubernetes 1.35 Cluster
+
+If you already have a healthy Kubernetes cluster, do not reset it just to follow this guide. We rebuilt a dedicated test node so the installation path was clean. The package commands below follow Kubernetes' official [kubeadm installation guide](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/).
+
+First enable the kernel settings Kubernetes networking needs and turn off swap:
 
 ```bash
-root@utho-gpu-rtxpro6000-8-62383:~# helm repo add hami-charts https://project-hami.github.io/HAMi/
-root@utho-gpu-rtxpro6000-8-62383:~# helm repo update
-root@utho-gpu-rtxpro6000-8-62383:~# VERSION=$(kubectl version | grep "Server Version:" | cut -d' ' -f3)
-root@utho-gpu-rtxpro6000-8-62383:~# helm install hami hami-charts/hami --set scheduler.kubeScheduler.imageTag=$VERSION -n hami-system --create-namespace
-root@utho-gpu-rtxpro6000-8-62383:~# helm list -n hami-system
-NAME    NAMESPACE   REVISION    UPDATED                                     STATUS      CHART               APP VERSION
-hami    hami-system 2           2026-07-16 11:30:02.969721978 +0000 UTC     deployed    hami-2.9.0-a52b738 2.9.0-a52b738
+sudo swapoff -a
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+cat <<'EOF' | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+sudo sysctl --system
 ```
+
+Add the Kubernetes v1.35 package repository and install the node tools:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+sudo mkdir -p -m 755 /etc/apt/keyrings
+
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /' \
+  | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+```
+
+### Make the NVIDIA runtime the default
+
+The host already had its NVIDIA driver and Container Toolkit. We configured containerd with the NVIDIA runtime and made it the default, which is also the setup expected by HAMi's [prerequisites](https://project-hami.io/docs/installation/prerequisites):
+
+```bash
+sudo nvidia-ctk runtime configure \
+  --runtime=containerd \
+  --set-as-default
+sudo systemctl restart containerd
+```
+
+Verify the result instead of assuming it worked:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# containerd config dump \
+  | grep -E 'default_runtime_name|BinaryName' | head -2
+      default_runtime_name = 'nvidia'
+            BinaryName = '/usr/bin/nvidia-container-runtime'
+```
+
+### Initialize the control plane
+
+The `10.244.0.0/16` pod network below matches Flannel's default manifest:
+
+```bash
+sudo kubeadm init \
+  --kubernetes-version v1.35.6 \
+  --apiserver-advertise-address 103.209.144.201 \
+  --pod-network-cidr 10.244.0.0/16 \
+  --cri-socket unix:///run/containerd/containerd.sock
+
+mkdir -p "$HOME/.kube"
+sudo cp /etc/kubernetes/admin.conf "$HOME/.kube/config"
+sudo chown "$(id -u):$(id -g)" "$HOME/.kube/config"
+```
+
+This is a one-node lab, so the control-plane node must also accept workloads. Do not remove this taint on a production control plane unless that is an intentional design decision:
+
+```bash
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+kubectl apply -f \
+  https://github.com/flannel-io/flannel/releases/download/v0.28.7/kube-flannel.yml
+```
+
+The rebuilt node came up on the expected versions:
+
+```text
+NAME                          STATUS   KUBERNETES   RUNTIME
+utho-gpu-rtxpro6000-8-62383   Ready    v1.35.6      containerd://2.2.1
+```
+
+## RuntimeClass and GPU Operator: Which Path Are We Using?
+
+It is reasonable to expect an `nvidia` RuntimeClass if you normally install GPUs through the **NVIDIA GPU Operator**. Many Operator configurations create it. Older CDI configurations could also add `nvidia-cdi` and `nvidia-legacy`.
+
+That is not a universal rule anymore. In current GPU Operator releases, ordinary CDI-injected workloads do not need to name a RuntimeClass, and enabling the newer NRI plugin deliberately removes the `nvidia` RuntimeClass. NVIDIA documents those mode differences in its [CDI and NRI guide](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/cdi.html).
+
+This lab does **not** install GPU Operator. The host already has the driver and Container Toolkit, and containerd's default runtime is `nvidia`. Therefore:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl get runtimeclass
+No resources found
+```
+
+That empty output is correct for this setup. The later workload works without `runtimeClassName` because the NVIDIA runtime is already the default.
+
+If your cluster already uses GPU Operator, do not run two device plugins that both advertise `nvidia.com/gpu`. HAMi's [GPU Operator compatibility guidance](https://project-hami.io/docs/faq) says to disable the Operator-managed device plugin (`devicePlugin.enabled=false`) when HAMi owns NVIDIA GPU scheduling. Keep the Operator for the driver/toolkit lifecycle if you need it; let HAMi own the conflicting device-plugin role.
+
+## Install HAMi From Scratch
+
+HAMi's NVIDIA device plugin selects nodes labeled `gpu=on` by default, so label the GPU node first:
+
+```bash
+kubectl label node utho-gpu-rtxpro6000-8-62383 gpu=on --overwrite
+```
+
+Now install a pinned HAMi chart. The scheduler image tag must match the Kubernetes server version. The remaining values make the sharing policy explicit instead of hiding important behavior behind defaults:
+
+```bash
+helm repo add hami-charts https://project-hami.github.io/HAMi/
+helm repo update hami-charts
+
+K8S_VERSION=$(kubectl version -o json | jq -r '.serverVersion.gitVersion')
+
+helm install hami hami-charts/hami \
+  --version 2.9.0 \
+  --namespace hami-system \
+  --create-namespace \
+  --wait \
+  --timeout 10m \
+  --set scheduler.kubeScheduler.imageTag="$K8S_VERSION" \
+  --set devicePlugin.deviceSplitCount=10 \
+  --set devicePlugin.deviceMemoryScaling=1 \
+  --set devicePlugin.deviceCoreScaling=1 \
+  --set devicePlugin.migStrategy=none \
+  --set devicePlugin.createRuntimeClass=false \
+  --set-string devicePlugin.disablecorelimit=false
+```
+
+This is the release created by that command, not a dry-run render or an inherited installation:
+
+```text
+NAME   NAMESPACE    REVISION   STATUS     CHART        APP VERSION
+hami   hami-system  1          deployed   hami-2.9.0   2.9.0
+```
+
+Both HAMi components became healthy:
+
+```text
+NAME                              READY   STATUS    RESTARTS
+hami-device-plugin-5wdzg          2/2     Running   0
+hami-scheduler-6f74879cc7-9fddb   2/2     Running   0
+```
+
+The scheduler pod is cluster-wide. The device-plugin DaemonSet runs once on every selected GPU node. On this node, the chart's split count turns eight physical cards into 80 schedulable sharing slots:
+
+```text
+NAME                          STATUS   KUBERNETES   GPU
+utho-gpu-rtxpro6000-8-62383   Ready    v1.35.6      80
+```
+
+### Where did `nvidia.com/gpu` come from?
+
+Not from RuntimeClass, and not directly from GPU Operator. A **device plugin** is the component that registers an extended resource with Kubelet.
+
+In a typical GPU Operator installation, the Operator deploys NVIDIA's official device plugin, which registers `nvidia.com/gpu`. In this installation, there is no GPU Operator or NVIDIA device-plugin DaemonSet. The HAMi chart installed **`hami-device-plugin`**, and that plugin owns the same resource name:
+
+```text
+NAME                 READY   DESIRED   IMAGE
+hami-device-plugin   1       1         docker.io/projecthami/hami:v2.9.0
+```
+
+The sequence is:
+
+1. The host NVIDIA driver lets the plugin discover eight physical GPUs.
+2. `hami-device-plugin` connects to Kubelet's Device Plugin API.
+3. It registers the configured resource name, `nvidia.com/gpu`.
+4. `deviceSplitCount: 10` makes each physical card contribute ten schedulable device IDs.
+5. Kubelet publishes `8 × 10 = 80` as the node's `nvidia.com/gpu` capacity.
+
+The live plugin log contained `Discovered 8 device(s) for registration`, while the node annotation recorded `"count": 10` for every UUID. Without either HAMi's device plugin or NVIDIA's official device plugin, `nvidia-smi` could work perfectly on the host while Kubernetes would advertise **no** `nvidia.com/gpu` capacity.
+
+This also explains the conflict warning above: HAMi's plugin and NVIDIA's official plugin should not both try to own `nvidia.com/gpu` on the same node.
+
+The `nvcr.io/nvidia/pytorch:25.01-py3` image used later is an official NGC image. NVIDIA's [25.01 release notes](https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/rel-25-01.html) mark that release as optimized for Blackwell, and our test confirmed compute capability `(12, 0)` on this RTX PRO 6000.
 
 ## How HAMi's Architecture Differs from the MIG Stack
 
-The MIG stack layers a hardware partitioner (`nvidia-mig-manager`), a toolkit that mounts device files into containers, and a device plugin that advertises whatever profiles the hardware carved out. HAMi collapses that into three components that all live inside the `hami-system` namespace:
+The MIG stack first creates hardware instances, then the NVIDIA device plugin advertises those instances to Kubernetes. HAMi leaves the physical GPU unpartitioned in `hami-core` mode and coordinates four software responsibilities instead: admission, placement, device injection, and in-container enforcement.
 
-![HAMi's three-layer architecture: scheduling layer, enforcement layer, and the unmodified NVIDIA driver underneath](/img/blog/sharing-gpus-in-kubernetes-with-hami/hami-architecture.png)
+![Excalidraw-style flow showing a HAMi request moving through the webhook, scheduler extender, device plugin, HAMi-Core, and physical GPU](/img/blog/sharing-gpus-in-kubernetes-with-hami/hami-architecture.png)
+
+### HAMi mutating webhook
+
+When a pod requests HAMi-managed resources, the webhook routes it to `hami-scheduler`. It does **not** send every ordinary pod through HAMi. A CPU-only sanity-check pod on the rebuilt cluster retained `schedulerName: default-scheduler`, while the GPU test pods reported `schedulerName: hami-scheduler`.
+
+### `hami-scheduler` (cluster-wide)
+
+The HAMi scheduler pod contains a Kubernetes scheduler instance plus HAMi's extender logic. During **Filter**, it rejects nodes or cards that lack a free sharing slot, requested VRAM, or requested compute. During **Score**, it applies the configured binpack/spread policy. During **Bind**, it chooses a physical GPU UUID and records the allocation in pod annotations. The official [architecture documentation](https://project-hami.io/docs/core-concepts/architecture) describes these roles separately.
 
 ### `hami-device-plugin` (DaemonSet, one per GPU node)
 
-Registers with the host driver, reports each physical GPU's memory/UUID, and (this is the part that matters below) splits each physical GPU into N virtual counting units. It also runs a `vgpu-monitor` sidecar container that watches per-container GPU usage and logs enforcement events.
-
-### `hami-scheduler` (Deployment, cluster-wide)
-
-Replaces (or sits alongside, depending on config) the default Kubernetes scheduler. Because `scheduler.forceOverwriteDefaultScheduler: true` on this cluster, pods that don't even mention HAMi still get scheduled through it. An admission webhook rewrites/validates GPU resource requests so the vGPU-aware scheduling extender can bin-pack them correctly.
+Registers the logical GPU count with Kubelet, publishes each physical card's UUID/memory/core information in node annotations, and reads the scheduler's chosen allocation from the pod annotation. During the Device Plugin `Allocate` call it exposes `/dev/nvidia*`, mounts `libvgpu.so` and `/etc/ld.so.preload`, and injects limit variables into the container. Its `vgpu-monitor` sidecar exports real-time usage metrics; the OOM message itself is emitted by HAMi-Core inside the workload process.
 
 ### `hami-core` (the actual enforcement mechanism)
 
-This is a shared library HAMi mounts into every GPU workload container. It sits between the application and the real GPU. It intercepts calls used to allocate memory on the GPU and calls used to query the current memory allocation and availability of a specific NVIDIA GPU.
+This is the shared library, `libvgpu.so`, that HAMi mounts into a managed NVIDIA workload container. `/etc/ld.so.preload` causes the dynamic linker to load it into processes before CUDA/NVML libraries. It intercepts supported calls used to allocate/query memory and throttles kernel launches for compute control. The [HAMi-Core design](https://project-hami.io/docs/developers/hami-core-design) places it between the CUDA runtime and driver.
 
-When a container's tracked allocation would exceed its configured `nvidia.com/gpumem` limit, `hami-core` fails the call. The physical GPU never even sees the request. This is also why `nvidia-smi` _inside_ a HAMi pod reports a virtualized total memory figure instead of the card's real 97887 MiB: the NVML calls are hooked too.
+When a container's tracked allocation would exceed its configured `nvidia.com/gpumem` limit, HAMi-Core returns an OOM on that intercepted path even if the physical card still has free memory. This is also why `nvidia-smi` _inside_ a HAMi container reports its virtualized total instead of the card's real 97887 MiB: the relevant NVML memory query is intercepted too.
 
-No custom `runtimeClassName` or container-toolkit injection is required for this. Unlike the MIG stack, HAMi doesn't need containerd to know about a special OCI runtime class. That's also why our working manifest (below) has no `runtimeClassName: nvidia` in it: the chart ships with `devicePlugin.createRuntimeClass: false` and `runtimeClassName: ""`.
-
-## Why Enterprises Split One GPU Into Ten Schedulable Units
-
-This node advertises `Capacity`/`Allocatable: nvidia.com/gpu: 80` for 8 physical cards, a 10x split. That's not an artifact of this particular install; it's the HAMi chart's own default (`devicePlugin.deviceSplitCount: 10`), and it reflects a pattern enterprises reach for deliberately on shared GPU infrastructure.
-
-### Why enterprises do this
-
-- GPUs are the most expensive, most contended line item in an AI platform's budget. Handing out an entire 96GB Blackwell card to every workload that requests one is the same "whole GPU, fractional job" waste MIG was built to solve, except here there's no hardware partitioning available or wanted.
-- Most workloads on a shared dev/inference cluster don't need a whole card: a small inference replica, a notebook session, a CI job exercising a training script. Advertising only 8 whole-GPU units forces the scheduler to hand one entire card to each of these, even though each one uses a sliver of it.
-- Splitting each physical GPU into many schedulable units lets the platform present GPU capacity the same way it already presents CPU and memory (many small, quota-bound, self-service units) instead of 8 indivisible blocks that need a platform ticket to share.
-
-### Why this cluster runs the default 10x split, and what actually bounds it
-
-Nobody tuned `deviceSplitCount` for this install; it's the value that ships out of the box with the chart. That's worth being precise about: **the "10" is a scheduling multiplier, not a capacity promise.** What actually stops ten tenants on one card from starving each other is `deviceMemoryScaling: 1` and `deviceCoreScaling: 1` (no oversubscription configured), so the sum of every pod's `nvidia.com/gpumem` and `nvidia.com/gpucores` on a given physical GPU is still hard-capped at its real 97887 MiB and 100% SM. The split count decides how many _pods_ can be scheduled onto a card; the scaling values decide how much _resource_ those pods can collectively claim.
-
-### Pros
-
-- **Density and self-service.** Ten small workloads can land on one card without a platform engineer intervening, the same experience teams already expect from CPU/memory requests.
-- **Utilization goes up without buying hardware.** Idle VRAM/SM capacity on a card running one small job gets reclaimed by other tenants instead of sitting unused, the same utilization argument MIG makes, achieved in software instead of silicon.
-- **No fixed-profile tax.** Unlike MIG's `1g.24gb` minimum, a tenant can request exactly `nvidia.com/gpumem: 2000` if that's all it needs. The split count only governs how many concurrent pods fit on a card, not how much VRAM each one is forced to take.
-
-### Cons
-
-- **The headline number is misleading if read literally.** `nvidia.com/gpu: 80` looks like 10x the compute capacity of the box. It isn't; it's 10x the scheduling slots. Capacity planning has to be done in `gpumem`/`gpucores` terms, not by counting `nvidia.com/gpu`.
-- **A high split count invites over-scheduling pressure.** A tenth pod can still get scheduled onto a card the moment a free `nvidia.com/gpu` slot exists, even if the other nine pods on that card have already claimed the physical GPU's entire real memory and compute budget between them. The split count and the actual physical ceiling can drift apart from a scheduling perspective, and that tenth pod fails at runtime, not at admission time.
-- **Enforcement is software, not hardware.** The isolation between those 10 slots is `hami-core` intercepting driver calls, a materially different (and weaker) guarantee than MIG's silicon partition, covered next. A higher split count just means more tenants sharing that same software-enforced boundary on one card.
-
-### The evidence, if you want to check it yourself
-
-The split factor shows up in the node's `hami.io/node-nvidia-register` annotation, where each of the 8 physical GPUs is registered with `"count": 10`:
+Here is the mechanism from one of the fresh 8,000 MiB / 10% test containers:
 
 ```bash
-root@utho-gpu-rtxpro6000-8-62383:~# kubectl describe node utho-gpu-rtxpro6000-8-62383
-...
-Annotations:        ...
-                    hami.io/node-handshake: Requesting_2026-07-16 10:08:42
-                    hami.io/node-nvidia-register:
-                      [{"id":"GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288","index":4,"count":10,"devmem":97887,"devcore":100,"type":"NVIDIA RTX PRO 6000 Blackwell ...
-...
-Capacity:
-  nvidia.com/gpu:     80
-  ...
-Allocatable:
-  nvidia.com/gpu:     80
-  ...
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl exec -n hami-blog-verify <pod> -- sh -c 'cat /etc/ld.so.preload; printf "CUDA_DEVICE_MEMORY_LIMIT_0=%s\n" "$CUDA_DEVICE_MEMORY_LIMIT_0"; printf "CUDA_DEVICE_SM_LIMIT=%s\n" "$CUDA_DEVICE_SM_LIMIT"'
+/usr/local/vgpu/libvgpu.so
+CUDA_DEVICE_MEMORY_LIMIT_0=8000m
+CUDA_DEVICE_SM_LIMIT=10
 ```
 
+No `runtimeClassName` appears in our pod because the node uses `nvidia-container-runtime` by default and this chart was installed with `devicePlugin.createRuntimeClass: false`. HAMi still depends on the NVIDIA Container Toolkit/runtime; omitting the field does not mean that layer is unnecessary.
+
+## What “80 GPUs” Means on an Eight-GPU Node
+
+This node advertises `nvidia.com/gpu: 80` even though `nvidia-smi -L` lists eight cards. The missing mental model is simple:
+
+- `deviceSplitCount: 10` means **up to ten separate workload containers may share one physical GPU**.
+- `nvidia.com/gpu: 1` means the container needs one physical GPU in its device set. It does not mean “one tenth of a GPU,” and a single container cannot request two logical slots from the same card by setting this to `2`.
+- `nvidia.com/gpumem` and `nvidia.com/gpucores` describe the per-GPU budget for that container.
+
+So the arithmetic is `8 physical GPUs × 10 possible sharing workloads = 80 schedulable GPU units`. The node still has eight memory systems and eight sets of SMs.
+
+{{hami-slot-math-animation}}
+
+The chart defaults to 10, but the right value is a concurrency choice, not a performance promise. A smaller number reduces how many containers can contend on one card. A larger number permits more tiny workloads, but adds more contexts, more neighbors, and more operational complexity. Setting it to `1` restores exclusive placement: only one workload can occupy each physical GPU.
+
+With `deviceMemoryScaling: 1` and `deviceCoreScaling: 1`, the scheduler also checks the real aggregate budget. It does not admit a pod merely because a count slot is free. To prove that, I pinned a 90,000 MiB request to GPU 5 while two 8,000 MiB slices were already reserved there. The count still had eight free slots, but the memory sum would have exceeded 97,887 MiB:
+
+```text
+NAME             STATUS    SCHEDULER        NODE
+hami-too-large   Pending   hami-scheduler   <none>
+
+Warning  FilteringFailed  1 nodes CardInsufficientMemory(utho-gpu-rtxpro6000-8-62383)
 ```
-8 physical GPUs × 10 virtual units/GPU = 80 allocatable nvidia.com/gpu
+
+That is an admission-time scheduling failure, not a runtime OOM. Runtime OOM is a different test: it happens when an already-admitted container actually allocates beyond its own grant, which we reproduce later.
+
+The practical upside is density without fixed profile sizes. A notebook can request 8,000 MiB, a small inference replica 12,000 MiB, and another workload 20,000 MiB, as long as the total count, memory, and compute requests all fit. The practical costs are shared-hardware contention and a software isolation boundary, so latency-sensitive or adversarial tenants may still deserve MIG or dedicated GPUs.
+
+### Verify the count yourself
+
+The split factor appears in `hami.io/node-nvidia-register`, where each physical GPU is registered with `"count": 10`. The simplest summary is the node capacity:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl get node \
+  -o custom-columns='NAME:.metadata.name,CAPACITY:.status.capacity.nvidia\.com/gpu,ALLOCATABLE:.status.allocatable.nvidia\.com/gpu'
+NAME                          CAPACITY   ALLOCATABLE
+utho-gpu-rtxpro6000-8-62383   80         80
 ```
+
+The node's capacity confirms the multiplication, while `nvidia-smi -L` remains the source of truth for physical card count.
 
 ## Reading the Helm Values That Control the Split
 
-The `count: 10` comes straight from the Helm release's computed values:
+The `count: 10` comes straight from the Helm release's computed values. Here are only the fields that affect this walkthrough; the full output also contains image, service, security-context, and vendor configuration:
 
 ```bash
 root@utho-gpu-rtxpro6000-8-62383:~# helm get values -n hami-system hami --all
@@ -185,25 +382,8 @@ devicePlugin:
   deviceCoreScaling: 1
   migStrategy: none
   disablecorelimit: "false"
-  enableNumaTopology: true
-  nodeConfiguration:
-    config: |
-      {
-        "nodeconfig": [
-          {
-            "name": "your-node-name",
-            "operatingmode": "hami-core",
-            "devicememoryscaling": 1,
-            "devicesplitcount": 10,
-            "preconfigureddevicememory": 0,
-            "enablenumatopology": false,
-            "migstrategy": "none",
-            "filterdevices": { "uuid": [], "index": [] },
-            "enablegetpreferredallocation": false
-          }
-        ]
-      }
-    externalConfigName: ""
+  createRuntimeClass: false
+  runtimeClassName: ""
   nvidiaNodeSelector:
     gpu: "on"
 resourceName: nvidia.com/gpu
@@ -214,40 +394,54 @@ scheduler:
   defaultSchedulerPolicy:
     gpuSchedulerPolicy: spread
     nodeSchedulerPolicy: binpack
-  forceOverwriteDefaultScheduler: true
 ```
 
-The fields that matter most day-to-day:
+The current [HAMi configuration reference](https://project-hami.io/docs/userguide/configure) defines the semantics:
 
-- **`deviceSplitCount: 10`** is the multiplier behind the 80. Set this lower (e.g. `1`) if you want `nvidia.com/gpu` to map 1:1 to physical cards and rely purely on `gpumem`/`gpucores` for fractioning.
-- **`deviceMemoryScaling: 1`** is a multiplier on how much virtual memory HAMi will let you _oversubscribe_ per device. `1` means no oversubscription: the sum of all `gpumem` requests on a card can't exceed its real 97887 MiB. Values above `1` let you promise more virtual memory than physically exists (useful for bursty, rarely-concurrent workloads; risky otherwise).
-- **`deviceCoreScaling: 1`** is the same idea for `gpucores`, no compute oversubscription.
+- **`deviceSplitCount: 10`** is the maximum number of workload containers HAMi may assign to one physical GPU. `1` means exclusive placement, not fractional sharing.
+- **`deviceMemoryScaling: 1`** means the schedulable memory budget equals physical memory. Values above `1` deliberately advertise more memory than exists; HAMi documents memory overcommit as experimental, and a real physical OOM becomes possible if tenants use all promised memory together.
+- **`deviceCoreScaling: 1`** keeps the aggregate schedulable compute budget at 100% per card.
+- **`disablecorelimit: "false"`** enables HAMi-Core's compute limiting path. Core control is time-based throttling, so `nvidia-smi` utilization can fluctuate around the requested percentage rather than drawing a perfectly flat line.
 - **`migStrategy: none`** means HAMi is not layering on top of MIG partitions here; it's doing pure `hami-core` software slicing against whole physical GPUs.
 - **`nvidiaNodeSelector.gpu: "on"`** restricts the device plugin to nodes labeled `gpu=on`, which matches the label already on this node.
+- **`gpuSchedulerPolicy: spread`** prefers different physical cards; **`nodeSchedulerPolicy: binpack`** prefers already-used nodes. For the same-GPU isolation test, relying on a preference is not precise enough, so the manifest below pins a known idle GPU UUID.
 
 ## How to Request vGPU Slices in a Pod Spec
 
-Where a MIG-based manifest requests a fixed profile (`nvidia.com/mig-1g.24gb: 1`), a HAMi manifest requests three independent numbers:
+Where a MIG manifest requests a fixed profile (`nvidia.com/mig-1g.24gb: 1`), a HAMi manifest can request three independent values:
+
+One unit detail matters throughout the test: `gpumem` is measured in **MiB**. One MiB is 1,048,576 bytes, so 8,000 MiB is 8,388,608,000 bytes or 7.8125 GiB. That is why HAMi accepts `8000` while PyTorch later prints `7.81 GiB`; the numbers describe the same capacity.
 
 ```yaml
 resources:
   limits:
-    nvidia.com/gpu: 1 # 1 share of a physical GPU (out of deviceSplitCount)
-    nvidia.com/gpumem: 8000 # 8000 MiB of VRAM, enforced by hami-core
-    nvidia.com/gpucores: 10 # 10% of the GPU's SM/core capacity
+    nvidia.com/gpu: 1 # use one physical GPU, possibly shared with other containers
+    nvidia.com/gpumem: 8000 # reserve and expose 8000 MiB on that GPU
+    nvidia.com/gpucores: 10 # request 10% of that GPU's compute time
 ```
 
-Here's the full Deployment we ran on this node: the same PyTorch matmul workload used to validate the MIG setup, ported to HAMi's resource model and with every MIG-specific field removed (`runtimeClassName: nvidia` is gone, since HAMi doesn't need it; the resource block no longer references `mig-1g.24gb`):
+Kubernetes extended resources belong in `limits`; if you also write `requests`, they must match. This manifest includes both explicitly.
+
+### The exact two-container test
+
+For an ordinary workload, let HAMi choose a card. For a blast-radius test, both replicas must share the **same** card, so I pinned them to idle GPU 5 with `nvidia.com/use-gpuuuid`. The additional `binpack` annotation states the intent, while the UUID makes the result deterministic. Replace the UUID for your node, or remove both annotations outside a test.
+
+I kept the workload out of the `hami-system` control-plane namespace:
+
+```bash
+kubectl create namespace hami-blog-verify
+```
 
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pytorch-hami-demo
+  namespace: hami-blog-verify
   labels:
     app: pytorch-hami-demo
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: pytorch-hami-demo
@@ -255,11 +449,13 @@ spec:
     metadata:
       labels:
         app: pytorch-hami-demo
+      annotations:
+        # Test-only pin so both replicas definitely share GPU 5.
+        nvidia.com/use-gpuuuid: "GPU-04dc48d7-7048-aef5-ad36-f5db716e7668"
+        hami.io/gpu-scheduler-policy: "binpack"
     spec:
       containers:
         - name: pytorch
-          # Using NVIDIA's official PyTorch NGC container (25.01 or later)
-          # which is explicitly compiled to support Blackwell architecture (sm_120)
           image: nvcr.io/nvidia/pytorch:25.01-py3
           command: ["python3", "-c"]
           args:
@@ -267,25 +463,23 @@ spec:
               import torch
               import time
 
-              print("=== CUDA vGPU Slice Diagnostics ===")
-              print("CUDA Available:", torch.cuda.is_available())
+              print("=== CUDA vGPU Slice Diagnostics ===", flush=True)
+              print("CUDA Available:", torch.cuda.is_available(), flush=True)
               if torch.cuda.is_available():
-                  print("Device Name:", torch.cuda.get_device_name(0))
-                  print("Device Capability:", torch.cuda.get_device_capability(0))
-                  print("CUDA Device Count:", torch.cuda.device_count())
+                  print("Device Name:", torch.cuda.get_device_name(0), flush=True)
+                  print("Device Capability:", torch.cuda.get_device_capability(0), flush=True)
+                  print("CUDA Device Count:", torch.cuda.device_count(), flush=True)
 
-                  # Allocate memory and perform matrix multiplication to generate GPU load
-                  print("Allocating tensors on GPU and starting matrix math load...")
+                  print("Allocating tensors and starting matrix math...", flush=True)
                   device = torch.device("cuda")
                   x = torch.randn(10000, 10000, device=device)
                   y = torch.randn(10000, 10000, device=device)
 
-                  # Keep running matrix multiplications to hold the CUDA context and load
                   while True:
                       z = torch.matmul(x, y)
                       time.sleep(0.5)
               else:
-                  print("ERROR: CUDA is not available inside the container!")
+                  print("ERROR: CUDA is not available!", flush=True)
                   time.sleep(3600)
           resources:
             limits:
@@ -298,132 +492,235 @@ spec:
               nvidia.com/gpucores: 10
 ```
 
-Scaling this to `replicas: 2` puts two independent 8000 MiB / 10% slices on the cluster. The `spread` scheduling policy means HAMi will try to land them on two _different_ physical GPUs before stacking a second tenant onto a card that already has one. But with only one node and `binpack` at the node level, both replicas end up on this box, each pinned to its own share.
+Apply it and wait for both replicas:
 
-Here are both replicas running, four days in, with `nvidia-smi` executed inside each pod. Look at the memory column: each pod sees a "GPU" whose total is **8000MiB**, not the card's real 97887 MiB. That's `hami-core` hooking the NVML query calls, and it's your day-one proof that the enforcement library is actually loaded:
+```bash
+kubectl apply -f pytorch-hami-demo.yaml
+kubectl rollout status deployment/pytorch-hami-demo -n hami-blog-verify --timeout=180s
+```
 
-![Two pods sharing one physical GPU, each seeing a virtualized 8000MiB total in nvidia-smi](/img/blog/sharing-gpus-in-kubernetes-with-hami/two-pods-one-gpu.png)
+The run returned:
 
-One more resource worth knowing before you write manifests for a mixed fleet: **`nvidia.com/gpumem-percentage`**. Instead of a fixed MiB figure, it requests a percentage of whichever card the scheduler picks. `nvidia.com/gpumem-percentage: 50` claims half the VRAM of the GPU the pod lands on. On a uniform fleet like this one (every card is 97887 MiB) the two styles are interchangeable, but on a heterogeneous fleet (say, 24GB L4s next to 96GB Blackwells), a percentage request scales with the card while a fixed `gpumem` request doesn't. Pick one style per container; don't set both.
+```text
+[pod/pytorch-hami-demo-7956dd68c4-lrh8r/pytorch] CUDA Available: True
+[pod/pytorch-hami-demo-7956dd68c4-lrh8r/pytorch] Device Name: NVIDIA RTX PRO 6000 Blackwell Server Edition
+[pod/pytorch-hami-demo-7956dd68c4-lrh8r/pytorch] Device Capability: (12, 0)
+[pod/pytorch-hami-demo-7956dd68c4-tj9rg/pytorch] CUDA Available: True
+[pod/pytorch-hami-demo-7956dd68c4-tj9rg/pytorch] Device Name: NVIDIA RTX PRO 6000 Blackwell Server Edition
+[pod/pytorch-hami-demo-7956dd68c4-tj9rg/pytorch] Device Capability: (12, 0)
+```
+
+Both placement annotations name GPU 5 and the same 8,000 MiB / 10% grant:
+
+```text
+pytorch-hami-demo-7956dd68c4-lrh8r  GPU-04dc48d7-...,NVIDIA,8000,10:;
+pytorch-hami-demo-7956dd68c4-tj9rg  GPU-04dc48d7-...,NVIDIA,8000,10:;
+```
+
+Inside either container, `nvidia-smi` shows the virtualized view:
+
+```text
+GPU-04dc48d7-..., NVIDIA RTX PRO 6000 Blackwell Server Edition, 8000 MiB, 2107 MiB
+```
+
+The host sees the two real processes on the same physical UUID:
+
+```text
+GPU-04dc48d7-..., 1380219, 2110 MiB
+GPU-04dc48d7-..., 1380939, 2110 MiB
+```
+
+The few-MiB difference between in-container and host accounting is normal tool/accounting overhead. The important facts are the shared UUID and each container's separate 8,000 MiB view.
+
+### Fixed MiB or percentage?
+
+`nvidia.com/gpumem-percentage` requests a percentage of whichever card the scheduler chooses. HAMi's docs explicitly say not to combine it with fixed `gpumem`. On this 97,887 MiB card, a tested 50% memory request, paired with a separate 5% core request, produced:
+
+```text
+GPU-f4c61521-...,NVIDIA,48943,5:;
+GPU-f4c61521-..., 48943 MiB
+```
+
+Use fixed MiB when the application has a known memory requirement. Use a percentage when the intent is “half of any selected card” across a mixed-capacity fleet. The official [memory allocation guide](https://project-hami.io/docs/userguide/nvidia-device/specify-device-memory-usage) defines both forms.
 
 ## How to Verify Where a Slice Landed
 
-With `deviceSplitCount: 10` in play, "my pod got a GPU" no longer tells you _which_ GPU, and whether two replicas share a physical card is exactly what the blast-radius test below depends on. HAMi records its placement decision as annotations on the pod itself:
+With `deviceSplitCount: 10`, "my pod got a GPU" no longer tells you _which_ physical card. HAMi records its placement decision in pod annotations:
 
 ```bash
-kubectl get pod <pod-name> -o jsonpath='{.metadata.annotations}' | python3 -m json.tool
+kubectl get pod -n hami-blog-verify <pod-name> -o json \
+  | jq '.metadata.annotations | with_entries(select(.key | test("hami|gpu"; "i")))'
 ```
 
-The annotation to look for is `hami.io/vgpu-devices-allocated`. Its value encodes the physical GPU UUID, vendor, memory grant, and core grant for each device the container was given. For example, a pod holding one of our slices reports `GPU-4c395b7a-...,NVIDIA,8000,10:;`, which maps directly back to GPU 4 in the `nvidia-smi -L` output from the prerequisites section.
+The annotation to look for is `hami.io/vgpu-devices-allocated`. Its value encodes the physical GPU UUID, vendor, memory grant, and core grant for each allocated device. Our fresh test reported `GPU-04dc48d7-...,NVIDIA,8000,10:;`, which maps to GPU 5 in `nvidia-smi -L`.
 
 Two ways to cross-check that annotation against reality:
 
-- **From the host:** `nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv` shows which physical card each container's process is actually attached to. The UUID column should match the annotation.
-- **Across replicas:** run the `jsonpath` command against both pods. Same UUID means they share a card (what we want for the blast-radius test); different UUIDs means the `spread` policy separated them and you'll need to pin them together, or add replicas until two land on the same card.
+- **From the host:** `nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv` shows the physical UUID for each process. It should match the annotation.
+- **Across replicas:** compare both annotations. Same UUID means the containers share a card. For a deterministic test, use `nvidia.com/use-gpuuuid`; do not keep adding replicas and hope two collide.
 
 ## Software Isolation vs. Hardware Isolation
 
-This is the tradeoff worth internalizing before you rely on HAMi for hard multi-tenancy:
+This is the tradeoff to internalize before using HAMi for multi-tenancy:
 
-|                                                           | **MIG**                                             | **HAMi (`hami-core`)**                                                                                                |
-| --------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Isolation boundary                                        | Physical memory crossbars + dedicated SM partitions | Intercepted CUDA/NVML calls (LD_PRELOAD)                                                                              |
-| Granularity                                               | Fixed profiles (`1g.24gb`, `2g.48gb`, ...)          | Arbitrary MiB / arbitrary %                                                                                           |
-| Requires hardware support                                 | Yes (Ampere+ datacenter GPUs)                       | No; works on any NVIDIA GPU, and other vendors                                                                        |
-| Reconfiguration cost                                      | GPU reset, evict all workloads                      | None; it's just a different resource request                                                                          |
-| What a well-behaved pod sees                              | Its own literal hardware slice                      | A virtualized "GPU" whose reported total is its `gpumem` limit                                                        |
-| What happens if a process bypasses the interception layer | Not possible; the boundary is physical              | The quota could theoretically be circumvented by a process that talks to the driver in a way `hami-core` doesn't hook |
-| Failure containment                                       | Guaranteed at the silicon level                     | Enforced in the same address space as every other tenant's driver calls                                               |
+![Excalidraw-style comparison of NVIDIA time-slicing, HAMi software quotas, and MIG hardware partitions](/img/blog/sharing-gpus-in-kubernetes-with-hami/hami-isolation-spectrum.png)
 
-There's a third option worth naming, because it's the one most teams try first: **NVIDIA's time-slicing** (the stock `nvidia-device-plugin` with a time-slicing config). It also advertises one card as N schedulable units, but it enforces nothing. No memory cap, no compute cap; every tenant sees the full card, and one greedy `cudaMalloc` loop genuinely OOMs its neighbors. On the isolation spectrum, time-slicing sits at the loose end, MIG at the strict end, and HAMi in between: software-enforced quotas without hardware requirements. If you're already comfortable advertising 10 slots per card, HAMi buys you that same density _plus_ an actual quota, which is why it's the more defensible default for a shared cluster than time-slicing.
+| | **NVIDIA time-slicing** | **HAMi (`hami-core`)** | **MIG** |
+| --- | --- | --- | --- |
+| Isolation boundary | No per-replica GPU memory/compute boundary | User-space interception through `libvgpu.so` and `/etc/ld.so.preload` | Hardware GPU instances with dedicated memory/compute resources |
+| Memory shape | Every replica sees the whole card | 1 MiB request granularity | Fixed profiles such as `1g.24gb` and `2g.48gb` |
+| Compute shape | Workloads take turns; no per-replica cap | 1% request granularity, implemented through time-based throttling | Fixed fraction of SMs in the profile |
+| What the container sees | Full physical GPU | Virtual total equal to its grant | Its MIG device/profile |
+| Reconfiguration | Change plugin config/redeploy affected pods | Change the workload request | Destroy/recreate affected instances; toggling mode may require a reset on Ampere |
+| Important limitation | One workload can consume free VRAM needed by another workload's later allocations | Direct-driver paths, Docker-in-Docker, or `CUDA_DISABLE_CONTROL=true` can bypass enforcement | Requires supported GPU, driver, and profile geometry |
 
-Neither MIG nor HAMi is "better" in the abstract. MIG is the right call when you need airtight multi-tenancy and your hardware supports it; HAMi is the right call when you need finer granularity, cheaper reconfiguration, or hardware MIG doesn't support your card. What you should not do is assume HAMi's limits are as physically absolute as MIG's. That assumption is exactly what the next section tests.
+Time-slicing does not automatically crash every neighbor when one process gets an OOM. The precise risk is that all replicas share the same physical memory pool without per-replica caps: one workload can consume the remaining VRAM, causing later allocations in other workloads to fail.
+
+HAMi sits between time-slicing and MIG. It provides a real quota for the ordinary CUDA path we tested, but the [HAMi troubleshooting guide](https://project-hami.io/docs/troubleshooting) explicitly lists bypass cases. MIG provides the stronger hardware boundary and more predictable quality of service. HAMi provides finer sizes and cheaper reconfiguration. Dedicated GPUs remain the simplest choice for hostile tenants or strict isolation requirements.
 
 ## Testing the Blast Radius: What Happens When a Pod Exceeds Its Memory Quota
 
-With two replicas of `pytorch-hami-demo` running, each holding its own 8000 MiB / 10% share on the _same_ physical GPU, the natural question is: if one pod's process tries to allocate past its 8000 MiB limit, does it only break that pod, or does it take the neighbor down too?
+With two replicas running, each holding an 8,000 MiB / 10% grant on the _same_ physical GPU, the question is straightforward: if one container allocates beyond 8,000 MiB, does only that allocation fail, or does the neighbor fail too?
 
-Because HAMi's enforcement lives in `hami-core`'s intercepted `cudaMalloc`, not in the real driver, the expectation is that the failure is contained to the offending container's own allocation calls: the neighboring pod's driver calls are unaffected, and the physical GPU (which still has plenty of real headroom out of its 97887 MiB) never sees a genuine out-of-memory condition.
+{{hami-blast-radius-animation}}
 
-We ran it. Here's exactly what happened.
+This test covers a normal PyTorch/CUDA allocation path. It proves the configured quota for that path; it does not prove that user-space interception is impossible to bypass.
 
 ### Step 1: Spike memory usage from inside the pod
 
-No need to touch the Deployment. Exec in and allocate tensors in a loop until `hami-core` refuses the allocation:
+No need to change the Deployment. Exec into one replica and retain 20,000 × 20,000 FP32 tensors until HAMi-Core refuses the next allocation. Each tensor contains 400 million four-byte values: 1.6 GB in decimal units, or about 1.49 GiB.
 
 ```bash
-kubectl exec -it <pod-name> -- python3 -c "
+kubectl exec -i -n hami-blog-verify <pod-name> -- python3 - <<'PY'
 import torch
-device = torch.device('cuda')
+
 tensors = []
-i = 0
+print(
+    f"Visible limit: {torch.cuda.get_device_properties(0).total_memory / 1024**2:.0f} MiB",
+    flush=True,
+)
 try:
-    while True:
-        t = torch.randn(20000, 20000, device=device)  # ~1.6 GB per tensor
-        tensors.append(t)
-        i += 1
-        allocated = torch.cuda.memory_allocated(device) / 1024**2
-        print(f'tensor {i}: torch-reported allocated = {allocated:.0f} MiB')
-except RuntimeError as e:
-    print('FAILED at tensor', i)
-    print(e)
-"
+    for index in range(1, 9):
+        tensors.append(
+            torch.empty((20_000, 20_000), dtype=torch.float32, device="cuda")
+        )
+        torch.cuda.synchronize()
+        allocated = torch.cuda.memory_allocated() / 1024**2
+        print(f"block {index}: {allocated:.0f} MiB allocated", flush=True)
+except torch.OutOfMemoryError as error:
+    print("HAMi boundary reached: CUDA out of memory", flush=True)
+    print(str(error).split(". If reserved")[0], flush=True)
+PY
 ```
 
-We ran this inside one of the two replicas. Its main matmul process was already holding about 2 GiB, so the spike script's tensors stacked on top of that within the same 8000 MiB container budget:
+The main matmul process already held about 2.06 GiB, and the exec process shared the same container budget. The command returned:
 
+```text
+Visible limit: 8000 MiB
+[HAMI-core ERROR (pid:603 ... allocator.c:52)]: Device 0 OOM 9185657856 / 8388608000
+block 1: 1526 MiB allocated
+block 2: 3052 MiB allocated
+block 3: 4578 MiB allocated
+HAMi boundary reached: CUDA out of memory
+CUDA out of memory. Tried to allocate 1.49 GiB. GPU 0 has a total capacity of 7.81 GiB of which 765.87 MiB is free.
 ```
-tensor 1: torch-reported allocated = 1526 MiB
-tensor 2: torch-reported allocated = 3052 MiB
-tensor 3: torch-reported allocated = 4578 MiB
-[HAMi-core ERROR (pid:4309 ... allocator.c:52)]: Device 0 OOM 9185657856 / 8388608000
-FAILED at tensor 3
-CUDA out of memory. Tried to allocate 1.49 GiB. GPU 0 has a total capacity of 7.81 GiB ...
+
+The first three new tensors succeeded. The fourth allocation would have pushed HAMi's tracked total to **9,185,657,856 bytes** against an **8,388,608,000-byte** limit, exactly 8,000 MiB. PyTorch sees 7.81 GiB because GiB uses powers of 1024. The card itself was nowhere near its 97,887 MiB physical limit, so this was a software quota verdict rather than a physical-card OOM.
+
+### Step 2: Check the offending container, neighbor, and host
+
+```bash
+# 1. Virtualized view inside the offending container.
+kubectl exec -n hami-blog-verify <pod-name> -- \
+  nvidia-smi --query-gpu=uuid,memory.total,memory.used --format=csv
+
+# 2. Real processes and physical UUID from the host.
+nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv
+
+# 3. Pod state and restart count for both replicas.
+kubectl get pods -n hami-blog-verify -l app=pytorch-hami-demo \
+  -o custom-columns='NAME:.metadata.name,STATUS:.status.phase,RESTARTS:.status.containerStatuses[0].restartCount'
+
+# 4. The neighbor's virtualized memory after the failed allocation.
+kubectl exec -n hami-blog-verify <other-pod-name> -- \
+  nvidia-smi --query-gpu=uuid,memory.total,memory.used --format=csv,noheader
 ```
 
-Read that `HAMi-core ERROR` line carefully, because it's the entire architecture in one log entry. The allocation would have pushed the container to 9,185,657,856 bytes against a limit of 8,388,608,000 bytes (exactly 8000 MiB), so `hami-core`'s allocator rejected the call itself. 
-
-PyTorch then reports "GPU 0 has a total capacity of 7.81 GiB": that's the virtualized 8000 MiB total, not the card's real 96GB. The physical GPU had roughly 80GB free at that moment. The OOM is a software verdict, not a hardware condition.
-
-Here's the offending pod's own view at the peak of the spike, alongside the failing run:
+The terminal view below shows the same virtual capacity and rejected allocation:
 
 ![The pod's virtualized nvidia-smi pinned near its 8000MiB grant while hami-core rejects the next allocation](/img/blog/sharing-gpus-in-kubernetes-with-hami/oom-blast-radius.png)
 
-What the captured run shows:
+The fresh post-test checks returned:
 
-- **The offending pod**: its own `nvidia-smi` reports 7235MiB used of an 8000MiB total, with both of its python processes accounted (the original matmul loop plus the spike script). The OOM it hits is scoped to a number far below the card's actual capacity: proof the limit is enforced per-container, not derived from real GPU pressure.
-- **The neighboring pod**: kept printing its matmul loop the entire time, still holding its steady ~2107MiB of its own 8000MiB grant. It shares the same physical GPU, but its `cudaMalloc` calls are accounted separately by `hami-core`, so another container's overreach doesn't starve it.
-- **The host**: the card's real free memory (plenty, even with two 8000 MiB tenants on a 97887 MiB card) was irrelevant to whether the call succeeded. The allocation attempt never reached the real driver.
+```text
+NAME                                 STATUS    RESTARTS
+pytorch-hami-demo-7956dd68c4-lrh8r   Running   0
+pytorch-hami-demo-7956dd68c4-tj9rg   Running   0
 
-The result: HAMi's isolation is real and per-container, but it's a software contract enforced by a shared library sitting in the same process space as the workload, a meaningfully different guarantee than MIG's silicon-level partition, even though both stop one tenant's memory use from crashing another's.
+GPU-04dc48d7-..., 8000 MiB, 2107 MiB
+```
+
+- **Offending container:** HAMi-Core returned OOM at its 8,000 MiB account boundary.
+- **Neighbor:** remained `Running`, had zero restarts, and still reported 2,107 MiB used of its own 8,000 MiB grant.
+- **Host:** showed both long-running processes on GPU 5. Physical memory headroom did not override the container limit.
+- **Application behavior:** this exec script catches the `RuntimeError`, so the pod stays alive. An uncaught OOM may terminate the process and trigger whatever restart policy the workload defines.
+
+The result is deliberately narrow and useful: **for this PyTorch/CUDA path, the memory overrun was contained to the offending container's allocation and the neighbor continued running.** The boundary is still a user-space contract, not a MIG hardware partition.
 
 ## Monitoring the Slices
 
-A one-off blast-radius test proves the enforcement works. Running ten tenants per card in production requires watching it continuously, and HAMi ships two Prometheus-format endpoints for exactly that, no extra components needed.
+A one-off test is not an operations strategy. HAMi exposes two Prometheus-format endpoints: one for allocation decisions and one for live usage. Prometheus/Grafana are still separate components if you want storage, alerting, and dashboards.
+
+Do not guess the ports from an old example. Check the Services installed by your chart:
+
+```text
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl get service -n hami-system
+NAME                         TYPE       PORT(S)
+hami-device-plugin-monitor   NodePort   31992:31992/TCP
+hami-scheduler               NodePort   443:31998/TCP,31993:31993/TCP
+```
 
 **The scheduler's view:** cluster-wide allocation state, exposed by the `hami-scheduler` service (NodePort `31993` by default):
 
 ```bash
-curl http://<scheduler-node-ip>:31993/metrics
+curl http://127.0.0.1:31993/metrics
 ```
 
-This answers capacity-planning questions: how much of each physical GPU's memory and core budget is already promised to pods (`hami_gpu_memory_allocated_bytes`, `hami_gpu_core_allocated_ratio`, per device UUID), and which pods hold which slices (`hami_vgpu_memory_allocated_bytes`). This is the number to alert on _before_ the over-scheduling scenario from the cons list above: a card whose committed `gpumem` is at 100% still shows free `nvidia.com/gpu` slots, and this endpoint is where that gap becomes visible.
+This answers allocation questions: how much of each physical card's memory/core budget is promised (`hami_gpu_memory_allocated_bytes`, `hami_gpu_core_allocated_ratio`), how many containers share it (`hami_gpu_shared_count`), and which pods own each grant. With two 8,000 MiB / 10% containers on GPU 5, the scheduler endpoint reported an aggregate 16,000 MiB and 20% reservation:
 
-**The node's view:** real-time per-container usage, exposed by the `vgpu-monitor` sidecar on each GPU node (port `9394` by default):
+```text
+hami_gpu_core_allocated_ratio{device_index="5",device_uuid="GPU-04dc48d7-..."} 20
+hami_gpu_memory_allocated_bytes{device_cores="20",device_index="5",device_uuid="GPU-04dc48d7-..."} 1.6777216e+10
+```
+
+The official [cluster allocation metrics reference](https://project-hami.io/docs/userguide/monitoring/device-allocation) documents the metric names and labels.
+
+**The node's view:** real-time per-container usage, exposed by the `vgpu-monitor` sidecar through NodePort `31992` on this chart:
 
 ```bash
-curl http://<gpu-node-ip>:9394/metrics
+curl http://127.0.0.1:31992/metrics
 ```
 
-This is the enforcement-side counterpart: actual VRAM and core utilization per container versus its granted limit. A tenant sitting permanently at 95% of its `gpumem` grant is a resize conversation waiting to happen; a tenant at 5% is stranded capacity you can reclaim.
+This is the usage-side counterpart. For the unaffected neighbor, it reported about 2.21 GB used against an 8.39 GB byte limit:
 
-Wire the scheduler endpoint into Prometheus and a few panels give you the dashboard a shared-GPU platform actually needs. 
+```text
+hami_container_device_memory_bytes{namespace="hami-blog-verify",pod="...-tj9rg"} 2.208433152e+09
+hami_vgpu_memory_limit_bytes{namespace="hami-blog-verify",pod="...-tj9rg"} 8.388608e+09
+```
 
-Here's ours during the test: 8 physical GPUs, 2 vGPU containers on 1 shared card, each holding a 7.81 GiB / 10% grant, and the per-GPU allocation sitting miles under the physical limit line:
+The current [real-time usage reference](https://project-hami.io/docs/userguide/monitoring/real-time-device-usage) lists host, container, memory, and utilization metrics. Alert on both dimensions: **allocated** tells you what the scheduler has promised; **used** tells you what applications actually consume.
+
+Wire both endpoints into Prometheus and a few panels give you the dashboard a shared-GPU platform actually needs. A useful layout keeps fleet capacity, per-pod grants, and per-GPU allocation visible together:
 
 ![Grafana dashboard built from HAMi scheduler metrics: fleet stats, per-pod slices, and per-GPU allocation against the physical limit](/img/blog/sharing-gpus-in-kubernetes-with-hami/hami-grafana-dashboard.png)
 
-Port numbers are chart defaults, so confirm them against your release's Services before pointing scrape configs at them.
+The dashboard is useful because it keeps three different numbers separate: physical cards, logical sharing slots, and actual resource grants. Mixing those is how an eight-GPU node gets mistaken for an 80-GPU node.
+
+Once the outputs were captured, the temporary workloads were removed while the clean HAMi installation remained running:
+
+```bash
+kubectl delete namespace hami-blog-verify --wait=true
+```
 
 ## Common Pitfalls and How to Solve Them
 
@@ -431,36 +728,40 @@ Port numbers are chart defaults, so confirm them against your release's Services
 
 The first time you see `nvidia.com/gpu: 80` on an 8-GPU node, it's easy to assume something is broken. It isn't; it's `devicePlugin.deviceSplitCount` doing its job. Check the `hami.io/node-nvidia-register` annotation before assuming a misconfiguration; the `"count"` field per GPU entry tells you the actual split factor in effect.
 
-### Pitfall B: Forgetting `gpumem`/`gpucores` and Only Setting `nvidia.com/gpu`
+### Pitfall B: Expecting `nvidia.com/gpu: 1` Alone to Mean “One Tenth”
 
-Requesting only `nvidia.com/gpu: 1` gets you a share slot, but without `nvidia.com/gpumem` and `nvidia.com/gpucores` you haven't actually bounded what that share can consume. You're relying on `deviceMemoryScaling`/`deviceCoreScaling` defaults and whatever's left on the card. Always set explicit `gpumem`/`gpucores` limits for workloads sharing a physical GPU with other tenants.
+HAMi documents `nvidia.com/gpu` without memory/core fields as exclusive-GPU mode. I tested it on idle GPU 6; the allocation annotation was `GPU-f4f5db98-...,NVIDIA,97887,100:;`, and `nvidia-smi` inside the container reported all 97,887 MiB. If you intend to share, state `gpumem` and/or `gpucores` explicitly.
 
-### Pitfall C: Leftover MIG/Runtime-Class Fields From a Previous Setup
+### Pitfall C: Treating `requests` and `limits` Differently
 
-If a manifest was adapted from a MIG-based deployment (like ours was), watch for stale `runtimeClassName: nvidia` entries and `nvidia.com/mig-*` resource requests. HAMi's chart ships with `devicePlugin.createRuntimeClass: false`, so a runtime class reference that doesn't exist on the cluster will leave the pod stuck in `CreateContainerConfigError` rather than scheduling normally.
+Kubernetes extended resources cannot be overcommitted like CPU. Put the HAMi resources in `limits`; if you include `requests`, use the same values. A mismatched manifest is rejected before HAMi can schedule it.
 
-### Pitfall D: Blaming HAMi for a Slow First Deployment
+### Pitfall D: Removing `runtimeClassName` Without Checking the Runtime
+
+Our manifest has no `runtimeClassName` because containerd's default is already `nvidia` and the HAMi chart did not create one. That is a property of this installation, not a universal copy/paste rule. A GPU Operator cluster may have `nvidia` or CDI-related RuntimeClasses, while an NRI-enabled Operator cluster may intentionally have none. Check `kubectl get runtimeclass`, `containerd config dump`, and your Operator mode before copying the field. A reference to a nonexistent runtime handler prevents the pod sandbox from starting.
+
+### Pitfall E: Blaming HAMi for a Slow First Deployment
 
 The NGC PyTorch image used above is a multi-gigabyte pull. On a fresh node, the pod will sit in `ContainerCreating` for several minutes while containerd downloads it, which looks a lot like a scheduling or webhook failure if you're watching for HAMi problems. `kubectl describe pod` disambiguates instantly: a `Pulling image` event means wait; a `FailedScheduling` event mentioning `nvidia.com/gpumem` means the card genuinely can't fit your request alongside its existing tenants.
 
-### Pitfall E: Treating `hami-core` Limits as Hardware-Equivalent to MIG
+### Pitfall F: Treating HAMi-Core Limits as Hardware-Equivalent to MIG
 
 As covered above, plan your multi-tenancy story around what `hami-core` actually guarantees (per-container quota enforcement via intercepted driver calls), not around MIG's stronger silicon-level isolation. If your workloads are adversarial or security-sensitive rather than merely cooperative and resource-bounded, MIG (or a dedicated node) is the safer choice.
 
 ## Conclusion
 
-HAMi trades MIG's hardware guarantees for flexibility: any memory size, any compute percentage, no GPU resets, and support across a wider range of hardware than MIG-capable datacenter cards.
+HAMi trades MIG's hardware boundary for flexibility: memory in 1 MiB units, compute in 1% steps, and limits that change with the workload spec instead of a hardware repartition.
 
 Here's what this setup walked through:
 
-1. Installed HAMi via Helm into `hami-system` and confirmed the node registers `nvidia.com/gpu: 80` for 8 physical GPUs.
-2. Traced that number back to a single Helm value, `devicePlugin.deviceSplitCount: 10`, and read through the rest of the chart's device-plugin and scheduler configuration.
-3. Rewrote a MIG-based PyTorch Deployment into HAMi's resource model (`nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores`), stripping the now-unnecessary `runtimeClassName` and MIG resource references.
-4. Ran two replicas sharing one physical GPU, each pinned to an 8000 MiB / 10% share, and proved it from inside the pods, from the placement annotations, and from the host.
-5. Ran the blast-radius test and captured `hami-core` rejecting the over-quota allocation (driver-API interception, not memory-controller partitioning) while the neighboring pod on the same card never noticed.
-6. Traced any pod back to its physical GPU via the `hami.io/vgpu-devices-allocated` annotation, and wired the scheduler and node metrics endpoints into a Grafana dashboard for ongoing capacity and usage monitoring.
-7. Documented where HAMi's isolation model sits on the spectrum (stronger than time-slicing's non-existent enforcement, weaker than MIG's silicon partitions) so that choice gets made deliberately rather than assumed.
+1. Built a clean Kubernetes v1.35.6 node, configured the NVIDIA default runtime, and installed HAMi v2.9.0 as Helm revision 1.
+2. Traced `nvidia.com/gpu: 80` to `deviceSplitCount: 10` and separated logical concurrency from physical capacity.
+3. Ran two fresh PyTorch replicas on one explicitly pinned GPU, each with an 8,000 MiB / 10% grant.
+4. Proved that an unfit 90,000 MiB request stayed Pending with `CardInsufficientMemory`, even though logical count slots remained.
+5. Reproduced HAMi-Core rejecting an attempted 9,185,657,856-byte total against an 8,388,608,000-byte grant while the neighboring container remained Running with zero restarts.
+6. Tested the two easy-to-misunderstand resource forms: GPU-only produced an exclusive 97,887 MiB / 100% allocation, and a 50% request produced 48,943 MiB.
+7. Queried the live allocation endpoint on `31993` and usage endpoint on `31992`, then checked the corresponding Grafana view.
 
-The payoff: developers get fractional, self-service GPU access with much cheaper reconfiguration than MIG, on hardware MIG can't even touch, as long as the platform team understands exactly what kind of isolation they're signing up for.
+The payoff is fractional, self-service GPU access without pretending software quotas are silicon walls. For cooperative notebooks, CI jobs, and inference services, that can recover a great deal of stranded capacity. For hostile tenants or strict QoS, choose MIG or a dedicated card.
 
-If this was useful, HAMi is a CNCF project: the docs live at [project-hami.io](https://project-hami.io/) and the source at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). For the hardware-isolation side of this story, start with our [MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig).
+HAMi is a CNCF Incubating project. The docs live at [project-hami.io](https://project-hami.io/) and the source at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). For the hardware-isolation side of this story, continue with our [MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig).
