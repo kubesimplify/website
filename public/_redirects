@@ -177,6 +177,7 @@
 /blog/quick-bites-of-fluxcd-health-assessment                                          /quick-bites-of-fluxcd-health-assessment  301!
 /blog/rancher-desktop-evolution                                                        /rancher-desktop-evolution  301!
 /blog/ready-for-wasm-day-2023                                                          /ready-for-wasm-day-2023  301!
+/blog/sharing-gpus-in-kubernetes-with-hami                                             /sharing-gpus-in-kubernetes-with-hami  301!
 /blog/simplified-introduction-to-bacalhau                                              /simplified-introduction-to-bacalhau  301!
 /blog/slicing-gpus-in-kubernetes-with-nvidia-mig                                       /slicing-gpus-in-kubernetes-with-nvidia-mig  301!
 /blog/speeding-up-using-microk8s                                                       /speeding-up-using-microk8s  301!
@@ -390,6 +391,7 @@
 /quick-bites-of-fluxcd-health-assessment                                          /blog/quick-bites-of-fluxcd-health-assessment  200!
 /rancher-desktop-evolution                                                        /blog/rancher-desktop-evolution  200!
 /ready-for-wasm-day-2023                                                          /blog/ready-for-wasm-day-2023  200!
+/sharing-gpus-in-kubernetes-with-hami                                             /blog/sharing-gpus-in-kubernetes-with-hami  200!
 /simplified-introduction-to-bacalhau                                              /blog/simplified-introduction-to-bacalhau  200!
 /slicing-gpus-in-kubernetes-with-nvidia-mig                                       /blog/slicing-gpus-in-kubernetes-with-nvidia-mig  200!
 /speeding-up-using-microk8s                                                       /blog/speeding-up-using-microk8s  200!

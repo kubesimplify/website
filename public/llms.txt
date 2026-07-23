@@ -4,7 +4,7 @@
 
 ## About
 
-Kubesimplify is a community-driven publication on cloud-native technologies, with 191 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+Kubesimplify is a community-driven publication on cloud-native technologies, with 192 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
 
 Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
 
@@ -34,8 +34,9 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
 - Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
 
-## Recent posts (most recent 30 of 191)
+## Recent posts (most recent 30 of 192)
 
+- [How to Share GPUs in Kubernetes at Scale with HAMi (Software vGPU Slicing)](https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami) (2026-07-21). Share NVIDIA GPUs in Kubernetes with HAMi software vGPU slicing: memory and compute limits, Helm configuration, a verified PyTorch manifest, a real RTX PRO 6000 OOM test, and Prometheus monitoring.
 - [Slicing GPUs in Kubernetes with NVIDIA Multi-Instance GPU (MIG)](https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig) (2026-07-20). GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring.
 - [Day 5: Local LLM Inference Engines, Wrappers, and What to Pick](https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick) (2026-07-17). A beginner-friendly guide to local LLM inference, with the same Qwen model tested through Ollama, llama.cpp, Docker Model Runner, vLLM, SGLang, and TensorRT-LLM on NVIDIA DGX Spark.
 - [Bonsai 27B on RTX PRO 6000 vs DGX Spark: what actually works](https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark) (2026-07-16). Real Bonsai 27B benchmarks on an RTX PRO 6000 and a DGX Spark, including the supported llama.cpp setup, ternary vs 1-bit results, and speculative decoding.
@@ -65,11 +66,10 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [\"SSH Into Your DGX Spark From Anywhere in the World Using Tailscale](https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale) (2026-04-07). Learn how to set up Tailscale on your NVIDIA DGX Spark for secure SSH access from anywhere in the world.
 - [What Claude Code's Leaked Source Actually Teaches Us About Building AI Agents](https://blog.kubesimplify.com/claude-code-leak-what-the-source-actually-teaches) (2026-04-01). 512K lines of TypeScript, verified against actual source. The engineering patterns in Claude Code's leaked codebase that most coverage got wrong.
 - [The Ingress NGINX Migration Just Got Easier: 119 Annotations, 3 Targets, Impact Ratings](https://blog.kubesimplify.com/ing-switch-119-annotations-gateway-api-traefik-impact-ratings) (2026-03-30). \"Ingress NGINX was archived March 24, 2026. ing-switch maps all 119 NGINX annotations with
-- [clawspark: Your Private OpenClaw AI Assistant That Never Phones Home](https://blog.kubesimplify.com/clawspark-your-private-openclaw-ai-assistant-that-never-phones-home) (2026-03-15). Clawspark provides a way to Install openclaw on your device in a secure way with a single command. 
 
 ## Topics covered (auto-derived from tags)
 
-- kubernetes (96 articles): https://blog.kubesimplify.com/tag/kubernetes
+- kubernetes (97 articles): https://blog.kubesimplify.com/tag/kubernetes
 - devops (71 articles): https://blog.kubesimplify.com/tag/devops
 - docker (31 articles): https://blog.kubesimplify.com/tag/docker
 - k8s (27 articles): https://blog.kubesimplify.com/tag/k8s
@@ -80,7 +80,7 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - llm (11 articles): https://blog.kubesimplify.com/tag/llm
 - cloud-native (11 articles): https://blog.kubesimplify.com/tag/cloud-native
 - security (11 articles): https://blog.kubesimplify.com/tag/security
-- nvidia (9 articles): https://blog.kubesimplify.com/tag/nvidia
+- nvidia (10 articles): https://blog.kubesimplify.com/tag/nvidia
 - go (9 articles): https://blog.kubesimplify.com/tag/go
 - git (9 articles): https://blog.kubesimplify.com/tag/git
 - linux-for-beginners (9 articles): https://blog.kubesimplify.com/tag/linux-for-beginners
@@ -104,9 +104,9 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [Anurag Kumar](https://blog.kubesimplify.com/author/anurag-kumar) (8 posts)
 - [sysxplore](https://blog.kubesimplify.com/author/sysxplore) (6 posts)
 - [Arnav Barman](https://blog.kubesimplify.com/author/arnav-barman) (5 posts)
+- [Shubham Katara](https://blog.kubesimplify.com/author/shubham-katara) (4 posts)
 - [Srinivas Karnati](https://blog.kubesimplify.com/author/srinivas-karnati) (4 posts)
 - [Barkatul Mujauddin](https://blog.kubesimplify.com/author/barkatul-mujauddin) (4 posts)
-- [Shubham Katara](https://blog.kubesimplify.com/author/shubham-katara) (3 posts)
 - [Santoshdts](https://blog.kubesimplify.com/author/santoshdts) (3 posts)
 - [Rishit Dagli](https://blog.kubesimplify.com/author/rishit-dagli) (3 posts)
 - [Bishal Das](https://blog.kubesimplify.com/author/bishal-das) (3 posts)
