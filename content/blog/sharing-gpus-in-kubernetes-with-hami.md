@@ -128,6 +128,8 @@ EOF
 sudo sysctl --system
 ```
 
+`swapoff -a` changes the running system only. If this node may reboot, also disable its swap entry in `/etc/fstab` or the corresponding systemd swap unit before treating the cluster as persistent.
+
 Add the Kubernetes v1.35 package repository and install the node tools:
 
 ```bash
@@ -224,7 +226,7 @@ HAMi's NVIDIA device plugin selects nodes labeled `gpu=on` by default, so label 
 kubectl label node utho-gpu-rtxpro6000-8-62383 gpu=on --overwrite
 ```
 
-Now install a pinned HAMi chart. The scheduler image tag must match the Kubernetes server version. The remaining values make the sharing policy explicit instead of hiding important behavior behind defaults:
+Now install a pinned HAMi chart. We pin its bundled `kube-scheduler` sidecar to the same version as the API server. Kubernetes' [version-skew policy](https://kubernetes.io/releases/version-skew-policy/#kube-controller-manager-kube-scheduler-and-cloud-controller-manager) expects the same minor version and permits the scheduler to be one minor older; an exact match simply removes avoidable skew from this lab. Notice the full Helm path, `scheduler.kubeScheduler.image.tag`; `scheduler.kubeScheduler.imageTag` is not a chart 2.9.0 value and would be silently ignored. The remaining values make the sharing policy explicit instead of hiding important behavior behind defaults:
 
 ```bash
 helm repo add hami-charts https://project-hami.github.io/HAMi/
@@ -238,7 +240,7 @@ helm install hami hami-charts/hami \
   --create-namespace \
   --wait \
   --timeout 10m \
-  --set scheduler.kubeScheduler.imageTag="$K8S_VERSION" \
+  --set scheduler.kubeScheduler.image.tag="$K8S_VERSION" \
   --set devicePlugin.deviceSplitCount=10 \
   --set devicePlugin.deviceMemoryScaling=1 \
   --set devicePlugin.deviceCoreScaling=1 \
@@ -673,7 +675,11 @@ Use fixed MiB when the application has a known memory requirement. Use a percent
 With `deviceSplitCount: 10`, "my pod got a GPU" no longer tells you _which_ physical card. HAMi records its placement decision in pod annotations:
 
 ```bash
-kubectl get pod -n hami-blog-verify <pod-name> -o json \
+POD=$(kubectl get pods -n hami-blog-verify \
+  -l app=pytorch-hami-demo \
+  -o jsonpath='{.items[0].metadata.name}')
+
+kubectl get pod -n hami-blog-verify "$POD" -o json \
   | jq '.metadata.annotations | with_entries(select(.key | test("hami|gpu"; "i")))'
 ```
 
@@ -701,7 +707,7 @@ This is the tradeoff to internalize before using HAMi for multi-tenancy:
 
 Time-slicing does not automatically crash every neighbor when one process gets an OOM. The precise risk is that all replicas share the same physical memory pool without per-replica caps: one workload can consume the remaining VRAM, causing later allocations in other workloads to fail.
 
-HAMi sits between time-slicing and MIG. It provides a real quota for the ordinary CUDA path we tested, but the [HAMi troubleshooting guide](https://project-hami.io/docs/troubleshooting) explicitly lists bypass cases. MIG provides the stronger hardware boundary and more predictable quality of service. HAMi provides finer sizes and cheaper reconfiguration. Dedicated GPUs remain the simplest choice for hostile tenants or strict isolation requirements.
+Time-slicing shares access but does not give each pod a protected memory budget. HAMi adds software-enforced memory and compute quotas for supported CUDA workloads; in our PyTorch test, it stopped the container at its 8,000 MiB grant. The [HAMi troubleshooting guide](https://project-hami.io/docs/troubleshooting) documents paths that can bypass that user-space enforcement, so HAMi should be treated as resource control rather than a hard security boundary. MIG partitions supported GPUs in hardware, providing stronger isolation and more predictable performance, but with fixed profile sizes and more involved reconfiguration. For mutually untrusted tenants, combine MIG or a dedicated GPU with the VM or host isolation appropriate to your security model.
 
 ## Testing the Blast Radius: What Happens When a Pod Exceeds Its Memory Quota
 
@@ -870,11 +876,11 @@ Our manifest has no `runtimeClassName` because containerd's default is already `
 
 ### Pitfall E: Blaming HAMi for a Slow First Deployment
 
-The NGC PyTorch image used above is a multi-gigabyte pull. On a fresh node, the pod will sit in `ContainerCreating` for several minutes while containerd downloads it, which looks a lot like a scheduling or webhook failure if you're watching for HAMi problems. `kubectl describe pod` disambiguates instantly: a `Pulling image` event means wait; a `FailedScheduling` event mentioning `nvidia.com/gpumem` means the card genuinely can't fit your request alongside its existing tenants.
+The NGC PyTorch image used above is a multi-gigabyte pull. On a fresh node, the pod will sit in `ContainerCreating` for several minutes while containerd downloads it, which looks a lot like a scheduling or webhook failure if you're watching for HAMi problems. `kubectl describe pod` disambiguates instantly: a `Pulling image` event means wait; a `FilteringFailed` event with `CardInsufficientMemory` means the selected card cannot fit the request alongside its existing tenants.
 
 ### Pitfall F: Treating HAMi-Core Limits as Hardware-Equivalent to MIG
 
-As covered above, plan your multi-tenancy story around what `hami-core` actually guarantees (per-container quota enforcement via intercepted driver calls), not around MIG's stronger silicon-level isolation. If your workloads are adversarial or security-sensitive rather than merely cooperative and resource-bounded, MIG (or a dedicated node) is the safer choice.
+As covered above, plan your multi-tenancy story around what `hami-core` actually demonstrated here (per-container quota enforcement through supported CUDA runtime and NVML paths), not around MIG's stronger silicon-level isolation. For adversarial or security-sensitive workloads, use MIG or dedicated GPUs together with the VM or host isolation required by your threat model.
 
 ## Conclusion
 
@@ -890,6 +896,6 @@ Here's what this setup walked through:
 6. Tested the two easy-to-misunderstand resource forms: GPU-only produced an exclusive 97,887 MiB / 100% allocation, and a 50% request produced 48,943 MiB.
 7. Queried the live allocation endpoint on `31993` and usage endpoint on `31992`, then checked the corresponding Grafana view.
 
-The payoff is fractional, self-service GPU access without pretending software quotas are silicon walls. For cooperative notebooks, CI jobs, and inference services, that can recover a great deal of stranded capacity. For hostile tenants or strict QoS, choose MIG or a dedicated card.
+The payoff is fractional, self-service GPU access without pretending software quotas are silicon walls. For cooperative notebooks, CI jobs, and inference services, that can recover a great deal of stranded capacity. For strict QoS, choose MIG. For mutually untrusted tenants, pair MIG or dedicated GPUs with an appropriate VM or host boundary.
 
 HAMi is a CNCF Incubating project. The docs live at [project-hami.io](https://project-hami.io/) and the source at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). For the hardware-isolation side of this story, continue with our [MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig).
