@@ -216,10 +216,10 @@ export default function HAMiSlotMathAnimation() {
       <div className="hami-slot-math__inner">
         <p className="hami-slot-math__eyebrow">Scheduling math</p>
         <h3 className="hami-slot-math__title" id="hami-slot-math-title">
-          Eight physical GPUs can advertise 80 slots without becoming 80 GPUs
+          All-eight non-MIG example: 8 physical GPUs expose 80 logical slots
         </h3>
         <p className="hami-slot-math__subtitle">
-          HAMi multiplies how many containers may share a card. It does not multiply the card&apos;s memory or compute.
+          This is the all-eight non-MIG example. The live mixed-MIG node exposes 70 slots because HAMi currently registers seven whole GPUs.
         </p>
 
         <div className="hami-slot-math__stage" aria-hidden="true">
