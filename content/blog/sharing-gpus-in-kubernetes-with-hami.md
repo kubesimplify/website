@@ -32,7 +32,7 @@ Then there is the rest of the fleet: NVIDIA cards that do not support MIG, or cl
 
 The scheduler checks that those requests fit before placing the pod. Inside the running container, HAMi-Core enforces supported CUDA and NVML paths through an injected user-space library. That is flexible and useful, but it is not the same security boundary as MIG's hardware partitions. HAMi is now a [CNCF Incubating project](https://www.cncf.io/projects/hami/), and its maintained [device support matrix](https://project-hami.io/docs/userguide/device-supported) covers NVIDIA plus several other accelerator families through vendor-specific plugins.
 
-This walkthrough runs on our actual test rig: **8 NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs**. HAMi advertises those eight cards to Kubernetes as 80 schedulable units because the configured sharing ceiling is 10 containers per physical GPU. That does **not** create 80 GPUs or multiply the machine's VRAM. It creates 80 scheduling slots backed by the same eight cards.
+This walkthrough runs on our actual test rig: **8 NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs**. In the non-MIG HAMi run captured for this guide, Kubelet reported `nvidia.com/gpu: 80` because the configured sharing ceiling was 10 containers per physical GPU. That does **not** create 80 GPUs or multiply the machine's VRAM. It creates 80 scheduling slots backed by the same eight cards.
 
 For this guide, we rebuilt that node as a clean single-node Kubernetes v1.35.6 cluster, installed HAMi v2.9.0 as a new Helm release, and then ran the sharing and quota tests you will see below. The point is not merely to show the final YAML. It is to make every software layer between the physical GPU and the pod understandable.
 
@@ -260,12 +260,16 @@ hami-device-plugin-5wdzg          2/2     Running   0
 hami-scheduler-6f74879cc7-9fddb   2/2     Running   0
 ```
 
-The scheduler pod is cluster-wide. The device-plugin DaemonSet runs once on every selected GPU node. On this node, the chart's split count turns eight physical cards into 80 schedulable sharing slots:
+The scheduler pod is cluster-wide. The device-plugin DaemonSet runs once on every selected GPU node. Immediately after this non-MIG install, we read the capacity and allocatable values directly from the Node object:
 
-```text
-NAME                          STATUS   KUBERNETES   GPU
-utho-gpu-rtxpro6000-8-62383   Ready    v1.35.6      80
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# kubectl get node utho-gpu-rtxpro6000-8-62383 \
+  -o custom-columns='NAME:.metadata.name,KUBERNETES:.status.nodeInfo.kubeletVersion,GPU-CAPACITY:.status.capacity.nvidia\.com/gpu,GPU-ALLOCATABLE:.status.allocatable.nvidia\.com/gpu'
+NAME                          KUBERNETES   GPU-CAPACITY   GPU-ALLOCATABLE
+utho-gpu-rtxpro6000-8-62383   v1.35.6      80             80
 ```
+
+The chart's split count therefore made eight physical cards appear as 80 schedulable sharing slots to Kubernetes.
 
 ### Where did `nvidia.com/gpu` come from?
 
@@ -286,7 +290,18 @@ The sequence is:
 4. `deviceSplitCount: 10` makes each physical card contribute ten schedulable device IDs.
 5. Kubelet publishes `8 × 10 = 80` as the node's `nvidia.com/gpu` capacity.
 
-The live plugin log contained `Discovered 8 device(s) for registration`, while the node annotation recorded `"count": 10` for every UUID. Without either HAMi's device plugin or NVIDIA's official device plugin, `nvidia-smi` could work perfectly on the host while Kubernetes would advertise **no** `nvidia.com/gpu` capacity.
+This came from the **HAMi device-plugin container log**, not from Kubelet or the NVIDIA GPU Operator:
+
+```bash
+PLUGIN_POD=$(kubectl get pod -n hami-system \
+  -l app.kubernetes.io/component=hami-device-plugin \
+  -o jsonpath='{.items[0].metadata.name}')
+
+kubectl logs -n hami-system "$PLUGIN_POD" -c device-plugin \
+  | grep -E 'Discovered [0-9]+ device\(s\) for registration'
+```
+
+In the captured non-MIG run, that command returned `Discovered 8 device(s) for registration`, while the node's `hami.io/node-nvidia-register` annotation recorded `"count": 10` for each of those eight UUIDs. Without either HAMi's device plugin or NVIDIA's official device plugin, `nvidia-smi` could work perfectly on the host while Kubernetes would advertise **no** `nvidia.com/gpu` capacity.
 
 This also explains the conflict warning above: HAMi's plugin and NVIDIA's official plugin should not both try to own `nvidia.com/gpu` on the same node.
 
@@ -356,7 +371,7 @@ The practical upside is density without fixed profile sizes. A notebook can requ
 
 ### Verify the count yourself
 
-The split factor appears in `hami.io/node-nvidia-register`, where each physical GPU is registered with `"count": 10`. The simplest summary is the node capacity:
+The split factor appears in `hami.io/node-nvidia-register`, where each physical GPU was registered with `"count": 10` in this captured non-MIG run. The simplest summary is the node capacity:
 
 ```bash
 root@utho-gpu-rtxpro6000-8-62383:~# kubectl get node \
