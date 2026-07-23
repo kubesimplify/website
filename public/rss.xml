@@ -6,8 +6,16 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 06 Jul 2026 14:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 11 Jul 2026 10:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>Hybrid Retrieval Pipelines: Why SQLite FTS5 + Dense Vectors Beat Naive RAG</title>
+      <link>https://blog.kubesimplify.com/sqlite-fts5-dense-hybrid-retrieval</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/sqlite-fts5-dense-hybrid-retrieval</guid>
+      <pubDate>Sat, 11 Jul 2026 10:00:00 GMT</pubDate>
+      <description>Build a lightweight, high-performance hybrid retrieval RAG pipeline using SQLite FTS5, dense vectors, and Reciprocal Rank Fusion (RRF).</description>
+      <category>ai</category><category>rag</category><category>search</category><category>sqlite</category>
+    </item>
     <item>
       <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>
       <link>https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers</link>

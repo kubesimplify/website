@@ -5,11 +5,23 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-07-06T14:35:05.272Z</updated>
+  <updated>2026-07-23T09:51:30.679Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
   </author>
+  <entry>
+    <title>Hybrid Retrieval Pipelines: Why SQLite FTS5 + Dense Vectors Beat Naive RAG</title>
+    <link href="https://blog.kubesimplify.com/sqlite-fts5-dense-hybrid-retrieval"/>
+    <id>https://blog.kubesimplify.com/sqlite-fts5-dense-hybrid-retrieval</id>
+    <updated>2026-07-11T10:00:00.000Z</updated>
+    <published>2026-07-11T10:00:00.000Z</published>
+    <summary>Build a lightweight, high-performance hybrid retrieval RAG pipeline using SQLite FTS5, dense vectors, and Reciprocal Rank Fusion (RRF).</summary>
+    <category term="ai"/>
+    <category term="rag"/>
+    <category term="search"/>
+    <category term="sqlite"/>
+  </entry>
   <entry>
     <title>Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM</title>
     <link href="https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers"/>

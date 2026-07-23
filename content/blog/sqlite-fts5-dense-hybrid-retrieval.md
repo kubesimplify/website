@@ -5,6 +5,7 @@ seoDescription: "Build a lightweight, high-performance hybrid retrieval RAG pipe
 datePublished: 2026-07-11T10:00:00.000Z
 slug: sqlite-fts5-dense-hybrid-retrieval
 author: ishwar
+draft: false
 cover: /img/blog/sqlite-fts5-dense-hybrid-retrieval/cover.jpg
 tags: ["ai", "rag", "search", "sqlite"]
 ---

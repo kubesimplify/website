@@ -877,6 +877,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/sqlite-fts5-dense-hybrid-retrieval",
+      "destination": "https://blog.kubesimplify.com/sqlite-fts5-dense-hybrid-retrieval",
+      "permanent": true
+    },
+    {
       "source": "/blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
       "destination": "https://blog.kubesimplify.com/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale",
       "permanent": true
@@ -2792,6 +2797,17 @@
     {
       "source": "/speeding-up-using-microk8s",
       "destination": "https://blog.kubesimplify.com/speeding-up-using-microk8s",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/sqlite-fts5-dense-hybrid-retrieval",
+      "destination": "https://blog.kubesimplify.com/sqlite-fts5-dense-hybrid-retrieval",
       "permanent": true,
       "has": [
         {

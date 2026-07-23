@@ -177,6 +177,7 @@
 /blog/ready-for-wasm-day-2023                                                          /ready-for-wasm-day-2023  301!
 /blog/simplified-introduction-to-bacalhau                                              /simplified-introduction-to-bacalhau  301!
 /blog/speeding-up-using-microk8s                                                       /speeding-up-using-microk8s  301!
+/blog/sqlite-fts5-dense-hybrid-retrieval                                               /sqlite-fts5-dense-hybrid-retrieval  301!
 /blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale               /ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale  301!
 /blog/starting-your-devops-journey-as-a-windows-user                                   /starting-your-devops-journey-as-a-windows-user  301!
 /blog/statefulsets                                                                     /statefulsets  301!
@@ -387,6 +388,7 @@
 /ready-for-wasm-day-2023                                                          /blog/ready-for-wasm-day-2023  200!
 /simplified-introduction-to-bacalhau                                              /blog/simplified-introduction-to-bacalhau  200!
 /speeding-up-using-microk8s                                                       /blog/speeding-up-using-microk8s  200!
+/sqlite-fts5-dense-hybrid-retrieval                                               /blog/sqlite-fts5-dense-hybrid-retrieval  200!
 /ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale               /blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale  200!
 /starting-your-devops-journey-as-a-windows-user                                   /blog/starting-your-devops-journey-as-a-windows-user  200!
 /statefulsets                                                                     /blog/statefulsets  200!
