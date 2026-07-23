@@ -171,9 +171,11 @@ root@utho-gpu-rtxpro6000-8-62383:~# containerd config dump \
 The `10.244.0.0/16` pod network below matches Flannel's default manifest:
 
 ```bash
+PUBLIC_IP="<PUBLIC_IP>"
+
 sudo kubeadm init \
   --kubernetes-version v1.35.6 \
-  --apiserver-advertise-address 103.209.144.201 \
+  --apiserver-advertise-address "$PUBLIC_IP" \
   --pod-network-cidr 10.244.0.0/16 \
   --cri-socket unix:///run/containerd/containerd.sock
 
