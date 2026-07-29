@@ -5,7 +5,7 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-07-22T08:43:06.924Z</updated>
+  <updated>2026-07-29T03:30:06.885Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
@@ -14,8 +14,8 @@
     <title>How to Share GPUs in Kubernetes at Scale with HAMi (Software vGPU Slicing)</title>
     <link href="https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami"/>
     <id>https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami</id>
-    <updated>2026-07-21T10:00:00.000Z</updated>
-    <published>2026-07-21T10:00:00.000Z</published>
+    <updated>2026-07-23T10:00:00.000Z</updated>
+    <published>2026-07-23T10:00:00.000Z</published>
     <summary>Share NVIDIA GPUs in Kubernetes with HAMi software vGPU slicing: memory and compute limits, Helm configuration, a verified PyTorch manifest, a real RTX PRO 6000 OOM test, and Prometheus monitoring.</summary>
     <category term="kubernetes"/>
     <category term="gpu"/>

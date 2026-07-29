@@ -1,51 +1,10 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-
-const KNOWN_PATHS = ['/', '/about', '/blog', '/blogs', '/workshops', '/partnerships', '/resources'];
-
 export default function NotFound() {
-  const [redirectUrl, setRedirectUrl] = useState('');
-
-  useEffect(() => {
-    const path = window.location.pathname.replace(/\/$/, '') || '/';
-    if (KNOWN_PATHS.includes(path)) return;
-
-    // Don't try to redirect file-like URLs (assets, feeds, sitemaps).
-    // These should serve directly or stay 404'd, never go through the
-    // /blog/<slug> fallback (which would loop on /blog/rss.xml etc.).
-    if (/\.[a-zA-Z0-9]+$/.test(path)) return;
-
-    const slug = path.replace(/^\//, '').replace(/^blog\//, '');
-    if (!slug) return;
-
-    const target = `/blog/${slug}`;
-    // Guard against self-redirect loops. If we're already at the target,
-    // bail — there's no working slug to redirect to.
-    if (path === target) return;
-
-    setRedirectUrl(target);
-    window.location.replace(target);
-  }, []);
-
-  if (redirectUrl) {
-    return (
-      <main className="pt-24 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>
-            This article has moved. Redirecting&hellip;
-          </p>
-          <a
-            href={redirectUrl}
-            className="text-[var(--accent)] hover:underline font-semibold"
-          >
-            Click here if not redirected
-          </a>
-        </div>
-      </main>
-    );
-  }
-
+  // Plain 404 — no client-side redirect fallback. The edge router
+  // (public/_worker.js on Pages, public/_redirects on Workers assets) already
+  // rewrites every known blog slug server-side; they are generated from the
+  // same content list, so any path that reaches this page genuinely doesn't
+  // exist. A JS redirect to /blog/<slug> here ping-pongs with the router's
+  // /blog/* strip rule and refresh-loops forever (seen twice in production).
   return (
     <main className="pt-24 min-h-screen flex items-center justify-center">
       <div className="text-center">

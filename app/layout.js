@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AnalyticsBeacon from '@/components/AnalyticsBeacon';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -196,6 +197,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="font-sans noise-overlay">
+        <AnalyticsBeacon />
         <Navbar />
         {children}
         <Footer />
