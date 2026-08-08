@@ -6,8 +6,16 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Thu, 23 Jul 2026 10:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 08 Aug 2026 10:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>How to Slice GPUs on Demand with HAMi Dynamic MIG (Hardware Isolation Without the Ops Pain)</title>
+      <link>https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami</guid>
+      <pubDate>Sat, 08 Aug 2026 10:00:00 GMT</pubDate>
+      <description>Carve NVIDIA MIG slices on demand in Kubernetes with HAMi dynamic MIG: same gpumem request API, automatic re-slicing in ~35s, tested on 8x RTX PRO 6000.</description>
+      <category>kubernetes</category><category>gpu</category><category>nvidia</category><category>platform-engineering</category>
+    </item>
     <item>
       <title>How to Share GPUs in Kubernetes at Scale with HAMi (Software vGPU Slicing)</title>
       <link>https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami</link>

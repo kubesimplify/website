@@ -337,6 +337,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/dynamic-mig-in-kubernetes-with-hami",
+      "destination": "https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami",
+      "permanent": true
+    },
+    {
       "source": "/blog/embed-http-servers-in-wasm-with-rust-and-csharp",
       "destination": "https://blog.kubesimplify.com/embed-http-servers-in-wasm-with-rust-and-csharp",
       "permanent": true
@@ -1624,6 +1629,17 @@
     {
       "source": "/docker-networking-demystified",
       "destination": "https://blog.kubesimplify.com/docker-networking-demystified",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/dynamic-mig-in-kubernetes-with-hami",
+      "destination": "https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami",
       "permanent": true,
       "has": [
         {

@@ -69,6 +69,7 @@
 /blog/docker-captain-journey                                                           /docker-captain-journey  301!
 /blog/docker-mcp-catalog                                                               /docker-mcp-catalog  301!
 /blog/docker-networking-demystified                                                    /docker-networking-demystified  301!
+/blog/dynamic-mig-in-kubernetes-with-hami                                              /dynamic-mig-in-kubernetes-with-hami  301!
 /blog/embed-http-servers-in-wasm-with-rust-and-csharp                                  /embed-http-servers-in-wasm-with-rust-and-csharp  301!
 /blog/enhancing-runtime-security-with-falco-my-hands-on-experience                     /enhancing-runtime-security-with-falco-my-hands-on-experience  301!
 /blog/ephemeral-pull-request-environment-using-vcluster                                /ephemeral-pull-request-environment-using-vcluster  301!
@@ -283,6 +284,7 @@
 /docker-captain-journey                                                           /blog/docker-captain-journey  200!
 /docker-mcp-catalog                                                               /blog/docker-mcp-catalog  200!
 /docker-networking-demystified                                                    /blog/docker-networking-demystified  200!
+/dynamic-mig-in-kubernetes-with-hami                                              /blog/dynamic-mig-in-kubernetes-with-hami  200!
 /embed-http-servers-in-wasm-with-rust-and-csharp                                  /blog/embed-http-servers-in-wasm-with-rust-and-csharp  200!
 /enhancing-runtime-security-with-falco-my-hands-on-experience                     /blog/enhancing-runtime-security-with-falco-my-hands-on-experience  200!
 /ephemeral-pull-request-environment-using-vcluster                                /blog/ephemeral-pull-request-environment-using-vcluster  200!
