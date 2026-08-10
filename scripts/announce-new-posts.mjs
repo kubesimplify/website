@@ -79,10 +79,15 @@ for (const file of added) {
     continue;
   }
 
+  // Read time mirrors lib/blog.js's reading-time (200 wpm) closely enough
+  // for an email hint, without pulling dependencies into the workflow.
+  const bodyText = readFileSync(file, 'utf8').replace(/^---[\s\S]*?---/, '');
+  const readMinutes = Math.max(1, Math.round(bodyText.split(/\s+/).length / 200));
+
   const res = await fetch('https://blog.kubesimplify.com/api/broadcast', {
     method: 'POST',
     headers: { Authorization: `Bearer ${SECRET}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url, title: data.title || slug, description: data.seoDescription || '' }),
+    body: JSON.stringify({ url, title: data.title || slug, description: data.seoDescription || '', readMinutes }),
   });
   const body = await res.json().catch(() => ({}));
   console.log(`${slug}: HTTP ${res.status}`, JSON.stringify(body));

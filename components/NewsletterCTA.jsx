@@ -137,18 +137,18 @@ export default function NewsletterCTA({ variant = 'card' }) {
         Newsletter
       </p>
       <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
-        {SITE.newsletterName || 'Never miss a deep dive'}
+        Never miss a release
       </h3>
       <p className="text-base mb-6 max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-        New Kubernetes, AI infra, and cloud-native articles, videos, and workshops, in your
-        inbox, from us directly.
+        One short email when a new article, video, or workshop ships. No schedule, no
+        spam, we only email when there is something new.
       </p>
       <SignupForm source="blog-card" />
       {SITE.newsletterUrl && (
         <p className="text-[11px] mt-4" style={{ color: 'var(--text-muted)' }}>
-          Prefer Substack?{' '}
+          Want the editorial digest too? <span className="font-semibold">Kubesimplify Diaries</span>, our separate newsletter, lives on{' '}
           <a href={SITE.newsletterUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--accent)]">
-            Subscribe there instead
+            Substack
           </a>
         </p>
       )}

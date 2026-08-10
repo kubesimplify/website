@@ -382,6 +382,9 @@ export default async function BlogPost({ params }) {
             <aside className="hidden lg:block">
               <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
                 <BlogToc toc={toc} />
+                <div className="mt-6">
+                  <NewsletterCTA variant="inline" />
+                </div>
               </div>
             </aside>
           </article>

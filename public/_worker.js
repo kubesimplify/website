@@ -584,11 +584,12 @@ async function nlHandleErase(request, env) {
   return Response.redirect(`${origin}/unsubscribed?erased=1`, 303);
 }
 
-function broadcastEmailHtml({ title, description, url }, unsubUrl, eraseUrl) {
+function broadcastEmailHtml({ title, description, url, readMinutes }, unsubUrl, eraseUrl) {
   return `<!doctype html><html><body style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f6f8fa;margin:0;padding:32px 16px;">
   <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e5e7eb;">
     <p style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0098cc;margin:0 0 10px;">New from Kubesimplify</p>
-    <h1 style="font-size:22px;margin:0 0 10px;color:#0f172a;">${title}</h1>
+    <h1 style="font-size:22px;margin:0 0 6px;color:#0f172a;">${title}</h1>
+    ${readMinutes ? `<p style="color:#94a3b8;font-size:13px;margin:0 0 10px;">${readMinutes} minute read</p>` : ''}
     <p style="color:#475569;font-size:15px;line-height:1.6;">${description || ''}</p>
     <p style="text-align:center;margin:28px 0;">
       <a href="${url}" style="background:#0098cc;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;display:inline-block;">
@@ -631,6 +632,7 @@ async function nlHandleBroadcast(request, env) {
   const title = String(body.title || '').trim().slice(0, 200);
   const description = String(body.description || '').trim().slice(0, 500);
   const subject = String(body.subject || title).trim().slice(0, 150);
+  const readMinutes = Math.min(Math.max(parseInt(body.readMinutes, 10) || 0, 0), 600);
   if (!/^https:\/\/(blog\.)?kubesimplify\.com\//.test(url) || !title) {
     return nlJson(request, 400, { error: 'url (kubesimplify.com) and title are required' });
   }
@@ -670,7 +672,7 @@ async function nlHandleBroadcast(request, env) {
       reply_to: 'contact@kubesimplify.com',
       subject,
       html: broadcastEmailHtml(
-        { title, description, url },
+        { title, description, url, readMinutes },
         `${origin}/api/unsubscribe?token=${sub.token}`,
         `${origin}/api/erase?token=${sub.token}`
       ),
