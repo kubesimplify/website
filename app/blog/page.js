@@ -7,6 +7,7 @@ import Pagination from '@/components/Pagination';
 import { getAllPosts, getAllTags, getFeaturedPosts, getAuthor, SITE, postUrl, blogIndexUrl } from '@/lib/blog';
 import { getAllHubs } from '@/lib/hubs';
 import { getAllSeries } from '@/lib/series';
+import { safeJsonLd } from '@/lib/jsonld';
 
 const POSTS_PER_PAGE = 15;
 function pathFor(n) {
@@ -68,7 +69,7 @@ export default function BlogIndex() {
     <main className="pt-24">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
 
       <section className="py-16 md:py-24">

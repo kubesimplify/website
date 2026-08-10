@@ -213,6 +213,11 @@
 /workshops             https://kubesimplify.com/workshops       301!
 /partnerships          https://kubesimplify.com/partnerships    301!
 /resources             https://kubesimplify.com/resources       301!
+/products              https://kubesimplify.com/products        301!
+/products/*            https://kubesimplify.com/products/:splat 301!
+/learn                 https://kubesimplify.com/learn           301!
+/learn/*               https://kubesimplify.com/learn/:splat    301!
+/privacy               https://kubesimplify.com/privacy         301!
 /discord               https://discord.gg/26Z384WSPB            302!
 
 # ── 3. Serve blog content under clean URLs (URL stays as-is).

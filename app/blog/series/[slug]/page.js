@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPostBySlug, getAuthor, SITE, postUrl } from '@/lib/blog';
 import { getAllSeries, getSeries } from '@/lib/series';
+import { safeJsonLd } from '@/lib/jsonld';
 
 export const dynamicParams = false;
 
@@ -72,8 +73,8 @@ export default function SeriesPage({ params }) {
 
   return (
     <main className="pt-24">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       <section className="py-12 md:py-16">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">

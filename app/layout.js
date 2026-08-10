@@ -3,6 +3,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AnalyticsBeacon from '@/components/AnalyticsBeacon';
+import { safeJsonLd } from '@/lib/jsonld';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -116,10 +117,10 @@ const jsonLd = {
       '@type': 'VideoObject',
       name: 'The Kubernetes Course 2025',
       description: 'Complete Kubernetes course covering everything from basics to advanced concepts for 2025.',
-      thumbnailUrl: 'https://i.ytimg.com/vi/7XDeI5fyj3w/hqdefault.jpg',
+      thumbnailUrl: 'https://i.ytimg.com/vi/EV47Oxwet6Y/hqdefault.jpg',
       uploadDate: '2025-01-01T00:00:00+00:00',
-      contentUrl: 'https://www.youtube.com/watch?v=7XDeI5fyj3w',
-      embedUrl: 'https://www.youtube.com/embed/7XDeI5fyj3w',
+      contentUrl: 'https://www.youtube.com/watch?v=EV47Oxwet6Y',
+      embedUrl: 'https://www.youtube.com/embed/EV47Oxwet6Y',
       publisher: {
         '@type': 'Organization',
         name: 'Kubesimplify',
@@ -142,12 +143,12 @@ const jsonLd = {
     },
     {
       '@type': 'VideoObject',
-      name: 'DevOps Roadmap 2025: Step-by-Step Guide',
+      name: 'DevOps Roadmap 2025: Your Step-by-Step Guide to Mastering DevOps in the Modern Era',
       description: 'Your complete step-by-step guide to mastering DevOps in 2025 covering tools, practices, and career paths.',
-      thumbnailUrl: 'https://i.ytimg.com/vi/Tvx5LB3jOYQ/hqdefault.jpg',
+      thumbnailUrl: 'https://i.ytimg.com/vi/Tt_dqMu0sLM/hqdefault.jpg',
       uploadDate: '2025-01-01T00:00:00+00:00',
-      contentUrl: 'https://www.youtube.com/watch?v=Tvx5LB3jOYQ',
-      embedUrl: 'https://www.youtube.com/embed/Tvx5LB3jOYQ',
+      contentUrl: 'https://www.youtube.com/watch?v=Tt_dqMu0sLM',
+      embedUrl: 'https://www.youtube.com/embed/Tt_dqMu0sLM',
       publisher: {
         '@type': 'Organization',
         name: 'Kubesimplify',
@@ -187,7 +188,7 @@ export default function RootLayout({ children }) {
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
         {/* Cloudflare Web Analytics — privacy-friendly, no cookies */}
         <script

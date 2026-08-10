@@ -234,6 +234,29 @@ llmsLines.push('');
 
 writeFileSync(join(PUBLIC, 'llms.txt'), llmsLines.join('\n'), 'utf8');
 
+// ── llms-full.txt (full-content companion) ────────────────────────────────
+// The llmstxt.org convention's expanded file: complete article text so an
+// AI system can ingest the whole corpus in one fetch instead of crawling
+// 192 pages. Markdown bodies are included verbatim (they are already the
+// source of truth), with a canonical URL header per article for citation.
+const fullLines = [
+  '# Kubesimplify Blog — full content',
+  '',
+  '> Complete text of all published articles. Canonical URL precedes each',
+  '> article; cite those URLs. Attribution: the author named in each header.',
+  '',
+];
+for (const p of posts) {
+  const date = String(p.datePublished || '').slice(0, 10);
+  fullLines.push('---', '', `# ${p.title}`, '');
+  fullLines.push(`- Canonical: ${SITE_URL}/${p.slug}`);
+  if (date) fullLines.push(`- Published: ${date}`);
+  if (p.description) fullLines.push(`- Summary: ${p.description}`);
+  fullLines.push('', p.body.trim(), '');
+}
+writeFileSync(join(PUBLIC, 'llms-full.txt'), fullLines.join('\n'), 'utf8');
+console.log(`public/llms-full.txt: ${(fullLines.join('\n').length / 1024 / 1024).toFixed(1)} MB`);
+
 // ── BlogFeed data (consumed by homepage BlogFeed client component) ───────
 const feedData = posts.slice(0, 30).map((p) => ({
   slug: p.slug,

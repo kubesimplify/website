@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import BlogCard from '@/components/BlogCard';
 import { getAllTags, getPostsByTag, tagUrl, postUrl, SITE } from '@/lib/blog';
+import { safeJsonLd } from '@/lib/jsonld';
 
 export const dynamicParams = false;
 
@@ -58,8 +59,8 @@ export default function TagPage({ params }) {
 
   return (
     <main className="pt-24">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <nav aria-label="Breadcrumb" className="mb-6 text-sm">

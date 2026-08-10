@@ -13,6 +13,7 @@ import NewsletterCTA from '@/components/NewsletterCTA';
 import SponsorCallout from '@/components/SponsorCallout';
 import AuthorSocials from '@/components/AuthorSocials';
 import Comments from '@/components/Comments';
+import { safeJsonLd } from '@/lib/jsonld';
 
 export const dynamicParams = true;
 
@@ -135,13 +136,28 @@ export default async function BlogPost({ params }) {
     ],
   };
 
+  const faqLd = post.faq?.length
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: post.faq.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      }
+    : null;
+
   const editUrl = `https://github.com/${SITE.githubRepo}/blob/main/content/blog/${post.slug}.md`;
 
   return (
     <>
       <BlogReadingProgress />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
+      {faqLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
+      )}
 
       <main className="pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -262,6 +278,29 @@ export default async function BlogPost({ params }) {
               )}
 
               <div className="prose-blog">{rendered}</div>
+
+              {post.faq?.length > 0 && (
+                <section className="mt-12">
+                  <h2 className="text-2xl font-bold mb-5" style={{ color: 'var(--text-primary)' }}>
+                    Frequently asked questions
+                  </h2>
+                  <div className="space-y-3">
+                    {post.faq.map((f) => (
+                      <details
+                        key={f.q}
+                        className="rounded-xl border px-5 py-4 group"
+                        style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}
+                      >
+                        <summary className="font-semibold cursor-pointer list-none flex justify-between items-center gap-3" style={{ color: 'var(--text-primary)' }}>
+                          {f.q}
+                          <span className="shrink-0 transition-transform group-open:rotate-45" style={{ color: 'var(--accent)' }}>+</span>
+                        </summary>
+                        <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{f.a}</p>
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               <CodeBlockEnhancer />
 
