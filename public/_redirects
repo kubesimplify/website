@@ -64,6 +64,7 @@
 /blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws                  /deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws  301!
 /blog/deploy-a-simple-server-using-aws-terraform                                       /deploy-a-simple-server-using-aws-terraform  301!
 /blog/deploying-java-application-using-docker-and-kubernetes-devops-project            /deploying-java-application-using-docker-and-kubernetes-devops-project  301!
+/blog/devin-outposts-on-kubernetes                                                     /devin-outposts-on-kubernetes  301!
 /blog/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload /ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload  301!
 /blog/diy-how-to-build-a-kubernetes-policy-engine                                      /diy-how-to-build-a-kubernetes-policy-engine  301!
 /blog/docker-captain-journey                                                           /docker-captain-journey  301!
@@ -283,6 +284,7 @@
 /deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws                  /blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws  200!
 /deploy-a-simple-server-using-aws-terraform                                       /blog/deploy-a-simple-server-using-aws-terraform  200!
 /deploying-java-application-using-docker-and-kubernetes-devops-project            /blog/deploying-java-application-using-docker-and-kubernetes-devops-project  200!
+/devin-outposts-on-kubernetes                                                     /blog/devin-outposts-on-kubernetes  200!
 /ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload /blog/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload  200!
 /diy-how-to-build-a-kubernetes-policy-engine                                      /blog/diy-how-to-build-a-kubernetes-policy-engine  200!
 /docker-captain-journey                                                           /blog/docker-captain-journey  200!

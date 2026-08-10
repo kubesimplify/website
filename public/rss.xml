@@ -6,8 +6,16 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Thu, 23 Jul 2026 10:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 10 Aug 2026 14:15:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>Devin Outposts on Kubernetes: Why Your AI Agent Needs Your Cluster</title>
+      <link>https://blog.kubesimplify.com/devin-outposts-on-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/devin-outposts-on-kubernetes</guid>
+      <pubDate>Mon, 10 Aug 2026 14:15:00 GMT</pubDate>
+      <description>Devin Outposts runs AI coding agent sessions as pods on your own Kubernetes cluster, with an open-source operator to manage the fleet.</description>
+      <category>kubernetes</category><category>ai-agents</category><category>devin</category><category>platform-engineering</category>
+    </item>
     <item>
       <title>How to Share GPUs in Kubernetes at Scale with HAMi (Software vGPU Slicing)</title>
       <link>https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami</link>
