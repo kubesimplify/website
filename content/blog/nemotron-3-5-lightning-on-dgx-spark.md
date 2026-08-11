@@ -5,6 +5,7 @@ seoDescription: "NVIDIA's new Nemotron 3.5 Lightning on DGX Spark with Ollama: h
 datePublished: 2026-08-11T17:40:00.000Z
 slug: nemotron-3-5-lightning-on-dgx-spark
 author: saiyam-pathak
+cover: /img/blog/nemotron-3-5-lightning-on-dgx-spark/cover.png
 tags: ["nvidia", "dgxspark", "nemotron", "ai-agents", "ollama"]
 ---
 
