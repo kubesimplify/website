@@ -5,6 +5,7 @@ seoDescription: "A hands-on comparison of Istio sidecar and ambient mode for zer
 datePublished: 2026-07-22T10:00:00.000Z
 slug: zero-trust-istio-sidecar-vs-ambient
 author: prianshu-mukherjee
+draft: false
 cover: /img/blog/zero-trust-istio-sidecar-vs-ambient/cover.png
 tags: ["istio", "service-mesh", "zero-trust", "kubernetes", "ambient-mesh", "mtls", "security"]
 ---
