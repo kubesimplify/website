@@ -143,34 +143,35 @@ mkdirSync(output, { recursive: true });
 {
   const sketch = new Sketch(1200, 630, '#f8fafc');
   sketch.text(64, 68, 'KUBESIMPLIFY · GPU SHARING', { size: 19, anchor: 'start', weight: 800, color: COLORS.green.stroke });
-  sketch.lines(64, 158, ['Dynamic MIG in', 'Kubernetes with HAMi'], { size: 52, anchor: 'start', weight: 800, lineHeight: 1.12 });
-  sketch.lines(64, 292, ['Hardware-isolated slices carved, grown, and re-carved', 'on demand on an 8× RTX PRO 6000 Kubernetes node.'], { size: 22, anchor: 'start', color: COLORS.muted, lineHeight: 1.38 });
+  sketch.lines(64, 158, ['HAMi Dynamic MIG on', 'RTX PRO 6000'], { size: 52, anchor: 'start', weight: 800, lineHeight: 1.12 });
+  sketch.lines(64, 292, ['Topology-aware per-pod placements, tested with', 'real CUDA workloads on Blackwell.'], { size: 22, anchor: 'start', color: COLORS.muted, lineHeight: 1.38 });
 
   sketch.rect(70, 407, 515, 112, { stroke: COLORS.blue.stroke, fill: COLORS.blue.fill });
-  sketch.text(327, 449, '4× 24GB idle  →  2× 48GB in ~35 s', { size: 24, weight: 800, color: COLORS.blue.stroke });
-  sketch.text(327, 488, 'no drain · no eviction · no human', { size: 18, color: COLORS.muted });
+  sketch.text(327, 449, '4 × 1g on GPU 4  →  fifth on GPU 5', { size: 22, weight: 800, color: COLORS.blue.stroke });
+  sketch.text(327, 488, 'exact placement · exact reclamation', { size: 18, color: COLORS.muted });
 
   sketch.rect(720, 95, 390, 420, { stroke: COLORS.gray.stroke, fill: COLORS.gray.fill, strokeWidth: 3 });
-  sketch.text(915, 138, 'one physical GPU', { size: 26, weight: 800 });
-  sketch.text(915, 170, 'MIG mode on', { size: 20, color: COLORS.muted });
+  sketch.text(915, 138, 'mixed profiles · one GPU', { size: 26, weight: 800 });
+  sketch.text(915, 170, 'NVML legal placements', { size: 20, color: COLORS.muted });
 
-  const beforeY = 205;
-  [750, 836, 922, 1008].forEach((x) => {
-    sketch.rect(x, beforeY, 77, 95, { stroke: COLORS.green.stroke, fill: COLORS.green.fill });
-    sketch.text(x + 38.5, beforeY + 42, '1g', { size: 18, weight: 700, color: COLORS.green.stroke });
-    sketch.text(x + 38.5, beforeY + 68, '24gb', { size: 15, color: COLORS.muted });
-  });
+  const placementY = 225;
+  sketch.rect(750, placementY, 163, 125, { stroke: COLORS.blue.stroke, fill: COLORS.blue.fill });
+  sketch.text(831.5, placementY + 51, '2g.48gb', { size: 20, weight: 800, color: COLORS.blue.stroke });
+  sketch.text(831.5, placementY + 83, 'start 0 · size 6', { size: 15, color: COLORS.muted });
 
-  sketch.arrow(915, 315, 915, 352, { stroke: COLORS.ink });
+  sketch.rect(922, placementY, 77, 125, { stroke: COLORS.gray.stroke, fill: '#ffffff', dashed: true, hachure: false });
+  sketch.text(960.5, placementY + 59, 'free', { size: 16, weight: 700, color: COLORS.gray.stroke });
+  sketch.text(960.5, placementY + 84, 'gap', { size: 14, color: COLORS.muted });
 
-  const afterY = 365;
-  [750, 922].forEach((x) => {
-    sketch.rect(x, afterY, 163, 95, { stroke: COLORS.blue.stroke, fill: COLORS.blue.fill });
-    sketch.text(x + 81.5, afterY + 55, '2g.48gb', { size: 19, weight: 700, color: COLORS.blue.stroke });
-  });
+  sketch.rect(1008, placementY, 77, 125, { stroke: COLORS.green.stroke, fill: COLORS.green.fill });
+  sketch.text(1046.5, placementY + 45, '1g', { size: 19, weight: 800, color: COLORS.green.stroke });
+  sketch.text(1046.5, placementY + 72, '24gb', { size: 15, color: COLORS.muted });
+  sketch.text(1046.5, placementY + 99, 'start 9', { size: 13, color: COLORS.muted });
 
-  sketch.text(915, 487, 'hardware walls · scheduler lifecycle', { size: 18, color: COLORS.muted });
-  sketch.text(64, 588, 'HAMi dynamic MIG · live re-slice captured on video', { size: 18, anchor: 'start', weight: 700, color: COLORS.orange.stroke });
+  sketch.arrow(915, 372, 915, 410, { stroke: COLORS.ink });
+  sketch.text(915, 454, 'both CUDA workloads progressed', { size: 18, weight: 700, color: COLORS.teal.stroke });
+  sketch.text(915, 487, 'delete 1g · 2g keeps running', { size: 17, color: COLORS.muted });
+  sketch.text(64, 588, 'tested at commit 634bf2b · August 11, 2026', { size: 18, anchor: 'start', weight: 700, color: COLORS.orange.stroke });
   sketch.save(join(output, 'cover.svg'));
 }
 

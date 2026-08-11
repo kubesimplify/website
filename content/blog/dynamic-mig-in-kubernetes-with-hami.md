@@ -1,8 +1,8 @@
 ---
-title: "How to Slice GPUs on Demand with HAMi Dynamic MIG (Hardware Isolation Without the Ops Pain)"
-seoTitle: "HAMi Dynamic MIG on Kubernetes: Hardware GPU Slices Carved On Demand"
-seoDescription: "Carve NVIDIA MIG slices on demand in Kubernetes with HAMi dynamic MIG: same gpumem request API, automatic re-slicing in ~35s, tested on 8x RTX PRO 6000."
-datePublished: 2026-08-08T10:00:00.000Z
+title: "HAMi Dynamic MIG on RTX PRO 6000: A Live Kubernetes Test"
+seoTitle: "HAMi Dynamic MIG on Kubernetes: RTX PRO 6000 Live Test"
+seoDescription: "A hands-on test of topology-aware HAMi Dynamic MIG on RTX PRO 6000 Blackwell, with pinned setup commands, real allocations, mixed profiles, reclamation, and recovery."
+datePublished: 2026-08-11T10:00:00.000Z
 slug: dynamic-mig-in-kubernetes-with-hami
 author: shubham-katara
 authors: ["shubham-katara", "saiyam-pathak"]
@@ -18,308 +18,874 @@ sponsor:
   blurb: "This deep dive ran on an 8x NVIDIA RTX PRO 6000 Blackwell node from Utho Cloud. If you need GPU infrastructure to run workloads like these, take a look."
 ---
 
-Over the last two posts, you made a choice twice, and both times you gave something up.
+The first two posts in this series explored opposite ends of GPU sharing.
 
-In [the MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig), you carved 8 Blackwell cards into hardware-isolated slices. Real walls, silicon-level isolation, one tenant cannot touch another. The price was operational: fixed profiles decided upfront, a human (or a node label and a full workload eviction) in the loop for every geometry change, and a fleet of non-MIG cards left out entirely.
+In [the MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig), we carved Blackwell cards into hardware-isolated slices. MIG gives each instance dedicated memory, cache, and compute resources, but a static layout makes profile changes an operational task. In [the HAMi vGPU post](/blog/sharing-gpus-in-kubernetes-with-hami), we requested exact memory and compute fractions through software-enforced `hami-core` mode. That improves packing density, but it is not a hardware isolation boundary.
 
-In [the HAMi vGPU post](/blog/sharing-gpus-in-kubernetes-with-hami), you went the other way: software slicing, any memory size, any core percentage, reconfigured by nothing more than a pod spec. The price was the isolation boundary itself: a quota enforced by an intercepted `cudaMalloc`, not by memory crossbars. We captured `hami-core` rejecting an over-quota allocation, and it worked, but it is a software contract, not a wall.
+The natural third question is: can a Kubernetes pod request GPU memory, receive a real MIG instance, and let HAMi manage that instance from creation to cleanup?
 
-So the obvious question, and the one readers asked after both posts: can the scheduler carve the silicon on demand? Hardware walls, but created and destroyed when workloads request them, with nobody running `nvidia-smi mig` at 2 a.m.? And when a card already carries partitions that are idle but the wrong size, can the scheduler tear them down and re-carve the card to fit the new request?
+We reran that experiment from scratch on August 11, 2026, on an eight-GPU RTX PRO 6000 Blackwell server. This post follows HAMi's topology-aware, per-pod Dynamic MIG implementation from installation through cleanup.
 
-That is exactly what HAMi's **dynamic MIG mode** does. Same `nvidia.com/gpumem` request API as the previous post, but instead of intercepting driver calls, HAMi picks the smallest MIG profile that fits your request, creates the GPU instance on the fly, and binds your pod to it.
+The results were straightforward:
 
-This post covers what dynamic MIG actually is, what it deliberately is not, the myths about MIG reconfiguration that NVIDIA's own docs put to rest, and a test plan we run on the same 8x RTX PRO 6000 Blackwell node from the previous two posts.
+- Four 8,000 MiB requests became four `1g.24gb` instances on one GPU.
+- A fifth identical pod moved to a second GPU after we made that GPU available to HAMi.
+- A `1g.24gb` workload and a `2g.48gb` workload ran together on the same card.
+- Deleting the small workload reclaimed only its MIG instance; the neighboring CUDA workload continued.
+- A valid active allocation survived a HAMi device-plugin restart with the same MIG UUID and continued CUDA progress.
 
-Who this is for:
+> **Version and migration note:** [PR #2378](https://github.com/Project-HAMi/HAMi/pull/2378) is merged, and this post tests the resulting per-pod implementation at [commit `634bf2b32e68`](https://github.com/Project-HAMi/HAMi/commit/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1). The chart at that commit still defaults to the pre-merge `v2.9.0` image, so explicitly pin the built image. Existing `knownMigGeometries` users should follow the [migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md); the walkthrough below covers only the merged per-pod design.
 
-- Readers of the first two posts who want the third option: hardware isolation with scheduler-driven lifecycle.
-- Platform teams running mixed fleets who want one request API across software-sliced and hardware-sliced nodes.
+{{dynamic-mig-lifecycle-animation}}
 
-## What Dynamic MIG Is, and What It Is Not
+## Dynamic MIG in one sentence
 
-It's important to understand that there are two main ways HAMi segments GPUs for Kubernetes workloads: software slicing and hardware slicing. HAMi lets you choose which mode to run on each node using the `operatingmode` field, depending on your hardware and isolation needs:
+A pod asks for GPU memory. HAMi chooses the smallest allowed MIG profile that has enough NVML-reported memory and a legal free placement, then creates that exact GPU Instance (GI) and Compute Instance (CI) for the pod.
 
-- **`operatingmode: "hami-core"` (Software Slicing):** Uses software CUDA API interception (`LD_PRELOAD`) to enforce memory quotas and compute fractions. Enables arbitrary slice sizes and high pod density per card with software-enforced logical isolation.
-- **`operatingmode: "mig"` (Dynamic Hardware Slicing):** Dynamically provisions and destroys native NVIDIA MIG hardware instances on demand based on pod resource requests (`nvidia.com/gpumem`, `nvidia.com/gpucores`). Provides true silicon-level physical isolation (dedicated memory crossbars and SM fractions), constrained by the card's supported hardware geometries.
-
-**Why mix operating modes across nodes in the same cluster?**
-
-- **Heterogeneous Fleet Support:** MIG requires specific enterprise cards (A100, H100, Blackwell). `mig` mode manages your hardware-slicable GPUs, while non-MIG cards (T4, L4, consumer GPUs) in the same cluster run `hami-core` under a single, unified `nvidia.com/gpumem` request API.
-- **Tiered Workload Isolation:** Zero-trust, multi-tenant, or production workloads run on `mig` nodes for physical isolation and dedicated memory crossbars, while internal dev/test, batch jobs, and micro-inference services run on `hami-core` nodes to maximize packing density (e.g., 10+ tenants per card) with zero VRAM stranding.
-- **Cost vs. Isolation Balancing:** Platform teams avoid paying the MIG "profile rounding tax" on lightweight 1–2 GB microservices while guaranteeing dedicated hardware bandwidth to critical jobs, letting Kubernetes node labels and scheduler rules handle routing automatically.
-
-In the previous post, our node ran `operatingmode: "hami-core"` in the device plugin's `nodeconfig`. Switch a node to `operatingmode: "mig"` and the same scheduler starts managing real MIG instances instead, while any node left out of `nodeconfig` keeps running `hami-core`.
-
-What it is:
-
-- **The same request API.** Tenants still write `nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores`. Nobody learns profile names.
-- **Scheduler-driven instance lifecycle.** HAMi picks the smallest MIG profile that satisfies the request from a set of allowed geometries, and creates the GPU instance and compute instance on demand. No human runs `nvidia-smi mig -cgi` anymore.
-- **Real hardware isolation.** The pod lands on a genuine MIG instance: dedicated memory slice, dedicated SM fraction, the same silicon walls from post one.
-
-What it is not, and this is where mental models break:
-
-- **It is not hami-core inside a MIG slice.** In `mig` mode there is no LD_PRELOAD interception. The `gpumem` figure stops being an enforced quota and becomes a sizing hint to the scheduler.
-- **It cannot invent geometries.** The profiles are burned into the card. If the smallest profile is 24GB, a `gpumem: 8000` request gets a 24GB instance, and the pod owns all of it. The fixed-profile tax from post one applies in full; HAMi just automates paying it.
-- **It does not raise the tenant ceiling.** Our card exposes at most 4 compute slices. Ten small pods per card was a hami-core trick; in `mig` mode the silicon decides, and the answer here is at most 4.
-
-One-line summary: hami-core mode negotiates with software, mig mode negotiates with a menu.
-
-## The Drain Myth, Settled by NVIDIA's Own Docs
-
-Post one said reslicing MIG means draining the card. That is true for the tooling we used there, and it is the single biggest reason people assume dynamic MIG cannot work. NVIDIA's MIG User Guide splits the cost into two different operations, and only one of them is expensive:
-
-**1. Toggling MIG mode itself: one-time, expensive.** From the [Deployment Considerations](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/deployment-considerations.html) page: "Setting MIG mode on the A100/A30 requires a GPU reset (and thus super-user privileges). Once the GPU is in MIG mode, instance management is then dynamic." Also: "All daemons holding handles on driver modules need to be stopped before MIG enablement", which is where the stop-DCGM-first ritual comes from. You pay this once at provisioning, per card.
-
-**2. Instance create/destroy: incremental, cheap.** From the [Getting Started](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/getting-started-with-mig.html) page: "Once the GPU is in MIG mode, GIs and CIs can be configured dynamically." New instances carve free capacity while neighboring instances keep running; only the instance being destroyed must be idle. This is the property dynamic MIG is built on.
-
-Under the hood, HAMi leverages **`nvidia-mig-parted`** to apply whole-card geometry trees declaratively. Two operational behaviors result from this:
-- **Lazy Partition Retention:** When a pod terminates, HAMi intentionally leaves its carved MIG slice active on the host. Subsequent identical pod requests reuse the pre-carved slice instantly without waiting for driver-level teardown or creation calls.
-- **Declarative Re-partitioning:** When a workload requesting a different profile geometry arrives, HAMi invokes `nvidia-mig-parted` to reconcile the card to the new target spec. Because `nvidia-mig-parted` operates declaratively at the whole-card level, a card layout shift only occurs when all active partitions on that GPU die are free/idle.
-
-## Our Card's Real Geometry: RTX PRO 6000 Blackwell
-
-Everything dynamic MIG can do on this rig is bounded by this table, from NVIDIA's [Supported MIG Profiles](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/supported-mig-profiles.html) page for the RTX PRO 6000 Blackwell (96GB):
-
-| Profile       | Memory | SM Fraction | Max Instances |
-| ------------- | ------ | ----------- | ------------- |
-| `MIG 1g.24gb` | 24GB   | 1/4         | 4             |
-| `MIG 2g.48gb` | 48GB   | 1/2         | 2             |
-| `MIG 4g.96gb` | 96GB   | Full        | 1             |
-
-## Configuring HAMi for Dynamic MIG
-
-There are three moving parts:
-
-**1. The GPU must have MIG mode enabled** (the one-time reset from the section above). Dynamic MIG manages instances, not the mode toggle. On a dedicated pool node:
-
-```bash
-root@utho-gpu-rtxpro6000-8-62383:~/dynamic-mig# for i in 0 1 2 3 4 5 6 7
-> do
-> nvidia-smi -i $i -mig 1 ;
-> done
-```
-
-**2. Switch the node's operating mode in the device plugin nodeConfiguration.** Using the helm chart, in the `devicePlugin.nodeConfiguration.config` section, it is possible to declare the mode required for nodes. You might have one node that has MIG capable GPUs while on the other node you'd have ones that do not support MIG and would benefit from `hami-core`:
+The workload request remains small:
 
 ```yaml
+metadata:
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+spec:
+  schedulerName: hami-scheduler
+  containers:
+    - resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 8000
+```
+
+On a `hami-core` node, `gpumem: 8000` is a software-enforced memory limit. On a Dynamic MIG node, it is a minimum memory requirement used to select a hardware profile. This GPU has no 8 GB profile, so the 8,000 MiB request receives `1g.24gb`; the container sees the complete 24,192 MiB MIG instance.
+
+Three details matter:
+
+- `nvidia.com/vgpu-mode: "mig"` explicitly selects the MIG path.
+- Profile selection is memory-driven. `nvidia.com/gpucores` does not select a MIG profile; the profile fixes the compute fraction in hardware.
+- NVIDIA's legal profile sizes and placements still apply. HAMi automates those rules; it does not remove them.
+
+## Why use Dynamic MIG instead of HAMi-Core?
+
+NVIDIA MIG divides a supported GPU into hardware-isolated instances. Each instance receives dedicated memory paths, cache, and compute resources. That is a stronger boundary than several workloads sharing one full GPU through software.
+
+| | HAMi-Core | Topology-aware Dynamic MIG |
+| --- | --- | --- |
+| Isolation | Software-enforced sharing | NVIDIA MIG hardware instance |
+| Size choices | Fine-grained memory and core fractions | Fixed NVIDIA profiles |
+| Pod request | `gpu`, `gpumem`, optional `gpucores` | `gpu`, `gpumem`, and MIG mode annotation |
+| Lifecycle | Software allocation | Create and reclaim one GI/CI per pod |
+| Best fit | High packing flexibility | Stronger workload isolation |
+
+MIG can be part of a multi-tenant security design, but it does not make a platform secure or compliant by itself. Identity, admission, network, storage, runtime, and host controls still matter.
+
+## The RTX PRO 6000 profile menu
+
+NVIDIA's [supported MIG profile table](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/supported-mig-profiles.html) lists three profile sizes for the RTX PRO 6000 Blackwell Server Edition:
+
+| Profile | Approximate memory | SM fraction | Maximum instances |
+| --- | ---: | ---: | ---: |
+| `1g.24gb` | 24 GB | 1/4 | 4 |
+| `2g.48gb` | 48 GB | 1/2 | 2 |
+| `4g.96gb` | 96 GB | Full GPU | 1 |
+
+Profile rounding remains. An 8,000 MiB request receives the 24 GB profile, and the unused difference cannot be assigned to another pod inside that instance.
+
+The implementation tested here uses a profile allowlist as policy:
+
+```yaml
+nvidia:
+  migProfileAllowlist:
+    - models: ["RTX PRO 6000 Blackwell Server Edition"]
+      profiles: ["1g.24gb", "2g.48gb", "4g.96gb"]
+```
+
+For every allowed profile, the node plugin asks NVIDIA's Management Library (NVML) for memory, compute metadata, instance count, and legal placements. The scheduler then chooses the smallest profile that satisfies the request and fits without overlapping a live placement.
+
+## Lab environment
+
+| Component | Tested value |
+| --- | --- |
+| Server | Utho single-node GPU server |
+| GPUs | 8 × NVIDIA RTX PRO 6000 Blackwell Server Edition |
+| GPU memory | 97,887 MiB per physical GPU |
+| NVIDIA driver | `610.43.02` |
+| Kubernetes | `v1.35.6` |
+| OS | Ubuntu 24.04.4 LTS, kernel `6.8.0-100-generic` |
+| Container runtime | containerd `2.2.1` |
+| HAMi source | `634bf2b32e68e07d3fbcbd6da1ee079392fc07c1` |
+| HAMi image | `localhost/hami-dynamic-mig:master-634bf2b32e68` |
+| Image digest | `sha256:0ddda56e333ff74e52d9908e00b85e7860cf4694fc09951aaa178e8c8e6dde76` |
+
+The run started with MIG mode enabled on all eight cards and no active CUDA processes:
+
+```bash
+nvidia-smi \
+  --query-gpu=index,name,driver_version,memory.total,mig.mode.current \
+  --format=csv
+
+nvidia-smi \
+  --query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory \
+  --format=csv
+```
+
+The first command inventories the hardware and MIG mode. The second checks for active compute processes before any lifecycle operation. We saw indices `0` through `7`, driver `610.43.02`, `97887 MiB`, and `Enabled` on every GPU. The compute-process query returned only its header.
+
+> **Host versus cluster commands:** run host-level `nvidia-smi`, Docker, and `ctr` commands on the GPU node. Run `kubectl` and Helm from any machine whose kubeconfig targets the intended cluster. In this lab they all ran on the single RTX node.
+
+## Pin the HAMi build before testing
+
+This step exposed the easiest version trap in the entire lab. At commit `634bf2b`, the checked-out chart and source contain topology-aware Dynamic MIG, but the chart metadata and default image tag still say `2.9.0`. Rendering that chart without image overrides deploys the `v2.9.0` binaries, not the code in the checkout.
+
+Helm's chart or app version is therefore not proof of the running binary. We built the commit and used the same pinned image for the scheduler extender, device plugin, and monitor.
+
+### 1. Back up and inventory the existing installation
+
+Before changing a running lab, capture both Helm's saved values and the live objects. They can differ:
+
+```bash
+export NODE=utho-gpu-rtxpro6000-8-62383
+export LAB=/root/hami-dynamic-mig-rerun-2026-08-11
+
+mkdir -p "$LAB"
+
+helm get values hami -n hami-system --all -o yaml \
+  > "$LAB/helm-values-before.yaml"
+helm get manifest hami -n hami-system \
+  > "$LAB/helm-manifest-before.yaml"
+kubectl get configmaps -n hami-system -o yaml \
+  > "$LAB/live-configmaps-before.yaml"
+kubectl get node "$NODE" -o yaml \
+  > "$LAB/node-before.yaml"
+kubectl get pods -A --field-selector spec.nodeName="$NODE" -o wide
+nvidia-smi -L > "$LAB/nvidia-smi-L-before.txt"
+```
+
+After taking the backups, we stopped every GPU workload and verified that the entire node was idle before continuing.
+
+### 2. Build the exact source snapshot
+
+```bash
+export HAMI_SHA=634bf2b32e68e07d3fbcbd6da1ee079392fc07c1
+export HAMI_TAG=master-634bf2b32e68
+export HAMI_IMAGE=localhost/hami-dynamic-mig:$HAMI_TAG
+
+git clone --recurse-submodules \
+  https://github.com/Project-HAMi/HAMi.git "$LAB/HAMi"
+git -C "$LAB/HAMi" checkout --detach "$HAMI_SHA"
+git -C "$LAB/HAMi" submodule update --init --recursive
+
+make -C "$LAB/HAMi" docker \
+  IMG_NAME=localhost/hami-dynamic-mig \
+  IMG_TAG="$HAMI_TAG" \
+  VERSION="$HAMI_TAG" \
+  TARGET_PLATFORMS=linux/amd64
+
+docker image inspect "$HAMI_IMAGE" \
+  --format='ID={{.Id}} Architecture={{.Architecture}} SizeBytes={{.Size}}'
+```
+
+The final command verifies what was built. Our result was:
+
+```text
+ID=sha256:0ddda56e333ff74e52d9908e00b85e7860cf4694fc09951aaa178e8c8e6dde76 Architecture=amd64 SizeBytes=411671341
+```
+
+For a normal multi-node cluster, push that immutable tag to a registry every target node can reach. Our single-node lab instead imported the image into containerd:
+
+```bash
+docker save --output "$LAB/hami-$HAMI_TAG.tar" "$HAMI_IMAGE"
+sudo ctr --namespace k8s.io images import "$LAB/hami-$HAMI_TAG.tar"
+sudo ctr --namespace k8s.io images list | grep -F "$HAMI_IMAGE"
+```
+
+That local import is suitable only because the scheduler, plugin, and both tested GPUs lived on the same node. On multiple nodes, push to a registry or import the image on every target node.
+
+### 3. Use current Dynamic MIG values
+
+The relevant parts of our `hami-current-mig-values.yaml` were:
+
+```yaml
+global:
+  imageTag: master-634bf2b32e68
+
+scheduler:
+  defaultSchedulerPolicy:
+    nodeSchedulerPolicy: binpack
+    gpuSchedulerPolicy: binpack
+  extender:
+    image:
+      registry: localhost
+      repository: hami-dynamic-mig
+      tag: master-634bf2b32e68
+      pullPolicy: Never
+
 devicePlugin:
-  nodeConfiguration: 
+  image:
+    registry: localhost
+    repository: hami-dynamic-mig
+    tag: master-634bf2b32e68
+    pullPolicy: Never
+  monitor:
+    image:
+      registry: localhost
+      repository: hami-dynamic-mig
+      tag: master-634bf2b32e68
+      pullPolicy: Never
+
+  # This is NVIDIA's static resource-exposure strategy.
+  # Keep it separate from HAMi's per-node operating mode below.
+  migStrategy: none
+
+  nodeConfiguration:
     config: |
       {
         "nodeconfig": [
           {
             "name": "utho-gpu-rtxpro6000-8-62383",
-            "operatingmode": "mig"
+            "operatingmode": "mig",
+            "devicememoryscaling": 1,
+            "devicecorescaling": 1,
+            "devicesplitcount": 10,
+            "preconfigureddevicememory": 0,
+            "enablenumatopology": false,
+            "migstrategy": "none",
+            "filterdevices": {
+              "uuid": [],
+              "index": [0, 1, 2, 3, 5, 6, 7]
+            },
+            "enablegetpreferredallocation": false
           }
         ]
       }
+
+# Empty means: use the device-config.yaml bundled in this pinned chart.
+device-config:
+  content: ""
 ```
 
-Only nodes named here switch to `operatingmode: "mig"`; every other node in the cluster, including ones without MIG-capable silicon, keeps running default `hami-core` mode with no entry required at all. One `values.yaml`, one HAMi scheduler, a mixed fleet. This is what makes the node-pools framing in the decision table further down a tested configuration, not an aspiration.
+Two similarly named settings do different jobs:
 
-**3. The allowed geometry templates.** HAMi ships known MIG geometries per GPU model and picks placements from them. The RTX PRO 6000 Blackwell geometries ship in the latest chart's default templates, no manual ConfigMap edit needed. From the live `hami-scheduler-device` ConfigMap:
+- `operatingmode: "mig"` activates HAMi Dynamic MIG for this node.
+- Top-level `devicePlugin.migStrategy: none` tells the NVIDIA device-plugin path not to publish pre-created MIG resources separately. The workload still requests the parent resource `nvidia.com/gpu` and HAMi creates the MIG instance dynamically.
 
-```yaml
-knownMigGeometries:
-  - models: ["NVIDIA RTX PRO 6000 Blackwell Server Edition"]
-    allowedGeometries:
-      - - name: "1g.24gb"
-          core: 25
-          memory: 24186
-          count: 4
-      - - name: "2g.48gb"
-          core: 50
-          memory: 48517
-          count: 2
-      - - name: "4g.96gb"
-          core: 100
-          memory: 97402
-          count: 1
+Also, `filterdevices.index` is an **exclusion list**. The initial list excluded every card except GPU 4. It did not protect the excluded GPUs from all startup actions; we return to that safety boundary later.
+
+### 4. Render before installing
+
+```bash
+helm lint "$LAB/HAMi/charts/hami" \
+  -f "$LAB/hami-current-mig-values.yaml"
+
+helm template hami "$LAB/HAMi/charts/hami" \
+  --namespace hami-system \
+  --kube-version 1.35.6 \
+  -f "$LAB/hami-current-mig-values.yaml" \
+  > "$LAB/rendered-current-hami.yaml"
+
+grep -n -A 25 'migProfileAllowlist' \
+  "$LAB/rendered-current-hami.yaml"
+grep -n -E 'image:|imagePullPolicy:' \
+  "$LAB/rendered-current-hami.yaml"
 ```
 
-## What a Pod Request Becomes in mig Mode
+The rendered manifest contained the RTX profile allowlist and the pinned image in all three HAMi containers. No `projecthami/hami:v2.9.0` runtime image remained.
 
-The pod spec is unchanged from post two. This is the whole point:
+Avoid `--reuse-values` here. A saved per-component tag takes precedence over `global.imageTag`, so a stale custom plugin image can survive even when the global tag looks correct.
 
-```yaml
-resources:
-  limits:
-    nvidia.com/gpu: 1
-    nvidia.com/gpumem: 8000
-    nvidia.com/gpucores: 10
+### 5. Perform the controlled lab handover
+
+> **Destructive lab step:** we used a fresh reinstall only after every GPU pod and process on the single node was gone. Existing clusters should follow the linked migration guide instead of treating `helm uninstall` as a general upgrade procedure.
+
+```bash
+helm uninstall hami -n hami-system --wait --timeout 5m
+
+helm upgrade --install hami "$LAB/HAMi/charts/hami" \
+  -n hami-system \
+  --create-namespace \
+  --reset-values \
+  -f "$LAB/hami-current-mig-values.yaml" \
+  --wait \
+  --timeout 10m
+
+kubectl get pods -n hami-system \
+  -o custom-columns='POD:.metadata.name,CONTAINERS:.spec.containers[*].name,IMAGES:.spec.containers[*].image'
 ```
 
-On a hami-core node, that pod gets exactly 8000 MiB, software-enforced. On a mig node, the scheduler walks the geometry menu, finds the smallest profile with at least 8000 MiB, and the answer on this card is `1g.24gb`. The pod gets a hardware slice of 24GB and a quarter of the SMs. Three consequences:
+The live output confirmed that the scheduler extender, device plugin, and monitor all used:
 
-- **The grant is the whole instance.** Nothing enforces 8000 MiB anymore. `nvidia-smi` inside the pod should report roughly 24GB, not a virtualized 8000 MiB. That single number is the cleanest fingerprint of which mode a node is running, and Test 1 captures it.
-- **The stranded 16GB is real.** Post one's fixed-profile tax, automated but not eliminated.
-- **`gpucores` becomes advisory rounding input too.** The SM fraction comes from the profile (25% per 1g slice here), not from your percentage.
+```text
+localhost/hami-dynamic-mig:master-634bf2b32e68
+```
 
-Placement lands in the same annotation as before: `hami.io/vgpu-devices-allocated` on the pod.
+The monitor had one transient CDI `StartError` referring to a stale MIG UUID during the handover. Kubernetes retried it, and both plugin containers became ready. We checked the previous container state instead of hiding that transition.
 
-## The Tests: Proving the Lifecycle on Live Silicon
+## What HAMi discovered through NVML
 
-Each test states its claim and its capture. Together they are the evidence this post stands on.
+The node registration annotation is the clearest view of what the plugin learned from the driver:
 
-### Test 1: The rounding proof, and the two-mode fingerprint
+```bash
+kubectl get node "$NODE" -o json |
+jq '
+  .metadata.annotations["hami.io/node-nvidia-register"]
+  | fromjson
+  | .[]
+  | {id, index, type, mode, count, migProfiles}
+'
+```
 
-Apply the following Deployment requesting `gpumem: 8000` on the mig node.
+The live discovery was:
+
+| Profile | `memoryMB` | Core | `sliceCount` | Legal NVML placements (`start`, `size`) |
+| --- | ---: | ---: | ---: | --- |
+| `1g.24gb` | 24,192 | 25 | 1 | `(0,3)`, `(3,3)`, `(6,3)`, `(9,3)` |
+| `2g.48gb` | 48,512 | 50 | 2 | `(0,6)`, `(6,6)` |
+| `4g.96gb` | 97,408 | 100 | 4 | `(0,12)` |
+
+The `start` and `size` fields are NVML placement coordinates, used as a non-overlapping interval. They are not GiB, and `size` is not the same thing as `sliceCount`. Notice that `1g.24gb` has `sliceCount: 1` but placement `size: 3` on this GPU.
+
+The registered `count: 4` is a coarse maximum derived from the profiles. It does not mean every arbitrary combination of four profiles fits. The placement arrays and current occupancy determine real capacity.
+
+## A repeatable CUDA workload
+
+The test container repeatedly runs NVIDIA's `vectorAdd` sample and increments `/tmp/gpu-progress` after each successful run. That gives us a better health check than a sleeping container.
+
+For readability, this Deployment combines the same workload template we used for the single-pod and packing tests. Save it as `mig-small-pack.yaml` and replace the node name if yours differs:
 
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mig-smoke-test
+  name: mig-small-pack
+  namespace: hami-mig-retest
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mig-smoke-test
+      app: mig-small-pack
   template:
     metadata:
       labels:
-        app: mig-smoke-test
+        app: mig-small-pack
+      annotations:
+        nvidia.com/vgpu-mode: "mig"
+        hami.io/gpu-scheduler-policy: "binpack"
     spec:
+      schedulerName: hami-scheduler
+      nodeSelector:
+        kubernetes.io/hostname: utho-gpu-rtxpro6000-8-62383
       containers:
         - name: cuda
-          image: nvcr.io/nvidia/pytorch:25.01-py3
+          image: nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda12.5.0-ubuntu22.04
           imagePullPolicy: IfNotPresent
-          command: ["sleep", "infinity"]
+          command:
+            - bash
+            - -lc
+            - |
+              set -euo pipefail
+              n=0
+              echo 0 > /tmp/gpu-progress
+              while true; do
+                /cuda-samples/vectorAdd > /tmp/vectoradd.last 2>&1
+                n=$((n + 1))
+                echo "$n" > /tmp/gpu-progress.next
+                mv /tmp/gpu-progress.next /tmp/gpu-progress
+              done
           resources:
             limits:
-              nvidia.com/gpumem: 8000
               nvidia.com/gpu: 1
-            requests:
               nvidia.com/gpumem: 8000
-              nvidia.com/gpu: 1
-
 ```
 
-Then:
+Create the namespace, apply the workload, and wait for the pod to become ready:
 
 ```bash
-root@utho-gpu-rtxpro6000-8-62383:~# k exec -it mig-smoke-test-75d9d76466-cmfx7   -- nvidia-smi
-Sat Aug  1 09:37:31 2026
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 610.43.02              KMD Version: 610.43.02     CUDA UMD Version: 13.3     |
-+-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA RTX PRO 6000 Blac...    Off |   00000000:81:00.0 Off |                   On |
-| N/A   26C    P8             35W /  600W |                  N/A   |     N/A      Default |
-|                                         |                        |              Enabled |
-+-----------------------------------------+------------------------+----------------------+
+kubectl create namespace hami-mig-retest
+kubectl apply -f mig-small-pack.yaml
+kubectl rollout status deployment/mig-small-pack \
+  -n hami-mig-retest --timeout=180s
 
-+-----------------------------------------------------------------------------------------+
-| MIG devices:                                                                            |
-+------------------+----------------------------------+-----------+-----------------------+
-| GPU  GI  CI  MIG |              Shared Memory-Usage |        Vol|        Shared         |
-|      ID  ID  Dev |                Shared BAR1-Usage | SM     Unc| CE ENC  DEC  OFA  JPG |
-|                  |                                  |        ECC|                       |
-|==================+==================================+===========+=======================|
-|  0    3   0   0  |              64MiB / 24192MiB    | 46      0 |  1   1    1    0    1 |
-|                  |               0MiB /  8317MiB    |           |                       |
-+------------------+----------------------------------+-----------+-----------------------+
-
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|  No running processes found                                                             |
-+-----------------------------------------------------------------------------------------+
+POD=$(kubectl get pods -n hami-mig-retest \
+  -l app=mig-small-pack \
+  -o jsonpath='{.items[0].metadata.name}')
 ```
 
-Total memory ~24192 MiB (the full `1g.24gb` instance), whereas the identical pod on the hami-core node showed 8000 MiB.
+## Test 1: 8,000 MiB becomes one `1g.24gb` instance
 
-The video below shows the same lifecycle from a clean slate: the deployment starts at zero replicas and is scaled to four with `kubectl scale deploy mig-smoke-test --replicas 4`. The pods pend briefly while HAMi carves GPU 4, then all four bind and are Running within about 45 seconds of the scale command.
-
-<video controls src="/img/blog/dynamic-mig-in-kubernetes-with-hami/4mig.mp4" width="100%"></video>
-
-On the host, `nvidia-smi -L` confirms the result: GPU 4 now carries its full allowed geometry, four `1g.24gb` partitions (the `count: 4` from the template), one per replica.
+HAMi writes its controller-owned identity to `hami.io/vgpu-mig-allocations`. Users should inspect this annotation, but never create or edit it:
 
 ```bash
-root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi -L
-GPU 0: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-8b89b58e-b427-108d-ac50-06138d78fe78)
-GPU 1: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-03a041b7-8abf-360a-d1a2-dfd70188cd5f)
-GPU 2: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-ba09367f-dd50-32ca-e988-7ff66bece885)
-GPU 3: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-30512c46-708b-f374-5698-ee24be6cd626)
-GPU 4: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288)
-  MIG 1g.24gb     Device  0: (UUID: MIG-0b090ecd-97b3-5022-b410-353a54064db3)
-  MIG 1g.24gb     Device  1: (UUID: MIG-12e12a0a-56aa-5258-9cce-fb652a6d60ca)
-  MIG 1g.24gb     Device  2: (UUID: MIG-e80daae6-94df-5114-b105-f4b8e14fe00c)
-  MIG 1g.24gb     Device  3: (UUID: MIG-c652619d-ef73-5243-8313-163ba19341ce)
-GPU 5: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-04dc48d7-7048-aef5-ad36-f5db716e7668)
-GPU 6: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-f4f5db98-143f-0a8d-47ce-956fab39a736)
-GPU 7: NVIDIA RTX PRO 6000 Blackwell Server Edition (UUID: GPU-f4c61521-240a-da09-2787-e576034e197e)
+kubectl get pod "$POD" -n hami-mig-retest -o json |
+jq '.metadata.annotations["hami.io/vgpu-mig-allocations"] | fromjson'
 ```
 
-These partitions exist only because pods requesting `nvidia.com/gpumem: 8000` were scheduled onto a node running in `mig` operating mode; no human ran a single `nvidia-smi mig` command. And per the lazy partition retention described earlier, scaling the deployment back down leaves the slices carved: the next `gpumem: 8000` pod binds to a pre-carved partition with no teardown or creation latency.
+Our first allocation was:
 
-### Test 2: Multi-card expansion and the hardware ceiling
+```json
+[
+  {
+    "containerIndex": 0,
+    "deviceIndex": 0,
+    "gpuUUID": "GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288",
+    "profile": "1g.24gb",
+    "placement": {"start": 9, "size": 3},
+    "migUUID": "MIG-a5fa6120-f6fa-51b6-9820-a42112640629",
+    "gpuInstanceID": 6,
+    "computeInstanceID": 0
+  }
+]
+```
 
-Scale the small-pod Deployment to 5 replicas requesting `gpumem: 8000`. The first 4 replicas fill a GPU to its maximum 4-slice hardware capacity (4x `1g.24gb`). The 5th replica forces HAMi onto a second physical card, and this is where whole-card reconciliation becomes visible: GPU 5 does not gain one slice, it gets carved into the full 4x `1g.24gb` geometry for a single pod. In the capture, the 5th pod stays Pending for roughly 90 seconds while the second card is carved, then binds to one partition and transitions to Running; the other three sit pre-carved and free, so the next scale-up binds instantly. That is the declarative model from the drain-myth section showing up on live silicon.
+The host and container agreed about the device:
 
-If scaled beyond the entire node's physical slice capacity (32 total slices across 8 cards), extra pods **pend at scheduling** with a `FailedScheduling` event. In MIG mode, admission tracking is tied directly to real silicon.
+```bash
+# On the GPU node
+nvidia-smi -L
 
-<video controls src="/img/blog/dynamic-mig-in-kubernetes-with-hami/5mig.mp4" width="100%"></video>
+# Through the container's device view
+kubectl exec -n hami-mig-retest "$POD" -- nvidia-smi -L
+```
 
-### Test 3: Dynamic Resizing & Geometry Re-creation on Demand
+Both showed one `1g.24gb` instance with UUID `MIG-a5fa...`. The placement happened to start at `9`; the first allocation is not required to start at `0`.
 
-The final proof of dynamic lifecycle management: demonstrating that HAMi tears down old MIG geometries and carves new, larger MIG profiles on the fly when workload requests change—without manual intervention or host reboots.
+Finally, we verified that the CUDA loop was doing work:
 
-1. **Initial State:** GPU 4 is populated with four idle `1g.24gb` MIG partitions (`Device 0`, `Device 1`, `Device 2`, `Device 3`).
-2. **Workload Change:** A deployment (`big-mig-smoke-test`) requesting 30GB VRAM (`nvidia.com/gpumem: 30000`) is scaled to 1 replica (`kubectl scale --replicas 1 deploy big-mig-smoke-test`), which requires a larger `2g.48gb` profile.
-3. **Transient Pending & Declarative Reconcile:** The pod temporarily enters `0/1 Pending` while HAMi checks the GPU. Because none of the four existing 24GB partitions can fit a 30GB ask, HAMi detects that reslicing is required. Since all four 24GB slices on GPU 4 are idle, HAMi calls `nvidia-mig-parted` to wipe the four 24GB slices and re-carve GPU 4 with `2g.48gb` slices.
-4. **Automated Admission & Placement:** Within ~35 seconds, `nvidia-smi -L` confirms GPU 4 now exposes `2g.48gb` slices (`Device 0`, `Device 1`), and `big-mig-smoke-test` transitions seamlessly to `1/1 Running`.
+```bash
+before=$(kubectl exec -n hami-mig-retest "$POD" -- cat /tmp/gpu-progress)
+sleep 3
+after=$(kubectl exec -n hami-mig-retest "$POD" -- cat /tmp/gpu-progress)
+printf 'before=%s after=%s\n' "$before" "$after"
+test "$after" -gt "$before"
+```
 
-<video controls src="/img/blog/dynamic-mig-in-kubernetes-with-hami/dynamic-recreation.mp4" width="100%"></video>
+```text
+before=75 after=77
+```
 
-#### The Prerequisite: Zero Occupied Handles
-Crucially, **dynamic reslicing only occurs when no active pods or host processes are claiming any MIG instances on that card**. If even a single container or host daemon (e.g., DCGM exporter or monitoring tool) holds an active CUDA handle on any partition of the GPU, driver locks prevent `nvidia-mig-parted` from tearing down the geometry layout. The incoming pod will remain safely in `Pending` until all processes on that card exit and release their handles.
+## Test 2: four legal placements, then real saturation
 
-#### Why This Matters (The Operational Benefits)
-- **Zero-Ops Automation:** Platform engineers never need to SSH into nodes at 2 AM to run manual `nvidia-smi mig` teardown scripts or drain nodes just to re-partition cards for different team requirements.
-- **Adaptive GPU Hardware Utilization:** Your GPU fleet automatically adapts to shifting workload demands. A card can run four high-density 24GB micro-inference containers during daytime traffic, and then automatically re-slice into a single 96GB or two 48GB instances overnight for batch LLM fine-tuning as soon as the day's inference pods exit.
-- **Safe Silicon Boundaries:** Guarantees true physical isolation with zero risk of accidental tenant eviction. HAMi respects occupied silicon and will never forcibly terminate a running workload just to re-slice a GPU.
+Scale the same Deployment to four replicas:
 
-## hami-core Mode vs. mig Mode: The Decision, Per Node
+```bash
+kubectl scale deployment/mig-small-pack \
+  -n hami-mig-retest --replicas=4
+kubectl rollout status deployment/mig-small-pack \
+  -n hami-mig-retest --timeout=180s
+nvidia-smi -L
+```
 
-|                      | **hami-core node**                  | **mig node (dynamic MIG)**                    |
-| -------------------- | ----------------------------------- | --------------------------------------------- |
-| Isolation            | Intercepted driver calls (software) | Silicon partitions (hardware)                 |
-| Slice size           | Any MiB / any %                     | Menu: 24GB, 48GB, 96GB on this card           |
-| `gpumem` meaning     | Enforced quota                      | Sizing hint, rounds up to a profile           |
-| Max tenants per card | deviceSplitCount (10 here)          | Max instances (4 here)                        |
-| Over-request failure | At runtime (hami-core OOM)          | At scheduling (pod pends)                     |
-| Stranded VRAM        | None (exact-size grants)            | Profile size minus request (16GB on 8GB ask)  |
-| Hardware support     | Any NVIDIA card, plus other vendors | MIG-capable cards only                        |
-| Reconfiguration      | Pod spec change                     | Instance create/destroy, placement permitting |
+GPU 4 now contained four `1g.24gb` instances. The allocation annotations used all four legal starts:
 
-The architecture this table implies is not choosing one. It is **node pools under one scheduler**: mig mode pools for adversarial or compliance-bound tenants, hami-core pools for cooperative high-density dev and inference, the same three resource lines in every pod spec, and HAMi routing each pod to a node whose mode matches the workload's isolation needs. Tenants never learn the difference; the platform team decides it per node label.
+```bash
+kubectl get pods -n hami-mig-retest -l app=mig-small-pack -o json |
+jq -r '
+  ["PARENT_GPU", "PROFILE", "START", "SIZE"],
+  (
+    .items[]
+    | (.metadata.annotations["hami.io/vgpu-mig-allocations"] | fromjson | .[0]) as $a
+    | [$a.gpuUUID, $a.profile, ($a.placement.start | tostring), ($a.placement.size | tostring)]
+  )
+  | @tsv
+'
+```
 
-## Common Pitfalls and How to Solve Them
+```text
+PARENT_GPU                                   PROFILE    START  SIZE
+GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   0      3
+GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   3      3
+GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   6      3
+GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   9      3
+```
 
-### Pitfall A: Treating `gpumem` as Enforced on a mig Node
+With only GPU 4 registered, scaling to five did **not** overcommit the card:
 
-The same manifest means different things on different nodes. On hami-core nodes the number is a wall; on mig nodes it is a menu lookup. A workload sized for 8GB that quietly grows to 20GB will run fine on its 24GB MIG instance and then OOM the day it lands on a hami-core node. Size requests for what the workload actually uses, not for what the profile happens to give you.
+```bash
+kubectl scale deployment/mig-small-pack \
+  -n hami-mig-retest --replicas=5
+kubectl get pods -n hami-mig-retest -o wide
+```
 
-### Pitfall B: Expecting hami-core Density From Silicon
+Four pods remained `Running`; the fifth stayed `Pending` and unbound. Its event included:
 
-If capacity planning assumed 10 tenants per card, a mig-mode node delivers at most 4 on this hardware, and only if everyone fits in `1g` profiles. The density and the isolation are the trade; nothing gives you both on one card.
+```text
+0/1 nodes are available: 1 1/1 CardTimeSlicingExhausted.
+```
 
-### Pitfall C: Reading the Node's Capacity Like a hami-core Node
+That inherited event label is misleading—the test did not use time slicing. Here it meant that no legal MIG placement remained on any registered GPU.
 
-`nvidia.com/gpu: 80` meant scheduling slots in post two. On a mig node the advertised capacity follows instance geometry instead. Dashboards and alerts that assume one meaning across the fleet will lie to you. 
+Scale back to four before the next test:
+
+```bash
+kubectl scale deployment/mig-small-pack \
+  -n hami-mig-retest --replicas=4
+```
+
+## Test 3: mixed profiles share one physical GPU
+
+The topology-aware implementation can place different profiles together whenever NVML reports legal, non-overlapping placements.
+
+We cleared the small-pod Deployment, then created an 8,000 MiB pod and a 30,000 MiB pod. Both used the same CUDA loop and were pinned to GPU 4 with `nvidia.com/use-gpuuuid` so the test measured one physical card:
+
+```bash
+kubectl scale deployment/mig-small-pack \
+  -n hami-mig-retest --replicas=0
+kubectl wait -n hami-mig-retest \
+  --for=delete pod -l app=mig-small-pack --timeout=180s
+```
+
+This Bash helper creates the same pod twice; only its name and memory request change:
+
+```bash
+export GPU4=GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288
+
+create_mig_pod() {
+  local name="$1"
+  local memory="$2"
+
+  kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ${name}
+  namespace: hami-mig-retest
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    hami.io/gpu-scheduler-policy: "binpack"
+    nvidia.com/use-gpuuuid: "${GPU4}"
+spec:
+  schedulerName: hami-scheduler
+  nodeSelector:
+    kubernetes.io/hostname: ${NODE}
+  containers:
+    - name: cuda
+      image: nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda12.5.0-ubuntu22.04
+      imagePullPolicy: IfNotPresent
+      command:
+        - bash
+        - -lc
+        - |
+          set -euo pipefail
+          n=0
+          echo 0 > /tmp/gpu-progress
+          while true; do
+            /cuda-samples/vectorAdd > /tmp/vectoradd.last 2>&1
+            n=\$((n + 1))
+            echo "\$n" > /tmp/gpu-progress.next
+            mv /tmp/gpu-progress.next /tmp/gpu-progress
+          done
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: ${memory}
+EOF
+}
+
+create_mig_pod mixed-small 8000
+create_mig_pod mixed-large 30000
+
+kubectl wait -n hami-mig-retest --for=condition=Ready \
+  pod/mixed-small pod/mixed-large --timeout=180s
+```
+
+We inspected the controller-owned allocation records with:
+
+```bash
+kubectl get pods mixed-small mixed-large -n hami-mig-retest -o json |
+jq -r '
+  ["POD", "PROFILE", "START", "SIZE", "MIG_UUID", "GI", "CI"],
+  (
+    .items
+    | sort_by(.metadata.name)[]
+    | . as $pod
+    | ($pod.metadata.annotations["hami.io/vgpu-mig-allocations"] | fromjson | .[0]) as $a
+    | [
+        $pod.metadata.name,
+        $a.profile,
+        ($a.placement.start | tostring),
+        ($a.placement.size | tostring),
+        $a.migUUID,
+        ($a.gpuInstanceID | tostring),
+        ($a.computeInstanceID | tostring)
+      ]
+  )
+  | @tsv
+'
+```
+
+The live allocation table was:
+
+```text
+POD          PROFILE    START  SIZE  MIG_UUID                                      GI  CI
+mixed-large  2g.48gb    0      6     MIG-b23491d8-d784-58d9-bcfa-3c171ead22da      1   0
+mixed-small  1g.24gb    9      3     MIG-a5fa6120-f6fa-51b6-9820-a42112640629      6   0
+```
+
+The intervals `[0,6)` and `[9,12)` do not overlap, so both profiles could coexist. `nvidia-smi -L` showed one `2g.48gb` and one `1g.24gb` instance under GPU 4.
+
+Both CUDA loops advanced during the same three-second window:
+
+```text
+small: 64 -> 67
+large: 37 -> 39
+PASS: both mixed-profile CUDA workloads progressed
+```
+
+## Test 4: reclaim only the pod's own instance
+
+Before deleting the small pod, we recorded the large pod's progress. Then we deleted only `mixed-small` and polled the host until its `1g.24gb` instance disappeared:
+
+```bash
+large_before=$(kubectl exec -n hami-mig-retest mixed-large -- \
+  cat /tmp/gpu-progress)
+
+kubectl delete pod mixed-small -n hami-mig-retest
+
+# Reclamation is asynchronous; poll instead of assuming delete is instant.
+watch -n 1 nvidia-smi -L
+```
+
+The host retained only:
+
+```text
+MIG 2g.48gb Device 0: (UUID: MIG-b23491d8-d784-58d9-bcfa-3c171ead22da)
+```
+
+The neighboring CUDA workload continued:
+
+```text
+large: 61 -> 94
+PASS: 2g workload survived 1g reclamation
+```
+
+We produced that check with:
+
+```bash
+large_after=$(kubectl exec -n hami-mig-retest mixed-large -- \
+  cat /tmp/gpu-progress)
+printf 'large: %s -> %s\n' "$large_before" "$large_after"
+test "$large_after" -gt "$large_before" \
+  && echo 'PASS: 2g workload survived 1g reclamation'
+```
+
+HAMi does not synchronously destroy the instance inside the `kubectl delete` call. Its annotation reconciler notices that the reservation is no longer active and removes the tracked CI and GI shortly afterward.
+
+We also recreated a `1g.24gb` instance at the freed placement. On this GPU and driver, it received the same `MIG-a5fa...` UUID. The UUID's observed disappearance proved reclamation; its later reappearance proved placement reuse. A MIG UUID is not a generation counter, so do not require a different UUID as proof of recreation.
+
+## Test 5: recover a valid allocation after plugin restart
+
+This is an advanced and disruptive controller test, not a normal workload step. We kept `mixed-large` active, recorded its progress and MIG UUID, then replaced the device-plugin pod:
+
+```bash
+OLD_DP_POD=$(kubectl get pods -n hami-system \
+  -l app.kubernetes.io/component=hami-device-plugin \
+  -o jsonpath='{.items[0].metadata.name}')
+
+progress_before=$(kubectl exec -n hami-mig-retest mixed-large -- \
+  cat /tmp/gpu-progress)
+
+kubectl delete pod "$OLD_DP_POD" -n hami-system
+kubectl rollout status daemonset/hami-device-plugin \
+  -n hami-system --timeout=180s
+```
+
+The replacement plugin logged:
+
+```text
+mig init: resolved startup layout inUseGPUs=[4] resetGPUs=[0,1,2,3,5,6,7]
+```
+
+With a complete runtime allocation annotation, it classified GPU 4 as in use, left that card untouched during startup cleanup, verified the live profile and identity through NVML, and adopted the allocation.
+
+The same `2g.48gb` UUID remained, and the workload continued:
+
+```text
+progress: 115 -> 187
+PASS: MIG UUID and CUDA workload survived device-plugin restart
+```
+
+The verification checked both the device and the progress counter:
+
+```bash
+nvidia-smi -L | grep -F 'MIG-b23491d8-d784-58d9-bcfa-3c171ead22da'
+
+progress_after=$(kubectl exec -n hami-mig-retest mixed-large -- \
+  cat /tmp/gpu-progress)
+printf 'progress: %s -> %s\n' "$progress_before" "$progress_after"
+test "$progress_after" -gt "$progress_before"
+```
+
+This proves the tested happy path for a valid annotation. It is not a guarantee that incomplete or malformed state can always be adopted.
+
+> **Node-wide safety warning:** `filterdevices` limits HAMi registration and scheduling, but at this commit it does not limit Dynamic MIG startup cleanup. The log shows that startup reconciled all eight physical GPUs, including filtered ones. Inventory and drain the entire node before the first install or a plugin restart; filtering a GPU is not a protection boundary.
+
+## Test 6: the fifth pod spills to GPU 5
+
+After deleting the mixed-profile workload and confirming no MIG instances remained, we changed the exclusion list from:
+
+```bash
+kubectl delete pod mixed-large -n hami-mig-retest
+
+until ! nvidia-smi -L | grep -q '^  MIG '; do
+  sleep 2
+done
+```
+
+```json
+"index": [0, 1, 2, 3, 5, 6, 7]
+```
+
+to:
+
+```json
+"index": [0, 1, 2, 3, 6, 7]
+```
+
+That made GPUs 4 and 5 available to HAMi. We applied the values and explicitly restarted the plugin only after confirming the whole node was idle:
+
+```bash
+helm upgrade hami "$LAB/HAMi/charts/hami" \
+  -n hami-system \
+  --reset-values \
+  -f "$LAB/hami-current-mig-values.yaml" \
+  --wait \
+  --timeout 10m
+
+# This configuration change did not trigger a plugin rollout by itself.
+kubectl rollout restart daemonset/hami-device-plugin -n hami-system
+kubectl rollout status daemonset/hami-device-plugin \
+  -n hami-system --timeout=180s
+```
+
+This revealed a chart behavior worth knowing: Helm successfully updated the node-configuration ConfigMap, but the DaemonSet template did not checksum that ConfigMap. Registration stayed unchanged until we restarted the plugin.
+
+The node then registered GPUs 4 and 5 in MIG mode. Scaling the small-pod Deployment to five produced this real distribution:
+
+```bash
+kubectl scale deployment/mig-small-pack \
+  -n hami-mig-retest --replicas=5
+kubectl rollout status deployment/mig-small-pack \
+  -n hami-mig-retest --timeout=180s
+
+kubectl get pods -n hami-mig-retest -l app=mig-small-pack -o json |
+jq -r '
+  ["POD", "PARENT_GPU", "PROFILE", "START", "MIG_UUID"],
+  (
+    .items
+    | sort_by(.metadata.name)[]
+    | . as $pod
+    | ($pod.metadata.annotations["hami.io/vgpu-mig-allocations"] | fromjson | .[0]) as $a
+    | [
+        $pod.metadata.name,
+        $a.gpuUUID,
+        $a.profile,
+        ($a.placement.start | tostring),
+        $a.migUUID
+      ]
+  )
+  | @tsv
+'
+```
+
+```text
+POD                               PARENT_GPU                                   PROFILE    START
+mig-small-pack-6f5b7bd7b-dwld2    GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   3
+mig-small-pack-6f5b7bd7b-g72fd    GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   0
+mig-small-pack-6f5b7bd7b-jgql2    GPU-04dc48d7-7048-aef5-ad36-f5db716e7668   1g.24gb   9
+mig-small-pack-6f5b7bd7b-rlxbn    GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   9
+mig-small-pack-6f5b7bd7b-vjfv9    GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   6
+```
+
+GPU 4 held all four legal `1g.24gb` placements. The fifth pod received a legal placement on GPU 5. Again, its first placement happened to start at `9`; HAMi does not promise to allocate starts in numerical order.
+
+## Cleanup and final state
+
+We deleted the test namespace and waited for all per-pod MIG instances to be reclaimed:
+
+```bash
+kubectl delete namespace hami-mig-retest \
+  --wait=true --timeout=180s
+
+if nvidia-smi -L | grep -q '^  MIG '; then
+  echo 'FAIL: MIG instances remain'
+  nvidia-smi -L
+else
+  echo 'PASS: no MIG instances remain'
+fi
+```
+
+Then we restored the original exclusion list, applied the values, and performed the same safe plugin restart. The final verification was:
+
+```bash
+printf 'Registered GPU indices: '
+kubectl get node "$NODE" -o json |
+jq -r '
+  .metadata.annotations["hami.io/node-nvidia-register"]
+  | fromjson
+  | map(.index)
+  | join(",")
+'
+
+if nvidia-smi -L | grep -q '^  MIG '; then
+  echo 'MIG state: FAIL — instances remain'
+else
+  echo 'MIG state: PASS — no instances remain'
+fi
+
+kubectl get pods -n hami-system
+```
+
+```text
+Registered GPU indices: 4
+MIG state: PASS — no instances remain
+NAME                              READY   STATUS    RESTARTS
+hami-device-plugin-6snlc          2/2     Running   0
+hami-scheduler-74fbfcfbb5-qxftm   2/2     Running   0
+```
+
+That left the lab in its intended baseline: only GPU 4 registered with HAMi, no test MIG instances, and both HAMi components healthy.
+
+## Operational traps we hit
+
+### Chart metadata is not the runtime version
+
+At the tested commit, the chart still defaults to `v2.9.0`. Pin and inspect the live images for the scheduler extender, device plugin, and monitor. Do not publish `latest`, and do not rely on Helm's app-version label.
+
+### `operatingmode` is not `migStrategy`
+
+Use per-node `operatingmode: "mig"` for HAMi Dynamic MIG. Keep the Helm-level `devicePlugin.migStrategy` decision separate; changing only the similarly named field inside the JSON is not how this chart controls the NVIDIA plugin flag.
+
+### `filterdevices` excludes registration, not startup mutation
+
+The exclusion list controls which GPUs HAMi advertises for scheduling. It does not isolate the other physical cards from startup reconciliation. Treat first installation and plugin restart as node-wide maintenance at this commit.
+
+### A Helm upgrade may not restart the device plugin
+
+Changing `devicePlugin.nodeConfiguration.config` updated the ConfigMap but did not roll the DaemonSet in our test. Restart it deliberately, only after the node-wide safety check, then verify the registration annotation rather than trusting Helm's success message.
+
+### Scheduler events can use inherited language
+
+`CardTimeSlicingExhausted` described exhausted MIG placements in this run; it did not mean HAMi silently switched to time slicing. Confirm the allocation annotation and host MIG state before interpreting a generic reason string.
+
+### Reclamation is eventual, and UUIDs may be reused
+
+Poll the actual host state after pod deletion. The same placement can return the same MIG UUID, so disappearance between deletion and recreation is stronger lifecycle evidence than UUID inequality.
+
+### Legal placement still controls mixed profiles
+
+Dynamic does not mean arbitrary. The scheduler can combine profiles only when their NVML placement intervals do not overlap, and active instances cannot be destroyed just to satisfy a new request.
+
+### Homogeneous success is not a heterogeneous-node guarantee
+
+This node contained eight identical supported GPUs. Test mixed-model nodes separately; do not assume that filtering unsupported cards reproduces the same startup behavior.
 
 ## Conclusion
 
-1. Established what dynamic MIG is: HAMi's scheduler carving real MIG instances on demand from the card's geometry menu, same request API as software slicing, hardware isolation per pod.
-2. Configured a node pool for `operatingmode: mig` and proved the request-to-profile rounding with the two-mode nvidia-smi fingerprint.
-3. Proved that over-capacity requests fail at scheduling time rather than runtime.
-4. Proved dynamic re-carving end to end: a `gpumem: 30000` request arrived at a card holding four idle 24GB partitions, and HAMi wiped and re-carved them into `2g.48gb` slices in about 35 seconds, with no human in the loop and no drain.
-5. Closed the trilogy's decision framework: time-slicing enforces nothing, hami-core enforces in software with exact sizes, static MIG enforces in silicon with fixed menus, and dynamic MIG buys the silicon walls with scheduler-speed lifecycle, per node, under one API.
+Topology-aware Dynamic MIG kept the Kubernetes API simple while making the hardware lifecycle precise. An 8,000 MiB request selected `1g.24gb`; four legal placements filled GPU 4; a fifth pod used GPU 5; and `1g.24gb` plus `2g.48gb` occupied legal mixed placements on the same card.
 
-HAMi is a CNCF Incubating project; the docs live at [project-hami.io](https://project-hami.io/) and the source at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). If you are landing here first, start the trilogy from the beginning with the [MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig), then the [HAMi software vGPU guide](/blog/sharing-gpus-in-kubernetes-with-hami).
+The most useful result was not just allocation. HAMi reclaimed the small pod's exact GI/CI while its neighbor kept computing, and a valid allocation survived device-plugin restart and adoption. Those are the behaviors a dynamic controller needs to prove.
+
+The caveats are equally important. Profile rounding and NVIDIA placement rules remain. Version alignment must be verified from live images. At this snapshot, plugin startup has a node-wide hardware scope even when only one GPU is registered, so controlled installation and restart procedures are mandatory.
+
+HAMi is a CNCF Incubating project. Its source is at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). Existing installations can use the [pinned Dynamic MIG migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md) when moving to this per-pod implementation.
+
+If you are joining the series here, read the [static MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig) and the [HAMi software vGPU guide](/blog/sharing-gpus-in-kubernetes-with-hami) first.
