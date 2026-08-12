@@ -171,7 +171,7 @@ mkdirSync(output, { recursive: true });
   sketch.arrow(915, 372, 915, 410, { stroke: COLORS.ink });
   sketch.text(915, 454, 'both CUDA workloads progressed', { size: 18, weight: 700, color: COLORS.teal.stroke });
   sketch.text(915, 487, 'delete 1g · 2g keeps running', { size: 17, color: COLORS.muted });
-  sketch.text(64, 588, 'tested at commit 634bf2b · August 11, 2026', { size: 18, anchor: 'start', weight: 700, color: COLORS.orange.stroke });
+  sketch.text(64, 588, 'PER-POD GI/CI LIFECYCLE · LIVE CUDA TEST', { size: 18, anchor: 'start', weight: 700, color: COLORS.orange.stroke });
   sketch.save(join(output, 'cover.svg'));
 }
 

@@ -258,7 +258,7 @@ export default function DynamicMigLifecycleAnimation() {
           How one request becomes one hardware instance
         </h3>
         <p className="dynamic-mig-lifecycle__subtitle">
-          This is the topology-aware flow we tested at commit 634bf2b: discover, reserve, create, and reclaim one legal placement for one pod.
+          This is the topology-aware flow verified in this lab: discover, reserve, create, and reclaim one legal placement for one pod.
         </p>
 
         <div aria-hidden="true">
@@ -280,7 +280,7 @@ export default function DynamicMigLifecycleAnimation() {
           <div className="dynamic-mig-lifecycle__gpu">
             <div className="dynamic-mig-lifecycle__gpu-head">
               <strong>Verified mixed placement on GPU 4</strong>
-              <span>NVML coordinates 0–12</span>
+              <span>NVML placement intervals · not GiB</span>
             </div>
             <div className="dynamic-mig-lifecycle__placements">
               <div className="dynamic-mig-lifecycle__placement" style={{ '--placement-color': '#1971c2', '--placement-delay': '2.2s' }}>

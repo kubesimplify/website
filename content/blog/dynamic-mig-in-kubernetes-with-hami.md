@@ -34,7 +34,7 @@ The results were straightforward:
 - Deleting the small workload reclaimed only its MIG instance; the neighboring CUDA workload continued.
 - A valid active allocation survived a HAMi device-plugin restart with the same MIG UUID and continued CUDA progress.
 
-> **Version and migration note:** [PR #2378](https://github.com/Project-HAMi/HAMi/pull/2378) is merged, and this post tests the resulting per-pod implementation at [commit `634bf2b32e68`](https://github.com/Project-HAMi/HAMi/commit/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1). The chart at that commit still defaults to the pre-merge `v2.9.0` image, so explicitly pin the built image. Existing `knownMigGeometries` users should follow the [migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md); the walkthrough below covers only the merged per-pod design.
+> **Version and migration note:** [PR #2378](https://github.com/Project-HAMi/HAMi/pull/2378) is merged, and this post tests the resulting per-pod implementation at [commit `634bf2b32e68`](https://github.com/Project-HAMi/HAMi/commit/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1). At the time of this rerun, the latest tagged release was `v2.9.0`, which predates that implementation, so reproducing the lab requires the pinned source build below. Once HAMi publishes a release containing PR #2378, prefer its matching official chart and image. Existing `knownMigGeometries` users should follow the [migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md); the walkthrough below covers only the merged per-pod design.
 
 {{dynamic-mig-lifecycle-animation}}
 
@@ -100,7 +100,7 @@ nvidia:
       profiles: ["1g.24gb", "2g.48gb", "4g.96gb"]
 ```
 
-For every allowed profile, the node plugin asks NVIDIA's Management Library (NVML) for memory, compute metadata, instance count, and legal placements. The scheduler then chooses the smallest profile that satisfies the request and fits without overlapping a live placement.
+For every allowed profile, the HAMi device plugin running on the GPU node asks NVIDIA's Management Library (NVML) for memory, compute metadata, instance count, and legal placements. The scheduler then chooses the smallest profile that satisfies the request and fits without overlapping a live placement.
 
 ## Lab environment
 
@@ -114,14 +114,12 @@ For every allowed profile, the node plugin asks NVIDIA's Management Library (NVM
 | OS | Ubuntu 24.04.4 LTS, kernel `6.8.0-100-generic` |
 | Container runtime | containerd `2.2.1` |
 | HAMi source | `634bf2b32e68e07d3fbcbd6da1ee079392fc07c1` |
-| HAMi image | `localhost/hami-dynamic-mig:master-634bf2b32e68` |
-| Image digest | `sha256:0ddda56e333ff74e52d9908e00b85e7860cf4694fc09951aaa178e8c8e6dde76` |
 
 The run started with MIG mode enabled on all eight cards and no active CUDA processes:
 
 ```bash
 nvidia-smi \
-  --query-gpu=index,name,driver_version,memory.total,mig.mode.current \
+  --query-gpu=index,name,uuid,driver_version,memory.total,mig.mode.current \
   --format=csv
 
 nvidia-smi \
@@ -129,7 +127,27 @@ nvidia-smi \
   --format=csv
 ```
 
-The first command inventories the hardware and MIG mode. The second checks for active compute processes before any lifecycle operation. We saw indices `0` through `7`, driver `610.43.02`, `97887 MiB`, and `Enabled` on every GPU. The compute-process query returned only its header.
+The first command inventories the hardware and MIG mode. It returned all eight cards:
+
+```text
+index, name, uuid, driver_version, memory.total [MiB], mig.mode.current
+0, NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-8b89b58e-b427-108d-ac50-06138d78fe78, 610.43.02, 97887 MiB, Enabled
+1, NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-03a041b7-8abf-360a-d1a2-dfd70188cd5f, 610.43.02, 97887 MiB, Enabled
+2, NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-ba09367f-dd50-32ca-e988-7ff66bece885, 610.43.02, 97887 MiB, Enabled
+3, NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-30512c46-708b-f374-5698-ee24be6cd626, 610.43.02, 97887 MiB, Enabled
+4, NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288, 610.43.02, 97887 MiB, Enabled
+5, NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-04dc48d7-7048-aef5-ad36-f5db716e7668, 610.43.02, 97887 MiB, Enabled
+6, NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-f4f5db98-143f-0a8d-47ce-956fab39a736, 610.43.02, 97887 MiB, Enabled
+7, NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-f4c61521-240a-da09-2787-e576034e197e, 610.43.02, 97887 MiB, Enabled
+```
+
+The second command checks for active compute processes before any lifecycle operation. Its real output contained only the header:
+
+```text
+gpu_uuid, pid, process_name, used_gpu_memory [MiB]
+```
+
+That means no CUDA compute process was active at that instant.
 
 > **Host versus cluster commands:** run host-level `nvidia-smi`, Docker, and `ctr` commands on the GPU node. Run `kubectl` and Helm from any machine whose kubeconfig targets the intended cluster. In this lab they all ran on the single RTX node.
 
@@ -199,7 +217,7 @@ sudo ctr --namespace k8s.io images import "$LAB/hami-$HAMI_TAG.tar"
 sudo ctr --namespace k8s.io images list | grep -F "$HAMI_IMAGE"
 ```
 
-That local import is suitable only because the scheduler, plugin, and both tested GPUs lived on the same node. On multiple nodes, push to a registry or import the image on every target node.
+That local import is suitable only because the scheduler, plugin, and both tested GPUs lived on the same node. `localhost/...` is not an image that another node can pull. On multiple nodes, push the pinned build to a registry or import it on every target node.
 
 ### 3. Use current Dynamic MIG values
 
@@ -342,7 +360,7 @@ The live discovery was:
 | `2g.48gb` | 48,512 | 50 | 2 | `(0,6)`, `(6,6)` |
 | `4g.96gb` | 97,408 | 100 | 4 | `(0,12)` |
 
-The `start` and `size` fields are NVML placement coordinates, used as a non-overlapping interval. They are not GiB, and `size` is not the same thing as `sliceCount`. Notice that `1g.24gb` has `sliceCount: 1` but placement `size: 3` on this GPU.
+NVML reports each legal placement as `start` and `size`: `start` is the index of the first occupied memory slice, and `size` is the number of memory slices occupied. Together they describe the half-open interval `[start, start + size)`. On this RTX PRO 6000, the reported placement range was `[0,12)`; these values are not GiB and are specific to this GPU. Also, `size` is not the same thing as `sliceCount`: `1g.24gb` has `sliceCount: 1` but placement `size: 3` here.
 
 The registered `count: 4` is a coarse maximum derived from the profiles. It does not mean every arbitrary combination of four profiles fits. The placement arrays and current occupancy determine real capacity.
 

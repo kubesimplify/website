@@ -37,5 +37,5 @@
 <path d="M 916.7 408.7 Q 917.5 406.0 921.6 398.8" stroke="#172033" stroke-width="2.6" fill="none" stroke-linecap="round"/>
 <text x="915" y="454" font-family="Chalkboard SE, Comic Sans MS, sans-serif" font-size="18" font-weight="700" fill="#087f5b" text-anchor="middle">both CUDA workloads progressed</text>
 <text x="915" y="487" font-family="Chalkboard SE, Comic Sans MS, sans-serif" font-size="17" font-weight="500" fill="#5c677d" text-anchor="middle">delete 1g · 2g keeps running</text>
-<text x="64" y="588" font-family="Chalkboard SE, Comic Sans MS, sans-serif" font-size="18" font-weight="700" fill="#d9480f" text-anchor="start">tested at commit 634bf2b · August 11, 2026</text>
+<text x="64" y="588" font-family="Chalkboard SE, Comic Sans MS, sans-serif" font-size="18" font-weight="700" fill="#d9480f" text-anchor="start">PER-POD GI/CI LIFECYCLE · LIVE CUDA TEST</text>
 </svg>
