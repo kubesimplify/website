@@ -158,7 +158,7 @@ docker run -d --name vllm-lightning --gpus all --ipc=host --network=host \
   --enable-auto-tool-choice
 ```
 
-One change from NVIDIA's recipe: they say `--gpu-memory-utilization 0.91`, which on this box pre-allocates around 85GB of KV cache. Spark owners will recognize that number: pre-allocations past roughly 80GB are where the machine can freeze. At 0.80 the server allocated 75GB of KV cache and started cleanly (weights are 21.5GB, engine init took just under 2 minutes).
+One note on NVIDIA's recipe: it sets `--gpu-memory-utilization 0.91`, which on this box allocates 88GB of KV cache. I tested both. 0.91 starts and runs fine on this stack, and decodes at the same speed, but it leaves about 1GB of free system memory on a machine where CPU and GPU share the pool. I ran the benchmarks at 0.80: identical single-stream decode, 75GB of KV cache, and 12GB of headroom. The bigger allocation only buys you more concurrent requests, so if the Spark is doing anything else at all, 0.80 is the safer number (weights are 21.5GB, engine init took just under 2 minutes).
 
 Same prompts, same method as the Ollama tests:
 
