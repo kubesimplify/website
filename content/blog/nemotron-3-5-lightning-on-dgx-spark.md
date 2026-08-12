@@ -183,6 +183,8 @@ agent runs:  decode @ 98.28 / 94.31 / 95.90 tok/s
 
 So the recommended path is roughly 1.5x the Ollama decode speed and about 2x the prefill, on the same hardware, and it holds ~90 tok/s with 21K tokens of context on the clock. The DSpark draft model is doing real work here: the one public comparison point, a sibling 30B-A3B NVFP4 on a Spark without speculative decoding, sits at 57 tok/s.
 
+One tuning note before someone asks: there is a playbook variant of this command with 256K context and `num_speculative_tokens: 7` instead of 3. I ran that too. Single stream it is slower and noisier (80 to 93 tok/s against a steady 108), because every verification pass pays for seven drafted tokens whether or not they get accepted. Three is the right draft length for this box; the deeper draft only makes sense if your acceptance rate is unusually high.
+
 Two smaller things this test surfaced. First, my "8,194 token prompt" in the Ollama runs was actually Ollama silently truncating a much longer prompt to fit its context setting; vLLM processed the full 21,218 tokens. The per-token prefill rates stand, but it is a good reminder to check `prompt_eval_count` when you benchmark Ollama. Second, these vLLM numbers came through the completions endpoint without the chat template, so the model skipped its long thinking pass on the agent prompt; decode speed is comparable, token counts are not, so I am not re-running the token-efficiency comparison here.
 
 ## Reality check
