@@ -187,6 +187,20 @@ One tuning note before someone asks: there are configs circulating that set 256K
 
 Two smaller things this test surfaced. First, my "8,194 token prompt" in the Ollama runs was actually Ollama silently truncating a much longer prompt to fit its context setting; vLLM processed the full 21,218 tokens. The per-token prefill rates stand, but it is a good reminder to check `prompt_eval_count` when you benchmark Ollama. Second, these vLLM numbers came through the completions endpoint without the chat template, so the model skipped its long thinking pass on the agent prompt; decode speed is comparable, token counts are not, so I am not re-running the token-efficiency comparison here.
 
+### Benchmark it yourself
+
+The community leaderboard for this box is [Spark Arena](https://spark-arena.com), and it standardizes on llama-benchy sweeps. To run the same sweep against the server above, raise `--max-model-len` to 262144 in the serve command so the deeper context points fit, then:
+
+```bash
+pip install llama-benchy
+llama-benchy --base-url http://localhost:8000/v1 --model nemotron-3.5-lightning \
+  --depth 0 4096 8192 16384 32768 65535 100000 \
+  --pp 2048 --tg 128 --enable-prefix-caching \
+  --concurrency 1 2 5 10 --save-result results.csv
+```
+
+One reading tip for leaderboard numbers, there or anywhere: check whether a tok/s figure is single-stream or an aggregate peak across concurrent requests. The same recipe that decodes around 110 tok/s for one user can show 230+ tok/s summed over ten parallel streams, and the two numbers answer different questions.
+
 ## Reality check
 
 A few things to know before you use these numbers:
