@@ -515,6 +515,14 @@ GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   6      3
 GPU-4c395b7a-a7e6-d90f-1ced-d96e8dd68288   1g.24gb   9      3
 ```
 
+<figure class="blog-video">
+  <video controls muted playsinline preload="metadata" aria-label="Four 1g.24gb MIG instances created on one RTX PRO 6000 GPU">
+    <source src="/img/blog/dynamic-mig-in-kubernetes-with-hami/4mig.mp4" type="video/mp4" />
+    Your browser does not support embedded MP4 video. You can <a href="/img/blog/dynamic-mig-in-kubernetes-with-hami/4mig.mp4">open the recording directly</a>.
+  </video>
+  <figcaption>Four pods fill the four legal <code>1g.24gb</code> placements on GPU 4.</figcaption>
+</figure>
+
 With only GPU 4 registered, scaling to five did **not** overcommit the card:
 
 ```bash
@@ -541,6 +549,14 @@ kubectl scale deployment/mig-small-pack \
 ## Test 3: mixed profiles share one physical GPU
 
 The topology-aware implementation can place different profiles together whenever NVML reports legal, non-overlapping placements.
+
+<figure class="blog-video">
+  <video controls muted playsinline preload="metadata" aria-label="Live HAMi Dynamic MIG test with 8000 MiB and 30000 MiB pod requests on one RTX PRO 6000 GPU">
+    <source src="/img/blog/dynamic-mig-in-kubernetes-with-hami/mixed-profiles-lifecycle.mp4" type="video/mp4" />
+    Your browser does not support embedded MP4 video. You can <a href="/img/blog/dynamic-mig-in-kubernetes-with-hami/mixed-profiles-lifecycle.mp4">open the recording directly</a>.
+  </video>
+  <figcaption>A live terminal recording: requests for 8,000 MiB and 30,000 MiB become <code>1g.24gb</code> and <code>2g.48gb</code> instances on the same GPU. Each instance is reclaimed when its requesting pod is deleted; the recording is shown at 2.5&times; speed to shorten the waits.</figcaption>
+</figure>
 
 We cleared the small-pod Deployment, then created an 8,000 MiB pod and a 30,000 MiB pod. Both used the same CUDA loop and were pinned to GPU 4 with `nvidia.com/use-gpuuuid` so the test measured one physical card:
 
