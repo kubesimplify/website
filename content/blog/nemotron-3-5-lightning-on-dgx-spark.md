@@ -1,7 +1,7 @@
 ---
 title: "Running Nemotron 3.5 Lightning on DGX Spark"
 seoTitle: "Running Nemotron 3.5 Lightning on DGX Spark"
-seoDescription: "NVIDIA's new Nemotron 3.5 Lightning on DGX Spark with Ollama: how to run it, the tokens per second I measured, and how it compares to other models on the same box."
+seoDescription: "NVIDIA's new Nemotron 3.5 Lightning on DGX Spark: how to run it with Ollama and vLLM, the tokens per second I measured, and how the two paths compare."
 datePublished: 2026-08-11T17:40:00.000Z
 slug: nemotron-3-5-lightning-on-dgx-spark
 author: saiyam-pathak
@@ -133,11 +133,63 @@ Where Lightning does win is token efficiency. I gave qwen3.5:35b-a3b the exact C
 
 Qwen thought four times longer to reach the same place. One prompt is not a benchmark, but it is exactly the behavior NVIDIA claims Lightning was trained for: their PinchBench pitch is 30% faster task completion at similar accuracy, a time-to-done argument rather than a tok/s argument. On this one task the agent step finished 4.4x sooner. For an agent doing thousands of steps a day, tokens per step matters more than tokens per second.
 
+## Update: the NVFP4 checkpoint with vLLM and DSpark
+
+The Ollama numbers above are the Q4_K_M GGUF. NVIDIA's recommended path for the Spark is different: the NVFP4 checkpoint served by vLLM with the DSpark draft model doing speculative decoding. The exact recipe is on the [NVFP4 model card](https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4), and it runs in the stock `vllm/vllm-openai:v0.27.1` image, no special Spark build needed:
+
+```bash
+docker run -d --name vllm-lightning --gpus all --ipc=host --network=host \
+  -v $HOME/.cache/huggingface:/root/.cache/huggingface \
+  vllm/vllm-openai:v0.27.1 \
+  --model nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 \
+  --served-model-name nemotron-3.5-lightning \
+  --moe-backend marlin \
+  --kv-cache-dtype fp8 \
+  --max-model-len 65536 \
+  --enable-prefix-caching \
+  --speculative_config.method dspark \
+  --speculative_config.model nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4-DSpark \
+  --speculative_config.num_speculative_tokens 3 \
+  --mamba-backend flashinfer \
+  --mamba-cache-mode align \
+  --gpu-memory-utilization 0.80 \
+  --reasoning-parser nemotron_v3 \
+  --tool-call-parser qwen3_coder \
+  --enable-auto-tool-choice
+```
+
+One change from NVIDIA's recipe: they say `--gpu-memory-utilization 0.91`, which on this box pre-allocates around 85GB of KV cache. Spark owners will recognize that number: pre-allocations past roughly 80GB are where the machine can freeze. At 0.80 the server allocated 75GB of KV cache and started cleanly (weights are 21.5GB, engine init took just under 2 minutes).
+
+Same prompts, same method as the Ollama tests:
+
+![Ollama vs vLLM decode and prefill speeds for Nemotron 3.5 Lightning on DGX Spark](/img/blog/nemotron-3-5-lightning-on-dgx-spark/ollama-vs-vllm.png)
+
+| Test | Ollama (GGUF Q4_K_M) | vLLM (NVFP4 + DSpark) |
+|---|---|---|
+| Short prompt, 500 token decode | 72 tok/s | **108 tok/s** |
+| Agent-style prompt, decode | 86 tok/s | **95 to 98 tok/s** |
+| Long prompt, decode after prefill | 84 to 87 tok/s | **88 to 90 tok/s** |
+| Prefill, uncached | ~2,600 tok/s | **~5,400 tok/s** |
+
+The raw vLLM runs:
+
+```
+short run 1: decode 500 tok @ 108.31 tok/s
+short run 2: decode 500 tok @ 108.26 tok/s
+short run 3: decode 500 tok @ 108.22 tok/s
+long  run 1: prompt 21218 tok, TTFT 3.93s (~5,394 tok/s prefill) | decode @ 89.92 tok/s
+agent runs:  decode @ 98.28 / 94.31 / 95.90 tok/s
+```
+
+So the recommended path is roughly 1.5x the Ollama decode speed and about 2x the prefill, on the same hardware, and it holds ~90 tok/s with 21K tokens of context on the clock. The DSpark draft model is doing real work here: the one public comparison point, a sibling 30B-A3B NVFP4 on a Spark without speculative decoding, sits at 57 tok/s.
+
+Two smaller things this test surfaced. First, my "8,194 token prompt" in the Ollama runs was actually Ollama silently truncating a much longer prompt to fit its context setting; vLLM processed the full 21,218 tokens. The per-token prefill rates stand, but it is a good reminder to check `prompt_eval_count` when you benchmark Ollama. Second, these vLLM numbers came through the completions endpoint without the chat template, so the model skipped its long thinking pass on the agent prompt; decode speed is comparable, token counts are not, so I am not re-running the token-efficiency comparison here.
+
 ## Reality check
 
 A few things to know before you use these numbers:
 
-1. **This is the GGUF, not NVFP4.** The whole Lightning story on Blackwell hardware is the NVFP4 checkpoint with the dedicated kernels, plus the DSpark draft model that NVIDIA explicitly recommends for DGX Spark inference.
+1. **Runtime matters as much as model.** The same checkpoint family spans 72 to 108 tok/s on this box depending on how you serve it. Quote numbers with their runtime attached.
 2. **Single stream only.** These are one-user interactive numbers. If you want aggregate throughput, that is a vLLM or TensorRT-LLM concurrency story (NVIDIA published [deployment guides](https://developer.nvidia.com/blog/nvidia-nemotron-3-5-lightning-delivers-fast-accurate-specialized-task-execution-for-long-running-agents/) for both).
 3. **Launch-day software.** Ollama support is hours old. Expect the numbers to move as kernels and the runtime settle. I will update if they move meaningfully.
 
@@ -147,4 +199,4 @@ There is one other public number to compare against: the [NVIDIA forum benchmark
 
 The interesting part is not the benchmark table, it is the division of labor NVIDIA is pushing. Alongside Lightning they released [NeMo Switchyard](https://developer.nvidia.com/blog/route-ai-agent-workloads-across-models-with-nvidia-nemo-switchyard/), an open source model router: plans go up to a frontier model, execution comes down to Lightning. LangChain measured a 74% cost reduction routing between Lightning and Claude Opus 4.8 with only 7% of calls escalating to the frontier model, at about a 6 point accuracy tradeoff.
 
-A 3B-active model decoding in the 70s and 80s on a desktop box fits that execution layer well. Two follow-ups I want to do: the NVFP4 checkpoint with the DSpark draft model on this same hardware (the setup NVIDIA actually recommends for Spark), and Lightning as the local execution model with a frontier model in the cloud for planning, Switchyard in between. If that sounds interesting, subscribe.
+A 3B-active model decoding at 108 tok/s on a desktop box fits that execution layer well. The follow-up I want to do next: Lightning on the Spark as the local execution model, a frontier model in the cloud for planning, and Switchyard routing between them. If that sounds interesting, subscribe.
