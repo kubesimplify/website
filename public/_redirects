@@ -70,6 +70,7 @@
 /blog/docker-captain-journey                                                           /docker-captain-journey  301!
 /blog/docker-mcp-catalog                                                               /docker-mcp-catalog  301!
 /blog/docker-networking-demystified                                                    /docker-networking-demystified  301!
+/blog/dynamic-mig-in-kubernetes-with-hami                                              /dynamic-mig-in-kubernetes-with-hami  301!
 /blog/embed-http-servers-in-wasm-with-rust-and-csharp                                  /embed-http-servers-in-wasm-with-rust-and-csharp  301!
 /blog/enhancing-runtime-security-with-falco-my-hands-on-experience                     /enhancing-runtime-security-with-falco-my-hands-on-experience  301!
 /blog/ephemeral-pull-request-environment-using-vcluster                                /ephemeral-pull-request-environment-using-vcluster  301!
@@ -160,6 +161,7 @@
 /blog/my-kubecon-euvirtual-experience                                                  /my-kubecon-euvirtual-experience  301!
 /blog/my-schedule-for-kubecon-cloudnativecon-eu-2022                                   /my-schedule-for-kubecon-cloudnativecon-eu-2022  301!
 /blog/navigating-through-cncf-landscape                                                /navigating-through-cncf-landscape  301!
+/blog/nemotron-3-5-lightning-on-dgx-spark                                              /nemotron-3-5-lightning-on-dgx-spark  301!
 /blog/nemotron3-on-dgx-spark                                                           /nemotron3-on-dgx-spark  301!
 /blog/networking-fundamentals-for-devops                                               /networking-fundamentals-for-devops  301!
 /blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet /nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet  301!
@@ -290,6 +292,7 @@
 /docker-captain-journey                                                           /blog/docker-captain-journey  200!
 /docker-mcp-catalog                                                               /blog/docker-mcp-catalog  200!
 /docker-networking-demystified                                                    /blog/docker-networking-demystified  200!
+/dynamic-mig-in-kubernetes-with-hami                                              /blog/dynamic-mig-in-kubernetes-with-hami  200!
 /embed-http-servers-in-wasm-with-rust-and-csharp                                  /blog/embed-http-servers-in-wasm-with-rust-and-csharp  200!
 /enhancing-runtime-security-with-falco-my-hands-on-experience                     /blog/enhancing-runtime-security-with-falco-my-hands-on-experience  200!
 /ephemeral-pull-request-environment-using-vcluster                                /blog/ephemeral-pull-request-environment-using-vcluster  200!
@@ -380,6 +383,7 @@
 /my-kubecon-euvirtual-experience                                                  /blog/my-kubecon-euvirtual-experience  200!
 /my-schedule-for-kubecon-cloudnativecon-eu-2022                                   /blog/my-schedule-for-kubecon-cloudnativecon-eu-2022  200!
 /navigating-through-cncf-landscape                                                /blog/navigating-through-cncf-landscape  200!
+/nemotron-3-5-lightning-on-dgx-spark                                              /blog/nemotron-3-5-lightning-on-dgx-spark  200!
 /nemotron3-on-dgx-spark                                                           /blog/nemotron3-on-dgx-spark  200!
 /networking-fundamentals-for-devops                                               /blog/networking-fundamentals-for-devops  200!
 /nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet /blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet  200!

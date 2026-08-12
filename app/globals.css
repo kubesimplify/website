@@ -405,6 +405,25 @@ a:focus-visible, button:focus-visible {
   margin: 1.5em auto;
 }
 
+.prose-blog .blog-video {
+  margin: 1.75em 0;
+}
+.prose-blog .blog-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: #05070a;
+}
+.prose-blog .blog-video figcaption {
+  margin-top: 0.65rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .prose-blog hr {
   border: 0;
   height: 1px;
@@ -484,6 +503,10 @@ a:focus-visible, button:focus-visible {
   color: var(--text-secondary);
 }
 .prose-blog [data-rehype-pretty-code-title] + pre {
+  border-radius: 0 0 0.75rem 0.75rem;
+  margin-top: 0;
+}
+.prose-blog [data-rehype-pretty-code-title] + .blog-code-block pre {
   border-radius: 0 0 0.75rem 0.75rem;
   margin-top: 0;
 }

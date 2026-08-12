@@ -6,8 +6,24 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 10 Aug 2026 14:15:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 11 Aug 2026 17:40:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>Running Nemotron 3.5 Lightning on DGX Spark</title>
+      <link>https://blog.kubesimplify.com/nemotron-3-5-lightning-on-dgx-spark</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/nemotron-3-5-lightning-on-dgx-spark</guid>
+      <pubDate>Tue, 11 Aug 2026 17:40:00 GMT</pubDate>
+      <description>NVIDIA&apos;s new Nemotron 3.5 Lightning on DGX Spark: how to run it with Ollama and vLLM, the tokens per second I measured, and how the two paths compare.</description>
+      <category>nvidia</category><category>dgxspark</category><category>nemotron</category><category>ai-agents</category><category>ollama</category>
+    </item>
+    <item>
+      <title>HAMi Dynamic MIG on RTX PRO 6000: A Live Kubernetes Test</title>
+      <link>https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami</guid>
+      <pubDate>Tue, 11 Aug 2026 10:00:00 GMT</pubDate>
+      <description>A hands-on test of topology-aware HAMi Dynamic MIG on RTX PRO 6000 Blackwell, with pinned setup commands, real allocations, mixed profiles, reclamation, and recovery.</description>
+      <category>kubernetes</category><category>gpu</category><category>nvidia</category><category>platform-engineering</category>
+    </item>
     <item>
       <title>Devin Outposts on Kubernetes: Why Your AI Agent Needs Your Cluster</title>
       <link>https://blog.kubesimplify.com/devin-outposts-on-kubernetes</link>

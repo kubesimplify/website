@@ -8,7 +8,6 @@ import { renderMarkdown } from '@/lib/markdown';
 import BlogReadingProgress from '@/components/BlogReadingProgress';
 import BlogToc from '@/components/BlogToc';
 import BlogShareBar from '@/components/BlogShareBar';
-import CodeBlockEnhancer from '@/components/CodeBlockEnhancer';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import SponsorCallout from '@/components/SponsorCallout';
 import AuthorSocials from '@/components/AuthorSocials';
@@ -301,9 +300,6 @@ export default async function BlogPost({ params }) {
                   </div>
                 </section>
               )}
-
-              <CodeBlockEnhancer />
-
               <hr className="my-12" style={{ borderColor: 'var(--border-subtle)' }} />
 
               <SponsorCallout sponsor={post.sponsor} variant="cta" />
