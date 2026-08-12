@@ -1,14 +1,27 @@
 ---
 title: "HAMi Dynamic MIG on RTX PRO 6000: A Live Kubernetes Test"
 seoTitle: "HAMi Dynamic MIG on Kubernetes: RTX PRO 6000 Live Test"
-seoDescription: "A hands-on test of topology-aware HAMi Dynamic MIG on RTX PRO 6000 Blackwell, with pinned setup commands, real allocations, mixed profiles, reclamation, and recovery."
-datePublished: 2026-08-11T10:00:00.000Z
+seoDescription: "Hands-on HAMi Dynamic MIG test on Kubernetes and RTX PRO 6000 Blackwell: setup commands, real allocations, mixed profiles, reclamation, and recovery."
+datePublished: "2026-08-11T10:00:00.000Z"
 slug: dynamic-mig-in-kubernetes-with-hami
 author: shubham-katara
 authors: ["shubham-katara", "saiyam-pathak"]
 cover: /img/blog/dynamic-mig-in-kubernetes-with-hami/cover.png
-tags: ["kubernetes", "gpu", "nvidia", "platform-engineering"]
+tags: ["kubernetes", "gpu", "nvidia", "hami", "nvidia-mig", "platform-engineering"]
 draft: false
+faq:
+  - q: "What is HAMi Dynamic MIG?"
+    a: "HAMi Dynamic MIG lets a Kubernetes pod request GPU memory and receive a real NVIDIA MIG instance that HAMi creates, places, and reclaims for that pod."
+  - q: "What MIG profile does an 8,000 MiB request receive on RTX PRO 6000 Blackwell?"
+    a: "It receives the smallest allowed profile that fits: 1g.24gb, exposing 24,192 MiB because this GPU has no 8 GB MIG profile."
+  - q: "How does HAMi choose a Dynamic MIG profile?"
+    a: "HAMi chooses the smallest allowlisted profile with enough NVML-reported memory and a legal, non-overlapping placement; nvidia.com/gpucores does not select the profile."
+  - q: "Can different MIG profiles run on the same RTX PRO 6000 GPU?"
+    a: "Yes. In this test, a 1g.24gb instance and a 2g.48gb instance ran at the same time on one GPU in legal placements."
+  - q: "What happens when a Dynamic MIG pod is deleted?"
+    a: "HAMi reclaims that pod's GPU Instance and Compute Instance. In this test, the neighboring CUDA workload continued running."
+  - q: "Is this per-pod Dynamic MIG implementation included in HAMi v2.9.0?"
+    a: "No. This test used commit 634bf2b32e68 after PR 2378 merged because v2.9.0 predates the per-pod implementation. Prefer an official later release once it contains that change."
 sponsor:
   name: Utho
   url: "https://utho.com/?utm_source=Kubesimplify&utm_medium=docs&utm_campaign=Saiyam"
@@ -17,6 +30,8 @@ sponsor:
   logoDark: /img/sponsors/utho-logo-dark.png
   blurb: "This deep dive ran on an 8x NVIDIA RTX PRO 6000 Blackwell node from Utho Cloud. If you need GPU infrastructure to run workloads like these, take a look."
 ---
+
+[HAMi (Heterogeneous AI Computing Virtualization Middleware)](https://project-hami.io/docs/next) Dynamic MIG lets a Kubernetes pod request GPU memory and receive a real [NVIDIA Multi-Instance GPU (MIG)](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/introduction.html) hardware instance created for that pod. In our RTX PRO 6000 Blackwell test, HAMi selected the smallest legal profile, packed different profiles on one card, reclaimed only the deleted pod's instance, and preserved a live allocation across a device-plugin restart.
 
 The first two posts in this series explored opposite ends of GPU sharing.
 
@@ -36,11 +51,11 @@ The results were straightforward:
 
 > **Version and migration note:** [PR #2378](https://github.com/Project-HAMi/HAMi/pull/2378) is merged, and this post tests the resulting per-pod implementation at [commit `634bf2b32e68`](https://github.com/Project-HAMi/HAMi/commit/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1). At the time of this rerun, the latest tagged release was `v2.9.0`, which predates that implementation, so reproducing the lab requires the pinned source build below. Once HAMi publishes a release containing PR #2378, prefer its matching official chart and image. Existing `knownMigGeometries` users should follow the [migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md); the walkthrough below covers only the merged per-pod design.
 
-{{dynamic-mig-lifecycle-animation}}
-
-## Dynamic MIG in one sentence
+## What is HAMi Dynamic MIG in Kubernetes?
 
 A pod asks for GPU memory. HAMi chooses the smallest allowed MIG profile that has enough NVML-reported memory and a legal free placement, then creates that exact GPU Instance (GI) and Compute Instance (CI) for the pod.
+
+{{dynamic-mig-lifecycle-animation}}
 
 The workload request remains small:
 
@@ -79,7 +94,7 @@ NVIDIA MIG divides a supported GPU into hardware-isolated instances. Each instan
 
 MIG can be part of a multi-tenant security design, but it does not make a platform secure or compliant by itself. Identity, admission, network, storage, runtime, and host controls still matter.
 
-## The RTX PRO 6000 profile menu
+## Which MIG profiles does the RTX PRO 6000 support?
 
 NVIDIA's [supported MIG profile table](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/supported-mig-profiles.html) lists three profile sizes for the RTX PRO 6000 Blackwell Server Edition:
 
@@ -100,7 +115,7 @@ nvidia:
       profiles: ["1g.24gb", "2g.48gb", "4g.96gb"]
 ```
 
-For every allowed profile, the HAMi device plugin running on the GPU node asks NVIDIA's Management Library (NVML) for memory, compute metadata, instance count, and legal placements. The scheduler then chooses the smallest profile that satisfies the request and fits without overlapping a live placement.
+For every allowed profile, the HAMi device plugin running on the GPU node asks [NVIDIA's Management Library (NVML)](https://docs.nvidia.com/deploy/nvml-api/nvml-api-reference.html) for memory, compute metadata, instance count, and legal placements. The scheduler then chooses the smallest profile that satisfies the request and fits without overlapping a live placement.
 
 ## Lab environment
 
@@ -338,7 +353,7 @@ localhost/hami-dynamic-mig:master-634bf2b32e68
 
 The monitor had one transient CDI `StartError` referring to a stale MIG UUID during the handover. Kubernetes retried it, and both plugin containers became ready. We checked the previous container state instead of hiding that transition.
 
-## What HAMi discovered through NVML
+## How does HAMi discover legal MIG placements through NVML?
 
 The node registration annotation is the clearest view of what the plugin learned from the driver:
 
@@ -360,7 +375,7 @@ The live discovery was:
 | `2g.48gb` | 48,512 | 50 | 2 | `(0,6)`, `(6,6)` |
 | `4g.96gb` | 97,408 | 100 | 4 | `(0,12)` |
 
-NVML reports each legal placement as `start` and `size`: `start` is the index of the first occupied memory slice, and `size` is the number of memory slices occupied. Together they describe the half-open interval `[start, start + size)`. On this RTX PRO 6000, the reported placement range was `[0,12)`; these values are not GiB and are specific to this GPU. Also, `size` is not the same thing as `sliceCount`: `1g.24gb` has `sliceCount: 1` but placement `size: 3` here.
+[NVML reports each legal placement as `start` and `size`](https://docs.nvidia.com/deploy/nvml-api/structnvmlGpuInstancePlacement__t.html): `start` is the index of the first occupied memory slice, and `size` is the number of memory slices occupied. Together they describe the half-open interval `[start, start + size)`. On this RTX PRO 6000, the reported placement range was `[0,12)`; these values are not GiB and are specific to this GPU. Also, `size` is not the same thing as `sliceCount`: `1g.24gb` has `sliceCount: 1` but placement `size: 3` here.
 
 The registered `count: 4` is a coarse maximum derived from the profiles. It does not mean every arbitrary combination of four profiles fits. The placement arrays and current occupancy determine real capacity.
 
@@ -546,7 +561,7 @@ kubectl scale deployment/mig-small-pack \
   -n hami-mig-retest --replicas=4
 ```
 
-## Test 3: mixed profiles share one physical GPU
+## Test 3: Can mixed MIG profiles share one physical GPU?
 
 The topology-aware implementation can place different profiles together whenever NVML reports legal, non-overlapping placements.
 
@@ -664,7 +679,7 @@ large: 37 -> 39
 PASS: both mixed-profile CUDA workloads progressed
 ```
 
-## Test 4: reclaim only the pod's own instance
+## Test 4: Does HAMi reclaim only the deleted pod's MIG instance?
 
 Before deleting the small pod, we recorded the large pod's progress. Then we deleted only `mixed-small` and polled the host until its `1g.24gb` instance disappeared:
 
@@ -705,7 +720,7 @@ HAMi does not synchronously destroy the instance inside the `kubectl delete` cal
 
 We also recreated a `1g.24gb` instance at the freed placement. On this GPU and driver, it received the same `MIG-a5fa...` UUID. The UUID's observed disappearance proved reclamation; its later reappearance proved placement reuse. A MIG UUID is not a generation counter, so do not require a different UUID as proof of recreation.
 
-## Test 5: recover a valid allocation after plugin restart
+## Test 5: Does a live allocation survive a HAMi device-plugin restart?
 
 This is an advanced and disruptive controller test, not a normal workload step. We kept `mixed-large` active, recorded its progress and MIG UUID, then replaced the device-plugin pod:
 
@@ -752,7 +767,7 @@ This proves the tested happy path for a valid annotation. It is not a guarantee 
 
 > **Node-wide safety warning:** `filterdevices` limits HAMi registration and scheduling, but at this commit it does not limit Dynamic MIG startup cleanup. The log shows that startup reconciled all eight physical GPUs, including filtered ones. Inventory and drain the entire node before the first install or a plugin restart; filtering a GPU is not a protection boundary.
 
-## Test 6: the fifth pod spills to GPU 5
+## Test 6: What happens when one GPU's legal MIG placements are full?
 
 After deleting the mixed-profile workload and confirming no MIG instances remained, we changed the exclusion list from:
 
@@ -920,6 +935,6 @@ The most useful result was not just allocation. HAMi reclaimed the small pod's e
 
 The caveats are equally important. Profile rounding and NVIDIA placement rules remain. Version alignment must be verified from live images. At this snapshot, plugin startup has a node-wide hardware scope even when only one GPU is registered, so controlled installation and restart procedures are mandatory.
 
-HAMi is a CNCF Incubating project. Its source is at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). Existing installations can use the [pinned Dynamic MIG migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md) when moving to this per-pod implementation.
+HAMi is a [CNCF Incubating project](https://www.cncf.io/projects/hami/). Its source is at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). Existing installations can use the [pinned Dynamic MIG migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md) when moving to this per-pod implementation.
 
 If you are joining the series here, read the [static MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig) and the [HAMi software vGPU guide](/blog/sharing-gpus-in-kubernetes-with-hami) first.
