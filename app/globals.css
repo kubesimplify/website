@@ -506,6 +506,10 @@ a:focus-visible, button:focus-visible {
   border-radius: 0 0 0.75rem 0.75rem;
   margin-top: 0;
 }
+.prose-blog [data-rehype-pretty-code-title] + .blog-code-block pre {
+  border-radius: 0 0 0.75rem 0.75rem;
+  margin-top: 0;
+}
 
 /* embedded iframes (youtube, codepens) */
 .prose-blog iframe {
