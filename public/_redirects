@@ -64,6 +64,7 @@
 /blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws                  /deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws  301!
 /blog/deploy-a-simple-server-using-aws-terraform                                       /deploy-a-simple-server-using-aws-terraform  301!
 /blog/deploying-java-application-using-docker-and-kubernetes-devops-project            /deploying-java-application-using-docker-and-kubernetes-devops-project  301!
+/blog/devin-outposts-on-kubernetes                                                     /devin-outposts-on-kubernetes  301!
 /blog/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload /ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload  301!
 /blog/diy-how-to-build-a-kubernetes-policy-engine                                      /diy-how-to-build-a-kubernetes-policy-engine  301!
 /blog/docker-captain-journey                                                           /docker-captain-journey  301!
@@ -160,6 +161,7 @@
 /blog/my-kubecon-euvirtual-experience                                                  /my-kubecon-euvirtual-experience  301!
 /blog/my-schedule-for-kubecon-cloudnativecon-eu-2022                                   /my-schedule-for-kubecon-cloudnativecon-eu-2022  301!
 /blog/navigating-through-cncf-landscape                                                /navigating-through-cncf-landscape  301!
+/blog/nemotron-3-5-lightning-on-dgx-spark                                              /nemotron-3-5-lightning-on-dgx-spark  301!
 /blog/nemotron3-on-dgx-spark                                                           /nemotron3-on-dgx-spark  301!
 /blog/networking-fundamentals-for-devops                                               /networking-fundamentals-for-devops  301!
 /blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet /nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet  301!
@@ -214,6 +216,11 @@
 /workshops             https://kubesimplify.com/workshops       301!
 /partnerships          https://kubesimplify.com/partnerships    301!
 /resources             https://kubesimplify.com/resources       301!
+/products              https://kubesimplify.com/products        301!
+/products/*            https://kubesimplify.com/products/:splat 301!
+/learn                 https://kubesimplify.com/learn           301!
+/learn/*               https://kubesimplify.com/learn/:splat    301!
+/privacy               https://kubesimplify.com/privacy         301!
 /discord               https://discord.gg/26Z384WSPB            302!
 
 # ── 3. Serve blog content under clean URLs (URL stays as-is).
@@ -279,6 +286,7 @@
 /deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws                  /blog/deploy-a-maven-project-on-a-tomcat-server-using-jenkins-and-aws  200!
 /deploy-a-simple-server-using-aws-terraform                                       /blog/deploy-a-simple-server-using-aws-terraform  200!
 /deploying-java-application-using-docker-and-kubernetes-devops-project            /blog/deploying-java-application-using-docker-and-kubernetes-devops-project  200!
+/devin-outposts-on-kubernetes                                                     /blog/devin-outposts-on-kubernetes  200!
 /ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload /blog/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload  200!
 /diy-how-to-build-a-kubernetes-policy-engine                                      /blog/diy-how-to-build-a-kubernetes-policy-engine  200!
 /docker-captain-journey                                                           /blog/docker-captain-journey  200!
@@ -375,6 +383,7 @@
 /my-kubecon-euvirtual-experience                                                  /blog/my-kubecon-euvirtual-experience  200!
 /my-schedule-for-kubecon-cloudnativecon-eu-2022                                   /blog/my-schedule-for-kubecon-cloudnativecon-eu-2022  200!
 /navigating-through-cncf-landscape                                                /blog/navigating-through-cncf-landscape  200!
+/nemotron-3-5-lightning-on-dgx-spark                                              /blog/nemotron-3-5-lightning-on-dgx-spark  200!
 /nemotron3-on-dgx-spark                                                           /blog/nemotron3-on-dgx-spark  200!
 /networking-fundamentals-for-devops                                               /blog/networking-fundamentals-for-devops  200!
 /nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet /blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet  200!

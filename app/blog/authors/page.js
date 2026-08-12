@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import AuthorSocials from '@/components/AuthorSocials';
 import { getAllAuthors, authorUrl, SITE } from '@/lib/blog';
+import { safeJsonLd } from '@/lib/jsonld';
 
 export const metadata = {
   title: 'Authors · Kubesimplify Blog',
@@ -53,8 +54,8 @@ export default function AuthorsIndex() {
 
   return (
     <main className="pt-24">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <nav aria-label="Breadcrumb" className="mb-6 text-sm">

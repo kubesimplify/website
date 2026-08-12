@@ -551,3 +551,10 @@ a:focus-visible, button:focus-visible {
 .sponsor-logo--dark { display: none; }
 .dark .sponsor-logo--light { display: none; }
 .dark .sponsor-logo--dark { display: inline-block; }
+
+/* Terminal showcase caret (homepage hero) */
+.terminal-caret {
+  color: #5CFF68;
+  animation: caret-blink 1s steps(2) infinite;
+}
+@keyframes caret-blink { 50% { opacity: 0; } }

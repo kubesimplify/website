@@ -8,12 +8,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 // (main site) and blog.kubesimplify.com (blog). On the blog subdomain these
 // navigate directly to the main domain instead of bouncing through a 301.
 const navLinks = [
-  { href: 'https://kubesimplify.com/about', label: 'About' },
-  { href: 'https://kubesimplify.com/workshops', label: 'Watch & Learn' },
-  { href: 'https://kubesimplify.com/partnerships', label: 'Partnerships' },
-  { href: 'https://kubesimplify.com/resources', label: 'Resources' },
+  { href: 'https://kubesimplify.com/products', label: 'Products' },
+  { href: 'https://kubesimplify.com/learn', label: 'Learn' },
   { href: 'https://blog.kubesimplify.com', label: 'Blog' },
-  { href: 'https://www.youtube.com/@kubesimplify', label: 'YouTube', external: true },
+  { href: 'https://kubesimplify.com/workshops', label: 'Workshops' },
+  { href: 'https://kubesimplify.com/partnerships', label: 'Partnerships' },
+  { href: 'https://kubesimplify.com/about', label: 'About' },
 ];
 
 function ThemeToggle() {

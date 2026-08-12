@@ -1,16 +1,16 @@
 /**
- * First-party analytics API for blog.kubesimplify.com — shared module.
+ * First-party analytics API for blog.kubesimplify.com, shared module.
  *
  * Inlined into public/_worker.js by scripts/generate-redirects.mjs
- * (Cloudflare Pages Advanced Mode — the production deployment for
- * blog.kubesimplify.com). Keep this file self-contained: no imports —
+ * (Cloudflare Pages Advanced Mode, the production deployment for
+ * blog.kubesimplify.com). Keep this file self-contained: no imports -
  * the generator embeds it as plain source with `export ` stripped.
  *
  * Endpoints (handleApi returns null for non-/api/ paths):
- *   POST /api/collect — beacon from AnalyticsBeacon.jsx: pageviews and
+ *   POST /api/collect, beacon from AnalyticsBeacon.jsx: pageviews and
  *                       time-on-page slices. No cookies; visitors are a
  *                       daily-rotating SHA-256 of ip|ua|day (never stored raw).
- *   GET  /api/stats   — aggregates for the /analytics dashboard.
+ *   GET  /api/stats  , aggregates for the /analytics dashboard.
  *                       Requires `Authorization: Bearer <DASH_PASSWORD>`.
  *
  * Storage: D1 (binding DB). Schema is created lazily once per isolate.
@@ -213,12 +213,12 @@ async function handleStats(request, env) {
 }
 
 /**
- * Handle /api/* requests. Returns null for any other path so the caller
- * can fall through to its own routing.
+ * Handle the analytics /api/ endpoints. Returns null for any other path so
+ * the caller can try other API modules (newsletter) or its own routing.
  */
 export async function handleApi(request, env) {
   const { pathname } = new URL(request.url);
-  if (!pathname.startsWith('/api/')) return null;
+  if (pathname !== '/api/collect' && pathname !== '/api/stats') return null;
 
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -232,11 +232,11 @@ export async function handleApi(request, env) {
   try {
     if (pathname === '/api/collect' && request.method === 'POST') return await handleCollect(request, env);
     if (pathname === '/api/stats' && request.method === 'GET') return await handleStats(request, env);
+    return new Response('method not allowed', { status: 405, headers: corsHeaders(request) });
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
       headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
     });
   }
-  return new Response('not found', { status: 404, headers: corsHeaders(request) });
 }

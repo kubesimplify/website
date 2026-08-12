@@ -1,5 +1,7 @@
 import { getAllPosts, getAllTags, SITE } from '@/lib/blog';
 import { getAllSeries } from '@/lib/series';
+import productsData from '@/content/products.json';
+import pathsData from '@/content/learning-paths.json';
 
 const POSTS_PER_PAGE = 15;
 
@@ -15,6 +17,21 @@ export default function sitemap() {
     { url: `${MAIN}/workshops`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${MAIN}/resources`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${MAIN}/partnerships`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${MAIN}/products`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${MAIN}/learn`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${MAIN}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    ...productsData.products.map((p) => ({
+      url: `${MAIN}/products/${p.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    })),
+    ...pathsData.paths.map((p) => ({
+      url: `${MAIN}/learn/${p.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    })),
   ];
 
   const posts = getAllPosts().map((p) => ({

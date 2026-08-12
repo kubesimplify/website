@@ -1,0 +1,29 @@
+name: Announce new posts to subscribers
+
+# When a push to main adds new posts under content/blog/, email the
+# confirmed newsletter subscribers via the worker's /api/broadcast endpoint.
+# The endpoint deduplicates by URL, so re-runs are safe.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/blog/**'
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Announce newly added posts
+        env:
+          BROADCAST_SECRET: ${{ secrets.BROADCAST_SECRET }}
+          RANGE: ${{ github.event.before }}..${{ github.sha }}
+        run: node scripts/announce-new-posts.mjs

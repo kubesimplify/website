@@ -312,6 +312,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/devin-outposts-on-kubernetes",
+      "destination": "https://blog.kubesimplify.com/devin-outposts-on-kubernetes",
+      "permanent": true
+    },
+    {
       "source": "/blog/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
       "destination": "https://blog.kubesimplify.com/ditch-the-overheating-laptop-supercharge-your-docker-workflow-with-docker-offload",
       "permanent": true
@@ -789,6 +794,11 @@
     {
       "source": "/blog/navigating-through-cncf-landscape",
       "destination": "https://blog.kubesimplify.com/navigating-through-cncf-landscape",
+      "permanent": true
+    },
+    {
+      "source": "/blog/nemotron-3-5-lightning-on-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/nemotron-3-5-lightning-on-dgx-spark",
       "permanent": true
     },
     {
@@ -1574,6 +1584,17 @@
     {
       "source": "/deploying-java-application-using-docker-and-kubernetes-devops-project",
       "destination": "https://blog.kubesimplify.com/deploying-java-application-using-docker-and-kubernetes-devops-project",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/devin-outposts-on-kubernetes",
+      "destination": "https://blog.kubesimplify.com/devin-outposts-on-kubernetes",
       "permanent": true,
       "has": [
         {
@@ -2630,6 +2651,17 @@
     {
       "source": "/navigating-through-cncf-landscape",
       "destination": "https://blog.kubesimplify.com/navigating-through-cncf-landscape",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/nemotron-3-5-lightning-on-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/nemotron-3-5-lightning-on-dgx-spark",
       "permanent": true,
       "has": [
         {

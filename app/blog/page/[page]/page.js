@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import ArchiveCard from '@/components/ArchiveCard';
 import Pagination from '@/components/Pagination';
 import { getAllPosts, SITE, blogIndexUrl } from '@/lib/blog';
+import { safeJsonLd } from '@/lib/jsonld';
 
 const POSTS_PER_PAGE = 15;
 
@@ -67,8 +68,8 @@ export default function BlogPage({ params }) {
 
   return (
     <main className="pt-24">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(collectionLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
       <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <nav aria-label="Breadcrumb" className="mb-6 text-sm">
