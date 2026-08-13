@@ -250,6 +250,26 @@ Pre-flight classification of potentially write-capable tools, output truncation 
 
 ---
 
+## bCortex: Why This Is Not Just Model Calls in a Loop
+
+There is a failure mode every naive "agentic ops" tool shares: **the agent rediscovers your infrastructure from scratch on every question.** List the namespaces. Describe the deployments. Page through events. Ask again tomorrow and it does all of it again. Token spend grows with cluster size, latency grows with token spend, and worst of all, whenever discovery is incomplete the model fills the gaps by guessing - which is where operational hallucinations come from.
+
+NudgeBee's answer is a context layer the team calls **bCortex**, and it has three parts you can find in the codebase:
+
+- An **auto-generated Knowledge Graph** (`api-server/services/knowledge_graph/`) that models the relationships between resources, events, and findings - so "what depends on this pod" is a graph lookup, not a fresh round of kubectl calls.
+- A **Service Map** built from APM and trace data - deliberately a *different* artifact than the KG: the service map is dataflow (who calls whom), the KG is resource state. Both feed the agent.
+- A **multi-tiered, usage-based memory layer**. The code describes it as a layered "memory slab" - preferences and identity first, with patterns and decisions layered on - extracted from actual usage rather than hand-written.
+
+I did not have to take anyone's word for this, because my own run left its fingerprints in the logs. The moment my ImagePullBackOff investigation completed, llm-server ran `long-term memory extraction` on the conversation and logged the stats - the platform was already mining my investigation for reusable knowledge. During the run I also watched `kb_sync` cycles keeping the knowledge base current, `tool call cache` hits skipping discovery calls the platform had already made, and the planner `comparing with history` before deciding what to fetch. My first investigation was the expensive one; everything after it starts warmer.
+
+The economics follow directly. Right-sized context per call instead of dump-everything-into-the-prompt means fewer tokens. Graph and cache lookups replace repeated discovery tool calls. Model-tier routing (a `reasoning` / `retrieval` / `summary` split in the config) sends heavyweight thinking to the big model and summarization to a cheap one. At the scale where agentic ops gets interesting - hundreds of investigations a week across a fleet - that is the difference between a bill that grows with every question and one that amortizes. And accuracy moves the same direction as cost, because a model grounded in a graph that already knows what exists has far less room to hallucinate.
+
+The one-liner version:
+
+> A chatbot loop rediscovers your infrastructure every time. A context layer remembers it.
+
+---
+
 ## FinOps Is in the Same Loop
 
 The Optimize surface treats cost as an operational signal, not a finance spreadsheet: workload/replica/PV rightsizing, abandoned-resource detection, spot recommendations, best practices, and an **Auto Optimize** response that can act on them:
@@ -340,7 +360,7 @@ The standard sharp edges of the category, plus what I hit:
 
 Five lessons I keep coming back to after a day inside it:
 
-1. **Context beats chat.** The interesting part is not the assistant - it is the graph around it: resources, events, tickets, tool calls, prior investigations. AI without context is a guesser; AI with context is an operator interface.
+1. **Context beats chat.** The interesting part is not the assistant - it is bCortex, the graph and memory around it: resources, events, tickets, tool calls, prior investigations. AI without context is a guesser; AI with context is an operator interface.
 2. **Tools need ownership boundaries.** Tenant scoping, credential isolation, pre-flight write detection, output truncation - the unglamorous parts are the product.
 3. **Runbooks are the safety rail, not the legacy.** The agent discovers and parameterizes workflows; Temporal gives them retries, approvals, versioning, and history.
 4. **Cost is an ops signal.** Reliability and FinOps on one surface matches how platform teams actually work.
