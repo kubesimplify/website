@@ -4,11 +4,11 @@ seoTitle: "A Backup Is Not Disaster Recovery: Three Kubernetes DR Demos"
 seoDescription: "Three live Kubernetes demos - Velero restores, the GitOps trap, and VolumeGroupSnapshot - that show why backups alone are not disaster recovery."
 datePublished: 2026-08-14T10:00:00.000Z
 slug: a-backup-is-not-disaster-recovery
-author: saiyam-pathak
+authors: ["saiyam-pathak", "saloni-narang"]
 cover: /img/blog/a-backup-is-not-disaster-recovery/lab-setup.svg
 tags: ["kubernetes", "disaster-recovery", "velero", "gitops"]
 ---
-At KubeCon + CloudNativeCon Japan 2026, Saloni and I gave a talk called "Is
+At KubeCon + CloudNativeCon Japan 2026, the two of us gave a talk called "Is
 Your Kubernetes Disaster Recovery Actually Ready?" We opened with a poll.
 Raise your hand if you take backups of your clusters. Almost every hand in the
 room went up. Keep it up if you have ever restored a complete stateful
@@ -54,8 +54,8 @@ layers usually recover fine. Recovery fails at the joins between them.
 
 Let's walk through the lab. Two clusters and two services, all local:
 
-- **Production** runs on [kiac](https://github.com/saiyam1814/kiac), my open
-  source project that runs Kubernetes in Apple containers. Every node is its
+- **Production** runs on [kiac](https://github.com/saiyam1814/kiac), Saiyam's
+  open source project that runs Kubernetes in Apple containers. Every node is its
   own lightweight VM with its own kernel. This matters in demo 2: losing
   production means powering off a machine, not stopping a container that
   pretends to be one.
@@ -121,7 +121,7 @@ actual Postgres volume data left the cluster and landed in the S3 vault - the
 data itself, not just the YAML. If your backup tool cannot show you this
 number, ask it why.
 
-On stage I then deleted the whole namespace, PVC included, and restored it
+On stage we then deleted the whole namespace, PVC included, and restored it
 with one command:
 
 ```bash
@@ -160,7 +160,7 @@ gets restored into.
 
 ![The GitOps trap: Argo rebuilds the declarations, the vault holds the data](/img/blog/a-backup-is-not-disaster-recovery/gitops-trap.svg)
 
-This is the demo the room remembers. I recorded the time and powered off the
+This is the demo the room remembers. We recorded the time and powered off the
 production VM:
 
 ```console
@@ -195,7 +195,7 @@ velero               Active   12d
 No guestbook. This cluster has never run our app.
 
 Now the 2026 on-call reflex: we have GitOps, the whole app is declared in
-Git, just sync it. So I triggered Argo CD and waited for it to go green:
+Git, just sync it. So we triggered Argo CD and waited for it to go green:
 
 ```bash
 kubectl -n argocd patch application guestbook --type merge \
@@ -214,8 +214,8 @@ NAME        SYNC STATUS   HEALTH STATUS
 guestbook   Synced        Progressing
 ```
 
-Synced. Postgres Running and Ready. Every dashboard green. On stage I said
-this is the moment half the room posts "we are recovered" in Slack. Then I
+Synced. Postgres Running and Ready. Every dashboard green. On stage we said
+this is the moment half the room posts "we are recovered" in Slack. Then we
 queried the data:
 
 ```console
@@ -267,8 +267,8 @@ something you test, not assume.
 
 Now the stopwatch. On stage, from powering off production to validated data
 in the recovery cluster took four minutes, 16:06 to 16:10 on the on-screen
-clock. The capture above, a rehearsed rerun, took just under two. The line I
-used on stage is the one I want you to keep: the first time we "recovered,"
+clock. The capture above, a rehearsed rerun, took just under two. The line we
+used on stage is the one we want you to keep: the first time we "recovered,"
 when the dashboards went green and the Slack message went out, was not the
 recovery. The second time, when the data came back and we checked it, was.
 And remember this measures only the scripted slice. A production RTO wraps
@@ -283,7 +283,7 @@ Kafka brokers, replica sets. Our stand-in is a tiny ledger app writing
 matched pairs, order n to one PVC and payment n to another, five times a
 second. One invariant: every payment must have its order.
 
-I snapshotted the orders volume, let the app keep writing for five seconds,
+We snapshotted the orders volume, let the app keep writing for five seconds,
 then snapshotted the payments volume. Each one is a plain CSI VolumeSnapshot,
 and 121152 is the run id the lab script stamps on every object in one run:
 
@@ -309,7 +309,7 @@ volumesnapshot.snapshot.storage.k8s.io/torn-payments-121152 created
 volumesnapshot.snapshot.storage.k8s.io/torn-payments-121152 condition met
 ```
 
-Both ReadyToUse. Both individually perfect. Then I restored both into new
+Both ReadyToUse. Both individually perfect. Then we restored both into new
 PVCs using dataSource, the standard way to restore any CSI snapshot, and ran
 a verifier job that mounts both restored volumes and compares the last
 sequence number on each:
@@ -398,7 +398,7 @@ last payment committed : 109169
 [OK] Every payment has a matching order. Restore is consistent.
 ```
 
-Full disclosure, the same one I gave on stage: my lab uses the CSI hostpath
+Full disclosure, the same one we gave on stage: our lab uses the CSI hostpath
 test driver, which implements the group RPCs but archives member volumes
 sequentially, so the writer is paused during the group snapshot to keep the
 demo deterministic. What the demo shows is the GA API and the restore
@@ -408,7 +408,7 @@ backend of a production driver. Which leads to the practical takeaways:
 - Support is driver specific. A driver that supports ordinary
   VolumeSnapshots proves nothing about group snapshots. Ask your storage
   vendor whether they implement the CSI group RPCs. As of mid 2026, most of
-  the major cloud drivers I checked do not.
+  the major cloud drivers we checked do not.
 - Setup is explicit: the CRDs and feature gates on the snapshot controller
   and CSI sidecar are your job.
 - Crash consistent is not application consistent. The API removes cross
@@ -433,8 +433,8 @@ The demos expose gaps that no single tool closes today:
    target, validates data and the user path, and measures the whole thing.
 
 There is community work here: the Cloud Native Business Continuity initiative
-proposal under CNCF TAG Operational Resilience (disclosure: I am one of the
-TAG chairs). It is an open proposal seeking contributors, aiming at a
+proposal under CNCF TAG Operational Resilience (disclosure: Saiyam is one of
+the TAG chairs). It is an open proposal seeking contributors, aiming at a
 landscape gap analysis, updated backup and DR guidance, and reference
 architectures. If this post resonates, that is where to help:
 https://github.com/cncf/toc/issues/1779
@@ -454,7 +454,7 @@ modes and timings still need testing on your production platforms.
 
 ## Now the questions are for you
 
-We ended the talk with questions instead of answers, and I will end this post
+We ended the talk with questions instead of answers, and we will end this post
 the same way. Answer these honestly, ideally out loud in your next team
 meeting:
 
@@ -485,7 +485,7 @@ panic or ending in a runbook she has already executed.
 The lab, the commands, and everything you saw here:
 https://github.com/saiyam1814/kubecon-japan-dr-demo
 
-I would genuinely like to hear what you do today: who owns DR at your
-company, and when did you last run a real restore? Tell me on
+We would genuinely like to hear what you do today: who owns DR at your
+company, and when did you last run a real restore? Tell us on
 [X](https://x.com/saiyampathak) or
 [LinkedIn](https://linkedin.com/in/saiyampathak).
