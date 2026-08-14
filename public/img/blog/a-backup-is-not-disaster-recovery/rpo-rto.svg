@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280" style="font-family:'Chalkboard SE','Comic Sans MS',cursive">
+  <g stroke="#1e1e1e" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- timeline -->
+    <path d="M55 162 Q280 156 480 161 Q680 165 845 159"/>
+    <path d="M826 150 Q836 155 845 159 Q834 163 825 169"/>
+    <!-- camera: last good recovery point -->
+    <path d="M196 122 Q220 118 244 122 L244 150 Q220 154 196 150 Z" fill="#A5D8FF"/>
+    <path d="M212 122 L216 112 L228 112 L232 122"/>
+    <path d="M214 136 Q220 130 227 135 Q230 142 222 145 Q214 144 214 136 Z" fill="#fff"/>
+    <line x1="220" y1="152" x2="220" y2="162"/>
+    <!-- explosion at disaster -->
+    <path d="M470 118 L479 136 L500 130 L488 147 L506 158 L484 160 L487 180 L470 166 L453 180 L456 160 L434 158 L452 147 L440 130 L461 136 Z" fill="#FFC9C9" stroke="#E03131"/>
+    <!-- flag: serving again -->
+    <line x1="760" y1="112" x2="760" y2="160"/>
+    <path d="M760 112 Q784 118 806 112 L804 134 Q782 140 760 134 Z" fill="#B2F2BB" stroke="#2F9E44"/>
+    <!-- RPO bracket -->
+    <path d="M220 108 L220 92 Q345 84 470 92 L470 108" stroke="#E8590C"/>
+    <!-- RTO bracket -->
+    <path d="M470 214 L470 230 Q615 238 760 230 L760 214" stroke="#E8590C"/>
+  </g>
+  <text x="220" y="196" text-anchor="middle" font-size="17" fill="#1e1e1e">last good recovery point</text>
+  <text x="470" y="216" text-anchor="middle" font-size="17" fill="#E03131">02:07 · disaster</text>
+  <text x="760" y="196" text-anchor="middle" font-size="17" fill="#1e1e1e">serving users again</text>
+  <text x="345" y="72" text-anchor="middle" font-size="20" fill="#E8590C">RPO · the data you lose</text>
+  <text x="615" y="262" text-anchor="middle" font-size="20" fill="#E8590C">RTO · the time you are down</text>
+</svg>

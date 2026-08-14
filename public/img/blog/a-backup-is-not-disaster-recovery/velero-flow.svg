@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 250" style="font-family:'Chalkboard SE','Comic Sans MS',cursive">
+  <defs>
+    <pattern id="hblue" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D0EBFF" stroke-width="4"/>
+    </pattern>
+    <pattern id="hyellow" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#FFF3BF" stroke-width="4"/>
+    </pattern>
+    <pattern id="hgreen" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D3F9D8" stroke-width="4"/>
+    </pattern>
+  </defs>
+  <g stroke="#1e1e1e" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- source cluster -->
+    <path d="M62 62 Q160 56 258 62 Q263 125 258 190 Q160 196 62 190 Q57 125 62 62 Z" fill="url(#hblue)"/>
+    <rect x="86" y="84" width="34" height="30" rx="5" fill="#fff" transform="rotate(-1.6 103 99)"/>
+    <rect x="132" y="82" width="34" height="30" rx="5" fill="#fff" transform="rotate(1.4 149 97)"/>
+    <path d="M96 136 Q130 128 164 136 L162 166 Q130 174 98 166 Z" fill="#fff"/>
+    <path d="M96 136 Q130 144 164 136"/>
+    <!-- backup arrow -->
+    <path d="M272 122 Q322 112 372 122" stroke="#E8590C" stroke-width="3.2"/>
+    <path d="M354 108 Q364 116 372 122 Q361 126 351 132" stroke="#E8590C" stroke-width="3.2"/>
+    <!-- bucket -->
+    <path d="M394 84 Q444 78 494 84 L480 192 Q444 200 408 192 Z" fill="url(#hyellow)"/>
+    <path d="M394 84 Q444 94 494 84"/>
+    <!-- restore arrow (dashed) -->
+    <path d="M510 122 Q560 112 610 122" stroke="#E8590C" stroke-width="3.2" stroke-dasharray="8 7"/>
+    <path d="M592 108 Q602 116 610 122 Q599 126 589 132" stroke="#E8590C" stroke-width="3.2"/>
+    <!-- target cluster (dashed = does not exist yet) -->
+    <path d="M628 62 Q726 56 824 62 Q829 125 824 190 Q726 196 628 190 Q623 125 628 62 Z" fill="url(#hgreen)" stroke-dasharray="9 7"/>
+    <path d="M700 116 Q712 132 720 142 Q740 104 766 84" stroke="#2F9E44" stroke-width="5"/>
+  </g>
+  <text x="160" y="218" text-anchor="middle" font-size="18" fill="#1e1e1e">source cluster</text>
+  <text x="322" y="94" text-anchor="middle" font-size="16" fill="#E8590C">objects + PV bytes</text>
+  <text x="444" y="224" text-anchor="middle" font-size="18" fill="#1e1e1e">any S3 vault</text>
+  <text x="560" y="94" text-anchor="middle" font-size="16" fill="#E8590C">restore</text>
+  <text x="726" y="218" text-anchor="middle" font-size="18" fill="#1e1e1e">a different cluster</text>
+</svg>

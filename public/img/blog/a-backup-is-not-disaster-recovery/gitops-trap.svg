@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 360" style="font-family:'Chalkboard SE','Comic Sans MS',cursive">
+  <defs>
+    <pattern id="hred" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#FFC9C9" stroke-width="4"/>
+    </pattern>
+    <pattern id="hgreen" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D3F9D8" stroke-width="4"/>
+    </pattern>
+    <pattern id="hyellow" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#FFF3BF" stroke-width="4"/>
+    </pattern>
+  </defs>
+  <g stroke="#1e1e1e" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- dead prod -->
+    <g transform="rotate(-0.5 130 150)">
+      <path d="M48 84 Q130 78 212 84 Q218 150 212 218 Q130 224 48 218 Q42 150 48 84 Z" fill="url(#hred)"/>
+    </g>
+    <path d="M62 96 Q130 160 200 208" stroke="#E03131" stroke-width="5"/>
+    <path d="M198 98 Q132 158 64 206" stroke="#E03131" stroke-width="5"/>
+
+    <!-- git cylinder top middle -->
+    <path d="M380 40 Q440 32 500 40 L497 74 Q440 82 383 74 Z" fill="url(#hyellow)"/>
+    <path d="M380 40 Q440 50 500 40"/>
+    <!-- arrow git -> recovery -->
+    <path d="M508 64 Q600 84 664 116" stroke="#1971C2" stroke-width="3.2"/>
+    <path d="M646 104 Q656 111 664 116 Q657 122 650 129" stroke="#1971C2" stroke-width="3.2"/>
+
+    <!-- recovery cluster -->
+    <g transform="rotate(0.4 780 170)">
+      <path d="M620 108 Q780 100 916 108 Q924 170 916 234 Q780 242 620 234 Q612 170 620 108 Z" fill="url(#hgreen)"/>
+    </g>
+    <!-- db cylinder inside, empty with ? -->
+    <path d="M726 142 Q772 135 818 142 L816 196 Q772 203 728 196 Z" fill="#fff"/>
+    <path d="M726 142 Q772 151 818 142"/>
+    <!-- green check top right of cluster -->
+    <path d="M856 76 Q866 90 872 100 Q888 68 912 50" stroke="#2F9E44" stroke-width="5"/>
+
+    <!-- vault bottom middle -->
+    <path d="M400 240 Q448 232 496 240 L484 330 Q448 338 414 330 Z" fill="url(#hyellow)"/>
+    <path d="M400 240 Q448 250 496 240"/>
+    <!-- arrow prod -> vault (backup happened before disaster, dashed grey) -->
+    <path d="M220 210 Q300 250 394 268" stroke="#868e96" stroke-width="3" stroke-dasharray="7 6"/>
+    <path d="M377 256 Q386 263 394 268 Q385 271 376 276" stroke="#868e96" stroke-width="3"/>
+    <!-- arrow vault -> recovery (the real restore) -->
+    <path d="M502 276 Q600 262 662 220" stroke="#E8590C" stroke-width="3.4"/>
+    <path d="M646 214 Q654 217 662 220 Q658 228 655 237" stroke="#E8590C" stroke-width="3.4"/>
+  </g>
+
+  <text x="130" y="252" text-anchor="middle" font-size="18" fill="#1e1e1e">prod · powered off</text>
+  <text x="440" y="24" text-anchor="middle" font-size="16" fill="#1e1e1e">Git · the declarations</text>
+  <text x="600" y="66" text-anchor="middle" font-size="14" fill="#1971C2">Argo syncs · green in 30s</text>
+  <text x="772" y="176" text-anchor="middle" font-size="26" fill="#E03131">?</text>
+  <text x="772" y="266" text-anchor="middle" font-size="15" fill="#E03131">running · and EMPTY</text>
+  <text x="780" y="290" text-anchor="middle" font-size="17" fill="#1e1e1e">recovery cluster</text>
+  <text x="448" y="354" text-anchor="middle" font-size="15" fill="#1e1e1e">S3 vault · the only place the data survived</text>
+  <text x="300" y="216" text-anchor="middle" font-size="13" fill="#868e96">backup · before the disaster</text>
+  <text x="600" y="300" text-anchor="middle" font-size="15" fill="#E8590C">Velero restore · the missing step</text>
+</svg>

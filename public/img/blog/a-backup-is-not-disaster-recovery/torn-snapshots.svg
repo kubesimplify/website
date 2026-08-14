@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 310" style="font-family:'Chalkboard SE','Comic Sans MS',cursive">
+  <defs>
+    <pattern id="hblue" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D0EBFF" stroke-width="4"/>
+    </pattern>
+    <pattern id="hgreen" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D3F9D8" stroke-width="4"/>
+    </pattern>
+    <pattern id="hredx" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#FFA8A8" stroke-width="3.4"/>
+    </pattern>
+  </defs>
+  <g stroke="#1e1e1e" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- orders volume + write lane -->
+    <path d="M64 70 Q114 62 164 70 L162 120 Q114 128 66 120 Z" fill="url(#hblue)"/>
+    <path d="M64 70 Q114 80 164 70"/>
+    <path d="M180 96 Q480 90 810 95"/>
+    <line x1="240" y1="88" x2="240" y2="104"/><line x1="300" y1="88" x2="300" y2="104"/><line x1="360" y1="88" x2="360" y2="104"/><line x1="470" y1="88" x2="470" y2="104"/><line x1="530" y1="88" x2="530" y2="104"/><line x1="590" y1="88" x2="590" y2="104"/><line x1="650" y1="88" x2="650" y2="104"/><line x1="710" y1="88" x2="710" y2="104"/>
+    <!-- payments volume + write lane -->
+    <path d="M64 190 Q114 182 164 190 L162 240 Q114 248 66 240 Z" fill="url(#hgreen)"/>
+    <path d="M64 190 Q114 200 164 190"/>
+    <path d="M180 216 Q480 210 810 215"/>
+    <line x1="240" y1="208" x2="240" y2="224"/><line x1="300" y1="208" x2="300" y2="224"/><line x1="360" y1="208" x2="360" y2="224"/><line x1="470" y1="208" x2="470" y2="224"/><line x1="530" y1="208" x2="530" y2="224"/><line x1="590" y1="208" x2="590" y2="224"/><line x1="650" y1="208" x2="650" y2="224"/><line x1="710" y1="208" x2="710" y2="224"/>
+    <!-- camera snap on orders at t=0 -->
+    <path d="M382 30 Q406 26 430 30 L430 58 Q406 62 382 58 Z" fill="#A5D8FF"/>
+    <path d="M398 30 L402 20 L414 20 L418 30"/>
+    <line x1="406" y1="64" x2="406" y2="112" stroke-dasharray="6 6" stroke="#1971C2" stroke-width="3"/>
+    <!-- camera snap on payments at t=5 -->
+    <path d="M596 262 Q620 258 644 262 L644 290 Q620 294 596 290 Z" fill="#B2F2BB"/>
+    <path d="M612 262 L616 252 L628 252 L632 262"/>
+    <line x1="620" y1="196" x2="620" y2="256" stroke-dasharray="6 6" stroke="#2F9E44" stroke-width="3"/>
+    <!-- the skew window on the payments lane -->
+    <path d="M408 200 L618 200 L618 232 L408 232 Z" fill="url(#hredx)" stroke="#E03131" stroke-dasharray="5 5"/>
+  </g>
+  <text x="114" y="52" text-anchor="middle" font-size="17" fill="#1e1e1e">orders PV</text>
+  <text x="114" y="270" text-anchor="middle" font-size="17" fill="#1e1e1e">payments PV</text>
+  <text x="330" y="44" text-anchor="end" font-size="16" fill="#1971C2">snapshot A · t = 0</text>
+  <text x="700" y="280" text-anchor="start" font-size="16" fill="#2F9E44">snapshot B · t = 5s</text>
+  <text x="513" y="180" text-anchor="middle" font-size="17" fill="#E03131">5 seconds of payments with no matching order</text>
+</svg>
