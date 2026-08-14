@@ -1,7 +1,7 @@
 ---
 title: "I Ran an AI SRE Copilot on My Own Hardware. Here Is What It Actually Does."
 seoTitle: "NudgeBee v1.4.0 Hands-On: Self-Hosted AI SRE Copilot with Kubernetes and a DGX Spark"
-seoDescription: "Running NudgeBee v1.4.0 end to end: Docker Compose control plane, a kiac Kubernetes cluster, Ollama on a DGX Spark, and a real AI root-cause investigation."
+seoDescription: "Running NudgeBee v1.4.0 end to end - a self-hosted AIOps platform behind AI-SRE, AI-FinOps, AI-K8sOps, and agentic automation - on a Mac, a kiac cluster, and a DGX Spark."
 datePublished: 2026-08-10T18:30:00.000Z
 slug: nudgebee-ai-sre-copilot-hands-on
 author: saiyam-pathak
@@ -9,7 +9,7 @@ cover: /img/blog/nudgebee-ai-sre-copilot-hands-on/02-home-dashboard.jpg
 tags: ["kubernetes", "ai", "sre", "aiops", "platform-engineering"]
 ---
 
-**TL;DR** - NudgeBee is not "a chatbot for Kubernetes." It is a full SRE control loop in code: collect signals, rank events, investigate with real tools, recommend fixes, run durable workflows, and keep an audit trail. In this post I run the whole thing locally - the control plane in Docker Compose on my Mac, a 3-node Kubernetes cluster in lightweight VMs via kiac, and the LLM served from a DGX Spark on my desk. Real screenshots, real commands, real sharp edges.
+**TL;DR** - NudgeBee is an AIOps platform built around AI agents for DevOps and SRE teams - AI-SRE is one surface on it, alongside AI-FinOps, AI-K8sOps, and an automation builder. What sold me is that it implements a full SRE control loop in code: collect signals, rank events, investigate with real tools, recommend fixes, run durable workflows, and keep an audit trail. In this post I run the whole thing locally - the control plane in Docker Compose on my Mac, a 3-node Kubernetes cluster in lightweight VMs via kiac, and the LLM served from a DGX Spark on my desk. Real screenshots, real commands, real sharp edges.
 
 > Source note: everything below was run against **NudgeBee v1.4.0** (released August 3, 2026) on August 10, 2026. I installed it, connected a cluster, and broke things so you don't have to. For a fast-moving open-source project, always cross-check the upstream README.
 
@@ -21,7 +21,7 @@ Most teams do not fail on-call because they have zero dashboards.
 
 They fail because the dashboards, alerts, logs, cloud inventory, cost data, tickets, and runbooks all live in different places. The on-call engineer becomes the integration layer: copy a pod name from Slack, search logs in another tab, check metrics in a third tool, open a ticket, paste a summary, then run a command from a runbook that may or may not still be true.
 
-That is the real problem an SRE copilot should solve. Not "ask an LLM what Kubernetes is."
+That is the real problem an SRE copilot should solve - and it has nothing to do with asking an LLM what Kubernetes is.
 
 The mental model that makes this class of tool click:
 
@@ -39,13 +39,13 @@ SRE teams already run this loop by hand every day:
 6. **Act** - run the remediation, or guide a human through it.
 7. **Record** - keep the investigation and outcome for the next incident.
 
-NudgeBee's value is that it treats these stages as **one product surface**. The dashboard is not the product. The LLM is not the product. The loop is the product.
+NudgeBee's value is that it treats these stages as **one product surface**. The loop is the product - not the dashboard, and not the LLM.
 
 ---
 
 ## What NudgeBee Is (as of v1.4.0)
 
-NudgeBee describes itself as a unified CloudOps platform: **AI-SRE** (troubleshooting), **AI-FinOps** (cost and rightsizing), **AI-K8sOps** (cluster operations), and an **Agentic Automation Builder** - without fragmented tools or model lock-in.
+NudgeBee describes itself as a unified AIOps / CloudOps platform: **AI-SRE** (troubleshooting), **AI-FinOps** (cost and rightsizing), **AI-K8sOps** (cluster operations), and an **Agentic Automation Builder** - without fragmented tools or model lock-in.
 
 Under the hood it is a monorepo of TypeScript, Go, and Python services:
 
@@ -63,7 +63,11 @@ Each service owns a stage of the loop:
 | Notify | `notifications-server` - Slack, Teams, Discord, email |
 | Record | Postgres: conversations, tool calls, executions, tickets |
 
+Because these surfaces share the same collectors, knowledge graph, and integrations (more on bCortex below), a team can start with just one - say, triage - and add FinOps or automation later without re-plumbing anything.
+
 The right way to read the repo is not file by file. It is: "which stage of the loop does this service own?"
+
+(One naming heads-up if you go source diving: the service that deploys as `workflow-server` lives in the code as `runbook-server`. Same thing - one Temporal worker wearing two names.)
 
 ---
 
@@ -208,7 +212,7 @@ Ten minutes later (on a 26B model running on my own hardware - more on that belo
 
 ![Completed AI investigation - summary, 5-Whys causality chain, evidence, resolution](/img/blog/nudgebee-ai-sre-copilot-hands-on/12-ai-investigation-result.jpg)
 
-This is worth pausing on, because the *structure* of the answer is the product:
+Let's pause on the *structure* of that answer for a second, because it is doing a lot of work:
 
 - **Investigation Summary** - symptom plus the exact signal: Kubernetes events reporting `NotFound` for the specific image reference.
 - **Causality Chain (5-Whys)** - pod is in ImagePullBackOff → runtime cannot pull the image → the registry returned `404 Not Found` for that tag → root cause: the manifest references a non-existent image tag.
@@ -233,8 +237,6 @@ The tool layer is wide: `kubectl` and Helm, Prometheus/PromQL, Loki, Elasticsear
 
 > The model should not hallucinate your cluster. It should ask tools for evidence.
 
-That single sentence is the difference between a chatbot and an SRE copilot.
-
 ### Guardrails you can see in the logs
 
 Watching llm-server logs during the investigation was its own education:
@@ -246,11 +248,11 @@ plannerexecutor: pre-flight detected tool with LLM-only
 plannerexecutor: tool output truncated at source
 ```
 
-Pre-flight classification of potentially write-capable tools, output truncation before context stuffing, per-account tool scoping, and an egress filter (default "detect" mode) that watches for secrets leaving via LLM calls. None of this is glamorous. All of it is what makes "AI with kubectl access" survivable.
+Pre-flight classification of potentially write-capable tools, output truncation before context stuffing, per-account tool scoping, and an egress filter (default "detect" mode) that watches for secrets leaving via LLM calls. None of it is glamorous, and all of it is what makes "AI with kubectl access" survivable.
 
 ---
 
-## bCortex: Why This Is Not Just Model Calls in a Loop
+## bCortex: The Context Layer Under Every Agent
 
 There is a failure mode every naive "agentic ops" tool shares: **the agent rediscovers your infrastructure from scratch on every question.** List the namespaces. Describe the deployments. Page through events. Ask again tomorrow and it does all of it again. Token spend grows with cluster size, latency grows with token spend, and worst of all, whenever discovery is incomplete the model fills the gaps by guessing - which is where operational hallucinations come from.
 
@@ -264,9 +266,9 @@ I did not have to take anyone's word for this, because my own run left its finge
 
 The economics follow directly. Right-sized context per call instead of dump-everything-into-the-prompt means fewer tokens. Graph and cache lookups replace repeated discovery tool calls. Model-tier routing (a `reasoning` / `retrieval` / `summary` split in the config) sends heavyweight thinking to the big model and summarization to a cheap one. At the scale where agentic ops gets interesting - hundreds of investigations a week across a fleet - that is the difference between a bill that grows with every question and one that amortizes. And accuracy moves the same direction as cost, because a model grounded in a graph that already knows what exists has far less room to hallucinate.
 
-The one-liner version:
-
 > A chatbot loop rediscovers your infrastructure every time. A context layer remembers it.
+
+This is also why the multi-agent pitch holds up in practice: a new agent - FinOps, K8sOps, a custom automation - does not start from zero. It inherits everything bCortex already knows about the environment.
 
 ---
 
@@ -290,9 +292,7 @@ NudgeBee runs every runbook and scheduled job through **Temporal**. I opened the
 
 Agent health checks, notification batching, recommendation-resolution updates, insight refreshes, system cleanup - all as versioned, retryable, resumable workflows with full history. The Automations surface builds on the same engine: manual, scheduled, webhook, and event-triggered workflows, with approval steps, retries, child workflows, and persistent state.
 
-> The LLM helps decide what to do. Temporal makes doing it operationally boring.
-
-That division of labor is exactly right, and it is why "AI will replace runbooks" has it backwards - AI makes durable runbooks *more* important.
+The division of labor here is exactly right: the LLM helps decide what to do, and Temporal makes doing it operationally boring. It is also why "AI will replace runbooks" has it backwards - AI makes durable runbooks *more* important.
 
 ---
 
@@ -302,7 +302,7 @@ NudgeBee's pitch includes "no model lock-in," and v1.4.0 implements providers fo
 
 Two field findings worth your time:
 
-**1. The `ollama` provider is documented but not implemented (yet).** The sample env lists `ollama` as an option, but the v1.4.0 provider switch has no case for it - you get `llm model not found - ollama`. The workaround is clean, since Ollama speaks the OpenAI protocol:
+**1. For Ollama, use the OpenAI-compatible path - it is what the [official docs](https://docs.nudgebee.com/docs/integrations/LLM/Ollama/) configure, and it works.** The trap I fell into: the sample env file also lists `ollama` as a provider value, and that switch case is not wired up in v1.4.0, so picking it fails with `llm model not found - ollama`. Stick to the documented config, which goes through Ollama's OpenAI-compatible endpoint (the team told me they will make this more explicit):
 
 ```bash
 LLM_PROVIDER=openai
@@ -326,6 +326,8 @@ The architecture take-away is bigger than my desk, though: because the model is 
 ---
 
 ## Where Would You Actually Use This? Six Scenarios
+
+Because the surfaces share one platform, these are not six separate products to evaluate - they are six entry points into the same one.
 
 **1. On-call triage.** Connect the cluster, wire Slack/Teams, and let the triage inbox rank what fires. The score plus event aggregation turns 40 raw alerts into 3 issues with owners. Start here - it is read-only and pays off day one.
 
@@ -356,17 +358,17 @@ The standard sharp edges of the category, plus what I hit:
 
 ---
 
-## What This Teaches About Building AI Operations Software
+## What This Teaches About Building AIOps Platforms
 
 Five lessons I keep coming back to after a day inside it:
 
 1. **Context beats chat.** The interesting part is not the assistant - it is bCortex, the graph and memory around it: resources, events, tickets, tool calls, prior investigations. AI without context is a guesser; AI with context is an operator interface.
-2. **Tools need ownership boundaries.** Tenant scoping, credential isolation, pre-flight write detection, output truncation - the unglamorous parts are the product.
+2. **Tools need ownership boundaries.** Tenant scoping, credential isolation, pre-flight write detection, output truncation - the boring parts are what make the write path safe.
 3. **Runbooks are the safety rail, not the legacy.** The agent discovers and parameterizes workflows; Temporal gives them retries, approvals, versioning, and history.
 4. **Cost is an ops signal.** Reliability and FinOps on one surface matches how platform teams actually work.
 5. **A monorepo can be a teaching tool.** TypeScript for the app, Go for the backends, Python for ML and collectors, Postgres/RabbitMQ/Redis/Qdrant/Temporal each doing the one job they are best at. Studying why each piece exists is a free course in platform engineering.
 
-If you want to explore the code, follow the loop: start at `docs/ARCHITECTURE.md` and `docs/GLOSSARY.md`, then `llm/llm-server/agents/` and `tools/` for the AI layer (grep `RegisterNBAgentFactory` and `RegisterNBTool`), then `runbook-server/tests/integration/testdata/` for a catalog of what the workflow engine can do, and finally `collector-server/` for how reality enters the system.
+If you want to explore the code, follow the loop: start at `docs/ARCHITECTURE.md` and `docs/GLOSSARY.md`, then `llm/llm-server/agents/` and `tools/` for the AI layer (grep `RegisterNBAgentFactory` and `RegisterNBTool`), then `runbook-server/tests/integration/testdata/` (the code home of workflow-server) for a catalog of what the workflow engine can do, and finally `collector-server/` for how reality enters the system.
 
 ---
 
@@ -376,9 +378,11 @@ If you want to explore the code, follow the loop: start at `docs/ARCHITECTURE.md
 signals -> resources -> events -> triage -> investigations -> recommendations -> runbooks -> records
 ```
 
-That is the SRE copilot loop, and NudgeBee is the most complete open implementation of it I have run. It earns the "copilot" name not because there is a chat box, but because every stage - collection, ranking, tool-driven investigation, durable remediation, and the paper trail - lives in one system that a small team can actually self-host.
+That is the SRE copilot loop, and NudgeBee is the most complete open implementation of it I have run. It earns the "copilot" name not because there is a chat box, but because every stage - collection, ranking, tool-driven investigation, durable remediation, and the paper trail - lives in one system that a small team can actually self-host. And because that system is agent-agnostic, the same AIOps platform covers SRE, FinOps, K8s ops, and whatever custom automation a team builds next.
 
-The future of SRE still needs humans. It just stops making humans do all the glue work by hand.
+SRE still needs humans. What it should stop needing is humans doing all the glue work by hand.
+
+Give it a try on a test cluster and let me know what you find - and if you hit the same sharp edges I did, the fixes above should save you an evening.
 
 ---
 
@@ -392,3 +396,4 @@ The future of SRE still needs humans. It just stops making humans do all the glu
 - Auth & NetworkPolicy: [docs/auth-and-networkpolicy.md](https://github.com/nudgebee/nudgebee/blob/main/docs/auth-and-networkpolicy.md)
 - Agent chart: [github.com/nudgebee/k8s-agent](https://github.com/nudgebee/k8s-agent)
 - kiac (the local cluster tool): [github.com/saiyam1814/kiac](https://github.com/saiyam1814/kiac)
+
