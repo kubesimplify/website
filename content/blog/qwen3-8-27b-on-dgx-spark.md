@@ -235,6 +235,25 @@ Then I re-enabled NEXTN speculation (SGLang's MTP equivalent) on the working ups
 
 Speculation on FP8 gives SGLang almost exactly vLLM's MTP single-stream number (same weights, same trick), and its speculative scheduler scales better under batch: 71 t/s aggregate at concurrency 10 where vLLM's MTP drops to 56. If you see people posting bigger SGLang numbers than mine from earlier in this post, this is why: speculation on versus off. The overall throughput crown still belongs to vLLM NVFP4+MTP, because the 4-bit quant halves the weight traffic that everything else queues behind. And for the record, SGLang with speculation survived the 16K single-stream cell that I tested; I deliberately did not run speculation at deep context plus concurrency, the combination that hard-rebooted the box twice under vLLM.
 
+## The 75 tok/s post, reproduced
+
+While I was sitting on this draft, a post by [@0xBakeer](https://x.com/0xBakeer) went around claiming 75 tok/s single-stream and 256 tok/s across 16 parallel requests, on the same model, on the same machine. My first reaction was that it contradicted everything above. It does not, and reproducing it taught me the most useful lesson in this post.
+
+The lever is a dedicated draft model: "DSpark" (community-built, 5 layers, ~2.6GB) proposes blocks of tokens and the full model verifies them in one weight-read. Same speculative idea as MTP, but the drafter is 3x cheaper per guess. Their [recipe repo](https://github.com/0xBakeer/Qwen3.8-27B-FP8-on-a-single-DGX-Spark) is excellent, annotated flag by flag, so I ran it verbatim on my Spark (vLLM v0.27.1 stable, FP8, DSpark k=7):
+
+| Workload | Their number | My Spark |
+|---|---|---|
+| Edit-heavy (98.5% draft acceptance) | 46.8 t/s | 45.0-48.6 t/s |
+| Fresh generation (~30% acceptance) | n/a | 20.8 t/s |
+| llama-benchy free-gen, single stream | n/a | 17.2 t/s |
+| llama-benchy, 10 concurrent aggregate | n/a | 65.6 t/s |
+
+Reproduced within noise. Their 75 t/s headline is the 4-bit checkpoint plus a deeper draft on the edit-heavy workload, and it is real too.
+
+The lesson: speculative decoding's speedup is the drafter's acceptance rate, and acceptance is a property of YOUR WORKLOAD, not the model. The same server on the same box is 3.5x faster editing existing code (where the draft just copies the prompt) than writing new code (where it genuinely guesses). So a single tokens-per-second number without its workload attached is close to meaningless, including the ones in this post: my numbers are free-form generation, the pessimistic end of the range. If your work is editing, refactoring, or structured rewriting, multiply accordingly.
+
+Practical takeaway for single-user Sparks: DSpark k=7 on the official FP8 checkpoint beats every configuration I measured above (17.2 t/s on the neutral benchmark, 45+ on edit work) with zero quality risk, since verification discards every wrong guess. And it ran on the stable vLLM release without the hard reboot the nightly's MTP path gave me, though I have not dared re-run the exact crash cell.
+
 ## Wrapping up
 
 Qwen3.8-27B on a DGX Spark, one day in:
