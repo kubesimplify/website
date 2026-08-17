@@ -54,11 +54,10 @@ Qwen's own (vendor-reported, so calibrate accordingly) numbers for the 27B: SWE-
 
 | Path | Status on day zero |
 |---|---|
-| llama.cpp + unsloth GGUF | Works (build b10423, vision mmproj included) |
-| vLLM + official FP8 checkpoint | Works via nightly container (recipe below) |
+| llama.cpp + unsloth GGUF | Works (stock release build b10423, vision mmproj included) |
+| vLLM + official FP8 checkpoint | Works, on both the stable v0.27.1 release and the spark-arena nightly (recipes below) |
 | Ollama | Works, needs v0.32.12 (released the same day) |
 | SGLang | Works on upstream latest; the older pinned dev container silently produced garbage (see below) |
-| TokenSpeed | Official recipe exists, not tested here |
 
 ## The llama.cpp path (fastest way to first token)
 
