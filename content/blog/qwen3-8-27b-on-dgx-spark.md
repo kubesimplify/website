@@ -1,7 +1,7 @@
 ---
 title: "Running Qwen3.8-27B on DGX Spark"
 seoTitle: "Running Qwen3.8-27B on DGX Spark"
-seoDescription: "Qwen3.8-27B on DGX Spark with llama.cpp, Ollama, vLLM, and SGLang: the recipes, the tokens per second I measured, MTP speculative decoding, and the sharp edges nobody mentions."
+seoDescription: "Qwen3.8-27B on DGX Spark with llama.cpp, Ollama, vLLM, and SGLang: the recipes, the tokens per second I measured, MTP speculative decoding, and the sharp edges I hit along the way."
 datePublished: 2026-08-17T14:00:00.000Z
 slug: qwen3-8-27b-on-dgx-spark
 author: saiyam-pathak
