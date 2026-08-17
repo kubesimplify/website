@@ -13,7 +13,7 @@ Qwen announced the 3.8 family on August 3: Qwen3.8-Max, the 2.4T flagship, plus 
 
 It dropped on August 14. I had it running on the DGX Spark within the hour, so here is the full recipe, what worked on day zero, what did not, and the numbers. Let's get into it.
 
-Everything below was run on my DGX Spark (GB10, 128GB unified memory, DGX OS, driver 580.159.03) on August 14-15, 2026 with llama.cpp build b10423, the spark-arena vLLM nightly (0.27.2rc1), Ollama v0.32.12, and llama-benchy 0.4.0 for the load tests.
+Everything below was run on my DGX Spark (GB10, 128GB unified memory, DGX OS, driver 580.159.03) on August 14-15, 2026 with llama.cpp build b10423, the spark-arena vLLM nightly (0.27.2rc1), Ollama v0.32.12, SGLang latest-cu130, and llama-benchy 0.4.0 for the load tests. Checkpoint revisions: Qwen/Qwen3.8-27B-FP8 at 017b9c7a (the launch upload, unchanged since), unsloth GGUF at 4604b899, unsloth NVFP4 at 60e813d4 for the day-zero runs and 7d6f8d4d for the MTP runs. unsloth updated both quants after launch, so I re-benchmarked the updated revisions: 11.9 t/s single-stream on both, within 3% of the numbers below, nothing material changed.
 
 ## What Qwen3.8-27B actually is
 
