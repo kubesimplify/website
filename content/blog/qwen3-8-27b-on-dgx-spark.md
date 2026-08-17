@@ -15,6 +15,28 @@ It dropped on August 14. I had it running on the DGX Spark within the hour, so h
 
 Everything below was run on my DGX Spark (GB10, 128GB unified memory, DGX OS, driver 580.159.03) on August 14-15, 2026 with llama.cpp build b10423, the spark-arena vLLM nightly (0.27.2rc1), Ollama v0.32.12, SGLang latest-cu130, and llama-benchy 0.4.0 for the load tests. Checkpoint revisions: Qwen/Qwen3.8-27B-FP8 at 017b9c7a (the launch upload, unchanged since), unsloth GGUF at 4604b899, unsloth NVFP4 at 60e813d4 for the day-zero runs and 7d6f8d4d for the MTP runs. unsloth updated both quants after launch, so I re-benchmarked the updated revisions: 11.9 t/s single-stream on both, within 3% of the numbers below, nothing material changed.
 
+Every measurement in this post came from one of these four commands, so you can rerun any table row yourself:
+
+```bash
+# llama.cpp raw numbers (pp512/pp2048/tg128/tg32 tables)
+docker run --rm --gpus all -v $HOME/models/qwen38:/root/.cache/huggingface \
+  --entrypoint /app/llama ghcr.io/ggml-org/llama.cpp:server-cuda \
+  bench -m <path-to>/Qwen3.8-27B-UD-Q4_K_XL.gguf -fa 1 -p 512,2048 -n 128,32
+
+# vLLM and SGLang numbers (all pp2048/tg128 tables, any depth/concurrency)
+uvx llama-benchy@0.4.0 --base-url http://<spark-ip>:8000/v1 --model <served-model> \
+  --pp 2048 --tg 128 --depth 0 16384 32768 --concurrency 1 2 5 10 \
+  --enable-prefix-caching --save-result results.csv --format csv
+
+# Ollama numbers (from Ollama's own eval counters, temperature 0, 3 runs)
+curl -s http://127.0.0.1:11435/api/generate -d '{"model":"qwen3.8:27b",
+  "prompt":"<prompt>","stream":false,"options":{"temperature":0,"num_predict":200}}' \
+  | jq '{prompt_tok:.prompt_eval_count, prompt_ns:.prompt_eval_duration, gen_tok:.eval_count, gen_ns:.eval_duration}'
+
+# Edit-heavy vs fresh-generation workload comparison (DSpark section)
+python3 edit_bench.py http://127.0.0.1:8002/v1 qwen3.8-27b   # from 0xBakeer's repo, bench/
+```
+
 ## What Qwen3.8-27B actually is
 
 Reading the config before running things saves a lot of confusion, and this one is interesting:
