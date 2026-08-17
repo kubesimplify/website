@@ -5,7 +5,7 @@ seoDescription: "Running NudgeBee v1.4.0 end to end - a self-hosted AIOps platfo
 datePublished: 2026-08-17T10:00:00.000Z
 slug: nudgebee-ai-sre-copilot-hands-on
 author: saiyam-pathak
-cover: /img/blog/nudgebee-ai-sre-copilot-hands-on/02-home-dashboard.jpg
+cover: /img/blog/nudgebee-ai-sre-copilot-hands-on/cover.png
 tags: ["kubernetes", "ai", "sre", "aiops", "platform-engineering"]
 ---
 
