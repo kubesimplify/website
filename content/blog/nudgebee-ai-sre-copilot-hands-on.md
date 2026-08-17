@@ -2,7 +2,7 @@
 title: "I Ran an AI SRE Copilot on My Own Hardware. Here Is What It Actually Does."
 seoTitle: "NudgeBee v1.4.0 Hands-On: Self-Hosted AI SRE Copilot with Kubernetes and a DGX Spark"
 seoDescription: "Running NudgeBee v1.4.0 end to end - a self-hosted AIOps platform behind AI-SRE, AI-FinOps, AI-K8sOps, and agentic automation - on a Mac, a kiac cluster, and a DGX Spark."
-datePublished: 2026-08-10T18:30:00.000Z
+datePublished: 2026-08-17T10:00:00.000Z
 slug: nudgebee-ai-sre-copilot-hands-on
 author: saiyam-pathak
 cover: /img/blog/nudgebee-ai-sre-copilot-hands-on/02-home-dashboard.jpg
@@ -382,7 +382,7 @@ That is the SRE copilot loop, and NudgeBee is the most complete open implementat
 
 SRE still needs humans. What it should stop needing is humans doing all the glue work by hand.
 
-Give it a try on a test cluster and let me know what you find - and if you hit the same sharp edges I did, the fixes above should save you an evening.
+Give it a try on a test cluster and let me know what you find - and if you hit the same sharp edges I did, the fixes above should save you an evening. If the project looks useful to you, [star the repo on GitHub](https://github.com/nudgebee/nudgebee) - it is the easiest way to support the team building it - and tag me on [X @SaiyamPathak](https://x.com/SaiyamPathak) with what your investigations turn up.
 
 ---
 
