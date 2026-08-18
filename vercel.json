@@ -732,6 +732,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/local-llm-glossary",
+      "destination": "https://blog.kubesimplify.com/local-llm-glossary",
+      "permanent": true
+    },
+    {
       "source": "/blog/managing-contexts-in-kubernetes-with-plugins",
       "destination": "https://blog.kubesimplify.com/managing-contexts-in-kubernetes-with-plugins",
       "permanent": true
@@ -817,6 +822,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/nudgebee-ai-sre-copilot-hands-on",
+      "destination": "https://blog.kubesimplify.com/nudgebee-ai-sre-copilot-hands-on",
+      "permanent": true
+    },
+    {
       "source": "/blog/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
       "destination": "https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
       "permanent": true
@@ -879,6 +889,11 @@
     {
       "source": "/blog/quick-bites-of-fluxcd-health-assessment",
       "destination": "https://blog.kubesimplify.com/quick-bites-of-fluxcd-health-assessment",
+      "permanent": true
+    },
+    {
+      "source": "/blog/qwen3-8-27b-on-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/qwen3-8-27b-on-dgx-spark",
       "permanent": true
     },
     {
@@ -2517,6 +2532,17 @@
       ]
     },
     {
+      "source": "/local-llm-glossary",
+      "destination": "https://blog.kubesimplify.com/local-llm-glossary",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
       "source": "/managing-contexts-in-kubernetes-with-plugins",
       "destination": "https://blog.kubesimplify.com/managing-contexts-in-kubernetes-with-plugins",
       "permanent": true,
@@ -2704,6 +2730,17 @@
       ]
     },
     {
+      "source": "/nudgebee-ai-sre-copilot-hands-on",
+      "destination": "https://blog.kubesimplify.com/nudgebee-ai-sre-copilot-hands-on",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
       "source": "/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
       "destination": "https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform",
       "permanent": true,
@@ -2838,6 +2875,17 @@
     {
       "source": "/quick-bites-of-fluxcd-health-assessment",
       "destination": "https://blog.kubesimplify.com/quick-bites-of-fluxcd-health-assessment",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/qwen3-8-27b-on-dgx-spark",
+      "destination": "https://blog.kubesimplify.com/qwen3-8-27b-on-dgx-spark",
       "permanent": true,
       "has": [
         {

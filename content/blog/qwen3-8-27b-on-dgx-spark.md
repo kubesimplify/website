@@ -53,6 +53,8 @@ curl -s http://127.0.0.1:11435/api/generate -d '{"model":"qwen3.8:27b",
 python3 edit_bench.py http://127.0.0.1:8002/v1 qwen3.8-27b   # from 0xBakeer's repo, bench/
 ```
 
+Two words to have straight before the tables below, because every number in this post is one or the other. **Prefill** is the model reading your prompt: all the input tokens get processed in parallel, so it is fast, hundreds to thousands of tokens per second. **Decode** is the model writing its answer one token at a time, each token waiting on the one before it, so it is slow, single or low double digits here. Prefill is the wait before the first word appears; decode is the speed you watch it type at. In benchmark names, `pp2048` is prefill measured on a 2,048 token prompt and `tg128` is decode measured over 128 generated tokens. Anything else that reads like a magic string in this post is in the [local LLM glossary](/blog/local-llm-glossary).
+
 ## What Qwen3.8-27B actually is
 
 Reading the config before running things saves a lot of confusion, and this one is interesting:
@@ -90,10 +92,12 @@ docker run -d --name qwen38-llamacpp --gpus all -p 8091:8091 \
   --port 8091 --host 0.0.0.0 -ngl 99 -c 32768 -fa on
 ```
 
+Three of those flags do the heavy lifting: `-ngl 99` offloads all layers to the GPU (99 is the idiomatic "all of them", and anything left on the CPU is dramatically slower), `-c 32768` sets the context window to 32K tokens, and `-fa on` enables flash attention, which computes attention without materializing the giant intermediate matrix in memory. That last one is free speed, leave it on.
+
 Two gotchas I hit so you do not have to:
 
 1. Recent llama.cpp downloads `-hf` models into the Hugging Face hub cache (`/root/.cache/huggingface`), not the old `/root/.cache/llama.cpp` path. Mount the right one or your 18GB download disappears with the container.
-2. The GGUF repo ships `mmproj-BF16.gguf` alongside the weights (llama.cpp pulled it automatically), so the vision path is wired up for llama.cpp as well. I test it below.
+2. The GGUF repo ships `mmproj-BF16.gguf` alongside the weights (llama.cpp pulled it automatically), so the vision path is wired up for llama.cpp as well. `mmproj` is the multimodal projector, the companion file that turns images into tokens the language model can read: no mmproj, no images, however capable the model is. I test it below.
 
 First token arrives fast and the model correctly identified what it was running on (a nice recursive moment: Qwen3.8-27B on a DGX Spark explaining what a DGX Spark is).
 
@@ -135,6 +139,20 @@ defaults:
 env:
   VLLM_MARLIN_USE_ATOMIC_ADD: '1'
 ```
+
+That is a lot of magic strings in twelve lines, so here is what each one is actually doing, because these are the knobs you will end up turning yourself:
+
+| Setting | What it does | Why this value |
+|---|---|---|
+| `gpu_memory_utilization: 0.8` | The share of memory vLLM claims up front, for weights plus KV cache | Higher means more KV cache, so longer contexts and more concurrent users. On unified memory you cannot go greedy: everything else on the box shares this pool. |
+| `max_model_len: 131072` | Longest context the server will accept, in tokens | 128K, well under the model's native 262K. Every token of headroom you reserve costs KV cache memory, and I would rather have the memory. |
+| `max_num_batched_tokens: 32768` | Cap on tokens the scheduler puts in one forward pass | The prefill-throughput vs responsiveness dial. Bigger batches process prompts faster and make latency chunkier. |
+| `load_format: instanttensor` | How the weights get off disk and into memory | Pure startup time. It is why a 29GB checkpoint is resident in under 5 seconds once cached instead of minutes. |
+| `kv_cache_dtype: fp8` | Precision the KV cache is stored at | Roughly halves cache memory versus 16-bit, which is what buys the long-context headroom. Small accuracy cost. |
+| `attention_backend: flashinfer` | Which attention kernel library runs | On `sm121` FlashInfer picks the `xqa` decode kernel and supports the FP8 cache above. Backends can differ by 2x, which is why recipes pin one. |
+| `tool_call_parser: qwen3_coder` | Pulls tool and function calls out of the raw token stream | Has to match the model family, or your agent framework sees plain text where it expected a structured call. |
+| `reasoning_parser: qwen3` | Pulls `<think>` blocks into the response's reasoning field | Same story: wrong parser and reasoning text leaks into the answer. |
+| `VLLM_MARLIN_USE_ATOMIC_ADD: '1'` | Switches Marlin's quantized kernels to atomic accumulation | A hardware-specific workaround. This one you copy from a working recipe rather than derive. |
 
 Then:
 
@@ -178,7 +196,7 @@ This is what day zero actually looks like: the happy paths work because the arch
 
 ## NVFP4: the best-numbers recipe
 
-GB10 is a Blackwell chip, and Blackwell has native FP4 tensor cores, so the natural question is whether the NVFP4 quant (unsloth/Qwen3.8-27B-NVFP4, ~16GB) buys real speed. Same recipe as above with the model swapped, and FlashInfer autotuned 46 fp4_gemm kernel configs on first boot. It does:
+GB10 is a Blackwell chip, and Blackwell has native FP4 tensor cores (NVFP4 being NVIDIA's 4-bit float format, covered properly in [Day 4](/blog/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters)), so the natural question is whether the NVFP4 quant (unsloth/Qwen3.8-27B-NVFP4, ~16GB) buys real speed. Same recipe as above with the model swapped, and FlashInfer autotuned 46 fp4_gemm kernel configs on first boot. It does:
 
 | Concurrency | Prefill pp2048 (t/s) | Decode tg128 aggregate (t/s) | Decode per request (t/s) |
 |---|---|---|---|

@@ -7,6 +7,7 @@ slug: k8sgpt-tutorial-when-kubernetes-meets-ai
 author: kunal-verma
 cover: /img/blog/k8sgpt-tutorial-when-kubernetes-meets-ai/cc4d6ad6-1b11-45ef-9e94-9e9ad31251aa.png
 tags: ["ai", "kubernetes", "openai", "llm", "ollama"]
+glossary: false
 cuid: clz9trn19000409mi6km2cpkh
 ---
 We all agree that in recent years, AI has taken the world by storm. With tools like ChatGPT and platforms developed by OpenAI leading the charge — AI is being used in many industries to make work easier, provide helpful insights, and boost productivity. According to [The State of AI 2023 by McKinsey](https://www.mckinsey.com/~/media/mckinsey/business%20functions/quantumblack/our%20insights/the%20state%20of%20ai%20in%202023%20generative%20ais%20breakout%20year/the-state-of-ai-in-2023-generative-ais-breakout-year_vf.pdf), AI adoption has increased by over 60% in the past year alone, with businesses using AI to stay ahead and innovate!
