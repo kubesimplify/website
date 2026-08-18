@@ -907,6 +907,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/running-a-big-llm-across-multiple-gpus-with-vllm",
+      "destination": "https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm",
+      "permanent": true
+    },
+    {
       "source": "/blog/sharing-gpus-in-kubernetes-with-hami",
       "destination": "https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami",
       "permanent": true
@@ -2908,6 +2913,17 @@
     {
       "source": "/ready-for-wasm-day-2023",
       "destination": "https://blog.kubesimplify.com/ready-for-wasm-day-2023",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/running-a-big-llm-across-multiple-gpus-with-vllm",
+      "destination": "https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm",
       "permanent": true,
       "has": [
         {

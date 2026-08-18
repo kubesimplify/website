@@ -6,8 +6,16 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 Aug 2026 09:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 18 Aug 2026 10:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>Running a big LLM across multiple GPUs with vLLM</title>
+      <link>https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm</guid>
+      <pubDate>Tue, 18 Aug 2026 10:00:00 GMT</pubDate>
+      <description>A plain-English guide to serving a model that is too big for one GPU: how tensor, pipeline, and expert parallelism split it up, what every vLLM flag does, and measured numbers from a 235B model on four RTX PRO 6000 cards.</description>
+      <category>vllm</category><category>gpu</category><category>nvidia</category><category>llm</category><category>platform-engineering</category>
+    </item>
     <item>
       <title>The Local LLM Glossary: Every Term, Flag, and Number in Plain English</title>
       <link>https://blog.kubesimplify.com/local-llm-glossary</link>
