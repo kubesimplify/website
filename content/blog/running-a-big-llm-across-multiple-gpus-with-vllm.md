@@ -98,6 +98,38 @@ A few things worth understanding here:
 
 Remember those block scales. They are the reason for the most annoying crash we hit, back in Part 12.
 
+### Can you change the number of shards?
+
+Worth answering because it is a natural question: no, not at download time. The shard layout is decided by whoever uploaded the model and is baked into `model.safetensors.index.json`. `hf download` just fetches the files that exist in the repo, so there is no flag to ask for more or fewer of them.
+
+You can only re-shard by loading the model yourself and saving it again, which is a local operation on your own copy:
+
+```python
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained("some/model")
+model.save_pretrained("./resharded", max_shard_size="5GB")
+```
+
+`max_shard_size` is the knob, and in current `transformers` it defaults to `"50GB"`. One caveat straight from its docs, because it surprises people: "If a single weight of the model is bigger than `max_shard_size`, it will be in its own checkpoint shard which will be bigger than `max_shard_size`." A giant embedding matrix can therefore blow past whatever cap you set.
+
+For a 235B model this is almost never worth doing, since you would have to load the whole thing to write it back out. Just take the shards you are given.
+
+### Is there a standard shard size?
+
+Not a formal one, but there are firm conventions and real limits.
+
+**The conventions** are the naming pattern (`model-00001-of-00024.safetensors`) and the index file next to it. Both are produced automatically by the saving code, which is why nearly every model on the Hub looks the same.
+
+**The limits** come from the Hub. Its guidance is to split large files "into chunks <200GB each", and it states that "500GB is the hard limit for a single file size". The reasoning is practical and worth knowing, because it is the same reasoning that should shape your own thinking about big files:
+
+- A failed download of a smaller file resumes cheaply. A failed download of one enormous file can mean starting over.
+- Files are served through a CDN, and per the Hub's docs "huge files are not cached by this service leading to a slower download speed". So one 236 GB file would genuinely download slower than 24 pieces of it.
+
+**What publishers actually pick** sits far below those limits. Our model uses a 10 GB cap: 23 shards of exactly 10.00 GB and a 24th holding the remaining 6.45 GB. Somewhere in the 5 to 10 GB range is the common choice across the Hub.
+
+**Does any of this affect serving?** Essentially no. Shard count does not change how much GPU memory you need or how fast the model runs, because the weights are identical either way and safetensors are memory-mapped, so the loader reads the byte ranges it wants regardless of how they are grouped into files. Shard size is a distribution question, not an inference question. Where it does matter is download throughput and resumability, which is exactly why the convention landed where it did.
+
 ### Where it gets stored
 
 By default everything lands under `~/.cache/huggingface/hub`, in a layout that looks strange the first time you see it:
