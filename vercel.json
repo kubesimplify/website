@@ -562,6 +562,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/kagent-part-1-local-ai-agent-kubernetes",
+      "destination": "https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes",
+      "permanent": true
+    },
+    {
       "source": "/blog/keptn-getting-started",
       "destination": "https://blog.kubesimplify.com/keptn-getting-started",
       "permanent": true
@@ -1029,6 +1034,11 @@
     {
       "source": "/blog/yours-kindly-drone",
       "destination": "https://blog.kubesimplify.com/yours-kindly-drone",
+      "permanent": true
+    },
+    {
+      "source": "/blog/zero-trust-istio-sidecar-vs-ambient",
+      "destination": "https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient",
       "permanent": true
     },
     {
@@ -2143,6 +2153,17 @@
       ]
     },
     {
+      "source": "/kagent-part-1-local-ai-agent-kubernetes",
+      "destination": "https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
       "source": "/keptn-getting-started",
       "destination": "https://blog.kubesimplify.com/keptn-getting-started",
       "permanent": true,
@@ -3168,6 +3189,17 @@
     {
       "source": "/yours-kindly-drone",
       "destination": "https://blog.kubesimplify.com/yours-kindly-drone",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/zero-trust-istio-sidecar-vs-ambient",
+      "destination": "https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient",
       "permanent": true,
       "has": [
         {

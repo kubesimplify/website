@@ -114,6 +114,7 @@
 /blog/iptables-demo                                                                    /iptables-demo  301!
 /blog/istio-service-mesh                                                               /istio-service-mesh  301!
 /blog/k8sgpt-tutorial-when-kubernetes-meets-ai                                         /k8sgpt-tutorial-when-kubernetes-meets-ai  301!
+/blog/kagent-part-1-local-ai-agent-kubernetes                                          /kagent-part-1-local-ai-agent-kubernetes  301!
 /blog/keptn-getting-started                                                            /keptn-getting-started  301!
 /blog/ksctl-making-kubernetes-easy-across-clouds                                       /ksctl-making-kubernetes-easy-across-clouds  301!
 /blog/kube-proxy-deep-dive                                                             /kube-proxy-deep-dive  301!
@@ -208,6 +209,7 @@
 /blog/why-devops-case-study                                                            /why-devops-case-study  301!
 /blog/wtf-is-linux-shell-command-substitution                                          /wtf-is-linux-shell-command-substitution  301!
 /blog/yours-kindly-drone                                                               /yours-kindly-drone  301!
+/blog/zero-trust-istio-sidecar-vs-ambient                                              /zero-trust-istio-sidecar-vs-ambient  301!
 
 # ── 2. Redirect main-site routes off the blog subdomain.
 #       Files exist in the static output (one shared build), but they
@@ -336,6 +338,7 @@
 /iptables-demo                                                                    /blog/iptables-demo  200!
 /istio-service-mesh                                                               /blog/istio-service-mesh  200!
 /k8sgpt-tutorial-when-kubernetes-meets-ai                                         /blog/k8sgpt-tutorial-when-kubernetes-meets-ai  200!
+/kagent-part-1-local-ai-agent-kubernetes                                          /blog/kagent-part-1-local-ai-agent-kubernetes  200!
 /keptn-getting-started                                                            /blog/keptn-getting-started  200!
 /ksctl-making-kubernetes-easy-across-clouds                                       /blog/ksctl-making-kubernetes-easy-across-clouds  200!
 /kube-proxy-deep-dive                                                             /blog/kube-proxy-deep-dive  200!
@@ -430,6 +433,7 @@
 /why-devops-case-study                                                            /blog/why-devops-case-study  200!
 /wtf-is-linux-shell-command-substitution                                          /blog/wtf-is-linux-shell-command-substitution  200!
 /yours-kindly-drone                                                               /blog/yours-kindly-drone  200!
+/zero-trust-istio-sidecar-vs-ambient                                              /blog/zero-trust-istio-sidecar-vs-ambient  200!
 
 # Everything else (assets, sitemap.xml, rss.xml, robots.txt, llms.txt,
 # /img/, /_next/) is served directly by Cloudflare from the static
