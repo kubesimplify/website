@@ -19,6 +19,16 @@
     },
     "postCount": 3
   },
+  "prianshu-mukherjee": {
+  "handle": "prianshu-mukherjee",
+  "name": "Prianshu Mukherjee",
+  "avatar": "/img/authors/prianshu-mukherjee.png",
+  "bio": "AI Platforms engineer , DevRel @kubesimplify. Building hands-on demos to make infrastructure concepts easy to digest.",
+  "socials": {
+    "github": "https://github.com/Prianshu-git",
+    "linkedin": "https://www.linkedin.com/in/prianshu-mukherjee-238072209/"
+  }
+  },
   "sysxplore": {
     "handle": "sysxplore",
     "name": "sysxplore",
