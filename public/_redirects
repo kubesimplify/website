@@ -148,6 +148,7 @@
 /blog/linux-boot-process-simplified                                                    /linux-boot-process-simplified  301!
 /blog/linux-system-directories-explained                                               /linux-system-directories-explained  301!
 /blog/llm-costs-and-observability-with-agentgateway-on-kubernetes                      /llm-costs-and-observability-with-agentgateway-on-kubernetes  301!
+/blog/local-llm-glossary                                                               /local-llm-glossary  301!
 /blog/managing-contexts-in-kubernetes-with-plugins                                     /managing-contexts-in-kubernetes-with-plugins  301!
 /blog/managing-your-operating-system-with-package-managers                             /managing-your-operating-system-with-package-managers  301!
 /blog/mastering-kubernetes-costs-from-monitoring-to-automation                         /mastering-kubernetes-costs-from-monitoring-to-automation  301!
@@ -165,6 +166,7 @@
 /blog/nemotron3-on-dgx-spark                                                           /nemotron3-on-dgx-spark  301!
 /blog/networking-fundamentals-for-devops                                               /networking-fundamentals-for-devops  301!
 /blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet /nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet  301!
+/blog/nudgebee-ai-sre-copilot-hands-on                                                 /nudgebee-ai-sre-copilot-hands-on  301!
 /blog/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform                    /nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform  301!
 /blog/operating-systems-101-essential-knowledge-for-devopssre-engineers                /operating-systems-101-essential-knowledge-for-devopssre-engineers  301!
 /blog/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints /optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints  301!
@@ -178,6 +180,7 @@
 /blog/prometheus-explained                                                             /prometheus-explained  301!
 /blog/pure-cilium-a-guide-for-local-load-balancing-and-bgp                             /pure-cilium-a-guide-for-local-load-balancing-and-bgp  301!
 /blog/quick-bites-of-fluxcd-health-assessment                                          /quick-bites-of-fluxcd-health-assessment  301!
+/blog/qwen3-8-27b-on-dgx-spark                                                         /qwen3-8-27b-on-dgx-spark  301!
 /blog/rancher-desktop-evolution                                                        /rancher-desktop-evolution  301!
 /blog/ready-for-wasm-day-2023                                                          /ready-for-wasm-day-2023  301!
 /blog/sharing-gpus-in-kubernetes-with-hami                                             /sharing-gpus-in-kubernetes-with-hami  301!
@@ -370,6 +373,7 @@
 /linux-boot-process-simplified                                                    /blog/linux-boot-process-simplified  200!
 /linux-system-directories-explained                                               /blog/linux-system-directories-explained  200!
 /llm-costs-and-observability-with-agentgateway-on-kubernetes                      /blog/llm-costs-and-observability-with-agentgateway-on-kubernetes  200!
+/local-llm-glossary                                                               /blog/local-llm-glossary  200!
 /managing-contexts-in-kubernetes-with-plugins                                     /blog/managing-contexts-in-kubernetes-with-plugins  200!
 /managing-your-operating-system-with-package-managers                             /blog/managing-your-operating-system-with-package-managers  200!
 /mastering-kubernetes-costs-from-monitoring-to-automation                         /blog/mastering-kubernetes-costs-from-monitoring-to-automation  200!
@@ -387,6 +391,7 @@
 /nemotron3-on-dgx-spark                                                           /blog/nemotron3-on-dgx-spark  200!
 /networking-fundamentals-for-devops                                               /blog/networking-fundamentals-for-devops  200!
 /nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet /blog/nexus-repository-manager-what-is-it-and-how-to-configure-it-on-a-digital-ocean-droplet  200!
+/nudgebee-ai-sre-copilot-hands-on                                                 /blog/nudgebee-ai-sre-copilot-hands-on  200!
 /nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform                    /blog/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform  200!
 /operating-systems-101-essential-knowledge-for-devopssre-engineers                /blog/operating-systems-101-essential-knowledge-for-devopssre-engineers  200!
 /optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints /blog/optimizing-kubernetes-costs-balancing-spot-and-on-demand-instances-with-topology-spread-constraints  200!
@@ -400,6 +405,7 @@
 /prometheus-explained                                                             /blog/prometheus-explained  200!
 /pure-cilium-a-guide-for-local-load-balancing-and-bgp                             /blog/pure-cilium-a-guide-for-local-load-balancing-and-bgp  200!
 /quick-bites-of-fluxcd-health-assessment                                          /blog/quick-bites-of-fluxcd-health-assessment  200!
+/qwen3-8-27b-on-dgx-spark                                                         /blog/qwen3-8-27b-on-dgx-spark  200!
 /rancher-desktop-evolution                                                        /blog/rancher-desktop-evolution  200!
 /ready-for-wasm-day-2023                                                          /blog/ready-for-wasm-day-2023  200!
 /sharing-gpus-in-kubernetes-with-hami                                             /blog/sharing-gpus-in-kubernetes-with-hami  200!

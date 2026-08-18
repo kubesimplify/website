@@ -6,8 +6,32 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 11 Aug 2026 17:40:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 18 Aug 2026 09:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>The Local LLM Glossary: Every Term, Flag, and Number in Plain English</title>
+      <link>https://blog.kubesimplify.com/local-llm-glossary</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/local-llm-glossary</guid>
+      <pubDate>Tue, 18 Aug 2026 09:00:00 GMT</pubDate>
+      <description>Plain-English definitions for every term you hit in local LLM posts: prefill and decode, tokens per second, FP8 and NVFP4, Q4_K_M, KV cache, YaRN, Gated DeltaNet, speculative decoding, and every vLLM, llama.cpp, and Ollama flag worth knowing.</description>
+      <category>local-ai</category><category>llm</category><category>inference</category><category>nvidia</category><category>dgxspark</category><category>vllm</category><category>ollama</category><category>quantization</category><category>glossary</category>
+    </item>
+    <item>
+      <title>Running Qwen3.8-27B on DGX Spark</title>
+      <link>https://blog.kubesimplify.com/qwen3-8-27b-on-dgx-spark</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/qwen3-8-27b-on-dgx-spark</guid>
+      <pubDate>Mon, 17 Aug 2026 14:00:00 GMT</pubDate>
+      <description>Qwen3.8-27B on DGX Spark with llama.cpp, Ollama, vLLM, and SGLang: the recipes, the tokens per second I measured, MTP speculative decoding, and the sharp edges I hit along the way.</description>
+      <category>qwen</category><category>dgxspark</category><category>nvidia</category><category>ollama</category><category>vllm</category>
+    </item>
+    <item>
+      <title>I Ran an AI SRE Copilot on My Own Hardware. Here Is What It Actually Does.</title>
+      <link>https://blog.kubesimplify.com/nudgebee-ai-sre-copilot-hands-on</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/nudgebee-ai-sre-copilot-hands-on</guid>
+      <pubDate>Mon, 17 Aug 2026 10:00:00 GMT</pubDate>
+      <description>Running NudgeBee v1.4.0 end to end - a self-hosted AIOps platform behind AI-SRE, AI-FinOps, AI-K8sOps, and agentic automation - on a Mac, a kiac cluster, and a DGX Spark.</description>
+      <category>kubernetes</category><category>ai</category><category>sre</category><category>aiops</category><category>platform-engineering</category>
+    </item>
     <item>
       <title>Running Nemotron 3.5 Lightning on DGX Spark</title>
       <link>https://blog.kubesimplify.com/nemotron-3-5-lightning-on-dgx-spark</link>
@@ -21,8 +45,8 @@
       <link>https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami</link>
       <guid isPermaLink="true">https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami</guid>
       <pubDate>Tue, 11 Aug 2026 10:00:00 GMT</pubDate>
-      <description>A hands-on test of topology-aware HAMi Dynamic MIG on RTX PRO 6000 Blackwell, with pinned setup commands, real allocations, mixed profiles, reclamation, and recovery.</description>
-      <category>kubernetes</category><category>gpu</category><category>nvidia</category><category>platform-engineering</category>
+      <description>Hands-on HAMi Dynamic MIG test on Kubernetes and RTX PRO 6000 Blackwell: setup commands, real allocations, mixed profiles, reclamation, and recovery.</description>
+      <category>kubernetes</category><category>gpu</category><category>nvidia</category><category>hami</category><category>nvidia-mig</category><category>platform-engineering</category>
     </item>
     <item>
       <title>Devin Outposts on Kubernetes: Why Your AI Agent Needs Your Cluster</title>

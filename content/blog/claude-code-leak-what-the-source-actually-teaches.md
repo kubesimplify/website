@@ -7,6 +7,7 @@ slug: claude-code-leak-what-the-source-actually-teaches
 author: saiyam-pathak
 cover: /img/blog/claude-code-leak-what-the-source-actually-teaches/0582a05f-42f3-4b97-8512-9c2133603126.svg
 tags: ["typescript", "llm", "ai-agents", "ai-engineering", "claude-code"]
+glossary: false
 cuid: cmng6ranm00wj1qkxcebmdpiy
 ---
 Let me start with the honest version of what happened.

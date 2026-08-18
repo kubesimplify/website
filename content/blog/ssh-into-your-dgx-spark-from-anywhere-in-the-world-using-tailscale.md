@@ -7,6 +7,7 @@ slug: ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale
 author: saiyam-pathak
 cover: /img/blog/ssh-into-your-dgx-spark-from-anywhere-in-the-world-using-tailscale/73a73de4-7383-44be-8853-78e3cf47b306.png
 tags: ["kubernetes", "devops", "ssh", "nvidia", "tailscale", "dgxspark"]
+glossary: false
 cuid: cmnokj01r00j21qqe2j8dcmcj
 ---
 * * *
