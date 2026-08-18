@@ -7,6 +7,7 @@ slug: docker-mcp-catalog
 author: saloni-narang
 cover: /img/blog/docker-mcp-catalog/dbdb9d02-71cb-42b5-b660-68290ac7d695.png
 tags: ["ai", "docker", "docker-images", "docker-desktop", "llm", "mcp"]
+glossary: false
 cuid: cmcd2f66f000u02l45g9529xf
 ---
 As large language models (LLMs) evolve from static text generators to dynamic agents capable of executing actions, there's a growing need for a standardized way to let them interact with external tooling securely. That’s where [Model Context Protocol](https://modelcontextprotocol.io/introduction) (MCP) steps in, a protocol designed to turn your existing APIs into AI-accessible tools. Think of MCP as the missing middleware between LLMs and the real-world functionality you’ve already built. Instead of doing the prompt hacks or building custom plugins for each model, MCP allows you to define your capabilities as structured tools that any compliant AI client can discover, invoke, and interact with safely and predictably. While the protocol is still maturing and the documentation can be opaque, the underlying value is clear: MCP turns your backend into a toolbox for AI agents. Whether you're integrating scraping APIs, financial services, or internal business logic, MCP offers a portable, reusable, and scalable pattern for AI integrations. In this blog, we’ll walk through Docker Desktop's latest MCP client-server feature and explore how you can install an MCP server and use that directly from your LLM tool.  

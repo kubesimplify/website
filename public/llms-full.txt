@@ -5,6 +5,955 @@
 
 ---
 
+# The Local LLM Glossary: Every Term, Flag, and Number in Plain English
+
+- Canonical: https://blog.kubesimplify.com/local-llm-glossary
+- Published: 2026-08-18
+- Summary: Plain-English definitions for every term you hit in local LLM posts: prefill and decode, tokens per second, FP8 and NVFP4, Q4_K_M, KV cache, YaRN, Gated DeltaNet, speculative decoding, and every vLLM, llama.cpp, and Ollama flag worth knowing.
+
+Every local LLM post, mine included, is full of shorthand: `pp2048`, `tg128`, FP8, `UD-Q4_K_XL`, KV cache, `gpu_memory_utilization: 0.8`, MTP, YaRN. If you live in this world daily it reads fine. If you do not, it reads like a wall of magic strings.
+
+So here is the glossary. Every term, flag, and number that shows up across the local LLM and DGX Spark posts on this blog, explained in plain English, with the reason it matters rather than just the expansion of the acronym.
+
+You do not need to read this top to bottom. Ctrl+F the thing that confused you, get your answer, go back to the post you came from.
+
+## Start here: the two halves of every request
+
+Almost everything in this glossary makes more sense once you have these two words straight.
+
+**Prefill** (also called prompt processing) is the model reading your input. Every token of your prompt can be processed at the same time, in parallel, because they are all already known. This is why prefill numbers look big: 800 to 4,000 tokens per second is normal on a DGX Spark.
+
+**Decode** (also called generation) is the model writing its answer. It produces one token, feeds that token back in, produces the next. Each step depends on the one before it, so there is nothing to parallelize. This is why decode numbers look small: 8 to 30 tokens per second for a 27B model on the same box.
+
+When someone says "the model feels slow," they nearly always mean decode. When someone says "it took ages before anything appeared," they mean prefill.
+
+[Day 2 of the Local LLM series](/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step) walks a single request through both halves step by step if you want the long version.
+
+## Reading a benchmark table
+
+**Token.** The unit models actually read and write. Roughly three quarters of an English word on average, so 1,000 tokens is about 750 words. Numbers, code, and punctuation eat more tokens than plain prose.
+
+**t/s (tokens per second).** The throughput unit for both halves above. Always ask which half it refers to, because prefill t/s and decode t/s can differ by 100x on the same machine.
+
+**TTFT (time to first token).** How long from pressing enter until the first word appears. Dominated by prefill, so it grows with prompt length.
+
+**pp512, pp2048.** `pp` is prompt processing, the number is how many tokens of prompt. `pp2048` means "prefill throughput measured on a 2,048 token prompt." These names come from `llama-bench` and stuck as a convention.
+
+**tg128, tg32.** `tg` is token generation, the number is how many tokens were generated. `tg128` means "decode throughput measured while generating 128 tokens."
+
+**Depth (context depth).** How much conversation or document was already in the context window before the measurement started. `depth 0` is a cold, empty context. `depth 32768` means the model was already holding 32K tokens. Decode usually slows down as depth grows, and how much it slows is one of the more interesting things about a model's architecture.
+
+**Concurrency.** How many requests were in flight at once. `c=1` is one user. `c=10` is ten simultaneous requests, which is what serving a team or a fleet of agents actually looks like.
+
+**Aggregate vs per request.** At concurrency 10 you get two decode numbers. Aggregate is all ten requests added together, which is what a server operator cares about. Per request is what each individual user experiences, which is always lower. A box doing 84 t/s aggregate across 10 users is giving each of them about 9 t/s.
+
+## Why the numbers come out the way they do
+
+This is the section that makes bad benchmark numbers stop being mysterious.
+
+**Memory bandwidth.** How many gigabytes per second the chip can read out of memory. The DGX Spark's GB10 does about 273 GB/s. A discrete RTX PRO 6000 does roughly 6x that. This single number sets the ceiling for decode.
+
+**Weight streaming.** To produce one token, a dense model has to read every one of its weights out of memory. A 16.7GB model at 273 GB/s can therefore do at most about 16 tokens per second, no matter how fast the compute is. Measured 11.6 t/s against a 16 t/s theoretical ceiling is about 70% of peak, which is what real kernels achieve.
+
+The mental model I keep coming back to: it is like re-reading an entire book off the shelf before you can write each next word. Your reading speed sets the pace, not how fast you can think.
+
+**Bandwidth-bound vs compute-bound.** Decode is bandwidth-bound: the chip is waiting on memory, and the tensor cores are mostly idle. Prefill is compute-bound: there is enough parallel work to actually saturate the math units. This is why the same box can look fast and slow within one request, and why halving your model size roughly doubles decode but barely moves prefill.
+
+**Unified memory.** On the GB10 the CPU and GPU share one pool of memory (128GB, of which about 121.7 GiB is addressable) rather than the GPU having its own separate VRAM. Two consequences: big models fit without a discrete card's memory limit, and every process on the box competes for the same pool. If a llama.cpp container is still holding 18GB, your vLLM launch will fail on memory it can see but not have.
+
+**VRAM.** The dedicated memory on a discrete GPU. On a unified-memory box like the Spark there is no separate VRAM, which trips up tools that assume there is.
+
+**Dense vs MoE.** A dense model uses all its parameters for every token. A Mixture of Experts model has many parameters but routes each token through only a few of them, so a 30B MoE with 3B active parameters streams roughly 3B worth of weights per token and feels dramatically faster. This is the whole reason a 30B MoE can hit 100+ t/s on a Spark while a real dense 27B sits at 11.
+
+**Active parameters.** The subset of an MoE's weights actually used per token. Written like `2.4T-A95B`, meaning 2.4 trillion total parameters, 95 billion active. Active is the number that predicts speed. Total is the number that predicts memory.
+
+## Quantization: decoding the format names
+
+Quantization is storing the model's numbers in fewer bits. Fewer bits means fewer gigabytes to stream per token, which means faster decode, at some cost in quality. [Day 4](/blog/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters) is the full treatment; this is the lookup table.
+
+| Format | Bits per weight | What to know |
+|---|---|---|
+| FP32 | 32 (4 bytes) | Full precision. Almost nobody serves at this. |
+| BF16 / FP16 | 16 (2 bytes) | The reference quality. A 27B model is about 54GB. |
+| FP8 | 8 (1 byte) | Halves the size with very little quality loss. Native on Hopper and Blackwell. A 27B is about 29GB. |
+| INT4 | 4 (0.5 bytes) | Generic 4-bit integer. Quality depends heavily on how it was produced. |
+| NVFP4 | 4 | NVIDIA's 4-bit float with fine-grained scaling, with native tensor core support on Blackwell (so on GB10). Usually the best speed on this hardware. |
+| MXFP4 | 4 | Open Compute Project's 4-bit micro-scaling float. Same idea, different standard body. |
+
+**GGUF.** The single-file model format llama.cpp and Ollama use. It packs weights plus metadata plus tokenizer into one file you can move around. Not a precision, a container: a GGUF file also has a quantization type inside it.
+
+**Q4_K_M, Q4_K_XL and friends.** The llama.cpp quantization naming scheme, three parts stacked:
+
+- `Q4` is 4 bits per weight.
+- `_K` is the K-quant layout. Instead of one scaling factor for a whole tensor, weights are stored in super-blocks of 256 that are split into blocks of 32, each carrying its own quantized scale. Outlier weights then only distort their own block of 32 rather than dragging a whole tensor's precision down.
+- The last letter is a size tier: `S` small, `M` medium, `L` large, `XL` extra large. Higher tiers spend extra bits on the tensors that matter most, so the file is a bit bigger and the quality a bit better.
+
+**UD (Unsloth Dynamic).** A prefix like `UD-Q4_K_XL` means the layers were deliberately not all quantized to the same width. Embeddings and the first and last blocks keep more bits because everything downstream depends on them, while the more redundant middle feed-forward layers get squeezed harder. The result holds up better than a uniform 4-bit quant of the same file size.
+
+**Checkpoint.** A published set of weights, usually a Hugging Face repo at a specific revision. "The official FP8 checkpoint" means the model author's own FP8 publication, as opposed to a community requantization.
+
+**Marlin.** A family of fast GPU kernels for quantized matrix multiplication in vLLM. `VLLM_MARLIN_USE_ATOMIC_ADD: '1'` switches those kernels to atomic accumulation, which is a correctness and performance workaround on some GPU and shape combinations. It is the kind of environment variable you copy from a working recipe rather than derive.
+
+**Bytes per parameter arithmetic.** The one calculation worth memorizing: parameters times bytes per parameter equals weight size. 27B at FP8 is about 27GB, at 4-bit about 16GB, at BF16 about 54GB. Then add KV cache and runtime overhead on top.
+
+## Context, attention, and the KV cache
+
+**Context window.** The maximum number of tokens the model can have in front of it at once, prompt plus generated output plus any system message. 262,144 tokens is a large modern window, and it is often quoted as "262K" or "256K" loosely.
+
+**KV cache.** As the model reads your prompt, each attention layer computes key and value vectors per token, and caches them so it does not recompute them for every subsequent token. Very effective, but the cache grows linearly with context length and with the number of concurrent requests, and it lives in the same memory pool as the weights. Long contexts and many users both eat memory here, not in the weights.
+
+**KV cache dtype.** The precision the cache is stored at. Storing it at `fp8` instead of 16-bit roughly halves cache memory, letting you serve longer contexts or more users on the same box, at a small accuracy cost.
+
+**Prefix caching.** If two requests share the same beginning (a system prompt, a document, a conversation so far), the runtime can reuse the KV cache from the shared part instead of prefilling it again. Enormous win for chat and agent workloads where 90% of every request is the same prefix. In vLLM this is `--enable-prefix-caching`.
+
+**Attention.** The mechanism that lets each token look at the other tokens in context and decide what is relevant. Standard ("full") attention lets every token look at every previous token, which is powerful and gets more expensive as context grows.
+
+**Flash attention.** A way of computing attention that avoids writing the giant intermediate attention matrix to memory, making it much faster and much cheaper in memory. Effectively always worth turning on: `-fa on` in llama.cpp.
+
+**Attention backend.** Which implementation of attention the serving engine actually calls. In vLLM you might see `flashinfer`, `flash_attn`, or `xformers`. **FlashInfer** is a library of highly tuned attention and GEMM kernels; on the Spark's `sm121` architecture it picks the `xqa` decode kernel and supports an FP8 KV cache. Different backends can differ by 2x on the same hardware, which is why recipes pin one.
+
+**Linear attention.** An alternative that keeps a fixed-size running state instead of a cache that grows with every token. Cheaper and flat in context length, but with less precise recall than full attention. Modern models often use a hybrid: a few full attention layers for precise recall, the rest linear.
+
+**Gated DeltaNet.** The specific linear attention design used by recent Qwen models. The *gate* decides how fast old memory fades, and the *delta rule* writes targeted corrections into the fixed-size state rather than appending to an ever-growing list. The state is the same size at token 100,000 as it is at token 10, which is exactly why decode speed on these models barely sags as context grows. In Qwen3.8-27B, 48 of 64 layers are Gated DeltaNet and every 4th layer is full gated attention.
+
+**RoPE (Rotary Position Embedding).** How most models encode *where* a token sits in the sequence, by rotating the token's vector by an angle that depends on its position. Positions the model never saw in training land at angles it does not understand, which is why context windows have a hard native limit.
+
+**YaRN (Yet another RoPE extensioN).** A technique for stretching that limit. It rescales the positional frequencies, stretching each one differently depending on its wavelength, so the model can address positions well beyond its training range without a full retrain. "262K native, extensible to 1M with YaRN" means the extra range is available but is an extension, not a native capability.
+
+**Vision encoder and mmproj.** A vision language model ships a separate encoder that turns images into tokens the language model can read. In GGUF land that encoder is a companion file called `mmproj` (multimodal projector). No `mmproj`, no images, even if the model is capable of them.
+
+**Thinking mode.** Models that emit reasoning inside `<think>` blocks before their actual answer. Better on hard problems, more tokens spent, so slower and more expensive per reply. Vendors publish different recommended sampling settings for thinking and non-thinking modes.
+
+**Reasoning parser and tool call parser.** Server-side parsers that pull those `<think>` blocks and any tool or function calls out of the raw token stream and put them in the right fields of the OpenAI-compatible API response. Wrong parser and your client sees reasoning text glued into the answer, or tool calls it cannot recognize. These are per model family: `reasoning_parser: qwen3`, `tool_call_parser: qwen3_coder`.
+
+## Speed tricks
+
+**Batching / continuous batching.** Running several requests through one pass over the weights. Since decode is bandwidth-bound, one weight-streaming pass can feed 10 tokens for 10 different users at almost the cost of feeding 1. This is why aggregate throughput climbs with concurrency while per-user throughput barely drops, and it is the main thing production servers like vLLM and SGLang buy you over single-user tools.
+
+**Speculative decoding.** A cheap model guesses the next few tokens, the real model verifies them all in one pass. Correct guesses are free tokens; wrong ones are discarded, so the output is identical to what the big model would have produced on its own. No quality risk, real speedup.
+
+**Draft model.** The cheap guesser in that scheme, a small separate model. "DSpark" is a community-built 5-layer, ~2.6GB drafter for Qwen3.8-27B.
+
+**MTP (Multi-Token Prediction).** The same trick with no separate model: the big model ships an extra head trained to predict several tokens ahead, and drafts for itself. Cheaper to deploy than a draft model since there is nothing extra to load. When Ollama serves a model 2x faster than llama.cpp on the same quantization, MTP being on by default is usually the reason.
+
+**NEXTN.** SGLang's name for its MTP-style speculative path. Same idea, different engine.
+
+**Acceptance rate.** The fraction of drafted tokens the real model accepts. This is the whole ballgame for speculative decoding, and it is a property of *your workload*, not of the model. Editing existing code, where the draft mostly copies text already in the prompt, can hit 98% acceptance and 3x speedups. Writing fresh prose or new code, where the drafter is genuinely guessing, might hit 30%. This is why a tokens-per-second number without its workload attached is close to meaningless.
+
+**k / num_speculative_tokens.** How many tokens the drafter proposes per round. Higher k pays off when acceptance is high and wastes work when it is low.
+
+**Tensor parallel (TP).** Splitting each layer's matrices across multiple GPUs so they all work on every token together. Needs fast interconnect between the cards. `tensor_parallel_size: 2` means two GPUs.
+
+**Pipeline parallel (PP).** Splitting the model by layer, so GPU 0 runs the first half and GPU 1 the second. Tolerates slower interconnect, but one card is idle while the other works unless you keep several requests in flight.
+
+## The flags you copy-paste
+
+### vLLM and sparkrun recipes
+
+A [sparkrun](https://sparkrun.dev) recipe is a YAML file that pins a model, a container, and the serving flags, so a working setup is one file rather than an afternoon of dependency fighting. The `defaults:` block is vLLM server arguments, and `env:` is environment variables passed into the container.
+
+| Key | What it does | How to think about it |
+|---|---|---|
+| `gpu_memory_utilization: 0.8` | The share of GPU memory vLLM is allowed to claim up front, for weights plus KV cache | Higher means more KV cache, so longer contexts and more concurrent users. Too high and the launch fails or something else on the box starves. On unified memory, remember other processes share the pool. |
+| `max_model_len: 131072` | The maximum context length the server will accept, in tokens | Can be lower than the model's native window, and often should be: every token of headroom you reserve costs KV cache memory. 131072 is 128K. |
+| `max_num_batched_tokens: 32768` | Cap on how many tokens the scheduler puts into one forward pass | Bigger batches mean better prefill throughput and chunkier latency. This is the prefill throughput vs responsiveness dial. |
+| `load_format: instanttensor` | How weights are read off disk into memory | `instanttensor` is a fast-load path that gets a 29GB checkpoint resident in seconds once cached, instead of minutes. Pure startup time, no runtime effect. |
+| `kv_cache_dtype: fp8` | Precision of the KV cache | Roughly halves cache memory versus 16-bit, so you fit longer contexts or more users. Small accuracy cost. |
+| `attention_backend: flashinfer` | Which attention kernel library to use | On the Spark's `sm121`, FlashInfer gets the fast decode path and FP8 KV cache support. |
+| `tool_call_parser: qwen3_coder` | Extracts tool and function calls from the token stream | Must match the model family, or your agent framework sees plain text where it expected a structured call. |
+| `reasoning_parser: qwen3` | Extracts `<think>` blocks into the response's reasoning field | Must match the model family, or reasoning text leaks into the answer. |
+| `VLLM_MARLIN_USE_ATOMIC_ADD: '1'` | Environment variable switching Marlin quantized kernels to atomic accumulation | A hardware-specific workaround. Copy it from a working recipe. |
+| `--enable-prefix-caching` | Reuses KV cache across requests that share a prefix | Big win for chat and agents, effectively free. |
+| `speculative_config` | Turns on speculative decoding, e.g. `{"method": "mtp", "num_speculative_tokens": 3}` | See MTP and acceptance rate above. |
+
+### llama.cpp
+
+| Flag | What it does |
+|---|---|
+| `-hf <repo>:<quant>` | Pulls the GGUF straight from Hugging Face. Note recent builds cache into `/root/.cache/huggingface`, not the old `llama.cpp` path, which matters when you mount a volume. |
+| `-ngl 99` | Number of layers to offload to the GPU. 99 is the idiomatic "all of them," since anything left on the CPU is dramatically slower. |
+| `-c 32768` | Context size in tokens for this server instance. Larger costs KV cache memory. |
+| `-fa on` / `-fa 1` | Flash attention. Turn it on. |
+| `--host 0.0.0.0 --port 8091` | Bind address and port for the OpenAI-compatible server. |
+| `mmproj-*.gguf` | The vision projector file. Present in the repo means images work. |
+
+`llama-bench` is llama.cpp's built-in benchmark, and it is where `pp512`/`tg128` style names come from.
+
+### Ollama
+
+| Thing | What it does |
+|---|---|
+| `num_ctx` | Context size, Ollama's equivalent of `-c`. Ollama picks a default from available memory. |
+| `num_predict` | Maximum tokens to generate in a reply. |
+| `ollama ps` | Shows loaded models and, critically, whether they are on GPU. If it says anything less than `100% GPU`, your benchmark is measuring the CPU and will be 3 to 5x too slow. |
+| `prompt_eval_count` / `eval_count` | Ollama's own counters for prompt tokens and generated tokens, with matching `_duration` fields in nanoseconds. Divide to get t/s. |
+
+### Sampling knobs
+
+These control how the next token is picked from the model's probability distribution. They change output style, not speed.
+
+- **temperature.** How much randomness. 0 is deterministic and repetitive, 1.0 is creative, above about 1.2 usually becomes incoherent. Use 0 when benchmarking so runs are comparable.
+- **top_p (nucleus sampling).** Only consider tokens inside the top cumulative probability mass, e.g. 0.95. Cuts off the long tail of unlikely tokens.
+- **top_k.** Only consider the k most likely tokens, e.g. 20.
+
+Model authors publish recommended values per mode, and it is worth using theirs. Qwen3.8's thinking mode wants temp 1.0 / top_p 0.95 / top_k 20, non-thinking wants temp 0.7 / top_p 0.80.
+
+## Hardware words
+
+**GB10.** The Grace Blackwell superchip inside the DGX Spark: Arm CPU plus Blackwell GPU plus 128GB of unified LPDDR5X at about 273 GB/s.
+
+**sm_121 / compute capability.** NVIDIA's architecture version tag for a GPU. GB10 is `sm_121`. Kernels have to be compiled for your architecture, so "supports sm121" in a release note is the difference between working and not. [Day 3](/blog/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists) covers the Spark's hardware story in detail.
+
+**Tensor cores.** The dedicated matrix multiply units. Which precisions they support natively (FP8 and FP4 on Blackwell) decides which quantization is genuinely fast rather than merely smaller.
+
+**GB vs GiB.** GB is 1,000^3 bytes, GiB is 1,024^3. A "128GB" box reports about 119 GiB, and vendors and tools mix the two freely. When a number looks 7% off, this is usually why.
+
+**`nvidia-smi` on GB10.** Cannot report memory usage on this chip and prints `Not Supported`. Use `free -h`, since the memory is unified anyway.
+
+## Where to go next
+
+If you want these terms in context rather than as a list, the Local LLM series builds them up in order:
+
+- [Day 1: The Local LLM Revolution](/blog/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter), why running models locally became viable at all
+- [Day 2: Anatomy of an LLM Inference Request](/blog/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step), prefill and decode end to end
+- [Day 3: The DGX Spark Unpacked](/blog/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists), the hardware and why bandwidth rules everything
+- [Day 4: Quantization Demystified](/blog/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters), every format name in depth
+- [Day 5: Inference Engines and What to Pick](/blog/day-5-local-llm-inference-engines-wrappers-and-what-to-pick), Ollama vs llama.cpp vs vLLM vs SGLang
+
+And if a term bit you that is not defined here, tell me and I will add it. That is what this page is for.
+
+---
+
+# Running Qwen3.8-27B on DGX Spark
+
+- Canonical: https://blog.kubesimplify.com/qwen3-8-27b-on-dgx-spark
+- Published: 2026-08-17
+- Summary: Qwen3.8-27B on DGX Spark with llama.cpp, Ollama, vLLM, and SGLang: the recipes, the tokens per second I measured, MTP speculative decoding, and the sharp edges I hit along the way.
+
+Qwen announced the 3.8 family on August 3: Qwen3.8-Max, the 2.4T flagship, plus a promise that open weights were coming "next week". The Max weights (2.4T-A95B) landed August 12. The one everyone actually wanted for local inference, the 27B, went quiet. Trackers even reported it as delayed with no new date.
+
+It dropped on August 14. I had it running on the DGX Spark within the hour, so here is the full recipe, what worked on day zero, what did not, and the numbers. Let's get into it.
+
+Here is exactly what everything below was run on:
+
+| Component | What I ran |
+|---|---|
+| Box | DGX Spark, GB10, 128GB unified memory |
+| OS and driver | DGX OS, driver 580.159.03, kernel 6.17.0-1018-nvidia |
+| Test dates | August 14-15, 2026 (the MTP, SGLang, and DSpark runs came on August 17) |
+| llama.cpp | build b10423 |
+| vLLM | spark-arena nightly 0.27.2rc1, plus stable v0.27.1 for the DSpark run |
+| Ollama | v0.32.12 |
+| SGLang | latest-cu130 |
+| Load-test tool | llama-benchy 0.4.0 |
+| FP8 checkpoint | Qwen/Qwen3.8-27B-FP8 at 017b9c7a (the launch upload, unchanged since) |
+| GGUF quant | unsloth/Qwen3.8-27B-GGUF at 4604b899 |
+| NVFP4 quant | unsloth/Qwen3.8-27B-NVFP4 at 60e813d4 (day zero), 7d6f8d4d (MTP runs) |
+
+unsloth updated both quants after launch, so I re-benchmarked the updated NVFP4 revision: 11.9 t/s single-stream, within 4% of the numbers below, nothing material changed.
+
+Every measurement in this post came from one of these four commands, so you can rerun any table row yourself:
+
+```bash
+# llama.cpp raw numbers (pp512/pp2048/tg128/tg32 tables)
+docker run --rm --gpus all -v $HOME/models/qwen38:/root/.cache/huggingface \
+  --entrypoint /app/llama ghcr.io/ggml-org/llama.cpp:server-cuda \
+  bench -m <path-to>/Qwen3.8-27B-UD-Q4_K_XL.gguf -fa 1 -p 512,2048 -n 128,32
+
+# vLLM and SGLang numbers (all pp2048/tg128 tables, any depth/concurrency)
+uvx llama-benchy@0.4.0 --base-url http://<spark-ip>:8000/v1 --model <served-model> \
+  --pp 2048 --tg 128 --depth 0 16384 32768 --concurrency 1 2 5 10 \
+  --enable-prefix-caching --save-result results.csv --format csv
+
+# Ollama numbers (from Ollama's own eval counters, temperature 0, 3 runs)
+curl -s http://127.0.0.1:11435/api/generate -d '{"model":"qwen3.8:27b",
+  "prompt":"<prompt>","stream":false,"options":{"temperature":0,"num_predict":200}}' \
+  | jq '{prompt_tok:.prompt_eval_count, prompt_ns:.prompt_eval_duration, gen_tok:.eval_count, gen_ns:.eval_duration}'
+
+# Edit-heavy vs fresh-generation workload comparison (DSpark section)
+python3 edit_bench.py http://127.0.0.1:8002/v1 qwen3.8-27b   # from 0xBakeer's repo, bench/
+```
+
+Two words to have straight before the tables below, because every number in this post is one or the other. **Prefill** is the model reading your prompt: all the input tokens get processed in parallel, so it is fast, hundreds to thousands of tokens per second. **Decode** is the model writing its answer one token at a time, each token waiting on the one before it, so it is slow, single or low double digits here. Prefill is the wait before the first word appears; decode is the speed you watch it type at. In benchmark names, `pp2048` is prefill measured on a 2,048 token prompt and `tg128` is decode measured over 128 generated tokens. Anything else that reads like a magic string in this post is in the [local LLM glossary](/blog/local-llm-glossary).
+
+## What Qwen3.8-27B actually is
+
+Reading the config before running things saves a lot of confusion, and this one is interesting:
+
+- 27B parameters, and it is NOT a MoE. 64 layers with a hybrid attention pattern: every 4th layer is full gated attention, the other 48 layers are [Gated DeltaNet](https://arxiv.org/abs/2412.06464) (linear attention). Same hybrid lineage as Qwen3.5/3.6.
+- Native vision language model. There is a 27-layer vision encoder in the checkpoint, images and video in, text out.
+- 262,144 token native context, extensible to 1M with [YaRN](https://arxiv.org/abs/2309.00071), short for Yet another RoPE extensioN: it rescales the model's positional frequencies, stretching each one differently depending on its wavelength, so the model can address positions further out than it was ever trained on without a full retrain.
+- Thinking mode on by default (`<think>` blocks), with recommended sampling temp 1.0 / top_p 0.95 / top_k 20. Non-thinking: temp 0.7 / top_p 0.80.
+- Apache 2.0.
+- Architecture class is `Qwen3_5ForConditionalGeneration` (`model_type: qwen3_5`). This detail matters: it is the same architecture family the inference engines already support, which is why day-zero support mostly just works.
+
+Gated DeltaNet deserves a sentence of its own, because it quietly explains most of the numbers later in this post. Normal attention keeps a KV cache that grows with every token you feed it, so the deeper your context gets, the more memory has to be read before the next token can come out. A linear attention layer keeps a fixed-size running state instead: the gate decides how fast old memory fades, and the delta rule writes targeted corrections into that state rather than appending to an ever-growing list. The state is the same size at token 100,000 as it is at token 10. Hold onto that one, it is why decode speed barely moves as context grows further down.
+
+Qwen's own (vendor-reported, so calibrate accordingly) numbers for the 27B: SWE-bench Pro 61.7, LiveCodeBench v6 90.3, Terminal Bench 2.1 at 73.0, GPQA Diamond 89.2, OSWorld-Verified 84.3.
+
+## What works on the Spark on day zero
+
+| Path | Status on day zero |
+|---|---|
+| llama.cpp + unsloth GGUF | Works (stock release build b10423, vision mmproj included) |
+| vLLM + official FP8 checkpoint | Works, on both the stable v0.27.1 release and the spark-arena nightly (recipes below) |
+| Ollama | Works, needs v0.32.12 (released the same day) |
+| SGLang | Works on upstream latest; the older pinned dev container silently produced garbage (see below) |
+
+## The llama.cpp path (fastest way to first token)
+
+Let's start with the fastest way to first token. One command, and the server pulls the GGUF straight from Hugging Face:
+
+```bash
+docker run -d --name qwen38-llamacpp --gpus all -p 8091:8091 \
+  -v $HOME/models/qwen38:/root/.cache/huggingface \
+  --entrypoint /app/llama-server \
+  ghcr.io/ggml-org/llama.cpp:server-cuda \
+  -hf unsloth/Qwen3.8-27B-GGUF:Q4_K_XL \
+  --port 8091 --host 0.0.0.0 -ngl 99 -c 32768 -fa on
+```
+
+Three of those flags do the heavy lifting: `-ngl 99` offloads all layers to the GPU (99 is the idiomatic "all of them", and anything left on the CPU is dramatically slower), `-c 32768` sets the context window to 32K tokens, and `-fa on` enables flash attention, which computes attention without materializing the giant intermediate matrix in memory. That last one is free speed, leave it on.
+
+Two gotchas I hit so you do not have to:
+
+1. Recent llama.cpp downloads `-hf` models into the Hugging Face hub cache (`/root/.cache/huggingface`), not the old `/root/.cache/llama.cpp` path. Mount the right one or your 18GB download disappears with the container.
+2. The GGUF repo ships `mmproj-BF16.gguf` alongside the weights (llama.cpp pulled it automatically), so the vision path is wired up for llama.cpp as well. `mmproj` is the multimodal projector, the companion file that turns images into tokens the language model can read: no mmproj, no images, however capable the model is. I test it below.
+
+First token arrives fast and the model correctly identified what it was running on (a nice recursive moment: Qwen3.8-27B on a DGX Spark explaining what a DGX Spark is).
+
+Quick decode of that quant name before the numbers, because `UD-Q4_K_XL` is three labels stacked on top of each other. `Q4_K` is llama.cpp's 4-bit K-quant: instead of one scaling factor for a whole tensor, weights are stored in super-blocks of 256, split into blocks of 32 that each carry their own quantized scale, so outlier weights do less damage to their neighbours. `UD` is Unsloth Dynamic, meaning the layers are deliberately not all quantized the same: embeddings and the first and last blocks keep more bits because everything downstream depends on them, while the more redundant middle feed-forward layers get squeezed harder. `XL` is the size tier, which promotes selected important matrices to 5-bit where unsloth judges that safe. The practical upshot is 16.68 GiB of weights that hold up better than a uniform 4-bit quant of the same size.
+
+The `llama-bench` numbers (build b10423, flash attention on, UD-Q4_K_XL, 16.68 GiB weights):
+
+| Test | Result |
+|---|---|
+| pp512 (prefill) | 838.6 t/s |
+| pp2048 (prefill) | 837.4 t/s |
+| tg128 (decode) | 11.6 t/s |
+| tg32 (decode) | 11.6 t/s |
+
+Let me be honest about that decode number, because this is where dense models and the Spark have a complicated relationship. The GB10's unified memory is the whole reason a 27B fits comfortably, but its ~273 GB/s of bandwidth is the ceiling for decode on any dense model: every generated token has to stream all 16.7GB of weights. Think of it like re-reading a whole book off the shelf before you can write each next word: your reading speed sets the pace, not how fast you can think. Do the arithmetic and 273 GB/s over 16.7GB puts the theoretical ceiling around 16 t/s, so the measured 11.6 is roughly 70% of peak, which is about what real kernels get. If you have been running MoE models like Nemotron 3.5 Lightning (30B but only ~3B active) on the Spark and got used to 100+ t/s decode, recalibrate: this is a real dense 27B, all parameters working on every token.
+
+Prefill is a different story: 838 t/s means a 2,000 token prompt is processed in under 2.5 seconds, and the hybrid DeltaNet layers keep that roughly flat as context grows.
+
+Fun detail: llama-bench identifies the model as "qwen35 27B", the architecture tag from the config showing through in the GGUF metadata.
+
+## The vLLM path (best throughput)
+
+Now let's do it properly with vLLM. No official Spark Arena recipe existed for Qwen3.8 when it dropped (the model was hours old), but the `@official/qwen3.6-27b-fp8-vllm` recipe is the same architecture family, so I adapted it. This is the part I want to highlight about the Spark ecosystem right now: [sparkrun](https://sparkrun.dev) recipes made a day-zero model a config-file edit, not an afternoon of dependency fighting.
+
+```yaml
+recipe_version: '2'
+model: Qwen/Qwen3.8-27B-FP8
+runtime: vllm
+container: ghcr.io/spark-arena/dgx-vllm-eugr-nightly:latest
+defaults:
+  gpu_memory_utilization: 0.8
+  max_model_len: 131072
+  max_num_batched_tokens: 32768
+  load_format: instanttensor
+  kv_cache_dtype: fp8
+  attention_backend: flashinfer
+  tool_call_parser: qwen3_coder
+  reasoning_parser: qwen3
+env:
+  VLLM_MARLIN_USE_ATOMIC_ADD: '1'
+```
+
+That is a lot of magic strings in twelve lines, so here is what each one is actually doing, because these are the knobs you will end up turning yourself:
+
+| Setting | What it does | Why this value |
+|---|---|---|
+| `gpu_memory_utilization: 0.8` | The share of memory vLLM claims up front, for weights plus KV cache | Higher means more KV cache, so longer contexts and more concurrent users. On unified memory you cannot go greedy: everything else on the box shares this pool. |
+| `max_model_len: 131072` | Longest context the server will accept, in tokens | 128K, well under the model's native 262K. Every token of headroom you reserve costs KV cache memory, and I would rather have the memory. |
+| `max_num_batched_tokens: 32768` | Cap on tokens the scheduler puts in one forward pass | The prefill-throughput vs responsiveness dial. Bigger batches process prompts faster and make latency chunkier. |
+| `load_format: instanttensor` | How the weights get off disk and into memory | Pure startup time. It is why a 29GB checkpoint is resident in under 5 seconds once cached instead of minutes. |
+| `kv_cache_dtype: fp8` | Precision the KV cache is stored at | Roughly halves cache memory versus 16-bit, which is what buys the long-context headroom. Small accuracy cost. |
+| `attention_backend: flashinfer` | Which attention kernel library runs | On `sm121` FlashInfer picks the `xqa` decode kernel and supports the FP8 cache above. Backends can differ by 2x, which is why recipes pin one. |
+| `tool_call_parser: qwen3_coder` | Pulls tool and function calls out of the raw token stream | Has to match the model family, or your agent framework sees plain text where it expected a structured call. |
+| `reasoning_parser: qwen3` | Pulls `<think>` blocks into the response's reasoning field | Same story: wrong parser and reasoning text leaks into the answer. |
+| `VLLM_MARLIN_USE_ATOMIC_ADD: '1'` | Switches Marlin's quantized kernels to atomic accumulation | A hardware-specific workaround. This one you copy from a working recipe rather than derive. |
+
+Then:
+
+```bash
+uvx sparkrun run ./qwen38-27b-fp8-vllm.yaml
+```
+
+The official FP8 checkpoint is 29GB, `instanttensor` loads the weights in under 5 seconds once cached, and FlashInfer picks the `xqa` decode backend on sm121 with FP8 KV cache. Changes from the 3.6 recipe: I dropped the qwen3.6-specific chat template mods (3.8 ships a correct template) and set `max_model_len` to 128K, which is plenty while leaving KV headroom.
+
+The numbers, measured with [llama-benchy](https://pypi.org/project/llama-benchy/) 0.4.0 (the same tool Spark Arena standardizes on), pp2048/tg128 at depth 0:
+
+| Concurrency | Prefill pp2048 (t/s) | Decode tg128 aggregate (t/s) | Decode per request (t/s) |
+|---|---|---|---|
+| 1 | 1,914 | 8.2 | 8.2 |
+| 2 | 1,305 | 16.1 | 8.2 |
+| 5 | 540 | 36.3 | 7.8 |
+| 10 | 627 | 57.9 | 7.2 |
+
+Two things jump out:
+
+1. vLLM's prefill is 2.3x llama.cpp's (1,914 vs 837 t/s). The FlashInfer path on sm121 is doing its job.
+2. vLLM's single-stream decode (8.2 t/s) is SLOWER than llama.cpp's (11.6 t/s). This is not a vLLM problem, it is arithmetic: the FP8 checkpoint streams 28.75GB per token, the Q4_K_XL GGUF streams 16.7GB. On a bandwidth-bound box the smaller quant wins single-stream, always. What vLLM buys you is batching: 10 concurrent requests get 57.9 t/s aggregate, because one weight-streaming pass now feeds 10 tokens instead of 1.
+
+So the honest serving decision tree on a Spark: single user chatting → llama.cpp with the smallest quant you can tolerate quality-wise. Serving a team or agents in parallel → vLLM FP8.
+
+### The long-context concurrency wedge (day-zero honesty)
+
+Not everything works yet. When I pushed 10 concurrent requests at 32K context depth, the engine effectively wedged: requests admitted one at a time, prefill bursts healthy at ~3,277 t/s, but aggregate generation collapsed to 0.2-0.6 t/s and sat there. It had not crashed, it was just stuck. Short-context concurrency: fine. Single-stream: fine (numbers below). Concurrent + deep context: pathological, at least in this nightly build with the hybrid DeltaNet architecture.
+
+At low concurrency, deep context is actually where this architecture shines. Measured at 32,768 tokens of context depth:
+
+| Config | Value |
+|---|---|
+| Prefill into 32K context (c=1) | 534-700 t/s |
+| Decode at 32K context (c=1) | 7.9 t/s |
+| Decode at 32K context (c=2, aggregate) | 15.1 t/s |
+
+The decode number is the one to notice here: 8.2 t/s at zero context, 7.9 t/s at 32K context, a 3% drop. On a conventional full-attention model the KV cache reads grow with context and decode sags noticeably; here 48 of the 64 layers are linear attention with constant-size state, so decode speed is nearly flat in context depth. For long-document and agentic workloads on local hardware, that flatness matters more than the headline number.
+
+This is what day zero actually looks like: the happy paths work because the architecture class was already supported, and the corner cases (linear-attention state management under concurrent long-context load) still need the engines to catch up. If you are evaluating this model for production serving, test YOUR context/concurrency profile before committing.
+
+## NVFP4: the best-numbers recipe
+
+GB10 is a Blackwell chip, and Blackwell has native FP4 tensor cores (NVFP4 being NVIDIA's 4-bit float format, covered properly in [Day 4](/blog/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters)), so the natural question is whether the NVFP4 quant (unsloth/Qwen3.8-27B-NVFP4, ~16GB) buys real speed. Same recipe as above with the model swapped, and FlashInfer autotuned 46 fp4_gemm kernel configs on first boot. It does:
+
+| Concurrency | Prefill pp2048 (t/s) | Decode tg128 aggregate (t/s) | Decode per request (t/s) |
+|---|---|---|---|
+| 1 | 1,794 | 11.5 | 11.5 |
+| 2 | 2,393 | 21.6 | 11.0 |
+| 5 | 2,719 | 49.8 | 10.5 |
+| 10 | 3,999 | 84.3 | 9.6 |
+
+NVFP4 ties llama.cpp's single-stream decode (11.5 vs 11.6, both stream ~16GB of weights, the physics is consistent), and wins everything else: 84.3 t/s aggregate decode at concurrency 10 (46% over FP8's 57.9), and batched prefill that scales UP with concurrency to nearly 4,000 t/s where FP8's fell. If you serve this model on a Spark, NVFP4 is the recipe.
+
+The quality tradeoff of 4-bit quantization is real and workload-dependent; benchmark your own evals before standardizing on it.
+
+## Spark Arena
+
+The numbers in this post are reproducible: I submitted the NVFP4 run to [Spark Arena](https://spark-arena.com), the community leaderboard where GB10 owners run the same standardized llama-benchy profile (pp2048/tg128, depths 0 to 100K, concurrency 1/2/5/10) and publish results with the full recipe attached. Submission sub1786754097881, status Completed. Grab the recipe from the leaderboard and you should land on the same numbers.
+
+Two full-grid results worth highlighting: decode at 100K context depth is still 9.8 t/s single-stream (15% below zero-context, at ONE HUNDRED THOUSAND tokens of context), and the 32K-deep concurrency-10 cell that wedged FP8 completed fine on NVFP4 at 63.1 t/s aggregate.
+
+## The Ollama path (same-day support)
+
+`ollama pull qwen3.8` failed all afternoon with "pull model manifest: file does not exist", and then Ollama shipped v0.32.12 the same day the weights landed, with qwen3.8 in the library: 27b tag, 18GB, 256K context, vision, thinking mode on by default. Older Ollama versions (including 0.32.11 from a day earlier) refuse the pull with a "requires a newer version" error, so upgrade first.
+
+```bash
+OLLAMA_HOST=127.0.0.1:11435 ollama pull qwen3.8:27b   # 18GB, Q4_K_M
+```
+
+Measured the same way as my previous Spark posts (temperature 0, 3 runs, numbers from Ollama's own eval counters):
+
+| Metric | Result |
+|---|---|
+| Prefill (~2,200 token prompt, cold) | 731 t/s |
+| Decode (200 tokens) | 26.5 t/s |
+
+Wait. 26.5 t/s decode, when llama.cpp does 11.6 on the same-size Q4 and the bandwidth ceiling says ~16? The answer is in the model config Ollama ships: `draft_num_predict 4`, and the runner launches with `--spec-type draft-mtp`. The Ollama build of Qwen3.8 includes the model's multi-token prediction head and turns speculative decoding ON by default, so each weight-streaming pass validates up to 4 drafted tokens. Same trick their Nemotron builds used. The plain unsloth GGUF I benchmarked in llama.cpp does not carry the MTP head, so it pays full price per token.
+
+That makes Ollama the single-stream champion of the day, and it did it with zero flags. Credit where due: they also default the context to 262K on this box (vram-based default) and the vision projector is wired up.
+
+Here is the day-zero picture across all the engines in one chart (the vLLM MTP and SGLang numbers further down came later):
+
+![Qwen3.8-27B on DGX Spark: measured prefill and decode across llama.cpp, Ollama, and vLLM](/img/blog/qwen3-8-27b-on-dgx-spark/chart.png)
+
+One operational note: the GB10 needs Ollama's cuda_v13 runner. My first attempt loaded the model on 100% CPU (7.5 t/s decode) because of a botched duplicate server start, so check `ollama ps` says `100% GPU` before you trust any numbers.
+
+## Vision test: it read its own benchmark chart
+
+The GGUF ships with the vision projector and llama.cpp loads it automatically, so I gave the model the chart you just scrolled past, the one measuring the model itself, and asked what it shows. It correctly identified the hardware, both metric panels, every engine and quantization in the comparison, the color coding, and the footnote about bandwidth-bound decode. Then it started reading the exact numbers back to me.
+
+There is something pleasingly recursive about a model reading a chart of its own decode speed at 11.6 t/s, which is the llama.cpp number on that chart, in the engine it was running in while it read it. The image cost 1,470 prompt tokens, and vision decode runs at effectively the same speed as text.
+
+## Unified memory sequencing lesson
+
+The Spark's memory is unified, and CUDA sees essentially all of it: 124,609 MiB, which is 121.7 GiB of the 128GB. That is the whole appeal, a 27B in bf16 fits without quantization. But it also means inference engines fight over the same pool: my vLLM launch failed with "Free memory 74.82/121.69 GiB is less than desired 0.8 utilization (97.35 GiB)" because the llama.cpp server was still resident. On a discrete-GPU box you would notice immediately; on unified memory it is easy to forget a container is holding 18GB. `docker ps` before you launch.
+
+Also the eternal Spark reminder: `nvidia-smi` cannot report memory usage on GB10 (Not Supported), use `free -h`.
+
+## Three days later: MTP arrives on vLLM, and finds a cliff
+
+I sat on this post for three days and the ecosystem moved fast, so here is the update. An official Spark Arena recipe landed with MTP speculative decoding for vLLM (`speculative_config {"method": "mtp", "num_speculative_tokens": 3}`), the same trick Ollama shipped on day one. The gains are real:
+
+| Config | Single-stream tg128 | c10 aggregate |
+|---|---|---|
+| vLLM NVFP4 plain | 11.5 t/s | 84.3 t/s |
+| vLLM NVFP4 + MTP | 22.0 t/s | 105.8 t/s |
+| vLLM FP8 + MTP | 13.8 t/s | 55.8 t/s |
+| Ollama Q4 (MTP default) | 26.5 t/s | n/a |
+
+NVFP4 + MTP at 105.8 t/s aggregate is the best serving number anything has produced on my Spark. Ollama still holds single-stream.
+
+Now the honest part, and please read this before you run the MTP recipes at long context: **twice in a row, the MTP config hard-rebooted my entire Spark** at exactly the same benchmark cell (16K context, 2 concurrent requests), once on FP8 and once on NVFP4. Not a container crash, a full machine reset, with the journal cut off mid-line and no panic trace, which points at a GPU/SoC lockup. The non-MTP configs ran the same cell and the full 28-cell grid for 6.5 hours without a hiccup. Environment: GB10, driver 580.159.03, kernel 6.17.0-1018-nvidia, the spark-arena vLLM nightly. Until this is understood, treat MTP on vLLM as short-context-only on this box. I will update here when I know more.
+
+### SGLang joins the matrix (and teaches the scariest lesson)
+
+SGLang was the last officially recommended engine I had not run, so I adapted the qwen3.5-27b-fp8 sglang recipe the same way. First attempt: the server came up healthy, answered every request, and produced complete token soup ("visit visit visits 訪...逻辑逻辑logic..."). Disabling the recipe's NEXTN speculative config changed nothing. The actual culprit was the pinned container image, an SGLang dev build created before Qwen3.8 existed: it loads the new checkpoint without a single warning and generates garbage. Swapping to upstream `lmsysorg/sglang:latest-cu130` fixed it instantly.
+
+The scary part is that the health check was green and the API answered every request the whole time - a crash at least tells you something is wrong, silent garbage does not. If you inherit a recipe with a pinned image, coherence-test the output before you benchmark anything.
+
+Numbers on the working upstream build (FP8, no speculation):
+
+| Cell | SGLang | vLLM FP8 (for comparison) |
+|---|---|---|
+| Prefill pp2048 (c=1) | 1,225 t/s | 1,914 t/s |
+| Decode tg128 (c=1) | 7.7 t/s | 8.2 t/s |
+| Decode c=10 aggregate | 54.3 t/s | 57.9 t/s |
+| Decode at 16K context (c=1) | 7.3 t/s | ~7.9 t/s |
+
+Same shape as vLLM, a few percent behind everywhere on this build, and the same context-flatness.
+
+Then I re-enabled NEXTN speculation (SGLang's MTP equivalent) on the working upstream build, and this is where SGLang earns its seat:
+
+| Cell | SGLang FP8 | SGLang FP8 + NEXTN | vLLM FP8 + MTP |
+|---|---|---|---|
+| Decode tg128 (c=1) | 7.7 t/s | 13.4 t/s | 13.8 t/s |
+| Decode c=10 aggregate | 54.3 t/s | 71.0 t/s | 55.8 t/s |
+| Decode at 16K context (c=1) | 7.3 t/s | 10.3 t/s | 14.4 t/s |
+
+Speculation on FP8 gives SGLang almost exactly vLLM's MTP single-stream number (same weights, same trick), and its speculative scheduler scales better under batch: 71 t/s aggregate at concurrency 10 where vLLM's MTP drops to 56. If you see people posting bigger SGLang numbers than mine from earlier in this post, this is why: speculation on versus off. The overall throughput crown still belongs to vLLM NVFP4+MTP, because the 4-bit quant halves the weight traffic that everything else queues behind. And for the record, SGLang with speculation survived the 16K single-stream cell; I deliberately did not run speculation at deep context plus concurrency, the combination that hard-rebooted the box twice under vLLM.
+
+## The 75 tok/s post, reproduced
+
+While I was sitting on this draft, a post by [@0xBakeer](https://x.com/0xBakeer) went around claiming 75 tok/s single-stream and 256 tok/s across 16 parallel requests, on the same model, on the same machine. My first reaction was that it contradicted everything above. It does not, and reproducing it taught me the most useful lesson in this post.
+
+The lever is a dedicated draft model: "DSpark" (community-built, 5 layers, ~2.6GB) proposes blocks of tokens and the full model verifies them in one weight-read. Same speculative idea as MTP, but the drafter is 3x cheaper per guess. Their [recipe repo](https://github.com/0xBakeer/Qwen3.8-27B-FP8-on-a-single-DGX-Spark) is excellent, annotated flag by flag, so I ran it verbatim on my Spark (vLLM v0.27.1 stable, FP8, DSpark k=7):
+
+| Workload | Their number | My Spark |
+|---|---|---|
+| Edit-heavy (98.5% draft acceptance) | 46.8 t/s | 45.0-48.6 t/s |
+| Fresh generation (~30% acceptance) | n/a | 20.8 t/s |
+| llama-benchy free-gen, single stream | n/a | 17.2 t/s |
+| llama-benchy, 10 concurrent aggregate | n/a | 65.6 t/s |
+
+Reproduced within noise. Their 75 t/s headline is the 4-bit checkpoint plus a deeper draft on the edit-heavy workload, and it is real too.
+
+The lesson: speculative decoding's speedup is the drafter's acceptance rate, and acceptance is a property of YOUR WORKLOAD, not the model. The same server on the same box is 3.5x faster editing existing code (where the draft just copies the prompt) than writing new code (where it genuinely guesses). So a single tokens-per-second number without its workload attached is close to meaningless, including the ones in this post: my numbers are free-form generation, the pessimistic end of the range. If your work is editing, refactoring, or structured rewriting, multiply accordingly.
+
+Practical takeaway for single-user Sparks: DSpark k=7 on the official FP8 checkpoint beats every configuration I measured above (17.2 t/s on the neutral benchmark, 45+ on edit work) with zero quality risk, since verification discards every wrong guess. And it ran on the stable vLLM release without the hard reboot the nightly's MTP path gave me, though I have not dared re-run the exact crash cell.
+
+## Wrapping up
+
+Qwen3.8-27B on a DGX Spark, one day in:
+
+- Day-zero support was real everywhere: llama.cpp immediately, vLLM immediately, Ollama by end of day with v0.32.12. The qwen3_5 architecture class being pre-supported did most of the work.
+- Best single-stream chat: Ollama, 26.5 t/s, because it ships the MTP head with speculative decoding on by default. Nobody else does yet.
+- Best serving throughput: vLLM NVFP4, 84.3 t/s aggregate at 10 concurrent, prefill scaling to 4,000 t/s.
+- The architecture's superpower on this hardware is context flatness: on NVFP4, decode runs 11.5 t/s at zero context, 10.9 at 32K, and still 9.8 at 100K. Long documents are effectively free at decode time.
+- Rough edge: FP8 wedged under concurrent deep-context load in the current vLLM nightly. NVFP4 did not. Test your traffic profile.
+
+A dense 27B with native vision and 262K context that runs at usable speeds on a desk box, with Apache 2.0 attached, is exactly what this hardware was built for. The MoE models are still faster chatters, but in my opinion this is the most capable thing my Spark has run so far.
+
+Huge thanks to the unsloth team for having the GGUF and NVFP4 quants up within hours, the Ollama team for shipping same-day support, and the Spark Arena maintainers (Drew Botwinick, Eugene Rakhmatulin, Raphael Amorim) whose recipes and containers turned a day-zero model into a config-file edit. If you have a Spark, give these recipes a try and let me know what numbers you get - and submit them to [Spark Arena](https://spark-arena.com) so we can compare notes.
+
+## Links
+
+- Model: [Qwen/Qwen3.8-27B](https://huggingface.co/Qwen/Qwen3.8-27B) and [Qwen/Qwen3.8-27B-FP8](https://huggingface.co/Qwen/Qwen3.8-27B-FP8)
+- Quants: [unsloth/Qwen3.8-27B-GGUF](https://huggingface.co/unsloth/Qwen3.8-27B-GGUF), [unsloth/Qwen3.8-27B-NVFP4](https://huggingface.co/unsloth/Qwen3.8-27B-NVFP4)
+- Ollama: [ollama.com/library/qwen3.8](https://ollama.com/library/qwen3.8) (needs v0.32.12+)
+- Tools: [sparkrun](https://sparkrun.dev), [llama-benchy](https://pypi.org/project/llama-benchy/), [Spark Arena](https://spark-arena.com)
+- My submission: sub1786754097881 on the Spark Arena leaderboard
+
+---
+
+# I Ran an AI SRE Copilot on My Own Hardware. Here Is What It Actually Does.
+
+- Canonical: https://blog.kubesimplify.com/nudgebee-ai-sre-copilot-hands-on
+- Published: 2026-08-17
+- Summary: Running NudgeBee v1.4.0 end to end - a self-hosted AIOps platform behind AI-SRE, AI-FinOps, AI-K8sOps, and agentic automation - on a Mac, a kiac cluster, and a DGX Spark.
+
+**TL;DR** - NudgeBee is an AIOps platform built around AI agents for DevOps and SRE teams - AI-SRE is one surface on it, alongside AI-FinOps, AI-K8sOps, and an automation builder. What sold me is that it implements a full SRE control loop in code: collect signals, rank events, investigate with real tools, recommend fixes, run durable workflows, and keep an audit trail. In this post I run the whole thing locally - the control plane in Docker Compose on my Mac, a 3-node Kubernetes cluster in lightweight VMs via kiac, and the LLM served from a DGX Spark on my desk. Real screenshots, real commands, real sharp edges.
+
+> Source note: everything below was run against **NudgeBee v1.4.0** (released August 3, 2026) on August 10, 2026. I installed it, connected a cluster, and broke things so you don't have to. For a fast-moving open-source project, always cross-check the upstream README.
+
+---
+
+## The Problem: On-Call Engineers Are Human Glue
+
+Most teams do not fail on-call because they have zero dashboards.
+
+They fail because the dashboards, alerts, logs, cloud inventory, cost data, tickets, and runbooks all live in different places. The on-call engineer becomes the integration layer: copy a pod name from Slack, search logs in another tab, check metrics in a third tool, open a ticket, paste a summary, then run a command from a runbook that may or may not still be true.
+
+That is the real problem an SRE copilot should solve - and it has nothing to do with asking an LLM what Kubernetes is.
+
+The mental model that makes this class of tool click:
+
+> **An SRE copilot is a control loop for production systems.**
+
+![The SRE copilot control loop](/img/blog/nudgebee-ai-sre-copilot-hands-on/diagram-control-loop.svg)
+
+SRE teams already run this loop by hand every day:
+
+1. **Observe** - alerts, metrics, logs, Kubernetes events, cloud inventory.
+2. **Normalize** - turn tool-specific mess into consistent resources and events.
+3. **Rank** - decide what is noise and what pages a human.
+4. **Investigate** - gather evidence from the cluster, metrics, logs, tickets.
+5. **Recommend** - a fix, a rollback, a rightsizing change, a runbook.
+6. **Act** - run the remediation, or guide a human through it.
+7. **Record** - keep the investigation and outcome for the next incident.
+
+NudgeBee's value is that it treats these stages as **one product surface**. The loop is the product - not the dashboard, and not the LLM.
+
+---
+
+## What NudgeBee Is (as of v1.4.0)
+
+NudgeBee describes itself as a unified AIOps / CloudOps platform: **AI-SRE** (troubleshooting), **AI-FinOps** (cost and rightsizing), **AI-K8sOps** (cluster operations), and an **Agentic Automation Builder** - without fragmented tools or model lock-in.
+
+Under the hood it is a monorepo of TypeScript, Go, and Python services:
+
+![NudgeBee v1.4.0 architecture - app, backend services, data layer, collectors, and the in-cluster agent](/img/blog/nudgebee-ai-sre-copilot-hands-on/diagram-architecture.svg)
+
+Each service owns a stage of the loop:
+
+| Loop stage | NudgeBee piece |
+| --- | --- |
+| Observe | `k8s-collector`, `cloud-collector`, in-cluster agent, webhooks |
+| Normalize | `services-server`, migrations, resource model |
+| Rank | triage scoring, event aggregation (LLM-assisted since v1.4) |
+| Investigate | `llm-server` agents + tools, RAG, knowledge graph |
+| Act | `workflow-server` (Temporal), relay to the cluster |
+| Notify | `notifications-server` - Slack, Teams, Discord, email |
+| Record | Postgres: conversations, tool calls, executions, tickets |
+
+Because these surfaces share the same collectors, knowledge graph, and integrations (more on bCortex below), a team can start with just one - say, triage - and add FinOps or automation later without re-plumbing anything.
+
+The right way to read the repo is not file by file. It is: "which stage of the loop does this service own?"
+
+(One naming heads-up if you go source diving: the service that deploys as `workflow-server` lives in the code as `runbook-server`. Same thing - one Temporal worker wearing two names.)
+
+---
+
+## Quick Start: Two Ways to Run It
+
+Since v1.3.0, every first-party image is published to `ghcr.io/nudgebee/*` and the umbrella Helm chart is on GHCR as an OCI artifact - so you no longer need to build anything from source.
+
+### Path 1: Kubernetes (the one-liner-ish path)
+
+```bash
+export NUDGEBEE_ENC_KEY=$(openssl rand -hex 32)   # store this safely
+
+helm install nudgebee oci://ghcr.io/nudgebee/charts/nudgebee \
+  --namespace nudgebee --create-namespace \
+  --set nudgebee_secret.NUDGEBEE_ENCRYPTION_KEY="$NUDGEBEE_ENC_KEY" \
+  --wait --timeout 20m
+
+kubectl -n nudgebee port-forward svc/app 3000:80
+```
+
+The post-install hook applies migrations automatically. Grab the bootstrap password from the `nudgebee` secret and sign in at `localhost:3000`.
+
+### Path 2: Docker Compose on a laptop (what I did)
+
+```bash
+git clone https://github.com/nudgebee/nudgebee.git && cd nudgebee
+docker compose --profile full up -d
+```
+
+The default profile starts the infrastructure (Postgres, Redis, RabbitMQ, Qdrant, Temporal, one-shot migrations). The `full` profile adds all the app services as containers - about 18 in total, all pulled from GHCR.
+
+Here is my stack once everything settled:
+
+```text
+SERVICE                IMAGE                                           STATUS
+api-server-services    ghcr.io/nudgebee/services-server:1.4.0          Up
+app                    ghcr.io/nudgebee/app:1.4.0                      Up
+cloud-collector        ghcr.io/nudgebee/cloud-collector-server:1.4.0   Up
+k8s-collector-app      ghcr.io/nudgebee/k8s-collector:1.4.0            Up
+llm-server             ghcr.io/nudgebee/llm-server:1.4.0               Up
+ml-k8s-server          ghcr.io/nudgebee/ml-k8s-server:1.4.0            Up
+notifications-server   ghcr.io/nudgebee/notifications:1.4.0            Up
+postgres               ghcr.io/nudgebee/postgres:16                    Up (healthy)
+qdrant                 ghcr.io/nudgebee/qdrant:v1.18.3                 Up
+rabbitmq               ghcr.io/nudgebee/rabbitmq:3-management          Up
+rag-server             ghcr.io/nudgebee/rag-server:1.4.0               Up
+redis                  ghcr.io/nudgebee/redis:7-alpine                 Up
+relay-server           ghcr.io/nudgebee/relay-server:1.4.0             Up
+temporal               temporalio/auto-setup:1.29.1                    Up
+temporal-ui            temporalio/ui:2.44.0                            Up
+ticket-server          ghcr.io/nudgebee/ticket-server:1.4.0            Up
+workflow-server        ghcr.io/nudgebee/workflow-server:1.4.0          Up
+```
+
+**Real-world notes from my install** (the kind of thing READMEs never tell you):
+
+- Several `full`-profile services ship without environment config in the compose file. I added a `docker-compose.override.yaml` that gives each one its database URL, RabbitMQ host, and the shared `NUDGEBEE_ENCRYPTION_KEY`. The key must be identical everywhere - it encrypts integration credentials at rest.
+- On macOS, the k8s-collector wants host port **5000**, which AirPlay already squats on. Remap it in the override.
+- The k8s-collector expects the backend at the hostname `services-server`; the compose service is named `api-server-services`. A one-line network alias fixes event ingestion.
+- If you disable ClickHouse (`clickhouse.enabled=false`), the agent chart still references the ClickHouse secret. Create a stub secret or leave it enabled.
+
+Sign in with **Admin Login**, any email, and the local dev password `Test!24#5` (the dummy-credentials provider - local development only).
+
+![NudgeBee login screen](/img/blog/nudgebee-ai-sre-copilot-hands-on/01-login.jpg)
+
+One pleasant surprise: v1.4.0 no longer drops you into an empty product. First login lands on a **demo dataset** - active incidents, error-rate events, rightsizing recommendations - so you can explore every surface before connecting anything real.
+
+![Home dashboard with demo data - incidents, optimize recommendations, quick links](/img/blog/nudgebee-ai-sre-copilot-hands-on/02-home-dashboard.jpg)
+
+---
+
+## The Lab: Cluster on the Mac, Brain on the DGX Spark
+
+For the demo I wanted everything self-hosted, including the model. My setup:
+
+![The lab - NudgeBee control plane and kiac cluster on the MacBook, Ollama on the DGX Spark](/img/blog/nudgebee-ai-sre-copilot-hands-on/diagram-lab-setup.svg)
+
+- **Control plane**: the Compose stack above.
+- **Tenant cluster**: a 3-node k3s cluster created with [kiac](https://github.com/saiyam1814/kiac) (Kubernetes in Apple Containers - every node is its own lightweight VM with a routable IP, so the in-cluster agent can reach the control plane over the vmnet gateway like a real remote cluster would).
+- **Inference**: Ollama on a DGX Spark across the room. NudgeBee's llm-server calls it over plain HTTP. The model does not need to be anywhere near the cluster - the LLM is just an API.
+
+The point of this setup is the architecture lesson: **the brain, the hands, and the workloads are three separate places**, glued together by exactly two protocols - a websocket relay for the cluster and an OpenAI-compatible endpoint for the model.
+
+### Demo workloads
+
+I deployed a `payments` namespace with three deployments: a healthy nginx `payments-gateway`, a `payments-api` that crashes on boot with a missing `DATABASE_URL`, and a deliberately over-provisioned `report-worker` (1 CPU / 1Gi requested per replica to do nothing) - one problem for each of NudgeBee's three surfaces: troubleshooting, RCA, and FinOps.
+
+### Connecting the cluster
+
+Admin → Integrations shows the catalog: Kubernetes and clouds, plus categories for messaging, ticketing, observability backends, repos, CI/CD, databases, and LLM providers.
+
+![Integrations catalog - Kubernetes, AWS, Azure, GCP, Cloud Foundry](/img/blog/nudgebee-ai-sre-copilot-hands-on/03-integrations-catalog.jpg)
+
+Adding a Kubernetes account generates an agent key and a copy-paste install command (shell script or Helm). You can toggle components off - Prometheus stack, OpenCost, eBPF node agent, OpenTelemetry collector - and the command updates live.
+
+![Add Kubernetes Account - component toggles and generated install command](/img/blog/nudgebee-ai-sre-copilot-hands-on/04-connect-cluster-modal.jpg)
+
+The agent chart installs kube-prometheus-stack and OpenCost alongside the NudgeBee agent, then dials **out** to the control plane over a websocket:
+
+```json
+{"msg":"greeting","payload":"{\"action\":\"auth\",\"version\":\"0.1.11\",...}"}
+{"msg":"updated relay connection status to true","agent_type":"k8s"}
+```
+
+That outbound-only relay design matters: real clusters sit behind NAT and firewalls, so the control plane can never assume it can dial in. Commands flow down the same websocket the agent opened.
+
+Two minutes later the cluster shows up with a candid message:
+
+![Connected account - "Give me about an hour to generate insights"](/img/blog/nudgebee-ai-sre-copilot-hands-on/05-connected-home.jpg)
+
+I like this honesty. Trend-based insights need trends. But live state is immediate:
+
+![Cluster overview - 3 nodes, 21 pods, real CPU and memory](/img/blog/nudgebee-ai-sre-copilot-hands-on/06-cluster-overview.jpg)
+
+Three nodes, twenty-one pods, live CPU and memory pulled from the Prometheus the agent just installed. No demo data - this is the kiac cluster.
+
+---
+
+## The Loop, Live: Signal → Triage → AI Investigation
+
+Within minutes, real events started flowing. The home page surfaced a firing issue with an **Investigate** button next to it:
+
+![Live issue on home - 1 pod has ImagePullBackoff, with Investigate button](/img/blog/nudgebee-ai-sre-copilot-hands-on/07-live-issue-investigate.jpg)
+
+The Troubleshoot section turns raw events into a **triage inbox**: every issue gets a triage score, severity, alert status, and an owner path - sliced by error type (OOM Killed, Image Pull Backoff, High Restarts, CPU Throttling, Replica Mismatch):
+
+![Triage inbox - pod errors with triage score, severity, and Investigate action](/img/blog/nudgebee-ai-sre-copilot-hands-on/08-triage-pod-errors.jpg)
+
+This is the **Rank** stage of the loop, and it is where alert fatigue goes to die. v1.4.0 added LLM-assisted triage scoring on top of the rule-based signals.
+
+Clicking **Investigate** opens the AI side. This is where NudgeBee stops being a dashboard:
+
+![AI investigation in progress - parallel tool calls with live status](/img/blog/nudgebee-ai-sre-copilot-hands-on/11-ai-investigation-parallel-tools.jpg)
+
+Read that screenshot carefully, because it shows the architecture:
+
+- The agent states its plan in plain language.
+- It then fires **multiple tool calls in parallel**: an events query for the pod, a `kubectl describe` for image and status, a resource-graph search - each with its own live status and a "Tool Details" expander showing the raw evidence.
+- Evidence accumulates as **sources** attached to the conversation, not vibes.
+
+Ten minutes later (on a 26B model running on my own hardware - more on that below), the finished analysis landed:
+
+![Completed AI investigation - summary, 5-Whys causality chain, evidence, resolution](/img/blog/nudgebee-ai-sre-copilot-hands-on/12-ai-investigation-result.jpg)
+
+Let's pause on the *structure* of that answer for a second, because it is doing a lot of work:
+
+- **Investigation Summary** - symptom plus the exact signal: Kubernetes events reporting `NotFound` for the specific image reference.
+- **Causality Chain (5-Whys)** - pod is in ImagePullBackOff → runtime cannot pull the image → the registry returned `404 Not Found` for that tag → root cause: the manifest references a non-existent image tag.
+- **Evidence** - a clickable source (`Events - E2`) carrying the raw `rpc error: code = NotFound`, with 4 sources attached to the conversation.
+- **Resolution** - an immediate fix (point the manifest at a valid tag, verify against the registry) *and* a long-term recommendation (validate image tags in CI/CD before rollout).
+
+And the diagnosis was correct - I verified the tag really does not exist in the registry. Not "it may be due to an image pull error, OOM kill, config issue, or failing dependency." A specific root cause, with the evidence to check its work.
+
+One small detail that shows the loop thinking: under the answer, NudgeBee suggests **Related Questions** - verify the fix was applied and the pod is Running, inspect the corrected manifest, analyze the CI/CD logs so the bad tag never ships again:
+
+![Related Questions - verify the fix, inspect the manifest, prevent the regression](/img/blog/nudgebee-ai-sre-copilot-hands-on/13-related-questions.jpg)
+
+That last suggestion is the Record stage turning into prevention: today's investigation trying to make sure tomorrow's page never fires.
+
+### ReWOO is gone - meet the Orchestrating planner
+
+If you read about NudgeBee before mid-2026, you may remember its two planning styles: ReWOO (plan first, execute after) and ReAct (think, act, observe, repeat). **v1.4.0 retired the ReWOO planner.** Both agent types - *Orchestrating* (the top-level coordinator) and *ReAct* (domain investigators) - now run a hybrid planner the code calls **ReAct3**: a ReAct loop extended with an `<actions>` block that lets the model declare several independent tool calls in one step.
+
+That is the parallel execution visible in the screenshot, and it is the sensible endpoint of the planner debate: keep ReAct's evidence-driven loop, recover ReWOO's efficiency by batching independent lookups.
+
+The tool layer is wide: `kubectl` and Helm, Prometheus/PromQL, Loki, Elasticsearch, Datadog, New Relic, OpenObserve (new in v1.4.0), cloud APIs, ticket systems, GitHub, spend analysis, and workflow lifecycle actions. The agent decides *what* to look at; tools are *how* it touches reality:
+
+> The model should not hallucinate your cluster. It should ask tools for evidence.
+
+### Guardrails you can see in the logs
+
+Watching llm-server logs during the investigation was its own education:
+
+```text
+plannerexecutor: submitting tool for parallel execution   (x4)
+plannerexecutor: pre-flight detected tool with LLM-only
+  classification, assuming potential write
+plannerexecutor: tool output truncated at source
+```
+
+Pre-flight classification of potentially write-capable tools, output truncation before context stuffing, per-account tool scoping, and an egress filter (default "detect" mode) that watches for secrets leaving via LLM calls. None of it is glamorous, and all of it is what makes "AI with kubectl access" survivable.
+
+---
+
+## bCortex: The Context Layer Under Every Agent
+
+There is a failure mode every naive "agentic ops" tool shares: **the agent rediscovers your infrastructure from scratch on every question.** List the namespaces. Describe the deployments. Page through events. Ask again tomorrow and it does all of it again. Token spend grows with cluster size, latency grows with token spend, and worst of all, whenever discovery is incomplete the model fills the gaps by guessing - which is where operational hallucinations come from.
+
+NudgeBee's answer is a context layer the team calls **bCortex**, and it has three parts you can find in the codebase:
+
+- An **auto-generated Knowledge Graph** (`api-server/services/knowledge_graph/`) that models the relationships between resources, events, and findings - so "what depends on this pod" is a graph lookup, not a fresh round of kubectl calls.
+- A **Service Map** built from APM and trace data - deliberately a *different* artifact than the KG: the service map is dataflow (who calls whom), the KG is resource state. Both feed the agent.
+- A **multi-tiered, usage-based memory layer**. The code describes it as a layered "memory slab" - preferences and identity first, with patterns and decisions layered on - extracted from actual usage rather than hand-written.
+
+I did not have to take anyone's word for this, because my own run left its fingerprints in the logs. The moment my ImagePullBackOff investigation completed, llm-server ran `long-term memory extraction` on the conversation and logged the stats - the platform was already mining my investigation for reusable knowledge. During the run I also watched `kb_sync` cycles keeping the knowledge base current, `tool call cache` hits skipping discovery calls the platform had already made, and the planner `comparing with history` before deciding what to fetch. My first investigation was the expensive one; everything after it starts warmer.
+
+The economics follow directly. Right-sized context per call instead of dump-everything-into-the-prompt means fewer tokens. Graph and cache lookups replace repeated discovery tool calls. Model-tier routing (a `reasoning` / `retrieval` / `summary` split in the config) sends heavyweight thinking to the big model and summarization to a cheap one. At the scale where agentic ops gets interesting - hundreds of investigations a week across a fleet - that is the difference between a bill that grows with every question and one that amortizes. And accuracy moves the same direction as cost, because a model grounded in a graph that already knows what exists has far less room to hallucinate.
+
+> A chatbot loop rediscovers your infrastructure every time. A context layer remembers it.
+
+This is also why the multi-agent pitch holds up in practice: a new agent - FinOps, K8sOps, a custom automation - does not start from zero. It inherits everything bCortex already knows about the environment.
+
+---
+
+## FinOps Is in the Same Loop
+
+The Optimize surface treats cost as an operational signal, not a finance spreadsheet: workload/replica/PV rightsizing, abandoned-resource detection, spot recommendations, best practices, and an **Auto Optimize** response that can act on them:
+
+![Optimize - rightsizing categories, abandoned resources, auto-optimize](/img/blog/nudgebee-ai-sre-copilot-hands-on/10-optimize-rightsizing.jpg)
+
+Mine shows zeros because recommendations are trend-based (OpenCost plus NudgeBee's ML rightsizing service watch for a day or more before opining). The structure is the takeaway: an over-provisioned pod, an idle disk, and a crashlooping deployment are the *same kind of problem* - operational hygiene - and they belong on the same screen with the same Investigate button.
+
+---
+
+## Why Temporal Ships Inside an SRE Copilot
+
+The moment a copilot crosses from *answering* to *acting*, durability stops being optional. A remediation workflow that dies silently when a process restarts after step 3 of 7 is worse than no automation at all.
+
+NudgeBee runs every runbook and scheduled job through **Temporal**. I opened the bundled Temporal UI (`:8233`) and found the platform eating its own dog food - 102 workflow executions from just a few hours of uptime:
+
+![Temporal UI - 102 workflows: agent status checks, notification batching, insight refresh](/img/blog/nudgebee-ai-sre-copilot-hands-on/09-temporal-workflows.jpg)
+
+Agent health checks, notification batching, recommendation-resolution updates, insight refreshes, system cleanup - all as versioned, retryable, resumable workflows with full history. The Automations surface builds on the same engine: manual, scheduled, webhook, and event-triggered workflows, with approval steps, retries, child workflows, and persistent state.
+
+The division of labor here is exactly right: the LLM helps decide what to do, and Temporal makes doing it operationally boring. It is also why "AI will replace runbooks" has it backwards - AI makes durable runbooks *more* important.
+
+---
+
+## Bring Your Own Model (Including the One on Your Desk)
+
+NudgeBee's pitch includes "no model lock-in," and v1.4.0 implements providers for OpenAI, Anthropic, Bedrock, SageMaker, Azure, Google AI, Vertex AI, and HuggingFace/vLLM-style endpoints.
+
+Two field findings worth your time:
+
+**1. For Ollama, use the OpenAI-compatible path - it is what the [official docs](https://docs.nudgebee.com/docs/integrations/LLM/Ollama/) configure, and it works.** The trap I fell into: the sample env file also lists `ollama` as a provider value, and that switch case is not wired up in v1.4.0, so picking it fails with `llm model not found - ollama`. Stick to the documented config, which goes through Ollama's OpenAI-compatible endpoint (the team told me they will make this more explicit):
+
+```bash
+LLM_PROVIDER=openai
+LLM_MODEL_NAME=qwen3.5:35b-a3b
+LLM_PROVIDER_API_ENDPOINT=http://<your-ollama-host>:11434/v1
+LLM_PROVIDER_API_KEY=anything-non-empty
+```
+
+**2. Local models need bigger timeouts.** The defaults assume cloud-API latency: 30 seconds to first token, a 10-minute global retry budget. An agent prompt here is 15k+ tokens, and a big local model can blow through both. Raise them:
+
+```bash
+LLM_PROVIDER_TTFT_TIMEOUT_SECONDS=300
+LLM_SERVER_GLOBAL_RETRY_BUDGET_MINUTES=30
+LLM_SERVER_MAX_INDIVIDUAL_CALL_TIMEOUT_MINUTES=15
+```
+
+On hardware: my Mac could not prefill the agent's ~16k-token prompts inside the deadlines. The DGX Spark prefilled the same prompt in **0.9 seconds warm (~17,900 tokens/sec)**. Two more lessons from the run: reasoning-mode models (qwen3.5's thinking) generate thousands of deliberation tokens per ReAct step, so decode speed - not prefill - becomes the loop's bottleneck; and a fast non-thinking model often beats a smarter slow one for agentic work. The completed investigation above ran on `gemma4:26b` - the full multi-tool loop plus write-up in about ten minutes, entirely on hardware I own.
+
+The architecture take-away is bigger than my desk, though: because the model is just an HTTP endpoint, "cluster on one machine, GPU on another, control plane on a third" works with zero special configuration. Your prompts and evidence stay on your network.
+
+---
+
+## Where Would You Actually Use This? Six Scenarios
+
+Because the surfaces share one platform, these are not six separate products to evaluate - they are six entry points into the same one.
+
+**1. On-call triage.** Connect the cluster, wire Slack/Teams, and let the triage inbox rank what fires. The score plus event aggregation turns 40 raw alerts into 3 issues with owners. Start here - it is read-only and pays off day one.
+
+**2. Crashloop and error RCA.** The `payments-api` pattern: pod crashes, event fires, Investigate pulls describe + events + logs + recent changes in parallel and writes up a root cause with evidence attached. The investigation is recorded, so the *next* engineer searching that error finds a documented case, not a blank page.
+
+**3. FinOps and rightsizing.** After a few days of trends: workload/replica/PV rightsizing with monthly savings estimates, abandoned-volume detection, spot candidates - each with an Optimize action, gated behind approvals if you want them.
+
+**4. Runbook automation.** Codify the fix once as a Temporal-backed workflow: event-triggered ("on ImagePullBackOff in namespace X, check the registry and page the owning team"), scheduled (nightly hygiene), or webhook-driven (from your existing alertmanager). Approval steps make the write path safe to roll out gradually.
+
+**5. Ticket and incident hygiene.** The ticket-server syncs Jira, ServiceNow, PagerDuty, and Zenduty, so investigations attach to tickets and resolutions flow back - the Record stage, automated.
+
+**6. Multi-cluster and hybrid estates.** The relay design (agents dial out) means clusters behind NAT, in customer VPCs, or on edge hardware all connect the same way. One control plane, N clusters, per-account scoping.
+
+The common thread: **start read-only, earn trust, then open the write path** - observation → investigation → recommendation → automation, in that order.
+
+---
+
+## Things I Would Be Careful About in Production
+
+The standard sharp edges of the category, plus what I hit:
+
+- **Start read-only.** Let it observe, investigate, and recommend before it remediates. The approval-gated workflows exist for a reason - use them.
+- **Treat the LLM provider as a data boundary.** Prompts carry pod names, log lines, maybe secrets that slipped into logs. Self-hosting the model (above) is the strongest version of this control; the built-in egress filter is defense in depth, not a substitute for thinking.
+- **The dummy credentials and sample secrets are for laptops.** `Test!24#5` and friends must never see a routable network. Disable dummy auth, rotate `NUDGEBEE_ENCRYPTION_KEY` handling into a real secret store, set the relay and internal service tokens, and read `docs/auth-and-networkpolicy.md` before exposing anything.
+- **The encryption key is a one-way door.** Rotate it and previously encrypted rows are unreadable. There is no automatic re-encryption.
+- **No telemetry by default** - data leaves only through integrations you configure (LLM calls, notifications, ticket sync, webhooks). Those paths are exactly where your security review should look.
+- **Licensing**: Business Source License 1.1 - free to self-host internally; hosted/managed-service use is restricted; each version converts to Apache 2.0 after its change date. Read `LICENSE` and `LICENSING.md` if you are evaluating for a company.
+
+---
+
+## What This Teaches About Building AIOps Platforms
+
+Five lessons I keep coming back to after a day inside it:
+
+1. **Context beats chat.** The interesting part is not the assistant - it is bCortex, the graph and memory around it: resources, events, tickets, tool calls, prior investigations. AI without context is a guesser; AI with context is an operator interface.
+2. **Tools need ownership boundaries.** Tenant scoping, credential isolation, pre-flight write detection, output truncation - the boring parts are what make the write path safe.
+3. **Runbooks are the safety rail, not the legacy.** The agent discovers and parameterizes workflows; Temporal gives them retries, approvals, versioning, and history.
+4. **Cost is an ops signal.** Reliability and FinOps on one surface matches how platform teams actually work.
+5. **A monorepo can be a teaching tool.** TypeScript for the app, Go for the backends, Python for ML and collectors, Postgres/RabbitMQ/Redis/Qdrant/Temporal each doing the one job they are best at. Studying why each piece exists is a free course in platform engineering.
+
+If you want to explore the code, follow the loop: start at `docs/ARCHITECTURE.md` and `docs/GLOSSARY.md`, then `llm/llm-server/agents/` and `tools/` for the AI layer (grep `RegisterNBAgentFactory` and `RegisterNBTool`), then `runbook-server/tests/integration/testdata/` (the code home of workflow-server) for a catalog of what the workflow engine can do, and finally `collector-server/` for how reality enters the system.
+
+---
+
+## Final Mental Model
+
+```text
+signals -> resources -> events -> triage -> investigations -> recommendations -> runbooks -> records
+```
+
+That is the SRE copilot loop, and NudgeBee is the most complete open implementation of it I have run. It earns the "copilot" name not because there is a chat box, but because every stage - collection, ranking, tool-driven investigation, durable remediation, and the paper trail - lives in one system that a small team can actually self-host. And because that system is agent-agnostic, the same AIOps platform covers SRE, FinOps, K8s ops, and whatever custom automation a team builds next.
+
+SRE still needs humans. What it should stop needing is humans doing all the glue work by hand.
+
+Give it a try on a test cluster and let me know what you find - and if you hit the same sharp edges I did, the fixes above should save you an evening. If the project looks useful to you, [star the repo on GitHub](https://github.com/nudgebee/nudgebee) - it is the easiest way to support the team building it - and tag me on [X @SaiyamPathak](https://x.com/SaiyamPathak) with what your investigations turn up.
+
+---
+
+## Useful Links
+
+- Repo: [github.com/nudgebee/nudgebee](https://github.com/nudgebee/nudgebee)
+- Release v1.4.0: [github.com/nudgebee/nudgebee/releases](https://github.com/nudgebee/nudgebee/releases)
+- Helm chart: `oci://ghcr.io/nudgebee/charts/nudgebee`
+- Architecture: [docs/ARCHITECTURE.md](https://github.com/nudgebee/nudgebee/blob/main/docs/ARCHITECTURE.md)
+- Glossary: [docs/GLOSSARY.md](https://github.com/nudgebee/nudgebee/blob/main/docs/GLOSSARY.md)
+- Auth & NetworkPolicy: [docs/auth-and-networkpolicy.md](https://github.com/nudgebee/nudgebee/blob/main/docs/auth-and-networkpolicy.md)
+- Agent chart: [github.com/nudgebee/k8s-agent](https://github.com/nudgebee/k8s-agent)
+- kiac (the local cluster tool): [github.com/saiyam1814/kiac](https://github.com/saiyam1814/kiac)
+
+---
+
 # Running Nemotron 3.5 Lightning on DGX Spark
 
 - Canonical: https://blog.kubesimplify.com/nemotron-3-5-lightning-on-dgx-spark
@@ -225,7 +1174,9 @@ A 3B-active model decoding at 108 tok/s on a desktop box fits that execution lay
 
 - Canonical: https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami
 - Published: 2026-08-11
-- Summary: A hands-on test of topology-aware HAMi Dynamic MIG on RTX PRO 6000 Blackwell, with pinned setup commands, real allocations, mixed profiles, reclamation, and recovery.
+- Summary: Hands-on HAMi Dynamic MIG test on Kubernetes and RTX PRO 6000 Blackwell: setup commands, real allocations, mixed profiles, reclamation, and recovery.
+
+[HAMi (Heterogeneous AI Computing Virtualization Middleware)](https://project-hami.io/docs/next) Dynamic MIG lets a Kubernetes pod request GPU memory and receive a real [NVIDIA Multi-Instance GPU (MIG)](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/introduction.html) hardware instance created for that pod. In our RTX PRO 6000 Blackwell test, HAMi selected the smallest legal profile, packed different profiles on one card, reclaimed only the deleted pod's instance, and preserved a live allocation across a device-plugin restart.
 
 The first two posts in this series explored opposite ends of GPU sharing.
 
@@ -245,11 +1196,11 @@ The results were straightforward:
 
 > **Version and migration note:** [PR #2378](https://github.com/Project-HAMi/HAMi/pull/2378) is merged, and this post tests the resulting per-pod implementation at [commit `634bf2b32e68`](https://github.com/Project-HAMi/HAMi/commit/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1). At the time of this rerun, the latest tagged release was `v2.9.0`, which predates that implementation, so reproducing the lab requires the pinned source build below. Once HAMi publishes a release containing PR #2378, prefer its matching official chart and image. Existing `knownMigGeometries` users should follow the [migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md); the walkthrough below covers only the merged per-pod design.
 
-{{dynamic-mig-lifecycle-animation}}
-
-## Dynamic MIG in one sentence
+## What is HAMi Dynamic MIG in Kubernetes?
 
 A pod asks for GPU memory. HAMi chooses the smallest allowed MIG profile that has enough NVML-reported memory and a legal free placement, then creates that exact GPU Instance (GI) and Compute Instance (CI) for the pod.
+
+{{dynamic-mig-lifecycle-animation}}
 
 The workload request remains small:
 
@@ -288,7 +1239,7 @@ NVIDIA MIG divides a supported GPU into hardware-isolated instances. Each instan
 
 MIG can be part of a multi-tenant security design, but it does not make a platform secure or compliant by itself. Identity, admission, network, storage, runtime, and host controls still matter.
 
-## The RTX PRO 6000 profile menu
+## Which MIG profiles does the RTX PRO 6000 support?
 
 NVIDIA's [supported MIG profile table](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/supported-mig-profiles.html) lists three profile sizes for the RTX PRO 6000 Blackwell Server Edition:
 
@@ -309,7 +1260,7 @@ nvidia:
       profiles: ["1g.24gb", "2g.48gb", "4g.96gb"]
 ```
 
-For every allowed profile, the HAMi device plugin running on the GPU node asks NVIDIA's Management Library (NVML) for memory, compute metadata, instance count, and legal placements. The scheduler then chooses the smallest profile that satisfies the request and fits without overlapping a live placement.
+For every allowed profile, the HAMi device plugin running on the GPU node asks [NVIDIA's Management Library (NVML)](https://docs.nvidia.com/deploy/nvml-api/nvml-api-reference.html) for memory, compute metadata, instance count, and legal placements. The scheduler then chooses the smallest profile that satisfies the request and fits without overlapping a live placement.
 
 ## Lab environment
 
@@ -547,7 +1498,7 @@ localhost/hami-dynamic-mig:master-634bf2b32e68
 
 The monitor had one transient CDI `StartError` referring to a stale MIG UUID during the handover. Kubernetes retried it, and both plugin containers became ready. We checked the previous container state instead of hiding that transition.
 
-## What HAMi discovered through NVML
+## How does HAMi discover legal MIG placements through NVML?
 
 The node registration annotation is the clearest view of what the plugin learned from the driver:
 
@@ -569,7 +1520,7 @@ The live discovery was:
 | `2g.48gb` | 48,512 | 50 | 2 | `(0,6)`, `(6,6)` |
 | `4g.96gb` | 97,408 | 100 | 4 | `(0,12)` |
 
-NVML reports each legal placement as `start` and `size`: `start` is the index of the first occupied memory slice, and `size` is the number of memory slices occupied. Together they describe the half-open interval `[start, start + size)`. On this RTX PRO 6000, the reported placement range was `[0,12)`; these values are not GiB and are specific to this GPU. Also, `size` is not the same thing as `sliceCount`: `1g.24gb` has `sliceCount: 1` but placement `size: 3` here.
+[NVML reports each legal placement as `start` and `size`](https://docs.nvidia.com/deploy/nvml-api/structnvmlGpuInstancePlacement__t.html): `start` is the index of the first occupied memory slice, and `size` is the number of memory slices occupied. Together they describe the half-open interval `[start, start + size)`. On this RTX PRO 6000, the reported placement range was `[0,12)`; these values are not GiB and are specific to this GPU. Also, `size` is not the same thing as `sliceCount`: `1g.24gb` has `sliceCount: 1` but placement `size: 3` here.
 
 The registered `count: 4` is a coarse maximum derived from the profiles. It does not mean every arbitrary combination of four profiles fits. The placement arrays and current occupancy determine real capacity.
 
@@ -755,7 +1706,7 @@ kubectl scale deployment/mig-small-pack \
   -n hami-mig-retest --replicas=4
 ```
 
-## Test 3: mixed profiles share one physical GPU
+## Test 3: Can mixed MIG profiles share one physical GPU?
 
 The topology-aware implementation can place different profiles together whenever NVML reports legal, non-overlapping placements.
 
@@ -873,7 +1824,7 @@ large: 37 -> 39
 PASS: both mixed-profile CUDA workloads progressed
 ```
 
-## Test 4: reclaim only the pod's own instance
+## Test 4: Does HAMi reclaim only the deleted pod's MIG instance?
 
 Before deleting the small pod, we recorded the large pod's progress. Then we deleted only `mixed-small` and polled the host until its `1g.24gb` instance disappeared:
 
@@ -914,7 +1865,7 @@ HAMi does not synchronously destroy the instance inside the `kubectl delete` cal
 
 We also recreated a `1g.24gb` instance at the freed placement. On this GPU and driver, it received the same `MIG-a5fa...` UUID. The UUID's observed disappearance proved reclamation; its later reappearance proved placement reuse. A MIG UUID is not a generation counter, so do not require a different UUID as proof of recreation.
 
-## Test 5: recover a valid allocation after plugin restart
+## Test 5: Does a live allocation survive a HAMi device-plugin restart?
 
 This is an advanced and disruptive controller test, not a normal workload step. We kept `mixed-large` active, recorded its progress and MIG UUID, then replaced the device-plugin pod:
 
@@ -961,7 +1912,7 @@ This proves the tested happy path for a valid annotation. It is not a guarantee 
 
 > **Node-wide safety warning:** `filterdevices` limits HAMi registration and scheduling, but at this commit it does not limit Dynamic MIG startup cleanup. The log shows that startup reconciled all eight physical GPUs, including filtered ones. Inventory and drain the entire node before the first install or a plugin restart; filtering a GPU is not a protection boundary.
 
-## Test 6: the fifth pod spills to GPU 5
+## Test 6: What happens when one GPU's legal MIG placements are full?
 
 After deleting the mixed-profile workload and confirming no MIG instances remained, we changed the exclusion list from:
 
@@ -1129,7 +2080,7 @@ The most useful result was not just allocation. HAMi reclaimed the small pod's e
 
 The caveats are equally important. Profile rounding and NVIDIA placement rules remain. Version alignment must be verified from live images. At this snapshot, plugin startup has a node-wide hardware scope even when only one GPU is registered, so controlled installation and restart procedures are mandatory.
 
-HAMi is a CNCF Incubating project. Its source is at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). Existing installations can use the [pinned Dynamic MIG migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md) when moving to this per-pod implementation.
+HAMi is a [CNCF Incubating project](https://www.cncf.io/projects/hami/). Its source is at [github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi). Existing installations can use the [pinned Dynamic MIG migration guide](https://github.com/Project-HAMi/HAMi/blob/634bf2b32e68e07d3fbcbd6da1ee079392fc07c1/docs/develop/dynamic-mig-migration.md) when moving to this per-pod implementation.
 
 If you are joining the series here, read the [static MIG deep dive](/blog/slicing-gpus-in-kubernetes-with-nvidia-mig) and the [HAMi software vGPU guide](/blog/sharing-gpus-in-kubernetes-with-hami) first.
 

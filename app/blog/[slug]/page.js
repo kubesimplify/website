@@ -10,6 +10,7 @@ import BlogToc from '@/components/BlogToc';
 import BlogShareBar from '@/components/BlogShareBar';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import SponsorCallout from '@/components/SponsorCallout';
+import GlossaryNote from '@/components/GlossaryNote';
 import AuthorSocials from '@/components/AuthorSocials';
 import Comments from '@/components/Comments';
 import { safeJsonLd } from '@/lib/jsonld';
@@ -257,6 +258,8 @@ export default async function BlogPost({ params }) {
               <SponsorCallout sponsor={post.sponsor} variant="cta" />
 
               <SeriesBanner info={seriesInfo} />
+
+              <GlossaryNote post={post} />
 
               {/* Mobile TOC (desktop has it in the right sidebar) */}
               {toc.length > 2 && (
