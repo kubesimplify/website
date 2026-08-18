@@ -7,7 +7,6 @@ slug: running-a-single-llm-across-two-gpus-with-vllm
 author: saiyam-pathak
 cover: /img/blog/running-a-single-llm-across-two-gpus-with-vllm/cover.png
 tags: ["vllm", "gpu", "nvidia", "tensor-parallelism"]
-draft: true
 ---
 
 Someone asked me this in a thread the other day, and it is such a good question that it deserves a full walkthrough:
