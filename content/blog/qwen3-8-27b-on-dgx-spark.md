@@ -57,12 +57,14 @@ python3 edit_bench.py http://127.0.0.1:8002/v1 qwen3.8-27b   # from 0xBakeer's r
 
 Reading the config before running things saves a lot of confusion, and this one is interesting:
 
-- 27B parameters, and it is NOT a MoE. 64 layers with a hybrid attention pattern: every 4th layer is full gated attention, the other 48 layers are Gated DeltaNet (linear attention). Same hybrid lineage as Qwen3.5/3.6.
+- 27B parameters, and it is NOT a MoE. 64 layers with a hybrid attention pattern: every 4th layer is full gated attention, the other 48 layers are [Gated DeltaNet](https://arxiv.org/abs/2412.06464) (linear attention). Same hybrid lineage as Qwen3.5/3.6.
 - Native vision language model. There is a 27-layer vision encoder in the checkpoint, images and video in, text out.
-- 262,144 token native context, extensible to 1M with YaRN.
+- 262,144 token native context, extensible to 1M with [YaRN](https://arxiv.org/abs/2309.00071), short for Yet another RoPE extensioN: it rescales the model's positional frequencies, stretching each one differently depending on its wavelength, so the model can address positions further out than it was ever trained on without a full retrain.
 - Thinking mode on by default (`<think>` blocks), with recommended sampling temp 1.0 / top_p 0.95 / top_k 20. Non-thinking: temp 0.7 / top_p 0.80.
 - Apache 2.0.
 - Architecture class is `Qwen3_5ForConditionalGeneration` (`model_type: qwen3_5`). This detail matters: it is the same architecture family the inference engines already support, which is why day-zero support mostly just works.
+
+Gated DeltaNet deserves a sentence of its own, because it quietly explains most of the numbers later in this post. Normal attention keeps a KV cache that grows with every token you feed it, so the deeper your context gets, the more memory has to be read before the next token can come out. A linear attention layer keeps a fixed-size running state instead: the gate decides how fast old memory fades, and the delta rule writes targeted corrections into that state rather than appending to an ever-growing list. The state is the same size at token 100,000 as it is at token 10. Hold onto that one, it is why decode speed barely moves as context grows further down.
 
 Qwen's own (vendor-reported, so calibrate accordingly) numbers for the 27B: SWE-bench Pro 61.7, LiveCodeBench v6 90.3, Terminal Bench 2.1 at 73.0, GPQA Diamond 89.2, OSWorld-Verified 84.3.
 
@@ -94,6 +96,8 @@ Two gotchas I hit so you do not have to:
 2. The GGUF repo ships `mmproj-BF16.gguf` alongside the weights (llama.cpp pulled it automatically), so the vision path is wired up for llama.cpp as well. I test it below.
 
 First token arrives fast and the model correctly identified what it was running on (a nice recursive moment: Qwen3.8-27B on a DGX Spark explaining what a DGX Spark is).
+
+Quick decode of that quant name before the numbers, because `UD-Q4_K_XL` is three labels stacked on top of each other. `Q4_K` is llama.cpp's 4-bit K-quant: instead of one scaling factor for a whole tensor, weights are stored in super-blocks of 256, split into blocks of 32 that each carry their own quantized scale, so outlier weights do less damage to their neighbours. `UD` is Unsloth Dynamic, meaning the layers are deliberately not all quantized the same: embeddings and the first and last blocks keep more bits because everything downstream depends on them, while the more redundant middle feed-forward layers get squeezed harder. `XL` is the size tier, which promotes selected important matrices to 5-bit where unsloth judges that safe. The practical upshot is 16.68 GiB of weights that hold up better than a uniform 4-bit quant of the same size.
 
 The `llama-bench` numbers (build b10423, flash attention on, UD-Q4_K_XL, 16.68 GiB weights):
 
