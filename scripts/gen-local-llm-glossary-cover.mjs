@@ -1,5 +1,5 @@
 // Excalidraw-style cover for the local LLM glossary post.
-// Sketch helpers shared with scripts/gen-two-gpu-vllm-cover.mjs.
+// Sketch helpers shared with scripts/gen-multi-gpu-vllm-cover.mjs.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 

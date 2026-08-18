@@ -1,4 +1,4 @@
-// Excalidraw-style cover for the two-GPU vLLM article.
+// Excalidraw-style cover for the multi-GPU vLLM article.
 // Sketch helpers shared with scripts/gen-hami-diagrams.mjs.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -144,96 +144,85 @@ const W = 1200;
 const H = 630;
 const sketch = new Sketch(W, H, '#fdfdfb');
 
-// ── heading ──────────────────────────────────────────────
-sketch.text(64, 84, 'One LLM, two GPUs', { size: 52, weight: 800, anchor: 'start' });
-sketch.text(64, 122, 'tensor parallelism splits every layer, not the stack', {
-  size: 23,
+sketch.text(64, 82, 'One big model, four GPUs', { size: 50, weight: 800, anchor: 'start' });
+sketch.text(64, 119, 'how a 235B model is cut up so it fits, and what that costs', {
+  size: 22,
   color: COLORS.muted,
   anchor: 'start',
 });
-sketch.line(64, 142, 700, 142, { stroke: COLORS.muted, strokeWidth: 1.6, dashed: true });
+sketch.line(64, 139, 760, 139, { stroke: COLORS.muted, strokeWidth: 1.6, dashed: true });
 
-// ── left: one card fails ─────────────────────────────────
-sketch.text(64, 190, 'ONE 45 GiB CARD', { size: 19, weight: 800, anchor: 'start', color: COLORS.red.stroke });
+// ── left: the model does not fit on one card ──────────────
+sketch.text(64, 186, 'ONE CARD', { size: 18, weight: 800, anchor: 'start', color: COLORS.red.stroke });
 
-const boxY = 210;
-sketch.rect(64, boxY, 300, 150, { stroke: COLORS.gray.stroke, fill: '#ffffff', hachure: false, dashed: true });
-sketch.text(214, boxY + 34, 'budget 40.47 GiB', { size: 17, color: COLORS.muted });
+const bY = 206;
+sketch.rect(64, bY, 210, 132, { stroke: COLORS.gray.stroke, fill: '#ffffff', hachure: false, dashed: true });
+sketch.text(169, bY + 30, '95 GiB', { size: 19, color: COLORS.muted });
+sketch.text(169, bY + 54, 'usable', { size: 15, color: COLORS.muted });
 
-// the weights bar overflowing the box
-sketch.rect(80, boxY + 52, 330, 62, { stroke: COLORS.red.stroke, fill: COLORS.red.fill });
-sketch.text(200, boxY + 80, 'weights 61.03 GiB', { size: 20, weight: 800, color: COLORS.red.stroke });
-sketch.text(200, boxY + 103, 'does not fit', { size: 16, color: COLORS.muted });
+// overflowing weights bar
+sketch.rect(78, bY + 72, 330, 46, { stroke: COLORS.red.stroke, fill: COLORS.red.fill });
+sketch.text(200, bY + 95, '236 GB of weights', { size: 19, weight: 800, color: COLORS.red.stroke });
 
-sketch.text(64, boxY + 182, 'Available KV cache memory:', { size: 17, anchor: 'start', color: COLORS.muted });
-sketch.text(64, boxY + 208, '-24.42 GiB', { size: 30, weight: 800, anchor: 'start', color: COLORS.red.stroke });
+sketch.text(64, bY + 164, '2.3x too big', { size: 26, weight: 800, anchor: 'start', color: COLORS.red.stroke });
+sketch.text(64, bY + 192, 'no flag fixes this', { size: 16, anchor: 'start', color: COLORS.muted });
 
-// ── middle divider ───────────────────────────────────────
-sketch.line(470, 190, 470, 470, { stroke: COLORS.muted, strokeWidth: 1.6, dashed: true });
-sketch.text(470, 340, 'vs', { size: 26, weight: 800, color: COLORS.muted });
+// ── divider ───────────────────────────────────────────────
+sketch.line(452, 186, 452, 452, { stroke: COLORS.muted, strokeWidth: 1.6, dashed: true });
 
-// ── right: two cards work ────────────────────────────────
-sketch.text(560, 190, 'TWO CARDS, --tensor-parallel-size 2', {
-  size: 19,
+// ── right: four cards, each holds a quarter ───────────────
+sketch.text(516, 186, 'FOUR CARDS, --tensor-parallel-size 4', {
+  size: 18,
   weight: 800,
   anchor: 'start',
   color: COLORS.teal.stroke,
 });
 
-const cardW = 246;
-const cardGap = 84;
-const gpuY = 210;
-[0, 1].forEach((gpu) => {
-  const x = 560 + gpu * (cardW + cardGap);
-  const accent = gpu === 0 ? COLORS.blue : COLORS.green;
-  sketch.rect(x, gpuY, cardW, 150, { stroke: accent.stroke, fill: accent.fill });
-  sketch.text(x + cardW / 2, gpuY + 34, `GPU ${gpu}`, { size: 22, weight: 800, color: accent.stroke });
-  sketch.text(x + cardW / 2, gpuY + 66, 'weights 30.59 GiB', { size: 18, weight: 700 });
-  sketch.text(x + cardW / 2, gpuY + 94, 'KV cache 8.22 GiB', { size: 17, color: COLORS.muted });
-  sketch.text(x + cardW / 2, gpuY + 124, gpu === 0 ? 'heads 0-31' : 'heads 32-63', {
-    size: 16,
-    color: COLORS.muted,
-  });
+const cw = 145;
+const gap = 10;
+const gY = 206;
+const palette = [COLORS.blue, COLORS.green, COLORS.violet, COLORS.orange];
+[0, 1, 2, 3].forEach((gpu) => {
+  const x = 516 + gpu * (cw + gap);
+  const c = palette[gpu];
+  sketch.rect(x, gY, cw, 132, { stroke: c.stroke, fill: c.fill });
+  sketch.text(x + cw / 2, gY + 30, `GPU ${gpu}`, { size: 20, weight: 800, color: c.stroke });
+  sketch.text(x + cw / 2, gY + 60, '59 GB', { size: 18, weight: 700 });
+  sketch.text(x + cw / 2, gY + 84, 'weights', { size: 14, color: COLORS.muted });
+  sketch.text(x + cw / 2, gY + 112, '16 of 64 heads', { size: 13, color: COLORS.muted });
 });
 
-// all-reduce link between the two cards
-const gapL = 560 + cardW + 10;
-const gapR = 560 + cardW + cardGap - 10;
-const gapMid = (gapL + gapR) / 2;
-const linkY = gpuY + 66;
-sketch.arrow(gapL, linkY, gapR, linkY, { stroke: COLORS.violet.stroke });
-sketch.arrow(gapR, linkY + 24, gapL, linkY + 24, { stroke: COLORS.violet.stroke });
-sketch.text(gapMid, gapMid && linkY + 60, 'all-', { size: 15, weight: 700, color: COLORS.violet.stroke });
-sketch.text(gapMid, linkY + 80, 'reduce', { size: 15, weight: 700, color: COLORS.violet.stroke });
-
-sketch.text(560, gpuY + 182, 'GPU KV cache size:', { size: 17, anchor: 'start', color: COLORS.muted });
-sketch.text(560, gpuY + 208, '67,296 tokens', {
-  size: 30,
+// all-reduce arrows under the row of cards
+const arrowY = gY + 154;
+sketch.line(516 + 40, arrowY, 516 + 3 * (cw + gap) + cw - 40, arrowY, {
+  stroke: COLORS.violet.stroke,
+  dashed: true,
+});
+sketch.text(516 + (3 * (cw + gap) + cw) / 2, arrowY + 30, '188 all-reduces per token', {
+  size: 18,
   weight: 800,
-  anchor: 'start',
-  color: COLORS.teal.stroke,
+  color: COLORS.violet.stroke,
 });
-sketch.text(830, gpuY + 208, '2.05x concurrency', { size: 18, anchor: 'start', color: COLORS.muted });
 
-// ── footer strip ─────────────────────────────────────────
-sketch.line(64, 520, W - 64, 520, { stroke: COLORS.muted, strokeWidth: 1.6 });
-sketch.text(64, 556, 'QWEN3-32B BF16 - 61.02 GiB CHECKPOINT - vLLM 0.27.1', {
-  size: 19,
+// ── footer ────────────────────────────────────────────────
+sketch.line(64, 516, W - 64, 516, { stroke: COLORS.muted, strokeWidth: 1.6 });
+sketch.text(64, 552, 'QWEN3-235B-A22B FP8 - 128 EXPERTS, 8 PER TOKEN - vLLM 0.27.1', {
+  size: 18,
   weight: 800,
   anchor: 'start',
   color: COLORS.ink,
 });
-sketch.text(64, 586, '2 x 128 all-reduces per token, no NVLink, measured not estimated', {
-  size: 17,
+sketch.text(64, 582, 'tensor, pipeline and expert parallelism explained in plain english', {
+  size: 16,
   anchor: 'start',
   color: COLORS.muted,
 });
-sketch.text(W - 64, 586, 'blog.kubesimplify.com', {
-  size: 17,
+sketch.text(W - 64, 582, 'blog.kubesimplify.com', {
+  size: 16,
   weight: 700,
   anchor: 'end',
   color: COLORS.muted,
 });
 
 sketch.save(join(output, 'cover.svg'));
-console.log(`Wrote two-GPU vLLM cover to ${output}`);
+console.log(`Wrote multi-GPU vLLM cover to ${output}`);
