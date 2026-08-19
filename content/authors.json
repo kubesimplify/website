@@ -620,5 +620,16 @@
       "hashnode": "https://hashnode.com/@kameshs"
     },
     "postCount": 1
+  },
+  "ekam-walia": {
+    "handle": "ekam-walia",
+    "name": "Ekamveer Walia",
+    "avatar": "/img/authors/ekam-walia.jpg",
+    "bio": "Writing some cool stuff ... ",
+    "socials": {
+      "hashnode": "https://hashnode.com/@ekamwalia",
+      "linkedin": "https://www.linkedin.com/in/ekamveerwalia/"
+    },
+    "postCount": 1
   }
 }
