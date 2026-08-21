@@ -82,6 +82,10 @@ function cleanPath(raw) {
   let path = raw.split('?')[0].split('#')[0];
   if (path.length > 1) path = path.replace(/\/+$/, '');
   if (path.length > 300 || path.includes('..')) return null;
+  // Client-side navigations report the internal /blog/<slug> route; the
+  // public URL is /<slug> (public/_redirects 301s the former to the latter),
+  // so fold both onto the canonical path to keep per-post counts whole.
+  if (path.startsWith('/blog/')) path = path.slice(5);
   return path || '/';
 }
 
