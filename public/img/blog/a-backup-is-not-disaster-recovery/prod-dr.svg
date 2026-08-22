@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 340" style="font-family:'Chalkboard SE','Comic Sans MS',cursive">
+  <defs>
+    <pattern id="hblue" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D0EBFF" stroke-width="4"/>
+    </pattern>
+    <pattern id="hgreen" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D3F9D8" stroke-width="4"/>
+    </pattern>
+    <pattern id="hyellow" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#FFF3BF" stroke-width="4"/>
+    </pattern>
+  </defs>
+  <g stroke="#1e1e1e" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- git/iac/secrets outside both -->
+    <path d="M336 22 Q460 16 586 22 Q590 52 586 84 Q460 90 336 84 Q332 52 336 22 Z" fill="url(#hyellow)"/>
+    <path d="M330 88 Q250 104 210 128" stroke="#1971C2"/>
+    <path d="M228 116 Q218 123 210 128 Q216 134 224 141" stroke="#1971C2"/>
+    <path d="M592 88 Q672 104 712 128" stroke="#1971C2"/>
+    <path d="M694 116 Q704 123 712 128 Q706 134 698 141" stroke="#1971C2"/>
+    <!-- Site A -->
+    <path d="M76 134 Q192 128 308 134 Q313 200 308 268 Q192 274 76 268 Q71 200 76 134 Z" fill="url(#hblue)"/>
+    <!-- Site B -->
+    <path d="M612 134 Q728 128 844 134 Q849 200 844 268 Q728 274 612 268 Q607 200 612 134 Z" fill="url(#hgreen)"/>
+    <!-- db replication -->
+    <path d="M322 172 Q460 156 598 172" stroke="#E8590C" stroke-width="3.2"/>
+    <path d="M580 160 Q590 167 598 172 Q591 178 584 185" stroke="#E8590C" stroke-width="3.2"/>
+    <!-- backup vault outside A -->
+    <path d="M410 244 Q458 238 506 244 L494 316 Q458 324 424 316 Z" fill="url(#hyellow)"/>
+    <path d="M410 244 Q458 254 506 244"/>
+    <path d="M312 258 Q356 268 402 274" stroke="#E8590C" stroke-width="3"/>
+    <path d="M386 262 Q394 269 402 274 Q393 278 384 283" stroke="#E8590C" stroke-width="3"/>
+    <path d="M514 274 Q560 268 604 258" stroke="#E8590C" stroke-width="3" stroke-dasharray="8 7"/>
+    <path d="M588 250 Q596 254 604 258 Q598 264 593 271" stroke="#E8590C" stroke-width="3"/>
+    <!-- users -->
+    <path d="M898 158 Q908 154 912 162 Q916 172 906 176 Q896 178 894 168 Q893 160 898 158 Z"/>
+    <line x1="903" y1="178" x2="903" y2="206"/>
+    <line x1="903" y1="186" x2="888" y2="198"/><line x1="903" y1="186" x2="918" y2="198"/>
+    <line x1="903" y1="206" x2="890" y2="226"/><line x1="903" y1="206" x2="916" y2="226"/>
+    <path d="M884 200 Q862 196 850 190" stroke="#2F9E44" stroke-width="3" stroke-dasharray="7 6"/>
+  </g>
+  <text x="460" y="48" text-anchor="middle" font-size="19" fill="#1e1e1e">Git · IaC · secrets</text>
+  <text x="460" y="72" text-anchor="middle" font-size="14" fill="#5f5b53">outside both sites</text>
+  <text x="192" y="298" text-anchor="middle" font-size="18" fill="#1e1e1e">Site A · active</text>
+  <text x="728" y="298" text-anchor="middle" font-size="18" fill="#1e1e1e">Site B · warm</text>
+  <text x="460" y="146" text-anchor="middle" font-size="15" fill="#E8590C">database replication</text>
+  <text x="368" y="302" text-anchor="end" font-size="14" fill="#E8590C">backup</text>
+  <text x="548" y="302" text-anchor="start" font-size="14" fill="#E8590C">restore</text>
+  <text x="458" y="336" text-anchor="middle" font-size="15" fill="#1e1e1e">recovery vault · outside Site A</text>
+  <text x="884" y="242" text-anchor="middle" font-size="13" fill="#2F9E44">traffic, after</text>
+  <text x="884" y="260" text-anchor="middle" font-size="13" fill="#2F9E44">validation</text>
+</svg>

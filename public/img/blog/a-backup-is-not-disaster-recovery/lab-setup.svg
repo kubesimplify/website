@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 430" style="font-family:'Chalkboard SE','Comic Sans MS',cursive">
+  <defs>
+    <pattern id="hblue" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D0EBFF" stroke-width="4"/>
+    </pattern>
+    <pattern id="hgreen" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D3F9D8" stroke-width="4"/>
+    </pattern>
+    <pattern id="hyellow" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#FFF3BF" stroke-width="4"/>
+    </pattern>
+  </defs>
+  <g stroke="#1e1e1e" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Gitea, top center -->
+    <path d="M400 30 Q470 22 540 30 L536 66 Q470 74 404 66 Z" fill="url(#hyellow)"/>
+    <path d="M400 30 Q470 40 540 30"/>
+    <!-- arrow gitea -> DR (argo pulls) -->
+    <path d="M548 58 Q640 76 700 108" stroke="#1971C2" stroke-width="3"/>
+    <path d="M682 96 Q692 103 700 108 Q693 113 686 120" stroke="#1971C2" stroke-width="3"/>
+
+    <!-- PROD: kiac, VM wall drawn as double border -->
+    <g transform="rotate(-0.4 190 220)">
+      <path d="M52 118 Q190 110 328 118 Q336 220 328 322 Q190 330 52 322 Q44 220 52 118 Z" fill="url(#hblue)"/>
+      <path d="M64 130 Q190 123 316 130 Q323 220 316 310 Q190 317 64 310 Q57 220 64 130 Z" stroke-dasharray="3 6"/>
+    </g>
+    <!-- postgres cylinder + pv -->
+    <path d="M120 176 Q166 169 212 176 L210 224 Q166 231 122 224 Z" fill="#fff"/>
+    <path d="M120 176 Q166 185 212 176"/>
+    <!-- velero sail tag -->
+    <path d="M236 168 L236 226 Q262 214 288 226 L288 168 Q262 156 236 168 Z" fill="#fff" transform="rotate(2 262 196)"/>
+    <path d="M252 184 Q262 178 274 184" stroke-width="2"/>
+    <path d="M250 200 Q262 194 276 200" stroke-width="2"/>
+
+    <!-- DR: kind -->
+    <g transform="rotate(0.4 750 220)">
+      <path d="M612 118 Q750 110 888 118 Q896 220 888 322 Q750 330 612 322 Q604 220 612 118 Z" fill="url(#hgreen)"/>
+    </g>
+    <!-- argo octopus-ish head -->
+    <path d="M652 170 Q676 158 698 170 Q706 188 692 198 Q676 206 660 198 Q646 188 652 170 Z" fill="#fff"/>
+    <path d="M660 202 L656 216 M676 205 L676 219 M692 202 L696 216" stroke-width="2"/>
+    <!-- ledger: two small cylinders -->
+    <path d="M740 176 Q766 172 792 176 L790 206 Q766 210 742 206 Z" fill="#fff"/>
+    <path d="M740 176 Q766 182 792 176"/>
+    <path d="M810 176 Q836 172 862 176 L860 206 Q836 210 812 206 Z" fill="#fff"/>
+    <path d="M810 176 Q836 182 862 176"/>
+    <!-- velero sail tag DR -->
+    <path d="M700 242 L700 296 Q724 285 748 296 L748 242 Q724 231 700 242 Z" fill="#fff" transform="rotate(-2 724 268)"/>
+    <path d="M714 258 Q724 252 736 258" stroke-width="2"/>
+    <path d="M712 274 Q724 268 738 274" stroke-width="2"/>
+
+    <!-- vault, bottom center -->
+    <path d="M424 296 Q470 288 516 296 L504 392 Q470 400 436 392 Z" fill="url(#hyellow)"/>
+    <path d="M424 296 Q470 306 516 296"/>
+    <!-- backup arrow prod -> vault (through the VM wall) -->
+    <path d="M334 268 Q380 296 418 320" stroke="#E8590C" stroke-width="3.2"/>
+    <path d="M402 306 Q410 314 418 320 Q408 322 399 327" stroke="#E8590C" stroke-width="3.2"/>
+    <!-- restore arrow vault -> DR (dashed) -->
+    <path d="M522 320 Q560 296 606 268" stroke="#E8590C" stroke-width="3.2" stroke-dasharray="8 7"/>
+    <path d="M588 268 Q598 267 606 268 Q601 276 598 285" stroke="#E8590C" stroke-width="3.2"/>
+  </g>
+
+  <text x="470" y="54" text-anchor="middle" font-size="17" fill="#1e1e1e">Gitea · app YAML in Git</text>
+  <text x="648" y="66" text-anchor="middle" font-size="13" fill="#1971C2">Argo pulls</text>
+
+  <text x="166" y="256" text-anchor="middle" font-size="15" fill="#1e1e1e">Postgres + PV</text>
+  <text x="264" y="256" text-anchor="middle" font-size="15" fill="#1e1e1e">Velero</text>
+  <text x="190" y="298" text-anchor="middle" font-size="15" fill="#5f5b53">+ CSI snapshots · VGS</text>
+  <text x="190" y="356" text-anchor="middle" font-size="19" fill="#1e1e1e">prod · kiac</text>
+  <text x="190" y="378" text-anchor="middle" font-size="14" fill="#5f5b53">the node is its own VM</text>
+
+  <text x="676" y="232" text-anchor="middle" font-size="15" fill="#1e1e1e">Argo CD</text>
+  <text x="800" y="232" text-anchor="middle" font-size="15" fill="#1e1e1e">ledger · 2 PVCs</text>
+  <text x="724" y="318" text-anchor="middle" font-size="15" fill="#1e1e1e">Velero</text>
+  <text x="750" y="356" text-anchor="middle" font-size="19" fill="#1e1e1e">recovery · kind</text>
+  <text x="750" y="378" text-anchor="middle" font-size="14" fill="#5f5b53">+ CSI snapshots · VGS</text>
+
+  <text x="370" y="308" text-anchor="end" font-size="14" fill="#E8590C">backup</text>
+  <text x="572" y="308" text-anchor="start" font-size="14" fill="#E8590C">restore</text>
+  <text x="470" y="418" text-anchor="middle" font-size="16" fill="#1e1e1e">SeaweedFS · S3 vault outside both clusters</text>
+</svg>

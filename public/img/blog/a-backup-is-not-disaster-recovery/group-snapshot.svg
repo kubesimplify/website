@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -14 860 264" style="font-family:'Chalkboard SE','Comic Sans MS',cursive">
+  <defs>
+    <pattern id="hblue" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D0EBFF" stroke-width="4"/>
+    </pattern>
+    <pattern id="hgreen" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="9" stroke="#D3F9D8" stroke-width="4"/>
+    </pattern>
+  </defs>
+  <g stroke="#1e1e1e" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- lasso around both volumes -->
+    <path d="M46 26 Q120 18 196 26 Q206 120 196 216 Q120 226 48 216 Q38 120 46 26 Z" stroke="#E8590C" stroke-width="3" stroke-dasharray="10 8"/>
+    <!-- volumes -->
+    <path d="M74 48 Q120 41 166 48 L164 92 Q120 99 76 92 Z" fill="url(#hblue)"/>
+    <path d="M74 48 Q120 57 166 48"/>
+    <path d="M74 150 Q120 143 166 150 L164 194 Q120 201 76 194 Z" fill="url(#hgreen)"/>
+    <path d="M74 150 Q120 159 166 150"/>
+    <!-- write lanes -->
+    <path d="M212 70 Q440 64 700 69"/>
+    <path d="M212 172 Q440 166 700 171"/>
+    <!-- single cut across both -->
+    <line x1="480" y1="34" x2="480" y2="204" stroke-dasharray="6 6" stroke="#E8590C" stroke-width="3.4"/>
+    <!-- one camera -->
+    <path d="M454 6 Q480 2 506 6 L506 32 Q480 36 454 32 Z" fill="#FFD8A8"/>
+    <path d="M472 6 L476 -2 L490 -2 L494 6"/>
+    <!-- check -->
+    <path d="M726 96 Q740 116 750 130 Q772 84 806 56" stroke="#2F9E44" stroke-width="6"/>
+  </g>
+  <text x="120" y="242" text-anchor="middle" font-size="15" fill="#E8590C">selector: group=ledger</text>
+  <text x="560" y="30" text-anchor="start" font-size="16" fill="#E8590C">one cut · one moment · both volumes</text>
+  <text x="766" y="160" text-anchor="middle" font-size="16" fill="#2F9E44">crash-consistent</text>
+</svg>
