@@ -18,15 +18,17 @@ Let's answer that properly, with a real model on real hardware. And let's be hon
 
 ## How to read this post
 
-First, why this post is shaped the way it is. Getting a big model serving and understanding how the serving works are two different jobs, usually done by two different people, or by the same person on two different days. An earlier version of this post ran both together, and that made it dense in exactly the wrong way: the reader with a deadline had to wade through all-reduce mechanics to reach the next command, and the reader who came for the mechanics kept tripping over Docker flags. We considered splitting it into two separate posts, but the deep dive's benchmark numbers come from the runbook's commands, and evidence belongs next to the thing it proves.
+This post is split into two tracks: a runbook for getting a big model serving, and a deep dive explaining how multi-GPU model splitting actually works. The runbook is for readers who need the commands and configs fast.
+
+The deep dive is for those who want to understand the mechanics, tradeoffs, and numbers. Jump to the track that fits your need, or read both: the post is structured so each section clearly points to the other right when extra context is helpful.
 
 So: one post, two tracks, each with a clear exit. Pick your entrance based on the job in front of you:
 
-| You are | You want | Read |
-| --- | --- | --- |
+| You are                                                             | You want                | Read                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Platform engineer, SRE, MLOps**: you have the GPUs and a deadline | The model serving today | **The runbook, Steps 1-8** (~20 min). Every command, flag, log line and error. Each step links into the deep dive at exactly the point a "why" earns its keep; follow those links only when something surprises you. |
-| **ML engineer, or just curious**: no root access required | The mental model | **The deep dive, sections 1-7** (~18 min). How the splitting actually works, and measured proof of when each method wins. Jump [straight there](#the-deep-dive-what-splitting-actually-means). |
-| **Both** | Everything | Read straight through. The runbook comes first because you cannot benchmark a server that is not running. |
+| **ML engineer, or just curious**: no root access required           | The mental model        | **The deep dive, sections 1-7** (~18 min). How the splitting actually works, and measured proof of when each method wins. Jump [straight there](#the-deep-dive-what-splitting-actually-means).                       |
+| **Both**                                                            | Everything              | Read straight through. The runbook comes first because you cannot benchmark a server that is not running.                                                                                                            |
 
 New to the jargon? Every term, flag, and benchmark number here is explained in plain English in the [local LLM glossary](https://blog.kubesimplify.com/local-llm-glossary).
 
@@ -92,8 +94,8 @@ You download it with the Hugging Face CLI:
 ```bash
 root@utho-gpu-rtxpro6000-8-62383:~# pip install huggingface_hub hf_transfer
 root@utho-gpu-rtxpro6000-8-62383:~# HF_XET_HIGH_PERFORMANCE=1 hf download Qwen/Qwen3-235B-A22B-Instruct-2507-FP8
-Downloading bytes: ████████████████████████████████████████████████▏                                                                                                             | 24.4GB,  234MB/s  
-Reconstructing (incomplete total...):  13%|███████████████▋                                                                                                             | 10.0GB / 80.0GB,  104MB/s  
+Downloading bytes: ████████████████████████████████████████████████▏                                                                                                             | 24.4GB,  234MB/s
+Reconstructing (incomplete total...):  13%|███████████████▋                                                                                                             | 10.0GB / 80.0GB,  104MB/s
 Fetching 34 files:   0%|                                                                                                                                                      | 0/34 [00:00<?, ?it/s]
 
 ```
@@ -120,7 +122,9 @@ A few things worth understanding here:
 - **`.safetensors`** files hold the actual weights. Each one starts with a small table of contents saying what is inside and exactly where each piece begins and ends. So a program can jump straight to the piece it needs instead of reading the whole file. This is called memory-mapping, and it matters later. And unlike the old `.bin` format, simply opening one of these files can never run hidden code on your machine.
 - **`model.safetensors.index.json`** is the master map. The weights are spread over 24 files, and this map says which file each piece lives in. When vLLM needs layer 62, it looks here, sees shard 17, and opens only that file.
 - **`config.json`** is the model's spec sheet: how many layers, how many heads, how many experts. It is a few kilobytes, and it decides almost everything in this post, including how many GPUs you can split across.
-- Because this model is FP8, each weight is stored in a single byte, and a single byte cannot record very large and very small numbers accurately at the same time. The checkpoint fixes this the way a paper map does. A map shrinks a whole city onto one page, and its legend tells you how to undo the shrinking: 1 cm on the page equals 1 km in the world. Same idea here: the weights are cut into blocks of 128 by 128 numbers, every block is shrunk until its values fit in one byte each, and each block carries one extra number, its **scale**, which is the legend for that block. To get a real weight back, the GPU multiplies the stored byte by its block's scale. These **block scales** ship in the download right alongside the weights, and you can see the whole arrangement declared in `config.json`:
+- Because this model is FP8, each weight is stored in a single byte, and a single byte cannot record very large and very small numbers accurately at the same time. The checkpoint fixes this the way a paper map does. A map shrinks a whole city onto one page, and its legend tells you how to undo the shrinking: 1 cm on the page equals 1 km in the world.
+
+Same idea here: the weights are cut into blocks of 128 by 128 numbers, every block is shrunk until its values fit in one byte each, and each block carries one extra number, its **scale**, which is the legend for that block. To get a real weight back, the GPU multiplies the stored byte by its block's scale. These **block scales** ship in the download right alongside the weights, and you can see the whole arrangement declared in `config.json`:
 
 ```json
 "quantization_config": {
@@ -137,9 +141,7 @@ Remember those block scales. They are the reason for the most annoying crash we 
 
 Not a formal one, but there are firm conventions. The Hub's guidance is to split large files into chunks under 200 GB, with 500 GB as the hard limit for a single file, for two practical reasons: a failed download of a smaller file resumes cheaply, and the CDN does not cache huge files, so one 236 GB file would genuinely download slower than 24 pieces of it. What publishers actually pick sits far below those limits. Our model uses a 10 GB cap: 23 shards of exactly 10.00 GB and a 24th holding the remaining 6.45 GB, for 236.45 GB in total.
 
-One thing the shard files do **not** line up with is the model's structure. The saver walks through the weights and fills each file to the 10 GB cap, then starts the next one, paying no attention to where a layer begins or ends. So no file contains "layers 1 to 4"; a file contains whatever bytes landed in it, and a single layer's pieces can straddle two files. 
-
-If you want a feel for the volume anyway: one layer of this model weighs about 236 GB / 94 = 2.5 GB in FP8, so each 10 GB file holds about four layers' worth of material, the way a moving box holds "one shelf's worth of books" without holding any particular shelf. That is exactly why the master map from earlier exists: without it, nobody would know where anything landed.
+What actually sits inside each file is less obvious than it looks, and it is not "layers 1 to 4". [The deep dive has that story.](#a-side-note-on-the-shard-files)
 
 **Does any of this affect serving?** No. Whether the weights are packaged as a single file or as 24 changes nothing about the numbers inside, and because safetensors files are memory-mapped, the program loading them (vLLM, in our case) jumps straight to the pieces it needs no matter how they are grouped into files. Shard size is a distribution question, not an inference question.
 
@@ -159,15 +161,17 @@ The content lives once in `blobs/` under its hash, and `snapshots/` holds human-
 
 The practical consequence for serving: mount that whole directory into your container and set `HF_HOME` to it, which is exactly what the `-v` and `-e HF_HOME` flags in Step 5 are doing. Otherwise the container downloads its own copy.
 
-One more thing about loading that surprises people. When you split the model over 4 GPUs, vLLM starts 4 separate processes, one per GPU, and **every one of them reads the whole download from disk**, keeping only the quarter it needs. 
+One more thing about loading that surprises people. When you split the model over 4 GPUs, vLLM starts 4 separate processes, one per GPU, and **every one of them reads the whole download from disk**, keeping only the quarter it needs.
 
-vLLM's own docs say it plainly: with tensor parallelism, "each process will read the whole model and split it into chunks". So at `-tp 4` the machine reads the 236 GB not once but four times, close to a full terabyte of disk reads before the server can answer anything. That is why a big model takes minutes to load even from a fast disk. 
+vLLM's own docs say it plainly: with tensor parallelism, "each process will read the whole model and split it into chunks". So at `-tp 4` the machine reads the 236 GB not once but four times, close to a full terabyte of disk reads before the server can answer anything. That is why a big model takes minutes to load even from a fast disk.
 
 Our first `Model loading took` line said 45 seconds, but only because we had just downloaded the model, so most of it was still sitting in RAM, where the operating system keeps recently used files. From a cold disk it takes much longer.
 
 ### The disk trap, which is a real production hazard
 
-**On a shared machine, filling the disk can take down everything else on it.** This is the part we learned the hard way, and it is worth more than a footnote. Our test box also runs a Kubernetes inference platform. Kubernetes treats free disk as a managed resource called ephemeral-storage, and when free space fell below its eviction threshold, the kubelet did exactly what it is designed to do: it evicted pods to reclaim space, tainted the node so nothing new could schedule, and garbage-collected container images. Several of those images had been built locally and existed in no registry, so they could not simply be pulled again.
+**On a shared machine, filling the disk can take down everything else on it.** This is the part we learned the hard way, and it is worth more than a footnote. Our test box also runs a Kubernetes inference platform. Kubernetes treats free disk as a managed resource called ephemeral-storage, and when free space fell below its eviction threshold, the kubelet did exactly what it is designed to do.
+
+It evicted pods to reclaim space, tainted the node so nothing new could schedule, and garbage-collected container images. Several of those images had been built locally and existed in no registry, so they could not simply be pulled again.
 
 Nothing about that is a Kubernetes bug, and nothing about it is specific to our setup. The lesson generalises: **before you download a quarter of a terabyte onto a machine, check what else lives on that disk and what will happen when it fills.** `df -h` before you start, and know your platform's eviction threshold, which is often far higher than "0 bytes free". If the machine is shared, keeping a couple of hundred gigabytes of headroom is not paranoia.
 
@@ -372,7 +376,7 @@ root@utho-gpu-rtxpro6000-8-62383:~# docker exec vllm-tp4 vllm bench serve \
   --base-url http://localhost:8000 \
   --dataset-name random --random-input-len 1024 --random-output-len 256 \
   --max-concurrency 1 --num-prompts 12 --seed 42 --ignore-eos
-  
+
 Starting initial single prompt test run...
 Skipping endpoint ready check.
 Starting main benchmark run...
@@ -382,29 +386,29 @@ Maximum request concurrency: 1
 100%|██████████| 12/12 [00:55<00:00,  4.62s/it]
 tip: install termplotlib and gnuplot to plot the metrics
 ============ Serving Benchmark Result ============
-Successful requests:                     12        
-Failed requests:                         0         
-Maximum request concurrency:             1         
-Benchmark duration (s):                  55.38     
-Total input tokens:                      12288     
-Total generated tokens:                  3072      
-Request throughput (req/s):              0.22      
-Output token throughput (tok/s):         55.47     
-Peak output token throughput (tok/s):    60.00     
-Peak concurrent requests:                2.00      
-Total token throughput (tok/s):          277.34    
+Successful requests:                     12
+Failed requests:                         0
+Maximum request concurrency:             1
+Benchmark duration (s):                  55.38
+Total input tokens:                      12288
+Total generated tokens:                  3072
+Request throughput (req/s):              0.22
+Output token throughput (tok/s):         55.47
+Peak output token throughput (tok/s):    60.00
+Peak concurrent requests:                2.00
+Total token throughput (tok/s):          277.34
 ---------------Time to First Token----------------
-Mean TTFT (ms):                          255.31    
-Median TTFT (ms):                        251.60    
-P99 TTFT (ms):                           272.03    
+Mean TTFT (ms):                          255.31
+Median TTFT (ms):                        251.60
+P99 TTFT (ms):                           272.03
 -----Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          17.10     
-Median TPOT (ms):                        17.14     
-P99 TPOT (ms):                           17.16     
+Mean TPOT (ms):                          17.10
+Median TPOT (ms):                        17.14
+P99 TPOT (ms):                           17.16
 ---------------Inter-token Latency----------------
-Mean ITL (ms):                           17.10     
-Median ITL (ms):                         17.13     
-P99 ITL (ms):                            17.79     
+Mean ITL (ms):                           17.10
+Median ITL (ms):                         17.13
+P99 ITL (ms):                            17.79
 ==================================================
 ```
 
@@ -413,57 +417,57 @@ and then again with 32 requests in flight, which is the same command with two nu
 ```bash
 --max-concurrency 32 --num-prompts 640
 
-Starting initial single prompt test run...
 Skipping endpoint ready check.
 Starting main benchmark run...
 Traffic request rate: inf
 Burstiness factor: 1.0 (Poisson process)
-Maximum request concurrency: 32
-100%|██████████| 640/640 [04:22<00:00,  2.44it/s]
+Maximum request concurrency: 33
+100%|██████████| 640/640 [05:22<00:00,  1.99it/s]
 tip: install termplotlib and gnuplot to plot the metrics
 ============ Serving Benchmark Result ============
-Successful requests:                     640       
-Failed requests:                         0         
-Maximum request concurrency:             32        
-Benchmark duration (s):                  262.63    
-Total input tokens:                      655360    
-Total generated tokens:                  163840    
-Request throughput (req/s):              2.44      
-Output token throughput (tok/s):         623.85    
-Peak output token throughput (tok/s):    960.00    
-Peak concurrent requests:                64.00     
-Total token throughput (tok/s):          3119.25   
+Successful requests:                     640
+Failed requests:                         0
+Maximum request concurrency:             33
+Benchmark duration (s):                  322.25
+Total input tokens:                      655360
+Total generated tokens:                  163840
+Request throughput (req/s):              1.99
+Output token throughput (tok/s):         508.43
+Peak output token throughput (tok/s):    960.00
+Peak concurrent requests:                64.00
+Total token throughput (tok/s):          2542.16
 ---------------Time to First Token----------------
-Mean TTFT (ms):                          2070.58   
-Median TTFT (ms):                        504.97    
-P99 TTFT (ms):                           6028.94   
+Mean TTFT (ms):                          2690.29
+Median TTFT (ms):                        1967.72
+P99 TTFT (ms):                           13101.50
 -----Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          43.36     
-Median TPOT (ms):                        40.53     
-P99 TPOT (ms):                           62.56     
+Mean TPOT (ms):                          54.48
+Median TPOT (ms):                        55.32
+P99 TPOT (ms):                           63.66
 ---------------Inter-token Latency----------------
-Mean ITL (ms):                           43.36     
-Median ITL (ms):                         37.67     
-P99 ITL (ms):                            65.99     
-----------------End-to-end Latency----------------
-Mean E2EL (ms):                          13126.87  
-Median E2EL (ms):                        13148.27  
-P99 E2EL (ms):                           17041.19  
-
+Mean ITL (ms):                           54.48
+Median ITL (ms):                         37.20
+P99 ITL (ms):                            255.76
+==================================================
 ```
+
+**Why 32 in-flight requests and not some other number?** Because 32 is the ceiling we gave the server ourselves: `--max-num-seqs 32` tells vLLM to work on at most 32 requests per step. Benchmarking at exactly that ceiling shows the server fully loaded, which is the number you actually want for capacity planning.
+
+**And what happens if a 33rd request arrives?** Nothing dramatic, and that is worth knowing. It is not rejected and it does not error. It waits in a queue inside the server, and the moment one of the 32 running requests finishes, it takes the freed slot. So the cost of oversubscribing is waiting time, not failures: throughput stays flat because the server was already flat out, and the extra request simply sees a longer time to first token.
+
+One subtlety: 32 is not the only ceiling in play. The startup log said this configuration holds about 19 full-length 32k conversations in its KV cache. Our benchmark requests are short, 1,280 tokens each, so all 32 fit in the cache with plenty of room and the `--max-num-seqs` flag is the limit that binds. With long conversations the cache fills first, and instead of queueing politely vLLM starts preempting: it evicts a running request's cache and recomputes it later ([Deep dive 2 explains preemption](#deep-dive-2-inference-is-two-jobs)). Which ceiling you hit first depends entirely on how long your requests are.
 
 One benchmarking warning before you copy this: if you re-run against a warm server, either vary the `--seed` or turn prefix caching off, otherwise your second measurement is mostly measuring vLLM's prompt cache. [The full story of the misleading numbers we caught is in Deep dive 7.](#deep-dive-7-the-proof)
 
 **The verdict.** The complete tables and number-by-number interpretation live in [Deep dive 7](#deep-dive-7-the-proof); here is what they add up to:
 
-* **Tensor Parallelism (TP) won nearly everything:**
-  * **Throughput:** 623.85 output tokens/sec at 32 concurrent requests (70% faster than pipeline parallelism).
-  * **Decode Latency:** Fastest single-request decode at 17.14 ms median per token.
-  * **Capacity:** Largest conversation capacity with 621,392 cached tokens (~19 concurrent 32k conversations).
-  * **Memory:** Perfectly even memory distribution across all four cards.
-* **Pipeline Parallelism (PP):** Won exactly one metric which was time to first token (TTFT) by 15%.
-* **Expert Parallelism (EP):** Cost 7% overhead and returned no benefit at this scale.
-
+- **Tensor Parallelism (TP) won nearly everything:**
+  - **Throughput:** 623.85 output tokens/sec at 32 concurrent requests (70% faster than pipeline parallelism).
+  - **Decode Latency:** Fastest single-request decode at 17.14 ms median per token.
+  - **Capacity:** Largest conversation capacity with 621,392 cached tokens (~19 concurrent 32k conversations).
+  - **Memory:** Perfectly even memory distribution across all four cards.
+- **Pipeline Parallelism (PP):** Won exactly one metric which was time to first token (TTFT) by 15%.
+- **Expert Parallelism (EP):** Cost 7% overhead and returned no benefit at this scale.
 
 So for a 235B MoE on 4 GPUs with no NVLink between them, we would use plain `--tensor-parallel-size 4` and leave both of the others off. It was faster nearly everywhere, it gives the most conversation capacity, it splits memory perfectly evenly, and it is one less thing to reason about.
 
@@ -505,7 +509,7 @@ memory, this process has 94.57 GiB memory in use.)
 
 **What it means:** exactly what it says. The weights for half this model do not fit on one of these cards. Note the useful detail in there, `438.31 MiB is free` out of `95.01 GiB`, so it filled the card almost exactly and then had nowhere to put the next 768 MiB chunk.
 
-**The fix:** vLLM lists the three real options itself, and for our case only one of them helps. Lowering `--gpu-memory-utilization` would make things worse, not better, because it reduces the space available for weights. 
+**The fix:** vLLM lists the three real options itself, and for our case only one of them helps. Lowering `--gpu-memory-utilization` would make things worse, not better, because it reduces the space available for weights.
 
 Quantizing further would work but changes the model. So the answer is more GPUs, which is the whole point of this post.
 
@@ -550,7 +554,7 @@ vllm serve: error: argument --compilation-config/-cc: Invalid JSON: expected val
 
 **The fix:** add `--ipc=host`. If you already have it, wait a bit longer, because CUDA graph capture on a big model is genuinely slow.
 
-That is the runbook complete: the model is serving, you know what every flag is doing, and you know the failure modes. If you stopped here you would be in good shape. What follows is for the day you want to know *why* the numbers came out the way they did.
+That is the runbook complete: the model is serving, you know what every flag is doing, and you know the failure modes. If you stopped here you would be in good shape. What follows is for the day you want to know _why_ the numbers came out the way they did.
 
 ---
 
@@ -568,13 +572,21 @@ Every token the model reads or writes leaves behind a key and a value at every l
 2 x 94 x 4 x 128 x 2 = 192,512 bytes = 188 KiB per token
 ```
 
-188 KiB does not sound like much. But this model supports a 262,144 token context, so one single conversation at full length would need `262,144 x 188 KiB`, which is about **47 GiB**. That is half a GPU for one user. 
+188 KiB does not sound like much. But this model supports a 262,144 token context, so one single conversation at full length would need `262,144 x 188 KiB`, which is about **47 GiB**. That is half a GPU for one user.
 
 Serving ten users at once with long prompts is where all your leftover memory goes, and it is why "the weights fit, so I am fine" is wrong, and why the runbook caps `--max-model-len` at 32,768 rather than letting one request hold 47 GiB hostage.
 
 Two consequences worth carrying forward. First, a model's conversation capacity is an architectural property, not just a memory-size property: this model's 4 KV heads make its cache unusually cheap per token.
 
 Second, whichever way you split the model across GPUs, what happens to this cache (divided, duplicated, or taxed) matters as much as what happens to the weights. Keep that question in mind through the next four sections.
+
+### A side note on the shard files
+
+If you followed the runbook, the weights arrived as 24 files of about 10 GB each. Worth knowing what is actually inside one of those files, because it is not what most people guess.
+
+One thing the shard files do **not** line up with is the model's structure. The saver walks through the weights and fills each file to the 10 GB cap, then starts the next one, paying no attention to where a layer begins or ends. So no file contains "layers 1 to 4"; a file contains whatever bytes landed in it, and a single layer's pieces can straddle two files.
+
+If you want a feel for the volume anyway: one layer of this model weighs about 236 GB / 94 = 2.5 GB in FP8, so each 10 GB file holds about four layers' worth of material, the way a moving box holds "one shelf's worth of books" without holding any particular shelf. That is exactly why the download ships with an index file, `model.safetensors.index.json`, mapping every piece to its file: without it, nobody would know where anything landed.
 
 ## Deep dive 2: Inference is two jobs
 
@@ -584,9 +596,9 @@ Before splitting anything, it helps to know what the work being split actually i
 
 When your prompt arrives, the model has to read all of it. If you send 1,000 tokens, all 1,000 go through every layer **at once**, as one big batch of work. This is called **prefill**, and it is the phase that decides your time to first token.
 
-Prefill is *compute-heavy*. There is a lot of arithmetic to do and the GPU's matrix engines are the bottleneck. It also produces the keys and values for every one of those 1,000 tokens, which get written into the KV cache and kept.
+Prefill is _compute-heavy_. There is a lot of arithmetic to do and the GPU's matrix engines are the bottleneck. It also produces the keys and values for every one of those 1,000 tokens, which get written into the KV cache and kept.
 
-One more thing becomes true once the model is split over several GPUs: prefill is also the phase where the GPUs send each other the most data, because every exchange between them carries your whole prompt rather than a single token. 
+One more thing becomes true once the model is split over several GPUs: prefill is also the phase where the GPUs send each other the most data, because every exchange between them carries your whole prompt rather than a single token.
 
 That makes prefill the phase most sensitive to how fast the link between the GPUs is. Our machine has no NVLink, so its GPUs talk over the slower PCIe path, and the measurements later show the bill for that: the splitting method that talks the most lost time to first token, and the method that barely talks won it.
 
@@ -596,7 +608,7 @@ Then the model writes its reply, and here is the part that surprises people: **i
 
 So decode is a loop. Each pass through it produces exactly one token, reads the entire KV cache built so far, and appends one more entry to that cache.
 
-Decode is *memory-heavy* rather than compute-heavy. For a single token there is barely any arithmetic to do, but the GPU still has to stream the relevant weights and the whole KV cache past its compute units. 
+Decode is _memory-heavy_ rather than compute-heavy. For a single token there is barely any arithmetic to do, but the GPU still has to stream the relevant weights and the whole KV cache past its compute units.
 
 The bottleneck is memory bandwidth, not maths. That is why decode speed tracks memory bandwidth so closely, and why giving a single request more GPUs to read from in parallel actually helps.
 
