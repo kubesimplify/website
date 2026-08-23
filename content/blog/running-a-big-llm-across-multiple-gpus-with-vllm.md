@@ -417,37 +417,38 @@ and then again with 32 requests in flight, which is the same command with two nu
 ```bash
 --max-concurrency 32 --num-prompts 640
 
+Starting initial single prompt test run...
 Skipping endpoint ready check.
 Starting main benchmark run...
 Traffic request rate: inf
 Burstiness factor: 1.0 (Poisson process)
-Maximum request concurrency: 33
-100%|██████████| 640/640 [05:22<00:00,  1.99it/s]
+Maximum request concurrency: 32
+100%|██████████| 640/640 [05:23<00:00,  1.98it/s]
 tip: install termplotlib and gnuplot to plot the metrics
 ============ Serving Benchmark Result ============
 Successful requests:                     640
 Failed requests:                         0
-Maximum request concurrency:             33
-Benchmark duration (s):                  322.25
+Maximum request concurrency:             32
+Benchmark duration (s):                  323.10
 Total input tokens:                      655360
 Total generated tokens:                  163840
-Request throughput (req/s):              1.99
-Output token throughput (tok/s):         508.43
+Request throughput (req/s):              1.98
+Output token throughput (tok/s):         507.09
 Peak output token throughput (tok/s):    960.00
-Peak concurrent requests:                64.00
-Total token throughput (tok/s):          2542.16
+Peak concurrent requests:                55.00
+Total token throughput (tok/s):          2535.46
 ---------------Time to First Token----------------
-Mean TTFT (ms):                          2690.29
-Median TTFT (ms):                        1967.72
-P99 TTFT (ms):                           13101.50
+Mean TTFT (ms):                          3176.38
+Median TTFT (ms):                        3211.10
+P99 TTFT (ms):                           6855.46
 -----Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          54.48
-Median TPOT (ms):                        55.32
-P99 TPOT (ms):                           63.66
+Mean TPOT (ms):                          50.88
+Median TPOT (ms):                        51.16
+P99 TPOT (ms):                           63.04
 ---------------Inter-token Latency----------------
-Mean ITL (ms):                           54.48
-Median ITL (ms):                         37.20
-P99 ITL (ms):                            255.76
+Mean ITL (ms):                           50.88
+Median ITL (ms):                         37.35
+P99 ITL (ms):                            442.81
 ==================================================
 ```
 
@@ -462,7 +463,7 @@ One benchmarking warning before you copy this: if you re-run against a warm serv
 **The verdict.** The complete tables and number-by-number interpretation live in [Deep dive 7](#deep-dive-7-the-proof); here is what they add up to:
 
 - **Tensor Parallelism (TP) won nearly everything:**
-  - **Throughput:** 623.85 output tokens/sec at 32 concurrent requests (70% faster than pipeline parallelism).
+  - **Throughput:** 507.09 output tokens/sec at 32 concurrent requests (70% faster than pipeline parallelism).
   - **Decode Latency:** Fastest single-request decode at 17.14 ms median per token.
   - **Capacity:** Largest conversation capacity with 621,392 cached tokens (~19 concurrent 32k conversations).
   - **Memory:** Perfectly even memory distribution across all four cards.
@@ -725,7 +726,7 @@ Look at the last row too. Under tensor parallelism all four cards sat at **exact
 | Measurement                             | TP=4         | TP=4 plus EP | PP=4         | Winner             |
 | --------------------------------------- | ------------ | ------------ | ------------ | ------------------ |
 | Median time per token, 1 request        | **17.14 ms** | 18.83 ms     | 21.19 ms     | TP                 |
-| Output tokens/sec, 32 requests          | **503.68**   | 470.93       | 296.48       | TP, by 70% over PP |
+| Output tokens/sec, 32 requests          | **507.09**   | 470.93       | 296.48       | TP, by 70% over PP |
 | Median time to first token, 32 requests | 3,233 ms     | 3,705 ms     | **2,735 ms** | PP, by 15%         |
 | Benchmark duration, 32 requests         | **65.06 s**  | 69.58 s      | 110.52 s     | TP                 |
 
