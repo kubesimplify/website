@@ -159,11 +159,9 @@ The quant is called `UD-IQ1_S` and llama.cpp reports `IQ1_S - 1.5625 bpw`, which
 
 ### What it costs you
 
-I nearly published this saying the quality holds up, based on a couple of prompts that came back correct. Two right answers is an anecdote, not evidence, so let's measure it properly with perplexity.
+A couple of prompts coming back correct is not evidence that a quant is fine, so let's measure it with perplexity.
 
-Quick definition, because the name is confusing and there is now a search company called Perplexity that has nothing to do with this. **Perplexity is a score for how surprised a model is by text it has never seen.** You feed it real writing and at every word you ask what probability it gave to the word that actually came next. Turn that into a single number and you get roughly "how many words was the model torn between at each step". A perplexity of 4 means it was about as uncertain as someone picking between 4 equally likely words. **Lower is better**, and it is the standard way to check whether squeezing a model has damaged it.
-
-It runs entirely on your own machine, no API and no external service. `llama-perplexity` ships inside llama.cpp, and `wikitext-2` is a standard set of Wikipedia articles everyone benchmarks against:
+Quick definition, because the name is confusing and there is now a search company called Perplexity that has nothing to do with this. **Perplexity scores how surprised a model is by text it has never seen.** You feed it real writing and at each word check what probability it gave to the word that actually came next, then boil that down to roughly "how many words was it torn between at each step". **Lower is better.** It runs locally, no API involved.
 
 ```bash
 # llama.cpp's own scripts/get-wikitext-2.sh is broken: it does not follow the
@@ -181,9 +179,9 @@ unzip -oq /tmp/wt2.zip -d /tmp/
 Final estimate: PPL = 4.7876 +/- 0.02848
 ```
 
-That is wikitext-2, 145 chunks at context 2048. For comparison, the author of PR #27742 reports 4.0068 for llama.cpp at high precision and 4.0126 for the reference implementation. Those are **their** numbers, not mine, and I could not reproduce them because no higher-precision GGUF of this model has been published yet.
+That is wikitext-2, 145 chunks at context 2048. Daniel Han reports 4.0068 for llama.cpp at high precision and 4.0126 for the reference implementation in the PR write-up. Those are **his** numbers, not mine, and I could not reproduce them because no higher-precision GGUF of this model has been published yet.
 
-Taking their figure at face value, this quant costs roughly 19% higher perplexity. A normal Q4_K_M usually costs 1 to 3%. So this is a real trade, not a free lunch. It answers questions correctly in casual use, and I would still not reach for it when accuracy matters.
+Taking his figure at face value, this quant costs roughly 19% higher perplexity. A normal Q4_K_M usually costs 1 to 3%. So it is a real trade, not a free lunch. It answers questions correctly in casual use, and I would still not reach for it when accuracy matters.
 
 ## Part 2: RTX PRO 6000 with vLLM
 
@@ -194,7 +192,7 @@ docker pull vllm/vllm-openai:qwen38-flash-next
 HF_HUB_DISABLE_XET=1 hf download Qwen/Qwen3.8-Flash-Next-FP8 --local-dir /llm/qwen38/fp8
 ```
 
-HuggingFace dropped to 146 KB/s with an 18.7 second time to first byte from this box, because `us.aws.cdn.hf.co` resolves to Singapore addresses. ModelScope serves the identical 145-file manifest and gave me 15 to 20 MB/s instead, so that is where I actually pulled it from.
+HuggingFace crawled from this box, so I pulled it from ModelScope instead, which serves the identical 145-file manifest.
 
 ```bash
 docker run -d --name q38-tp2 --gpus '"device=1,4"' --ipc=host --shm-size=32g \
@@ -327,17 +325,10 @@ I cannot give you a speed number though. The engine finished loading, captured i
 
 These are not really competing. One is a desktop box running a heavily compressed build, the other is four datacenter cards running the full FP8 checkpoint. What I find genuinely interesting is that the gap is only about 2.5x.
 
-## A note on Ollama
-
-Ollama has Qwen3.8-Flash-Next in its library, and I nearly recommended it before checking. All three tags are MLX, which is Apple Silicon only. Worse, the tag named `125b-a6b-nvfp4` and the tag named `125b-mlx` are **the same blob**, same config digest `sha256:f9dd4893...`, same 112.8 GB. The release that added support is titled "MLX: Qwen3.8 Flash Next support".
-
-So a tag with "nvfp4" in the name does not mean it runs on your NVIDIA card. I did not test Ollama on either box, so I have no numbers for it, only a warning to read the tags carefully.
-
 ## What I did not measure
 
 To be straight about the edges of this post:
 
-- **No Ollama numbers.** I read its tags and stopped there.
 - **No high-precision perplexity baseline.** The 4.0068 and 4.0126 figures are the PR author's, and no higher-precision GGUF exists yet for me to check them against.
 - **No proof that QSA causes the flat prefill curve.** It is consistent with the architecture, but I ran no ablation.
 - **No NVFP4 throughput.** The weights fit on one card, the server never came up.
