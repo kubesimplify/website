@@ -248,7 +248,7 @@ Here is TP2 and TP4, benchmarked with 1024 input and 512 output tokens:
 | --- | --- | --- | --- | --- |
 | TP1 | out of memory | - | - | - |
 | TP2 | **81.45 tok/s** | 739.06 tok/s | 10.01 ms | 19.6 GiB |
-| TP4 | 64.61 tok/s | **805.38 tok/s** | 13.85 ms | ~48 GiB |
+| TP4 | 64.61 tok/s | **805.38 tok/s** | 13.85 ms | 48.74 GiB |
 
 **Two GPUs are 26% faster than four for a single user.** That surprised me until I looked at the wiring. This box has no NVLink, and `nvidia-smi topo -m` reports every GPU pair as `SYS`, meaning traffic crosses PCIe and the CPU sockets. Now remember only 6B parameters are active per token, so there is barely any maths to divide up. Splitting a tiny job across more GPUs mostly means paying more postage. The extra cards still earn their keep under load, where the bigger KV cache lets you batch 32 users and win on total throughput.
 
@@ -263,26 +263,87 @@ The tech report implies host prefetching is nearly free. On this hardware it is 
 | TP4 config | 1 stream | 32 streams | KV cache |
 | --- | --- | --- | --- |
 | N-gram table on GPU | 74.84 tok/s | 772.16 tok/s | 4.7 GiB |
-| N-gram table on host | 64.61 tok/s | 805.38 tok/s | ~48 GiB |
+| N-gram table on host | 64.61 tok/s | 805.38 tok/s | 48.74 GiB |
 
-Keeping the table on the GPU is about 16% faster for one user, because you skip the round trip over PCIe. But it eats the memory your KV cache wanted, and it collapses from roughly 48 GiB to 4.7 GiB. Maximum concurrency drops from 74x to 10x.
+Keeping the table on the GPU is about 16% faster for one user, because you skip the round trip over PCIe. But it eats the memory your KV cache wanted, and it collapses from 48.74 GiB to 4.7 GiB. Maximum concurrency drops from 74x to 10x.
 
 Unless you are serving exactly one person, offload it.
 
-### Speculative decoding
+### Speculative decoding, and why benchmark workload decides the answer
 
-The model ships an MTP head, and the tech report measures a mean accepted length of about 4.06 tokens over four-step speculative decoding, so three speculative tokens is a sensible setting:
+The model ships an MTP head, so let's turn it on:
 
 ```bash
 --speculative-config '{"method":"mtp","num_speculative_tokens":3}'
 ```
+
+Measured with the same `vllm bench serve` command as everything above, which uses
+synthetic random tokens:
 
 | TP4 config | 1 stream | 32 streams | Median TTFT at 32 |
 | --- | --- | --- | --- |
 | without MTP | 64.61 tok/s | 805.38 tok/s | 2578 ms |
 | with MTP | **87.87 tok/s** | 693.72 tok/s | **588 ms** |
 
-That is 36% faster for a single user and a much better time to first token under load, at the cost of about 14% of peak throughput. The usual speculative decoding shape: great for one person waiting on a reply, worse when the server is saturated.
+That reads as 36% faster for one user, at the cost of 14% of peak throughput. I nearly
+left it there. Then someone asked what the acceptance rate was, which is the number that
+actually decides whether speculative decoding is worth anything, and I had not measured it.
+
+vLLM exposes it. Here is what the counters say:
+
+| workload | acceptance | mean accepted length |
+| --- | --- | --- |
+| synthetic random, 1024 in / 512 out | 71.3% | 3.14 of max 4 |
+| synthetic random, 512 in / 256 out | 84.4% | 3.53 of max 4 |
+| **real code and prose prompts, greedy** | **55.3%** | **2.66 of max 4** |
+
+Real prompts accept considerably worse than random ones. That is the opposite of what I
+expected, and the reason is worth knowing if you benchmark anything: `--dataset-name random`
+feeds the model random token IDs. Given nonsense, it produces repetitive low-entropy text,
+and a draft head predicts repetitive text very easily. **Random-token benchmarks flatter
+speculative decoding.**
+
+So I re-ran on five genuine prompts, an LRU cache in Python, a Kubernetes explanation, a Go
+CSV reader, a bash one-liner and a plain-English TP explainer, greedy decoding, single
+stream, measuring wall clock:
+
+| TP4, real prompts, temp 0 | tok/s |
+| --- | --- |
+| without MTP | 49.90 |
+| with MTP | **124.93** |
+
+**2.5x.** Far better than the 36% the synthetic benchmark implied, despite the lower
+acceptance rate. Note this is a different measurement method from the table above, wall
+clock across whole requests rather than vLLM's output-token throughput, so compare within
+each table and not across them.
+
+The lesson is not that one number is right and the other wrong. Both are real. It is that
+a speculative decoding result without its workload and its acceptance rate does not tell
+you anything you can act on.
+
+### Does MTP change the answer?
+
+Speculative decoding is supposed to be lossless. The draft head proposes, the full model
+verifies, and rejected tokens are discarded, so the output distribution should be
+untouched. Worth checking rather than trusting.
+
+Same prompt, temperature 0, seed 42, five runs each, on the same four GPUs with the same
+checkpoint, MTP the only variable:
+
+```
+MTP off : 3575aff8aa9c1df5  x5
+MTP on  : 3575aff8aa9c1df5  x5
+```
+
+Byte-identical, and identical to each other. Speculative decoding here costs you nothing in
+output fidelity. Worth knowing if you cache responses or snapshot-test them.
+
+For reference, llama.cpp on the Spark is also fully deterministic across five runs, though
+that is a different box and a different quant so the hashes are not comparable.
+
+One caveat on all of this: single stream. Under continuous batching, vLLM's batch
+composition varies between runs and that is where reproducibility usually breaks, not from
+MTP.
 
 ### One card, with NVFP4
 
