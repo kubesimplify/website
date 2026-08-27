@@ -1,10 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import productsData from '@/content/products.json';
+import { products } from '@/lib/products';
 import { getPostBySlug } from '@/lib/blog';
 import { safeJsonLd } from '@/lib/jsonld';
-
-const { products } = productsData;
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));

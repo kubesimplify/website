@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/generate-feeds.mjs && node scripts/generate-redirects.mjs",
+    "prebuild": "node scripts/fetch-stars.mjs && node scripts/generate-feeds.mjs && node scripts/generate-redirects.mjs",
     "build": "next build && pagefind --site out --output-subdir pagefind",
     "start": "next start",
     "lint": "next lint",
     "blog:import": "node scripts/import-posts.mjs",
     "blog:images": "node scripts/download-images.mjs",
     "blog:feeds": "node scripts/generate-feeds.mjs",
-    "blog:redirects": "node scripts/generate-redirects.mjs"
+    "blog:redirects": "node scripts/generate-redirects.mjs",
+    "blog:stars": "node scripts/fetch-stars.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.18.0",
