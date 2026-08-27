@@ -300,7 +300,7 @@ Current kv cache memory in use is 11.76 GiB.
 
 74.75 GiB of weights on one 95.6 GiB card, with 11.76 GiB of KV cache left over. So the memory answer is yes.
 
-I cannot give you a speed number though. The engine finished loading, captured its CUDA graphs, and then the API server never came up. It sat there with one CPU core spinning and `/health` refusing connections for over twenty minutes. RadixArk documented this checkpoint for SGLang and not vLLM, so I am not surprised, but I am not going to guess at numbers I did not get.
+I cannot give you a speed number though. The engine finished loading, captured its CUDA graphs at 06:34:14, and then the API server never came up. Twenty minutes later `Application startup complete` had still not been printed a single time, `/health` was refusing connections, and one CPU core was spinning. The only errors in the log were harmless transformers docstring warnings. RadixArk documented this checkpoint for SGLang and not vLLM, so I am not shocked, but I am not going to invent a number I did not measure.
 
 ## Both machines side by side
 
