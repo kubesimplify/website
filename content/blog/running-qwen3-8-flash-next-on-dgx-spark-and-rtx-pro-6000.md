@@ -118,6 +118,12 @@ It loads in about 30 seconds and sits at 72.5 GiB of the 121 GiB available. That
 
 Here is llama-bench, three repetitions:
 
+```bash
+~/llama-qwen4exp/build/bin/llama-bench \
+  -m ~/qwen38/gguf/UD-IQ1_S/Qwen3.8-Flash-Next-UD-IQ1_S-00001-of-00003.gguf \
+  -ngl 999 -p 2048,8192,32768 -n 128 -r 3
+```
+
 ```
 | model              |      size |    params | backend | ngl |    test |            t/s |
 | qwen4exp A3B IQ1_S | 67.55 GiB | 176.94  B | CUDA    | 999 |  pp2048 | 797.76 ± 2.08  |
@@ -155,6 +161,18 @@ The quant is called `UD-IQ1_S` and llama.cpp reports `IQ1_S - 1.5625 bpw`, which
 
 I nearly published this saying the quality holds up, based on a couple of prompts that came back correct. That is not evidence, so I measured perplexity properly:
 
+```bash
+# llama.cpp's own scripts/get-wikitext-2.sh is broken: it does not follow the
+# S3 redirect and leaves you with a 467-byte XML error instead of a zip.
+curl -sL -o /tmp/wt2.zip \
+  "https://huggingface.co/datasets/ggml-org/ci/resolve/main/wikitext-2-raw-v1.zip"
+unzip -oq /tmp/wt2.zip -d /tmp/
+
+~/llama-qwen4exp/build/bin/llama-perplexity \
+  -m ~/qwen38/gguf/UD-IQ1_S/Qwen3.8-Flash-Next-UD-IQ1_S-00001-of-00003.gguf \
+  -f /tmp/wikitext-2-raw/wiki.test.raw -ngl 999 -c 2048
+```
+
 ```
 Final estimate: PPL = 4.7876 +/- 0.02848
 ```
@@ -165,7 +183,14 @@ Taking their figure at face value, this quant costs roughly 19% higher perplexit
 
 ## Part 2: RTX PRO 6000 with vLLM
 
-vLLM had day-zero support with a dedicated image, so this side was much less work than the Spark.
+vLLM had day-zero support with a dedicated image, so this side was much less work than the Spark. Getting the 185 GB checkpoint down was the slow part:
+
+```bash
+docker pull vllm/vllm-openai:qwen38-flash-next
+HF_HUB_DISABLE_XET=1 hf download Qwen/Qwen3.8-Flash-Next-FP8 --local-dir /llm/qwen38/fp8
+```
+
+HuggingFace dropped to 146 KB/s with an 18.7 second time to first byte from this box, because `us.aws.cdn.hf.co` resolves to Singapore addresses. ModelScope serves the identical 145-file manifest and gave me 15 to 20 MB/s instead, so that is where I actually pulled it from.
 
 ```bash
 docker run -d --name q38-tp2 --gpus '"device=1,4"' --ipc=host --shm-size=32g \
@@ -179,6 +204,20 @@ docker run -d --name q38-tp2 --gpus '"device=1,4"' --ipc=host --shm-size=32g \
 ```
 
 If you leave out `--reasoning-parser qwen3`, the model's thinking text ends up inside the normal reply content. Ask for it.
+
+For the TP4 runs it is the same command with `--gpus '"device=1,4,5,6"'` and
+`--tensor-parallel-size 4`. To compare against keeping the N-gram table on the GPU, set
+`-e VLLM_PLE_CPU_OFFLOAD=0`. For speculative decoding, append the MTP config shown later.
+
+Every config below was benchmarked with exactly the same command, only `$C` changing:
+
+```bash
+docker exec q38-tp2 vllm bench serve \
+  --backend openai-chat --model /llm/qwen38/fp8 --served-model-name q38 \
+  --endpoint /v1/chat/completions --base-url http://localhost:8000 \
+  --dataset-name random --random-input-len 1024 --random-output-len 512 \
+  --max-concurrency $C --num-prompts $((C*4)) --ignore-eos
+```
 
 Before benchmarking anything I asked it a question with a known answer, because a healthy `/health` endpoint does not mean the model is producing sense. It got "a train leaves at 14:35 and arrives at 21:10 the next day" right at 30 hours 35 minutes, so we are good.
 
@@ -239,7 +278,19 @@ That is 36% faster for a single user and a much better time to first token under
 
 ### One card, with NVFP4
 
-There is a community NVFP4 build from RadixArk. It is documented for SGLang, but vLLM picked it up anyway (`Detected ModelOpt NVFP4 checkpoint`). And the weights genuinely fit on a single card:
+There is a community NVFP4 build from RadixArk. It is documented for SGLang, but vLLM picked it up anyway (`Detected ModelOpt NVFP4 checkpoint`):
+
+```bash
+docker run -d --name q38-nvfp4-tp1 --gpus '"device=1"' --ipc=host --shm-size=32g \
+  -v /llm/qwen38:/llm/qwen38 -e VLLM_PLE_CPU_OFFLOAD=1 -p 8012:8000 \
+  vllm/vllm-openai:qwen38-flash-next \
+  --model /llm/qwen38/nvfp4 --served-model-name q38 \
+  --tensor-parallel-size 1 --gpu-memory-utilization 0.93 \
+  --max-model-len 16384 --max-num-seqs 16 \
+  --no-enable-flashinfer-autotune --reasoning-parser qwen3
+```
+
+The weights genuinely fit on a single card:
 
 ```
 Actual usage is 74.75 GiB for consumed memory (weights + non-torch),
