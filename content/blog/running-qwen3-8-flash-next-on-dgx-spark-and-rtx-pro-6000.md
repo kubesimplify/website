@@ -75,7 +75,7 @@ On the RTX box only 4 of the 8 cards were free, so everything below uses GPUs 1,
 
 ### llama.cpp support is not merged yet
 
-First problem. My existing llama.cpp knows `QWEN3NEXT` but not `qwen4_exp`, so it simply will not load this model. Support is an open pull request, [#27742](https://github.com/ggml-org/llama.cpp/pull/27742), from Unsloth's fork.
+First problem. My existing llama.cpp knows `QWEN3NEXT` but not `qwen4_exp`, so it simply will not load this model. Support is an open pull request, [#27742](https://github.com/ggml-org/llama.cpp/pull/27742), written by [Daniel Han](https://github.com/danielhanchen) of [Unsloth](https://unsloth.ai) - all 33 commits of it. Converter, text graph, sparse attention, vision and three quantizer fixes. The entire Spark half of this post exists because of that PR.
 
 So we build it:
 
@@ -343,6 +343,21 @@ To be straight about the edges of this post:
 - **No NVFP4 throughput.** The weights fit on one card, the server never came up.
 - **No concurrency sweep on the Spark.** llama-bench numbers there are single stream.
 - **No BF16 run anywhere.** At 335 GiB it was not worth the download.
+
+## Thanks
+
+Two things made the Spark side of this possible and both came from the same place.
+
+[Daniel Han](https://x.com/danielhanchen) at [Unsloth](https://x.com/UnslothAI) wrote the
+llama.cpp support in PR [#27742](https://github.com/ggml-org/llama.cpp/pull/27742), every
+commit of it, within a day of the model landing. He also published the dynamic quant that
+is the only build small enough to fit on one Spark, and his write-up of the PR includes
+perplexity and top-1 agreement numbers against the reference implementation, which is what
+let me sanity check my own. That is a lot of careful work given away for free.
+
+Thanks also to the [llama.cpp](https://github.com/ggml-org/llama.cpp) maintainers, and to
+[RadixArk](https://huggingface.co/RadixArk/Qwen3.8-Flash-Next-NVFP4) for the NVFP4
+conversion, which fit on a single RTX PRO 6000 even though I could not get it serving.
 
 ## Wrapping up
 
