@@ -159,7 +159,11 @@ The quant is called `UD-IQ1_S` and llama.cpp reports `IQ1_S - 1.5625 bpw`, which
 
 ### What it costs you
 
-I nearly published this saying the quality holds up, based on a couple of prompts that came back correct. That is not evidence, so I measured perplexity properly:
+I nearly published this saying the quality holds up, based on a couple of prompts that came back correct. Two right answers is an anecdote, not evidence, so let's measure it properly with perplexity.
+
+Quick definition, because the name is confusing and there is now a search company called Perplexity that has nothing to do with this. **Perplexity is a score for how surprised a model is by text it has never seen.** You feed it real writing and at every word you ask what probability it gave to the word that actually came next. Turn that into a single number and you get roughly "how many words was the model torn between at each step". A perplexity of 4 means it was about as uncertain as someone picking between 4 equally likely words. **Lower is better**, and it is the standard way to check whether squeezing a model has damaged it.
+
+It runs entirely on your own machine, no API and no external service. `llama-perplexity` ships inside llama.cpp, and `wikitext-2` is a standard set of Wikipedia articles everyone benchmarks against:
 
 ```bash
 # llama.cpp's own scripts/get-wikitext-2.sh is broken: it does not follow the
@@ -232,7 +236,13 @@ torch.OutOfMemoryError: CUDA out of memory. GPU 0 has a total capacity of
 95.01 GiB of which 210.38 MiB is free ... 94.02 GiB is allocated by PyTorch
 ```
 
-TP3, by the way, is not an option at all. This model has only 2 KV heads and vLLM needs the KV heads to divide evenly with the TP size. Your choices are 1, 2, 4 or 8.
+TP3, by the way, is not an option at all. I assumed this was about the 2 KV heads on the attention layers, so I tried it to be sure, and the real reason is different:
+
+```
+AssertionError: 16 is not divisible by 3
+```
+
+The 16 is `linear_num_key_heads`, the key heads in the Gated DeltaNet layers, and those are 36 of the 48 layers. Your TP size has to divide 16, so the usable values are 1, 2, 4, 8 and 16.
 
 Here is TP2 and TP4, benchmarked with 1024 input and 512 output tokens:
 
