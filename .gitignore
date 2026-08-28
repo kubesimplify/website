@@ -30,3 +30,6 @@ yarn-error.log*
 # wrangler local dev
 .dev.vars
 .wrangler/
+
+# Scratch notes for unpublished posts, never rendered by lib/blog.js
+/content/blog/_drafts/
