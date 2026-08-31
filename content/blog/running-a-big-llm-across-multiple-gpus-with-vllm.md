@@ -300,9 +300,7 @@ root@utho-gpu-rtxpro6000-8-62383:~# docker run -d --name vllm-tp4 \
 (EngineCore pid=558) INFO 08-21 18:21:55 [kv_cache_utils.py:2235] GPU KV cache size: 621,392 tokens
 (EngineCore pid=558) INFO 08-21 18:21:55 [kv_cache_utils.py:2236] Maximum concurrency for 32,768 tokens per request: 18.96x
 (Worker_TP1 pid=771) INFO 08-21 18:22:06 [gpu_worker.py:789] Free memory on device (94.05/95.01 GiB) on startup. Desired GPU memory utilization is (0.9, 85.51 GiB). Actual usage is 56.89 GiB for consumed memory (weights + non-torch), 0.76 GiB for peak activation, and 0.32 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=29407858586` (27.39 GiB) to fit into requested memory, or `--kv-cache-memory=38581581312` (35.93 GiB) to fully utilize gpu memory. Current kv cache memory in use is 27.85 GiB.
-(Worker_TP0 pid=770) INFO 08-21 18:22:06 [gpu_worker.py:789] Free memory on device (94.05/95.01 GiB) on startup. Desired GPU memory utilization is (0.9, 85.51 GiB). Actual usage is 56.89 GiB for consumed memory (weights + non-torch), 0.76 GiB for peak activation, and 0.32 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=29407858586` (27.39 GiB) to fit into requested memory, or `--kv-cache-memory=38581581312` (35.93 GiB) to fully utilize gpu memory. Current kv cache memory in use is 27.85 GiB.
-(Worker_TP3 pid=773) INFO 08-21 18:22:06 [gpu_worker.py:789] Free memory on device (94.05/95.01 GiB) on startup. Desired GPU memory utilization is (0.9, 85.51 GiB). Actual usage is 56.89 GiB for consumed memory (weights + non-torch), 0.76 GiB for peak activation, and 0.32 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=29407858586` (27.39 GiB) to fit into requested memory, or `--kv-cache-memory=38581581312` (35.93 GiB) to fully utilize gpu memory. Current kv cache memory in use is 27.85 GiB.
-(Worker_TP2 pid=772) INFO 08-21 18:22:06 [gpu_worker.py:789] Free memory on device (94.05/95.01 GiB) on startup. Desired GPU memory utilization is (0.9, 85.51 GiB). Actual usage is 56.89 GiB for consumed memory (weights + non-torch), 0.76 GiB for peak activation, and 0.32 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=29407858586` (27.39 GiB) to fit into requested memory, or `--kv-cache-memory=38581581312` (35.93 GiB) to fully utilize gpu memory. Current kv cache memory in use is 27.85 GiB.
+(Worker_TP1, Worker_TP2 and Worker_TP3 print the same line, same numbers, different pid. That they agree exactly is the point: the split is even.)
 
 
 ```
@@ -389,38 +387,20 @@ root@utho-gpu-rtxpro6000-8-62383:~# docker exec vllm-tp4 vllm bench serve \
   --max-concurrency 1 --num-prompts 12 --seed 42 --ignore-eos \
   --no-enable-prefix-caching
 
-Starting initial single prompt test run...
-Skipping endpoint ready check.
-Starting main benchmark run...
-Traffic request rate: inf
-Burstiness factor: 1.0 (Poisson process)
 Maximum request concurrency: 1
 100%|██████████| 12/12 [00:55<00:00,  4.62s/it]
-tip: install termplotlib and gnuplot to plot the metrics
 ============ Serving Benchmark Result ============
-Successful requests:                     12
-Failed requests:                         0
-Maximum request concurrency:             1
 Benchmark duration (s):                  55.38
 Total input tokens:                      12288
 Total generated tokens:                  3072
 Request throughput (req/s):              0.22
 Output token throughput (tok/s):         55.47
-Peak output token throughput (tok/s):    60.00
-Peak concurrent requests:                2.00
 Total token throughput (tok/s):          277.34
 ---------------Time to First Token----------------
 Mean TTFT (ms):                          255.31
 Median TTFT (ms):                        251.60
-P99 TTFT (ms):                           272.03
 -----Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          17.10
 Median TPOT (ms):                        17.14
-P99 TPOT (ms):                           17.16
----------------Inter-token Latency----------------
-Mean ITL (ms):                           17.10
-Median ITL (ms):                         17.13
-P99 ITL (ms):                            17.79
 ==================================================
 ```
 
@@ -429,38 +409,20 @@ and then again with 32 requests in flight, which is the same command with two nu
 ```bash
 --max-concurrency 32 --num-prompts 640
 
-Starting initial single prompt test run...
-Skipping endpoint ready check.
-Starting main benchmark run...
-Traffic request rate: inf
-Burstiness factor: 1.0 (Poisson process)
 Maximum request concurrency: 32
 100%|██████████| 640/640 [05:23<00:00,  1.98it/s]
-tip: install termplotlib and gnuplot to plot the metrics
 ============ Serving Benchmark Result ============
-Successful requests:                     640
-Failed requests:                         0
-Maximum request concurrency:             32
 Benchmark duration (s):                  323.10
 Total input tokens:                      655360
 Total generated tokens:                  163840
 Request throughput (req/s):              1.98
 Output token throughput (tok/s):         507.09
-Peak output token throughput (tok/s):    960.00
-Peak concurrent requests:                55.00
 Total token throughput (tok/s):          2535.46
 ---------------Time to First Token----------------
 Mean TTFT (ms):                          3176.38
 Median TTFT (ms):                        3211.10
-P99 TTFT (ms):                           6855.46
 -----Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          50.88
 Median TPOT (ms):                        51.16
-P99 TPOT (ms):                           63.04
----------------Inter-token Latency----------------
-Mean ITL (ms):                           50.88
-Median ITL (ms):                         37.35
-P99 ITL (ms):                            442.81
 ==================================================
 ```
 
