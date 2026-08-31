@@ -184,7 +184,17 @@ Weights = parameters x bytes per parameter. For our model: 235 billion at 1 byte
 bytes per token = 2 x layers x kv_heads x head_dim x bytes_per_number
 ```
 
-For our model: `2 x 94 x 4 x 128 x 2 = 192,512 bytes`, call it 188 KiB per token. Sounds small, but this model supports a 262,144-token context, so one single full-length conversation would need about **47 GiB**. That is half a GPU for one user, and it is why "the weights fit, so I am fine" is wrong. It is also why `--max-model-len` exists, as you will see in the flags table.
+That leading **2 is not the number of blocks in a layer**. It is there because every token leaves behind **two** things, a key and a value, which is where the "KV" in KV cache comes from. Term by term for our model:
+
+| Term | Value | Where it comes from |
+| --- | --- | --- |
+| 2 | 2 | one key **and** one value per token |
+| `layers` | 94 | `num_hidden_layers` |
+| `kv_heads` | 4 | `num_key_value_heads` |
+| `head_dim` | 128 | `head_dim` |
+| `bytes_per_number` | 2 | the cache is kept in BF16, so 2 bytes each |
+
+So `2 x 94 x 4 x 128 x 2 = 192,512 bytes`, call it 188 KiB per token. Sounds small, but this model supports a 262,144-token context, so one single full-length conversation would need about **47 GiB**. That is half a GPU for one user, and it is why "the weights fit, so I am fine" is wrong. It is also why `--max-model-len` exists, as you will see in the flags table.
 
 One piece of good news: under tensor parallelism the KV cache is **divided** across GPUs rather than duplicated, so 4 GPUs give you roughly 4x the conversation room on top of making the weights fit.
 
@@ -192,17 +202,11 @@ One piece of good news: under tensor parallelism the KV cache is **divided** acr
 
 ## Step 3: Pick your split, then check it divides
 
-vLLM gives you three ways to spread a model over GPUs, and they are genuinely different things. Mixing them up is the source of most confusion, so here is the analogy first. Imagine a restaurant kitchen that has to produce one dish:
+vLLM gives you three ways to spread a model over GPUs, and they are genuinely different things. Picture a restaurant kitchen that has to produce one dish, and the flag falls out of the picture:
 
-- **Tensor parallelism** is four chefs all working on the same dish at once, one chopping, one on sauce, one on protein, one plating. They constantly have to coordinate, but the dish is done fast.
-- **Pipeline parallelism** is four chefs at four stations with the dish moving down the line. Station two cannot start until station one finishes. Very little talking, but three chefs are idle at any moment unless several dishes are in flight.
-- **Expert parallelism** is a kitchen of 128 specialists where each dish needs only 8 of them. You spread the 128 across four rooms and walk each dish to whichever rooms hold the specialists it needs.
-
-In flags, and with the trade-off each one buys you:
-
-- **Tensor parallelism** (`--tensor-parallel-size`) slices every layer across all GPUs, so they all work on the same token at once. Best tokens per second, evenly split memory, divided KV cache. The default choice for GPUs inside one machine. This is what we run.
-- **Pipeline parallelism** (`--pipeline-parallel-size`) gives each GPU a block of consecutive layers and passes the work along. The GPUs barely need to talk to each other, so it is the tool for spanning machines with a slow network, and it wins on time to first token, but GPUs spend time waiting their turn.
-- **Expert parallelism** (`--enable-expert-parallel`) exists only for mixture-of-experts models and hands out whole experts instead of slicing them. Its job is trillion-parameter-scale clusters where even a tensor-parallel split cannot hold all the experts. It is **not** a memory saver at our scale, as our measurements in Step 7 show.
+- **Tensor parallelism** (`--tensor-parallel-size`) is four chefs working on the same dish at once, one chopping, one on sauce, one on protein, one plating. They constantly coordinate, but the dish is done fast. It slices every layer across all GPUs: best tokens per second, evenly split memory, and the KV cache gets divided too. The default for GPUs inside one machine, and what we run.
+- **Pipeline parallelism** (`--pipeline-parallel-size`) is four chefs at four stations with the dish moving down the line, where station two cannot start until station one finishes. Very little talking, so it is the tool for spanning machines with a slow network, and it wins on time to first token. But a station that runs slow leaves the others waiting.
+- **Expert parallelism** (`--enable-expert-parallel`) is a kitchen of 128 specialists where each dish needs only 8, spread across four rooms. Mixture-of-experts models only. Its job is trillion-parameter clusters where even a tensor-parallel split cannot hold all the experts. It is **not** a memory saver at our scale, as Step 7 shows.
 
 {{multi-gpu-split-modes-animation}}
 
@@ -214,31 +218,7 @@ That is the whole distinction. Pipeline parallelism cuts across the layers and e
 
 The drawing shows three cards because it is illustrating the two shapes, not our setup. Card counts are not free choices, which is exactly what the next check is about.
 
-### What the tensor-parallel split costs: 188 all-reduces per token
-
-Tensor parallelism cuts **inside** every layer, and it is worth knowing what that costs before you commit to it, because it explains every result in Step 7.
-
-The work a layer does is mostly one big multiplication table, and multiplication tables can be cut up. The technique comes from NVIDIA's 2019 Megatron-LM paper. Cut the first matrix into vertical strips and each GPU can finish its columns alone. Cut the second into horizontal strips lining up with the first, and each GPU produces a **partial answer**, a quarter of the real result.
-
-Now, and only now, the GPUs have to talk. They add their four partial answers together so everyone ends up with the complete result. That operation is an **all-reduce**: everyone contributes a piece, everyone gets the total back. Megatron puts the cost plainly, saying the design runs a transformer layer "using only two all-reduces in the forward path". Generating text only uses the forward path, so:
-
-- 2 all-reduces per layer
-- 94 layers
-- **188 all-reduces to produce one single token**
-
-They happen strictly one after another, because layer 5 cannot start until layer 4 has compared notes. On our machine those 188 round trips cross PCIe rather than NVLink, which is the single fact that shapes every number in Step 7.
-
-{{multi-gpu-tensor-split-animation}}
-
-### Why this model is only 22B of work
-
-The third option needs one idea first, because it is also why this model runs far faster than 235B suggests.
-
-In an ordinary model every parameter is used for every token. In a **mixture-of-experts** model each layer holds many small networks called experts, and a tiny **router** picks which few each token visits. Ours has 128 experts per layer and the router picks 8. So the model holds 235B parameters in memory but only about 22B do any arithmetic for a given token. That is what "235B-A22B" means: you pay for the full 235B in memory and for only 22B in speed.
-
-{{moe-expert-routing-animation}}
-
-That is what gives you the third way to split. Instead of slicing every expert into strips, hand out whole experts: 128 experts over 4 GPUs is 32 intact experts each. Nothing needs adding up at the end, but tokens have to travel to whichever GPU owns the expert they were routed to, and the answers travel back. It also has a fairness problem, because the router does not promise to spread work evenly, so one GPU can end up holding the popular experts and everybody waits on it.
+**One cost to know before you pick tensor parallelism.** Because every GPU holds only a sliver of each layer, none of them can finish a layer alone. They each compute a partial answer and then add those together so everyone has the full result. That operation is called an **all-reduce**, and it happens twice per layer, every layer, for every single token. On a 94-layer model that is 188 all-reduces to produce one token, and on our machine every one of them crosses PCIe rather than NVLink. That communication tax is what Step 7's numbers are really measuring. You do not need the details to run the thing, only to know the tax exists and that the interconnect sets its rate.
 
 **Then the ten-second pre-flight check.** You cannot pick any number for `--tensor-parallel-size`: because attention heads are handed out whole, your TP size must divide the model's head counts. Open `config.json`:
 
@@ -397,22 +377,7 @@ Once it was running, we compared all three ways of splitting the same model over
 
 Two numbers do most of the talking. **Time to first token** is how long the user waits before anything appears, and **output tokens per second** is how fast the answer then streams. Every configuration trades one against the other, and one idea explains why.
 
-### The two jobs hiding inside inference
-
-Inference is really two different jobs wearing one coat, and almost everything confusing about multi-GPU performance comes from this split.
-
-**Prefill reads your prompt.** All 1,024 tokens go through every layer at once, as one big batch. This is the phase that decides time to first token. It is *compute-heavy*: there is a lot of arithmetic and the matrix engines are the bottleneck. It also writes keys and values for all 1,024 tokens into the KV cache.
-
-**Decode writes the answer**, and it can only produce one token at a time. To write token 2 the model needs token 1, because it feeds its own output back in. That is what "autoregressive" means, and there is no way around it. Each pass produces exactly one token, reads the whole KV cache built so far, and appends one entry. Decode is *memory-heavy* rather than compute-heavy: for a single token there is barely any arithmetic, but the GPU still has to stream the weights and the entire cache past its compute units.
-
-| | Prefill | Decode |
-| --- | --- | --- |
-| Work per step | your whole prompt at once | exactly one token |
-| Bottleneck | compute | memory bandwidth |
-| Metric it drives | time to first token | time per output token |
-| Data moved between GPUs | large, whole prompt's worth | tiny, one token's worth |
-
-That last row is the one to hold on to, and it is the whole explanation for the table below. Those 188 all-reduces from Step 3 are trivially cheap during decode, because each one carries a single token's worth of data. During prefill the same 188 all-reduces carry a thousand times more. So tensor parallelism pays its communication bill mostly at first-token time, and pipeline parallelism, which just hands one activation tensor to the next stage, skips it. That is the trade, and you are about to watch it happen.
+The reason they trade is worth one paragraph. Answering a request is two jobs, not one. First the server reads your whole prompt in a single pass, which is where time to first token is decided, and then it writes the reply one token at a time, which is where tokens per second is decided. Those 188 exchanges per token from Step 3 are almost free while writing, because each one carries a single token's worth of data. While reading a 1,024-token prompt they carry a thousand times more. So tensor parallelism pays its communication bill mostly at first-token time, and pipeline parallelism, which just hands one result to the next GPU in line, largely skips it. That is the whole trade, and you are about to watch it happen.
 
 The benchmark is vLLM's own, 1024 tokens in and 256 tokens out per request, with `--ignore-eos` so every request generates exactly 256 tokens and the comparison is fair:
 
@@ -536,9 +501,9 @@ Look at the last row. Under tensor parallelism all four cards sat at **exactly 8
 
 Every figure in that table is a rate or a latency rather than a total, which matters because the runs were not all the same size. We measured all three at `--num-prompts 128` first, then re-ran the winner at `--num-prompts 640` to be sure the result held up. It did: TP produced 507.09 tokens/sec at the larger scale against 503.68 at the smaller, and a median first-token latency of 3,211 ms against 3,233 ms. Both inside 1%, so the numbers above are the 640-prompt figures for TP and the 128-prompt figures for the other two, and the comparison is sound. The full output pasted above is from the 640-prompt run.
 
-Tensor parallelism won nearly everything, and one gap deserves attention. At 32 concurrent requests it produced **70% more tokens per second than pipeline parallelism**. That is not a rounding error, it is a different class of performance, and it lines up exactly with the prefill and decode split above. Tensor parallelism has all four GPUs working on every token. Pipeline parallelism has each GPU working on a different request's stage, and it only pays off when every stage takes the same time. Ours do not: the memory table above shows the four stages holding 84,283 to 87,899 MiB, because 94 layers do not divide evenly by 4 and the first stage carries the token embedding while the last carries the output head. Every uneven stage is a bubble the other three wait on, on every single token. Its median time per token was 24% worse for the same reason.
+Tensor parallelism won nearly everything, and one gap deserves attention. At 32 concurrent requests it produced **70% more tokens per second than pipeline parallelism**. That is not a rounding error, it is a different class of performance, and it lines up exactly with the reading-versus-writing split above. Tensor parallelism has all four GPUs working on every token. Pipeline parallelism has each GPU working on a different request's stage, and it only pays off when every stage takes the same time. Ours do not: the memory table above shows the four stages holding 84,283 to 87,899 MiB, because 94 layers do not divide evenly by 4 and the first stage carries the token embedding while the last carries the output head. Every uneven stage is a bubble the other three wait on, on every single token. Its median time per token was 24% worse for the same reason.
 
-**Pipeline parallelism did win one thing, and it is the one the theory predicts:** time to first token, by 15%. Processing a 1,024-token prompt is exactly where tensor parallelism's 188 all-reduces get expensive, because each one carries the whole prompt's worth of data rather than a single token's. Pipeline parallelism hands one activation tensor to the next stage and skips all of it. If your users judge you on how fast the first word appears, that is a real and measurable advantage.
+**Pipeline parallelism did win one thing, and it is the one the theory predicts:** time to first token, by 15%. Reading a 1,024-token prompt is exactly where tensor parallelism's 188 all-reduces get expensive, because each one carries the whole prompt's worth of data rather than a single token's. Pipeline parallelism hands one activation tensor to the next stage and skips all of it. If your users judge you on how fast the first word appears, that is a real and measurable advantage.
 
 Expert parallelism costing 7% is not a knock on the technique, and it is important not to over-read it. Expert parallelism exists to solve a problem we do not have: models so large that even a tensor-parallel split cannot hold all the experts, on clusters big enough that duplicating experts everywhere would be wasteful. With 4 GPUs and a model that already fits, we are asking it to do a job it was not designed for and paying an extra network hop per token for nothing. On a 32 or 64 GPU deployment of a trillion-parameter model the answer would very likely flip.
 
