@@ -6,13 +6,13 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 Aug 2026 10:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 31 Aug 2026 10:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
     <item>
       <title>Running a big LLM across multiple GPUs with vLLM</title>
       <link>https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm</link>
       <guid isPermaLink="true">https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm</guid>
-      <pubDate>Tue, 18 Aug 2026 10:00:00 GMT</pubDate>
+      <pubDate>Mon, 31 Aug 2026 10:00:00 GMT</pubDate>
       <description>A runbook for serving a model too big for one GPU: download to serving in eight steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards.</description>
       <category>vllm</category><category>gpu</category><category>nvidia</category><category>llm</category><category>platform-engineering</category>
     </item>

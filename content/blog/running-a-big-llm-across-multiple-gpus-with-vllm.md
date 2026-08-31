@@ -2,7 +2,7 @@
 title: "Running a big LLM across multiple GPUs with vLLM"
 seoTitle: "Running a big LLM across multiple GPUs with vLLM"
 seoDescription: "A runbook for serving a model too big for one GPU: download to serving in eight steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards."
-datePublished: 2026-08-18T10:00:00.000Z
+datePublished: 2026-08-31T10:00:00.000Z
 slug: running-a-big-llm-across-multiple-gpus-with-vllm
 author: shubham-katara
 authors: ["shubham-katara", "saiyam-pathak"]
@@ -10,7 +10,7 @@ cover: /img/blog/running-a-big-llm-across-multiple-gpus-with-vllm/cover.png
 tags: ["vllm", "gpu", "nvidia", "llm", "platform-engineering"]
 ---
 
-Sooner or later everyone running models locally hits the same wall. You find a model you want, you look at the download size, and it is bigger than the GPU you own. A 235B model needs roughly 236 GB just for its weights. The card we have holds 96 GB, and even the largest data-centre GPUs available today top out well below 236 GB. So the model does not fit, and no amount of clever flags will make 236 GB squeeze into 96 GB.
+Sooner or later everyone running models locally hits the same wall. You find a model you want, you look at the download size, and it is bigger than the GPU you own. A 235B model needs roughly 236 GB just for its weights. The card we have holds 96 GB. A handful of current data-centre parts do carry more, but nothing on our machine does, and no amount of clever flags will make 236 GB squeeze into 96 GB.
 
 The answer is to use more than one GPU. That part everybody knows. The part that is genuinely confusing is what "use more than one GPU" actually means. Does each GPU get a copy of the model? Does the model get cut in half? Do the GPUs take turns? Which of those is happening, and what does it cost you?
 
@@ -22,7 +22,6 @@ This is the runbook. Eight steps, from downloading a 236 GB model to serving it 
 
 The theory arrives where you need it to make a decision, not before. Step 3 explains what a tensor-parallel split actually costs, because that is where you pick one, and Step 7 explains why the three options trade against each other, because that is where you read the numbers. Nothing here is theory for its own sake.
 
-New to the jargon? Every term, flag, and benchmark number here is explained in plain English in the [local LLM glossary](https://blog.kubesimplify.com/local-llm-glossary).
 
 ## The machine and the model
 
@@ -34,32 +33,31 @@ One detail that matters more than it looks: these GPUs are **not** connected by 
 
 ```bash
 root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi topo -m
-
-| Device | GPU0 | GPU1 | GPU2 | GPU3 | GPU4 | GPU5 | GPU6 | GPU7 | NIC0 | CPU Affinity | NUMA Affinity | GPU NUMA ID |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: | :---: |
-| **GPU0** | **X** | SYS | SYS | SYS | SYS | SYS | SYS | SYS | SYS | 48-55,176-183 | 6 | N/A |
-| **GPU1** | SYS | **X** | SYS | SYS | SYS | SYS | SYS | SYS | PHB | 32-39,160-167 | 4 | N/A |
-| **GPU2** | SYS | SYS | **X** | SYS | SYS | SYS | SYS | SYS | SYS | 0-7,128-135 | 0 | N/A |
-| **GPU3** | SYS | SYS | SYS | **X** | SYS | SYS | SYS | SYS | SYS | 16-23,144-151 | 2 | N/A |
-| **GPU4** | SYS | SYS | SYS | SYS | **X** | SYS | SYS | SYS | SYS | 112-119,240-247 | 14 | N/A |
-| **GPU5** | SYS | SYS | SYS | SYS | SYS | **X** | SYS | SYS | SYS | 96-103,224-231 | 12 | N/A |
-| **GPU6** | SYS | SYS | SYS | SYS | SYS | SYS | **X** | SYS | SYS | 64-71,192-199 | 8 | N/A |
-| **GPU7** | SYS | SYS | SYS | SYS | SYS | SYS | SYS | **X** | SYS | 80-87,208-215 | 10 | N/A |
-| **NIC0** | SYS | PHB | SYS | SYS | SYS | SYS | SYS | SYS | **X** |  |  |  |
-
-**Legend:**
-
-| Symbol | Description |
-| :--- | :--- |
-| **X** | Self |
-| **SYS** | Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI) |
-| **NODE** | Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node |
-| **PHB** | Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU) |
-| **PXB** | Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge) |
-| **PIX** | Connection traversing at most a single PCIe bridge |
-| **NV#** | Connection traversing a bonded set of `#` NVLinks |
-| **NIC0** | `mlx4_0` |
 ```
+
+| Device | GPU0 | GPU1 | GPU2 | GPU3 | GPU4 | GPU5 | GPU6 | GPU7 | NIC0 | CPU Affinity | NUMA Affinity |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
+| **GPU0** | X | SYS | SYS | SYS | SYS | SYS | SYS | SYS | SYS | 48-55,176-183 | 6 |
+| **GPU1** | SYS | X | SYS | SYS | SYS | SYS | SYS | SYS | PHB | 32-39,160-167 | 4 |
+| **GPU2** | SYS | SYS | X | SYS | SYS | SYS | SYS | SYS | SYS | 0-7,128-135 | 0 |
+| **GPU3** | SYS | SYS | SYS | X | SYS | SYS | SYS | SYS | SYS | 16-23,144-151 | 2 |
+| **GPU4** | SYS | SYS | SYS | SYS | X | SYS | SYS | SYS | SYS | 112-119,240-247 | 14 |
+| **GPU5** | SYS | SYS | SYS | SYS | SYS | X | SYS | SYS | SYS | 96-103,224-231 | 12 |
+| **GPU6** | SYS | SYS | SYS | SYS | SYS | SYS | X | SYS | SYS | 64-71,192-199 | 8 |
+| **GPU7** | SYS | SYS | SYS | SYS | SYS | SYS | SYS | X | SYS | 80-87,208-215 | 10 |
+| **NIC0** | SYS | PHB | SYS | SYS | SYS | SYS | SYS | SYS | X | | |
+
+The legend that command prints, trimmed to the codes that matter here:
+
+| Symbol | Meaning |
+| :--- | :--- |
+| `X` | Self |
+| `SYS` | Across PCIe **and** the interconnect between CPU sockets. The slowest option. |
+| `NODE` | Across PCIe and the bridges inside one NUMA node |
+| `PHB` | Across PCIe and a PCIe host bridge, typically the CPU |
+| `PXB` | Across multiple PCIe bridges, without touching the host bridge |
+| `PIX` | Across at most a single PCIe bridge. The fastest non-NVLink option. |
+| `NV#` | Across a bonded set of `#` NVLinks |
 
 On our machine every pair of GPUs reports `SYS`, which means the traffic goes across PCIe and then across the link between the CPU sockets. If you had NVLink you would see `NV1`, `NV2` and so on instead. Keep this in mind, because it changes which splitting method is fastest.
 
@@ -150,7 +148,7 @@ By default everything lands under `~/.cache/huggingface/hub`, in a layout that l
 
 The content lives once in `blobs/` under its hash, and `snapshots/` holds human-readable symlinks into it. That is why pulling two revisions of a model does not always double your disk usage, and it is also why `du` and `df` can disagree with your intuition.
 
-The practical consequence for serving: mount that whole directory into your container and set `HF_HOME` to it, which is exactly what the `-v` and `-e HF_HOME` flags in Step 5 are doing. Otherwise the container downloads its own copy.
+The practical consequence for serving: mount `~/.cache/huggingface` into the container and point `HF_HOME` at it. Note that this is the **parent** of the `hub/` directory in the tree above, not `hub/` itself: the libraries append `hub/` themselves, so `HF_HOME=~/.cache/huggingface/hub` sends them looking in `hub/hub/` and they find nothing. That is exactly what the `-v` and `-e HF_HOME` flags in Step 5 are doing. Get it wrong and the container downloads its own 236 GB copy.
 
 One more thing about loading that surprises people. When you split the model over 4 GPUs, vLLM starts 4 separate processes, one per GPU, and **every one of them reads the whole download from disk**, keeping only the quarter it needs.
 
@@ -160,7 +158,7 @@ Our own `Model loading took` line, which you can see in Step 5, reported 48.5 se
 
 ## Step 2: Will it fit? The ten-minute check
 
-Do this on paper before the download, not after. The arithmetic is simpler than people expect.
+It sits after the download here because Step 1 is where the disk hazard bites, but on your next model run this check first: it is ten minutes with a calculator and it can save you a quarter-terabyte download that was never going to fit. The arithmetic is simpler than people expect.
 
 **First, the weights.** One parameter costs this many bytes:
 
@@ -281,6 +279,12 @@ Before the command, the vocabulary. Here is every flag we use and why it has the
 | `--enforce-eager`                   | Skips building optimised CUDA graphs at startup.                                                          | We do **not** use it. It saves memory and starts faster, but generation is slower. Reach for it only if you are out of memory. |
 | `--kv-cache-dtype fp8`              | Stores the conversation cache at 8 bits instead of 16, roughly halving cache memory.                      | We left it at the default so our cache numbers are easy to check by hand. It is a good lever if you need more concurrency.     |
 
+Three rows above describe flags we measured but did not keep: `--pipeline-parallel-size` and `--enable-expert-parallel` are the alternatives benchmarked in Step 7, and `--distributed-executor-backend mp` is already vLLM's default for a single machine, so it is in the table for the day you need `ray` rather than because our command sets it. The command in Step 5 carries only what our final configuration needs, plus one environment variable:
+
+| Environment variable | Why you need it |
+| --- | --- |
+| `VLLM_USE_DEEP_GEMM=0` | Not optional on our hardware. Without it all four workers die during startup with `Unknown SF transformation`. Step 8 explains why, and it is specific to FP8 block-scaled weights on `sm_120` cards, so try without it first on anything else. |
+
 Two container flags matter just as much, and neither is a vLLM flag:
 
 | Docker flag                 | Why you need it                                                                                                                                                                                    |
@@ -346,7 +350,7 @@ GPUs visible: 2
 can GPU 0 talk to GPU 1 directly: True
 ```
 
-That is a genuinely useful sanity check before you start a long model load, because it confirms the container can see the cards and that direct GPU-to-GPU access is available.
+That is a genuinely useful sanity check before you start a long model load, because it confirms the container can see the cards. Do read the second line carefully though: `can_device_access_peer` tells you peer-to-peer addressing is **possible**, not that it is fast. Ours returns `True` while `nvidia-smi topo -m` still reports `SYS` for that pair, because the transfer is permitted but it is going over PCIe and across sockets. The topology matrix is the one that tells you what performance to expect.
 
 ## Step 6: How to read the startup log
 
@@ -417,7 +421,8 @@ root@utho-gpu-rtxpro6000-8-62383:~# docker exec vllm-tp4 vllm bench serve \
   --served-model-name qwen3-235b \
   --base-url http://localhost:8000 \
   --dataset-name random --random-input-len 1024 --random-output-len 256 \
-  --max-concurrency 1 --num-prompts 12 --seed 42 --ignore-eos
+  --max-concurrency 1 --num-prompts 12 --seed 42 --ignore-eos \
+  --no-enable-prefix-caching
 
 Starting initial single prompt test run...
 Skipping endpoint ready check.
@@ -500,7 +505,7 @@ P99 ITL (ms):                            442.81
 
 One subtlety: 32 is not the only ceiling in play. The startup log said this configuration holds about 19 full-length 32k conversations in its KV cache, and our benchmark requests are short, so `--max-num-seqs` is the limit that binds here. With long conversations the cache fills first, and instead of queueing politely vLLM starts preempting: it evicts a running request's cache and recomputes it later. Which ceiling you hit first depends entirely on how long your requests are.
 
-One benchmarking warning before you copy this: if you re-run against a warm server, either vary the `--seed` or turn prefix caching off. We forgot, and time to first token "improved" from 265 ms to 61 ms purely because we had just sent the server those same prompts with the same seed.
+That `--no-enable-prefix-caching` on the end is not decoration, and we learned it the hard way. With a fixed `--seed 42` and prefix caching on, re-running against a warm server made time to first token "improve" from 265 ms to 61 ms, purely because we had just sent it those same prompts. If you would rather keep caching on, vary the seed between runs instead. Either way, do not compare a cold run against a warm one.
 
 ### The memory side
 
@@ -530,7 +535,7 @@ Look at the last row. Under tensor parallelism all four cards sat at **exactly 8
 
 Every figure in that table is a rate or a latency rather than a total, which matters because the runs were not all the same size. We measured all three at `--num-prompts 128` first, then re-ran the winner at `--num-prompts 640` to be sure the result held up. It did: TP produced 507.09 tokens/sec at the larger scale against 503.68 at the smaller, and a median first-token latency of 3,211 ms against 3,233 ms. Both inside 1%, so the numbers above are the 640-prompt figures for TP and the 128-prompt figures for the other two, and the comparison is sound. The full output pasted above is from the 640-prompt run.
 
-Tensor parallelism won nearly everything, and one gap deserves attention. At 32 concurrent requests it produced **70% more tokens per second than pipeline parallelism**. That is not a rounding error, it is a different class of performance, and it lines up exactly with the prefill and decode split above. Tensor parallelism has all four GPUs working on every token. Pipeline parallelism has each GPU working on a different request's stage, and with 32 requests spread over 4 stages there is not enough in flight to keep everyone busy, so cards sit idle waiting their turn. Its median time per token was 24% worse for the same reason.
+Tensor parallelism won nearly everything, and one gap deserves attention. At 32 concurrent requests it produced **70% more tokens per second than pipeline parallelism**. That is not a rounding error, it is a different class of performance, and it lines up exactly with the prefill and decode split above. Tensor parallelism has all four GPUs working on every token. Pipeline parallelism has each GPU working on a different request's stage, and it only pays off when every stage takes the same time. Ours do not: the memory table above shows the four stages holding 84,283 to 87,899 MiB, because 94 layers do not divide evenly by 4 and the first stage carries the token embedding while the last carries the output head. Every uneven stage is a bubble the other three wait on, on every single token. Its median time per token was 24% worse for the same reason.
 
 **Pipeline parallelism did win one thing, and it is the one the theory predicts:** time to first token, by 15%. Processing a 1,024-token prompt is exactly where tensor parallelism's 188 all-reduces get expensive, because each one carries the whole prompt's worth of data rather than a single token's. Pipeline parallelism hands one activation tensor to the next stage and skips all of it. If your users judge you on how fast the first word appears, that is a real and measurable advantage.
 
@@ -547,7 +552,7 @@ Median TTFT (ms):   265.56
 
 A mean fifteen times the median means one request behaved completely differently from the other eleven. One request stalled for about 45 seconds, almost certainly a one-off kernel compilation on the first pass through a code path, and that single stall stretched the whole benchmark from 63 seconds to 107 seconds. Since throughput is just tokens divided by wall-clock, one stall wrecked the headline number.
 
-That is why the speed table uses **median time per token** as its decode measurement rather than aggregate throughput. Median per-token latency does not care that one request had a bad start.
+That is why the speed table carries **median time per token** alongside aggregate throughput rather than relying on throughput alone. Median per-token latency does not care that one request had a bad start, so when the two rows agree, as they do for all three configurations above, the throughput figure is trustworthy. When they disagree, believe the median and go looking for a stall.
 
 ### What we would actually run
 
@@ -576,7 +581,7 @@ pydantic_core._pydantic_core.ValidationError: 1 validation error for VllmConfig
 
 **What it means:** the rule from Step 3. 64 heads cannot be shared out evenly among 3 GPUs. Good news, it fails in about a second, before loading a single byte of weights.
 
-**The fix:** pick a `--tensor-parallel-size` that divides your head count. Powers of two are the safe habit.
+**The fix:** pick a `--tensor-parallel-size` that divides **both** head counts, attention and key/value. Do not just reach for the next power of two: `-tp 8` divides our 64 attention heads but not our 4 KV heads, which is the case Step 3 warns about.
 
 ### "Failed to load model - not enough GPU memory"
 

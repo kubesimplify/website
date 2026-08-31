@@ -27,7 +27,7 @@ const cases = [
       { label: 'weights', value: '55.19 GiB', width: '23.00%', color: '#0098cc' },
       { label: 'KV cache', value: '27.85 GiB', width: '11.60%', color: '#2bb534' },
     ],
-    log: 'Worker_TP0  Model loading took 55.19 GiB\nAvailable KV cache memory: 27.85 GiB\nGPU KV cache size: 621,392 tokens',
+    log: 'Worker_TP0  Model loading took 55.19 GiB\nCurrent kv cache memory in use is 27.85 GiB\nGPU KV cache size: 621,392 tokens',
   },
 ];
 
