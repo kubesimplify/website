@@ -9,7 +9,7 @@
 
 - Canonical: https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm
 - Published: 2026-08-18
-- Summary: A runbook for serving a model too big for one GPU: download to serving in eight steps, with every vLLM flag, startup log line and real error explained, measured on a 235B model across four RTX PRO 6000 cards.
+- Summary: A runbook for serving a model too big for one GPU: download to serving in eight steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards.
 
 Sooner or later everyone running models locally hits the same wall. You find a model you want, you look at the download size, and it is bigger than the GPU you own. A 235B model needs roughly 236 GB just for its weights. The card we have holds 96 GB, and even the largest data-centre GPUs available today top out well below 236 GB. So the model does not fit, and no amount of clever flags will make 236 GB squeeze into 96 GB.
 
@@ -21,7 +21,7 @@ Let's answer that properly, with a real model on real hardware.
 
 This is the runbook. Eight steps, from downloading a 236 GB model to serving it across four GPUs, with every command, flag, startup log line and real error explained. It is written for the person with root on the box, and it assumes no prior knowledge of distributed computing: if you know what a GPU is and you have run a model locally once, you are qualified.
 
-It deliberately does not explain the machinery underneath. Why splitting a layer across GPUs makes prefill faster but costs you an all-reduce per layer, why that trade lands differently on decode, and why NVLink is the variable that decides the winner, are all part two, coming next. Where a "why" would otherwise interrupt the work, this post says so and moves on.
+The theory arrives where you need it to make a decision, not before. Step 3 explains what a tensor-parallel split actually costs, because that is where you pick one, and Step 7 explains why the three options trade against each other, because that is where you read the numbers. Nothing here is theory for its own sake.
 
 New to the jargon? Every term, flag, and benchmark number here is explained in plain English in the [local LLM glossary](https://blog.kubesimplify.com/local-llm-glossary).
 
@@ -135,7 +135,7 @@ One more detail, because a crash in Step 8 depends on it. Because this model is 
 
 Remember those block scales. They are the reason for the most annoying crash we hit, down in Step 8.
 
-Do not spend any time on the shard count itself. How the weights are packaged changes nothing about the numbers inside them, so shard size is a distribution question, not an inference question. Part two covers where those 10 GB boundaries come from and what actually sits inside each file, which is not "layers 1 to 4".
+Do not spend any time on the shard count itself. Ours uses a 10 GB cap, 23 shards of exactly 10.00 GB and a 24th holding the remaining 6.45 GB, and somewhere in the 5 to 10 GB range is the common choice across the Hub. The layout is fixed by whoever uploaded the model, there is no download flag to change it, and it makes no difference to serving: the weights are identical either way, and safetensors are memory-mapped so the loader reads the byte ranges it wants regardless of how they are grouped. Shard size is a distribution question, not an inference question.
 
 ### Where it gets stored
 
@@ -157,7 +157,7 @@ One more thing about loading that surprises people. When you split the model ove
 
 vLLM's own docs say it plainly: with tensor parallelism, "each process will read the whole model and split it into chunks". So at `-tp 4` the machine reads the 236 GB not once but four times, close to a full terabyte of disk reads before the server can answer anything. That is why a big model takes minutes to load even from a fast disk.
 
-Our first `Model loading took` line said 45 seconds, but only because we had just downloaded the model, so most of it was still sitting in RAM, where the operating system keeps recently used files. From a cold disk it takes much longer.
+Our own `Model loading took` line, which you can see in Step 5, reported 48.5 seconds, and that was a flattering number: we had just downloaded the model, so most of it was still sitting in RAM where the operating system keeps recently used files. From a cold disk it takes much longer.
 
 ## Step 2: Will it fit? The ten-minute check
 
@@ -194,11 +194,19 @@ One piece of good news: under tensor parallelism the KV cache is **divided** acr
 
 ## Step 3: Pick your split, then check it divides
 
-vLLM gives you three ways to spread a model over GPUs, and they are genuinely different things. The one-minute version, so you can pick a flag and move on:
+vLLM gives you three ways to spread a model over GPUs, and they are genuinely different things. Mixing them up is the source of most confusion, so here is the analogy first. Imagine a restaurant kitchen that has to produce one dish:
+
+- **Tensor parallelism** is four chefs all working on the same dish at once, one chopping, one on sauce, one on protein, one plating. They constantly have to coordinate, but the dish is done fast.
+- **Pipeline parallelism** is four chefs at four stations with the dish moving down the line. Station two cannot start until station one finishes. Very little talking, but three chefs are idle at any moment unless several dishes are in flight.
+- **Expert parallelism** is a kitchen of 128 specialists where each dish needs only 8 of them. You spread the 128 across four rooms and walk each dish to whichever rooms hold the specialists it needs.
+
+In flags, and with the trade-off each one buys you:
 
 - **Tensor parallelism** (`--tensor-parallel-size`) slices every layer across all GPUs, so they all work on the same token at once. Best tokens per second, evenly split memory, divided KV cache. The default choice for GPUs inside one machine. This is what we run.
 - **Pipeline parallelism** (`--pipeline-parallel-size`) gives each GPU a block of consecutive layers and passes the work along. The GPUs barely need to talk to each other, so it is the tool for spanning machines with a slow network, and it wins on time to first token, but GPUs spend time waiting their turn.
-- **Expert parallelism** (`--enable-expert-parallel`) exists only for mixture-of-experts models and hands out whole experts instead of slicing them. Its job is trillion-parameter-scale clusters where even a tensor-parallel split cannot hold all the experts. It is **not** a memory saver at our scale, as our measurements below show.
+- **Expert parallelism** (`--enable-expert-parallel`) exists only for mixture-of-experts models and hands out whole experts instead of slicing them. Its job is trillion-parameter-scale clusters where even a tensor-parallel split cannot hold all the experts. It is **not** a memory saver at our scale, as our measurements in Step 7 show.
+
+{{multi-gpu-split-modes-animation}}
 
 The first two are easiest to hold in your head as two ways of cutting a layer cake:
 
@@ -207,6 +215,32 @@ The first two are easiest to hold in your head as two ways of cutting a layer ca
 That is the whole distinction. Pipeline parallelism cuts across the layers and each GPU owns a few of them start to finish. Tensor parallelism cuts down through the layers and every GPU owns a sliver of all 94, which is why they all work on the same token at the same time. Expert parallelism is the odd one out and does not fit the cake picture: it deals whole expert networks to different cards, 32 each in our case.
 
 The drawing shows three cards because it is illustrating the two shapes, not our setup. Card counts are not free choices, which is exactly what the next check is about.
+
+### What the tensor-parallel split costs: 188 all-reduces per token
+
+Tensor parallelism cuts **inside** every layer, and it is worth knowing what that costs before you commit to it, because it explains every result in Step 7.
+
+The work a layer does is mostly one big multiplication table, and multiplication tables can be cut up. The technique comes from NVIDIA's 2019 Megatron-LM paper. Cut the first matrix into vertical strips and each GPU can finish its columns alone. Cut the second into horizontal strips lining up with the first, and each GPU produces a **partial answer**, a quarter of the real result.
+
+Now, and only now, the GPUs have to talk. They add their four partial answers together so everyone ends up with the complete result. That operation is an **all-reduce**: everyone contributes a piece, everyone gets the total back. Megatron puts the cost plainly, saying the design runs a transformer layer "using only two all-reduces in the forward path". Generating text only uses the forward path, so:
+
+- 2 all-reduces per layer
+- 94 layers
+- **188 all-reduces to produce one single token**
+
+They happen strictly one after another, because layer 5 cannot start until layer 4 has compared notes. On our machine those 188 round trips cross PCIe rather than NVLink, which is the single fact that shapes every number in Step 7.
+
+{{multi-gpu-tensor-split-animation}}
+
+### Why this model is only 22B of work
+
+The third option needs one idea first, because it is also why this model runs far faster than 235B suggests.
+
+In an ordinary model every parameter is used for every token. In a **mixture-of-experts** model each layer holds many small networks called experts, and a tiny **router** picks which few each token visits. Ours has 128 experts per layer and the router picks 8. So the model holds 235B parameters in memory but only about 22B do any arithmetic for a given token. That is what "235B-A22B" means: you pay for the full 235B in memory and for only 22B in speed.
+
+{{moe-expert-routing-animation}}
+
+That is what gives you the third way to split. Instead of slicing every expert into strips, hand out whole experts: 128 experts over 4 GPUs is 32 intact experts each. Nothing needs adding up at the end, but tokens have to travel to whichever GPU owns the expert they were routed to, and the answers travel back. It also has a fairness problem, because the router does not promise to spread work evenly, so one GPU can end up holding the popular experts and everybody waits on it.
 
 **Then the ten-second pre-flight check.** You cannot pick any number for `--tensor-parallel-size`: because attention heads are handed out whole, your TP size must divide the model's head counts. Open `config.json`:
 
@@ -237,8 +271,8 @@ Before the command, the vocabulary. Here is every flag we use and why it has the
 | Flag                                | What it does                                                                                              | Why our value                                                                                                                  |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `--tensor-parallel-size 4`          | How many GPUs to slice each layer across. Often shortened to `-tp`.                                       | 236 GB of weights needs at least 3 cards of 95 GiB, and 4 divides the model's head counts cleanly.                             |
-| `--pipeline-parallel-size 1`        | How many groups to cut the layer stack into. Often `-pp`.                                                 | 1 means off. We test a version with 4 later.                                                                                   |
-| `--enable-expert-parallel`          | Hand out whole experts per GPU instead of slicing every expert. Mixture-of-experts models only.           | Tested both ways, since this is exactly the choice a big MoE forces on you.                                                    |
+| `--pipeline-parallel-size 1`        | How many groups to cut the layer stack into. Often `-pp`.                                                 | 1 means off. We measure a `-pp 4` build in Step 7.                                                                                    |
+| `--enable-expert-parallel`          | Hand out whole experts per GPU instead of slicing every expert. Mixture-of-experts models only.           | Tested both ways in Step 7, the choice a big MoE forces on you.                                                            |
 | `--gpu-memory-utilization 0.90`     | The fraction of each GPU's memory vLLM is allowed to claim, for weights plus KV cache plus working space. | 0.90 leaves a little headroom. Push it to 0.95 for more cache, but leave room or startup fails.                                |
 | `--max-model-len 32768`             | The longest single request, prompt plus reply, in tokens.                                                 | The model supports 262,144, but that would eat 47 GiB of cache for one user. 32,768 is a sane serving value.                   |
 | `--max-num-seqs 32`                 | How many requests may be in flight at once.                                                               | Caps how much KV cache can be demanded simultaneously. Lower it if you see requests being preempted.                           |
@@ -327,13 +361,13 @@ The startup log is the best teaching tool in the whole stack, and almost nobody 
 
 If you divide the full model size by your `--tensor-parallel-size` and get roughly this number, the split worked. If this number equals the **whole** model, something is wrong and you are not actually splitting.
 
-**Line two, what is left for conversations:**
+**Line two, what is left for conversations.** On vLLM 0.27.1 this arrives inside the long `gpu_worker.py` line you can see in Step 5, phrased as:
 
 ```
-Available KV cache memory: X GiB
+Current kv cache memory in use is X GiB
 ```
 
-If this is **negative**, your weights plus overhead already exceeded the budget, and vLLM will refuse to start. That is the clearest possible signal that you need more GPUs, a smaller number format, or a lower `--max-model-len`.
+Older versions print a dedicated `Available KV cache memory: X GiB` line instead, so search for both. If the figure is **negative**, your weights plus overhead already exceeded the budget and vLLM will refuse to start. That is the clearest possible signal that you need more GPUs, a smaller number format, or a lower `--max-model-len`.
 
 **Line three, the cache in tokens:**
 
@@ -351,13 +385,30 @@ Maximum concurrency for 32,768 tokens per request: N.NNx
 
 This is the one to show your capacity planner. If it says `2.05x`, then two users can each have a full-length 32k conversation, and a third will have to wait or be preempted. It is simply the previous line divided by `--max-model-len`.
 
-For our run the four lines came out as: `Model loading took 55.19 GiB` per worker, `Available KV cache memory: 27.85 GiB`, `GPU KV cache size: 621,392 tokens`, and a maximum concurrency of `18.96x` at 32k. Predicting that token count by hand, 27.85 GiB divided by 47 KiB per token per card, gives 621,337 against the 621,392 vLLM printed, which is the kind of agreement that tells you the mental model is right.
+For our run the four figures came out as: `Model loading took 55.19 GiB` per worker, 27.85 GiB of kv cache in use, `GPU KV cache size: 621,392 tokens`, and a maximum concurrency of `18.96x` at 32k. Predicting that token count by hand, 27.85 GiB divided by 47 KiB per token per card, gives 621,337 against the 621,392 vLLM printed, which is the kind of agreement that tells you the mental model is right.
 
 ## Step 7: Benchmark it, and what we would run
 
-Once it was running, we compared all three ways of splitting the same model over the same 4 GPUs: tensor parallelism on its own, tensor parallelism plus expert parallelism, and pure pipeline parallelism. Same hardware, same flags otherwise, same benchmark.
+Once it was running, we compared all three ways of splitting the same model over the same 4 GPUs: tensor parallelism on its own, tensor parallelism plus expert parallelism, and pure pipeline parallelism. Same hardware, same flags otherwise, same benchmark shape.
 
-Two numbers do most of the talking. **Time to first token** is how long the user waits before anything appears, and **output tokens per second** is how fast the answer then streams. Every configuration trades one against the other; part two is about why.
+Two numbers do most of the talking. **Time to first token** is how long the user waits before anything appears, and **output tokens per second** is how fast the answer then streams. Every configuration trades one against the other, and one idea explains why.
+
+### The two jobs hiding inside inference
+
+Inference is really two different jobs wearing one coat, and almost everything confusing about multi-GPU performance comes from this split.
+
+**Prefill reads your prompt.** All 1,024 tokens go through every layer at once, as one big batch. This is the phase that decides time to first token. It is *compute-heavy*: there is a lot of arithmetic and the matrix engines are the bottleneck. It also writes keys and values for all 1,024 tokens into the KV cache.
+
+**Decode writes the answer**, and it can only produce one token at a time. To write token 2 the model needs token 1, because it feeds its own output back in. That is what "autoregressive" means, and there is no way around it. Each pass produces exactly one token, reads the whole KV cache built so far, and appends one entry. Decode is *memory-heavy* rather than compute-heavy: for a single token there is barely any arithmetic, but the GPU still has to stream the weights and the entire cache past its compute units.
+
+| | Prefill | Decode |
+| --- | --- | --- |
+| Work per step | your whole prompt at once | exactly one token |
+| Bottleneck | compute | memory bandwidth |
+| Metric it drives | time to first token | time per output token |
+| Data moved between GPUs | large, whole prompt's worth | tiny, one token's worth |
+
+That last row is the one to hold on to, and it is the whole explanation for the table below. Those 188 all-reduces from Step 3 are trivially cheap during decode, because each one carries a single token's worth of data. During prefill the same 188 all-reduces carry a thousand times more. So tensor parallelism pays its communication bill mostly at first-token time, and pipeline parallelism, which just hands one activation tensor to the next stage, skips it. That is the trade, and you are about to watch it happen.
 
 The benchmark is vLLM's own, 1024 tokens in and 256 tokens out per request, with `--ignore-eos` so every request generates exactly 256 tokens and the comparison is fair:
 
@@ -452,11 +503,63 @@ One subtlety: 32 is not the only ceiling in play. The startup log said this conf
 
 One benchmarking warning before you copy this: if you re-run against a warm server, either vary the `--seed` or turn prefix caching off. We forgot, and time to first token "improved" from 265 ms to 61 ms purely because we had just sent the server those same prompts with the same seed.
 
-**The verdict.** Tensor parallelism won nearly everything: 507.09 output tokens/sec at 32 concurrent requests, which is 70% faster than pipeline parallelism; the fastest single-request decode at 17.14 ms median per token; the largest conversation capacity at 621,392 cached tokens; and perfectly even memory across all four cards. Pipeline parallelism won exactly one metric, time to first token, by 15%. Expert parallelism cost 7% and returned nothing at this scale.
+### The memory side
 
-So for a 235B MoE on 4 GPUs with no NVLink between them, we would use plain `--tensor-parallel-size 4` and leave both of the others off.
+We ran the same pair of benchmarks against all three configurations. First, where the memory went:
 
-When the other two are the right call, why the results fall out this way, and why NVLink is the one component that would reshuffle them, is part two.
+| | TP=4 | TP=4 plus EP | PP=4 |
+| --- | --- | --- | --- |
+| Weights per GPU | 55.19 GiB | 55.19 GiB | 55.70 GiB |
+| KV cache per GPU | 27.85 GiB | 27.96 GiB | 26.84 GiB |
+| Total KV cache | 621,392 tokens | **623,696 tokens** | 555,680 tokens |
+| Max concurrency at 32k | 18.96x | **19.03x** | 16.96x |
+| GPU memory used | 88,211 MiB on all 4 | 88,209 MiB on all 4 | 84,283 / 87,899 / 87,899 / 84,507 |
+
+**Expert parallelism did not save memory.** It moved 0.37% of extra room into the cache, which is noise. If you were hoping expert parallelism would let you fit a model that otherwise does not fit, this is your warning that it will not.
+
+**Pipeline parallelism cost 10.6% of the cache**, dropping from 621,392 tokens to 555,680, because a pipeline needs extra buffers for the activations travelling between stages and that comes straight out of your conversation capacity.
+
+Look at the last row. Under tensor parallelism all four cards sat at **exactly 88,211 MiB**, the same number on every one. Under pipeline parallelism they ranged from 84,283 to 87,899 MiB, about 3.5 GiB apart, because a layer split cannot be perfectly even when 94 layers go over 4 GPUs and the ends of the model are not symmetric: the first stage carries the token embedding and the last carries the output head. That evenness check is the quickest sanity test you have that a tensor-parallel split is behaving.
+
+### The speed side
+
+| Measurement | TP=4 | TP=4 plus EP | PP=4 | Winner |
+| --- | --- | --- | --- | --- |
+| Median time per token, 1 request | **17.14 ms** | 18.83 ms | 21.19 ms | TP |
+| Output tokens/sec, 32 requests | **507.09** | 470.93 | 296.48 | TP, by 70% over PP |
+| Median time to first token, 32 requests | 3,211 ms | 3,705 ms | **2,735 ms** | PP, by 15% |
+
+Every figure in that table is a rate or a latency rather than a total, which matters because the runs were not all the same size. We measured all three at `--num-prompts 128` first, then re-ran the winner at `--num-prompts 640` to be sure the result held up. It did: TP produced 507.09 tokens/sec at the larger scale against 503.68 at the smaller, and a median first-token latency of 3,211 ms against 3,233 ms. Both inside 1%, so the numbers above are the 640-prompt figures for TP and the 128-prompt figures for the other two, and the comparison is sound. The full output pasted above is from the 640-prompt run.
+
+Tensor parallelism won nearly everything, and one gap deserves attention. At 32 concurrent requests it produced **70% more tokens per second than pipeline parallelism**. That is not a rounding error, it is a different class of performance, and it lines up exactly with the prefill and decode split above. Tensor parallelism has all four GPUs working on every token. Pipeline parallelism has each GPU working on a different request's stage, and with 32 requests spread over 4 stages there is not enough in flight to keep everyone busy, so cards sit idle waiting their turn. Its median time per token was 24% worse for the same reason.
+
+**Pipeline parallelism did win one thing, and it is the one the theory predicts:** time to first token, by 15%. Processing a 1,024-token prompt is exactly where tensor parallelism's 188 all-reduces get expensive, because each one carries the whole prompt's worth of data rather than a single token's. Pipeline parallelism hands one activation tensor to the next stage and skips all of it. If your users judge you on how fast the first word appears, that is a real and measurable advantage.
+
+Expert parallelism costing 7% is not a knock on the technique, and it is important not to over-read it. Expert parallelism exists to solve a problem we do not have: models so large that even a tensor-parallel split cannot hold all the experts, on clusters big enough that duplicating experts everywhere would be wasteful. With 4 GPUs and a model that already fits, we are asking it to do a job it was not designed for and paying an extra network hop per token for nothing. On a 32 or 64 GPU deployment of a trillion-parameter model the answer would very likely flip.
+
+### One number we threw away, and why
+
+Being straight about this, because it is a good lesson in reading your own benchmarks. The very first expert-parallel run at one request at a time reported **28.71 output tokens per second**, which would have made expert parallelism look catastrophic. It was not real. Look at the two TTFT figures from that run:
+
+```
+Mean TTFT (ms):    3987.38
+Median TTFT (ms):   265.56
+```
+
+A mean fifteen times the median means one request behaved completely differently from the other eleven. One request stalled for about 45 seconds, almost certainly a one-off kernel compilation on the first pass through a code path, and that single stall stretched the whole benchmark from 63 seconds to 107 seconds. Since throughput is just tokens divided by wall-clock, one stall wrecked the headline number.
+
+That is why the speed table uses **median time per token** as its decode measurement rather than aggregate throughput. Median per-token latency does not care that one request had a bad start.
+
+### What we would actually run
+
+For a 235B MoE on 4 GPUs with no NVLink between them, we would use plain `--tensor-parallel-size 4` and leave both of the others off. It was faster nearly everywhere, it gives the most conversation capacity, it splits memory perfectly evenly, and it is one less thing to reason about.
+
+We would reach for the other two in specific situations, not as general upgrades:
+
+- **Pipeline parallelism** if time to first token is the metric you are judged on, or if you are spanning multiple machines where the network between them is genuinely slow. It was 15% better at first-token latency and it barely touches the interconnect.
+- **Expert parallelism** when the model is so large that even a tensor-parallel split cannot hold all the experts. That is a real problem at trillion-parameter scale and simply is not our problem at 235B on 4 cards.
+
+One more thing worth saying plainly, because it is the biggest caveat on every number above: **our GPUs have no NVLink.** Every one of those 188 all-reduces per token crosses PCIe and the link between CPU sockets. On a machine with NVLink the all-reduce gets dramatically cheaper, tensor parallelism's one weakness at first-token latency shrinks, and pipeline parallelism's single win would likely disappear. If you are reading this table to plan hardware, the interconnect is the variable to check first.
 
 ## Step 8: Errors you will actually hit
 
@@ -548,13 +651,13 @@ Four things to carry out of this, all of them checks you can run in a minute.
 
 **Three.** Work out the memory on paper first. Parameters times bytes-per-parameter gives you the weights, and then remember the weights are only one of three things that must fit, alongside the conversation cache and the working space. A model whose weights just barely fit is a model that cannot serve anybody.
 
-**Four.** Read the startup log. `Model loading took`, `Available KV cache memory`, `GPU KV cache size` and `Maximum concurrency` tell you, in four lines, whether your setup is sane and how many users it can actually hold. A negative cache number is the clearest error message in the whole stack.
+**Four.** Read the startup log. `Model loading took`, the kv cache memory figure, `GPU KV cache size` and `Maximum concurrency` tell you, in four lines, whether your setup is sane and how many users it can actually hold. A negative cache number is the clearest error message in the whole stack.
 
 And for a 235B mixture-of-experts model on four GPUs with no NVLink between them, the answer is plain `--tensor-parallel-size 4`. It was faster nearly everywhere, it gives the most conversation capacity, and it splits memory perfectly evenly.
 
 Try it on whatever you have. Two GPUs are enough to see every one of these steps in action, and the log lines mean the same thing whether you are running 4 GPUs or 40. If you hit something we did not cover, tell us and we will add it.
 
-**Part two is the why.** How slicing a layer across GPUs divides the prefill arithmetic between them, why that costs you an all-reduce at every layer, why the bill lands hard on time to first token but barely registers during decode, and why NVLink is the single variable that decides whether tensor parallelism wins. Coming next.
+**And check your interconnect before you buy anything.** Every number in Step 7 was measured on GPUs with no NVLink between them, so all 188 all-reduces per token crossed PCIe. That single fact is why pipeline parallelism managed to win first-token latency at all. On a machine with NVLink we would expect that win to vanish. `nvidia-smi topo -m` tells you which world you are in, and it is the first command we run on any new box.
 
 ## Credits and references
 

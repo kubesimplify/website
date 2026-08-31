@@ -5,7 +5,7 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-08-28T19:13:14.583Z</updated>
+  <updated>2026-08-31T06:02:03.648Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
@@ -16,7 +16,7 @@
     <id>https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm</id>
     <updated>2026-08-18T10:00:00.000Z</updated>
     <published>2026-08-18T10:00:00.000Z</published>
-    <summary>A runbook for serving a model too big for one GPU: download to serving in eight steps, with every vLLM flag, startup log line and real error explained, measured on a 235B model across four RTX PRO 6000 cards.</summary>
+    <summary>A runbook for serving a model too big for one GPU: download to serving in eight steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards.</summary>
     <category term="vllm"/>
     <category term="gpu"/>
     <category term="nvidia"/>
