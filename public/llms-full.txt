@@ -8,7 +8,7 @@
 # Running a big LLM across multiple GPUs with vLLM
 
 - Canonical: https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm
-- Published: 2026-08-31
+- Published: 2026-09-01
 - Summary: A runbook for serving a model too big for one GPU: download to serving in seven steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards.
 
 Sooner or later everyone running models locally hits the same wall. You find a model you want, you look at the download size, and it is bigger than the GPU you own. A 235B model needs roughly 236 GB just for its weights. The card we have holds 96 GB. A handful of current data-centre parts do carry more, but nothing on our machine does, and no amount of clever flags will make 236 GB squeeze into 96 GB.
@@ -400,17 +400,17 @@ root@utho-gpu-rtxpro6000-8-62383:~# docker exec vllm-tp4 vllm bench serve \
 Maximum request concurrency: 1
 100%|██████████| 12/12 [00:55<00:00,  4.62s/it]
 ============ Serving Benchmark Result ============
-Benchmark duration (s):                  55.38
+Benchmark duration (s):                  55.03
 Total input tokens:                      12288
 Total generated tokens:                  3072
 Request throughput (req/s):              0.22
-Output token throughput (tok/s):         55.47
-Total token throughput (tok/s):          277.34
+Output token throughput (tok/s):         55.83
+Total token throughput (tok/s):          279.14
 ---------------Time to First Token----------------
-Mean TTFT (ms):                          255.31
-Median TTFT (ms):                        251.60
+Mean TTFT (ms):                          252.78
+Median TTFT (ms):                        252.43
 -----Time per Output Token (excl. 1st token)------
-Median TPOT (ms):                        17.14
+Median TPOT (ms):                        17.11
 ==================================================
 ```
 
@@ -422,17 +422,17 @@ and then again with 32 requests in flight, which is the same command with two nu
 Maximum request concurrency: 32
 100%|██████████| 640/640 [05:23<00:00,  1.98it/s]
 ============ Serving Benchmark Result ============
-Benchmark duration (s):                  323.10
+Benchmark duration (s):                  319.66
 Total input tokens:                      655360
 Total generated tokens:                  163840
-Request throughput (req/s):              1.98
-Output token throughput (tok/s):         507.09
-Total token throughput (tok/s):          2535.46
+Request throughput (req/s):              2.00
+Output token throughput (tok/s):         512.55
+Total token throughput (tok/s):          2562.73
 ---------------Time to First Token----------------
-Mean TTFT (ms):                          3176.38
-Median TTFT (ms):                        3211.10
+Mean TTFT (ms):                          3420.78
+Median TTFT (ms):                        3662.67
 -----Time per Output Token (excl. 1st token)------
-Median TPOT (ms):                        51.16
+Median TPOT (ms):                        47.76
 ==================================================
 ```
 
@@ -468,15 +468,13 @@ Look at the last row. Under tensor parallelism all four cards sat at **exactly 8
 
 | Measurement                             | TP=4         | TP=4 plus EP | PP=4         | Winner             |
 | --------------------------------------- | ------------ | ------------ | ------------ | ------------------ |
-| Median time per token, 1 request        | **17.14 ms** | 18.83 ms     | 21.19 ms     | TP                 |
-| Output tokens/sec, 32 requests          | **507.09**   | 470.93       | 296.48       | TP, by 70% over PP |
-| Median time to first token, 32 requests | 3,211 ms     | 3,705 ms     | **2,735 ms** | PP, by 15%         |
+| Median time per token, 1 request        | **17.11 ms** | 19.31 ms     | 21.17 ms     | TP                 |
+| Output tokens/sec, 32 requests          | **512.55**   | 475.20       | 324.02       | TP, by 58% over PP |
+| Median time to first token, 32 requests | 3,663 ms     | 3,666 ms     | **2,471 ms** | PP, by 33%         |
 
-Every figure in that table is a rate or a latency rather than a total, which matters because the runs were not all the same size. We measured all three at `--num-prompts 128` first, then re-ran the winner at `--num-prompts 640` to be sure the result held up.
+All three configurations were measured in one sitting on the same four cards, at `--num-prompts 640`, against a freshly started server each time.
 
-It did: TP produced 507.09 tokens/sec at the larger scale against 503.68 at the smaller, and a median first-token latency of 3,211 ms against 3,233 ms. Both inside 1%, so the numbers above are the 640-prompt figures for TP and the 128-prompt figures for the other two, and the comparison is sound. The full output pasted above is from the 640-prompt run.
-
-Tensor parallelism won nearly everything, and one gap deserves attention. At 32 concurrent requests it produced **70% more tokens per second than pipeline parallelism**. That is not a rounding error, it is a different class of performance, and it lines up exactly with the reading-versus-writing split above.
+Tensor parallelism won nearly everything, and one gap deserves attention. At 32 concurrent requests it produced **58% more tokens per second than pipeline parallelism**. That is not a rounding error, it is a different class of performance, and it lines up exactly with the reading-versus-writing split above.
 
 - Tensor parallelism has all four GPUs working on every token.
 - Pipeline parallelism has each GPU working on a different request's stage, and it only pays off when every stage takes the same time.
@@ -484,7 +482,7 @@ Tensor parallelism won nearly everything, and one gap deserves attention. At 32 
 Ours do not: the memory table above shows the four stages holding 84,283 to 87,899 MiB, because 94 layers do not divide evenly by 4 and the first stage carries the token embedding while the last carries the output head.
 Every uneven stage is a bubble the other three wait on, on every single token. Its median time per token was 24% worse for the same reason.
 
-**Pipeline parallelism did win one thing, and it is the one the theory predicts:** time to first token, by 15%. Reading a 1,024-token prompt is exactly where tensor parallelism's 188 all-reduces get expensive, because each one carries the whole prompt's worth of data rather than a single token's.
+**Pipeline parallelism did win one thing, and it is the one the theory predicts:** time to first token, by 33%. Reading a 1,024-token prompt is exactly where tensor parallelism's 188 all-reduces get expensive, because each one carries the whole prompt's worth of data rather than a single token's.
 
 Pipeline parallelism hands one activation tensor to the next stage and skips all of it. If your users judge you on how fast the first word appears, that is a real and measurable advantage.
 
@@ -511,7 +509,7 @@ For a 235B MoE on 4 GPUs with no NVLink between them, we would use plain `--tens
 
 We would reach for the other two in specific situations, not as general upgrades:
 
-- **Pipeline parallelism** if time to first token is the metric you are judged on, or if you are spanning multiple machines where the network between them is genuinely slow. It was 15% better at first-token latency and it barely touches the interconnect.
+- **Pipeline parallelism** if time to first token is the metric you are judged on, or if you are spanning multiple machines where the network between them is genuinely slow. It was 33% better at first-token latency and it barely touches the interconnect.
 - **Expert parallelism** when the model is so large that even a tensor-parallel split cannot hold all the experts. That is a real problem at trillion-parameter scale and simply is not our problem at 235B on 4 cards.
 
 One more thing worth saying plainly, because it is the biggest caveat on every number above: **our GPUs have no NVLink.** Every one of those 188 all-reduces per token crosses PCIe and the link between CPU sockets.
