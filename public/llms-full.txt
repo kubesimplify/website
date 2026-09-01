@@ -5,6 +5,1654 @@
 
 ---
 
+# Running a big LLM across multiple GPUs with vLLM
+
+- Canonical: https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm
+- Published: 2026-09-01
+- Summary: A runbook for serving a model too big for one GPU: download to serving in seven steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards.
+
+Sooner or later everyone running models locally hits the same wall. You find a model you want, you look at the download size, and it is bigger than the GPU you own. A 235B model needs roughly 236 GB just for its weights. The card we have holds 96 GB. A handful of current data-centre parts do carry more, but nothing on our machine does, and no amount of clever flags will make 236 GB squeeze into 96 GB.
+
+The answer is to use more than one GPU. That part everybody knows. The part that is genuinely confusing is what "use more than one GPU" actually means. Does each GPU get a copy of the model? Does the model get cut in half? Do the GPUs take turns? Which of those is happening, and what does it cost you?
+
+Let's answer that properly, with a real model on real hardware.
+
+## What this post covers
+
+This is the runbook. Seven steps, from downloading a 236 GB model to serving it across four GPUs, with every command, flag, startup log line and real error explained. It is written for the person with root on the box, and it assumes no prior knowledge of distributed computing: if you know what a GPU is and you have run a model locally once, you are qualified.
+
+The theory arrives where you need it to make a decision, not before. Step 3 explains what a tensor-parallel split actually costs, because that is where you pick one, and Step 6 explains why the three options trade against each other, because that is where you read the numbers. Nothing here is theory for its own sake.
+
+## The machine and the model
+
+Numbers mean nothing without the hardware attached, so here it is once.
+
+**The machine:** a server with 8x NVIDIA RTX PRO 6000 Blackwell Server Edition cards. Each card has 96 GB of memory, and the machine reports 95.01 GiB of that as usable. We borrowed 4 of the 8 cards for this work.
+
+One detail that matters more than it looks: these GPUs are **not** connected by NVLink. NVLink is NVIDIA's fast direct GPU-to-GPU cable. Without it, GPUs talk to each other over PCIe and through the CPU, which is slower. You can check what you have with one command:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# nvidia-smi topo -m
+```
+
+| Device   | GPU0 | GPU1 | GPU2 | GPU3 | GPU4 | GPU5 | GPU6 | GPU7 | NIC0 | CPU Affinity    | NUMA Affinity |
+| :------- | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :-------------- | :-----------: |
+| **GPU0** |  X   | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  | 48-55,176-183   |       6       |
+| **GPU1** | SYS  |  X   | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  | PHB  | 32-39,160-167   |       4       |
+| **GPU2** | SYS  | SYS  |  X   | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  | 0-7,128-135     |       0       |
+| **GPU3** | SYS  | SYS  | SYS  |  X   | SYS  | SYS  | SYS  | SYS  | SYS  | 16-23,144-151   |       2       |
+| **GPU4** | SYS  | SYS  | SYS  | SYS  |  X   | SYS  | SYS  | SYS  | SYS  | 112-119,240-247 |      14       |
+| **GPU5** | SYS  | SYS  | SYS  | SYS  | SYS  |  X   | SYS  | SYS  | SYS  | 96-103,224-231  |      12       |
+| **GPU6** | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  |  X   | SYS  | SYS  | 64-71,192-199   |       8       |
+| **GPU7** | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  |  X   | SYS  | 80-87,208-215   |      10       |
+| **NIC0** | SYS  | PHB  | SYS  | SYS  | SYS  | SYS  | SYS  | SYS  |  X   |                 |               |
+
+The legend that command prints, trimmed to the codes that matter here:
+
+| Symbol | Meaning                                                                       |
+| :----- | :---------------------------------------------------------------------------- |
+| `X`    | Self                                                                          |
+| `SYS`  | Across PCIe **and** the interconnect between CPU sockets. The slowest option. |
+| `NODE` | Across PCIe and the bridges inside one NUMA node                              |
+| `PHB`  | Across PCIe and a PCIe host bridge, typically the CPU                         |
+| `PXB`  | Across multiple PCIe bridges, without touching the host bridge                |
+| `PIX`  | Across at most a single PCIe bridge. The fastest non-NVLink option.           |
+| `NV#`  | Across a bonded set of `#` NVLinks                                            |
+
+On our machine every pair of GPUs reports `SYS`, which means the traffic goes across PCIe and then across the link between the CPU sockets. If you had NVLink you would see `NV1`, `NV2` and so on instead. Keep this in mind, because it changes which splitting method is fastest.
+
+**The model:** `Qwen/Qwen3-235B-A22B-Instruct-2507-FP8`. Let's unpack that name, because it is doing a lot of work:
+
+- **235B** is the total parameter count, 235 billion.
+- **A22B** means 22 billion **active** parameters. This is a mixture-of-experts model: each layer holds 128 small expert networks and a router picks just 8 of them per token, so you pay for 235B in memory but only about 22B in arithmetic.
+- **FP8** is the number format the weights are stored in, 8 bits each, so one byte per parameter.
+
+**The software:** vLLM 0.27.1 running in the official container, with PyTorch 2.13.0 and CUDA 13.0, on driver 610.43.02.
+
+---
+
+## Step 1: Getting the model onto the machine
+
+Before anything can be split across GPUs it has to be on disk, and with a model this size that is not a formality.
+
+### Check your disk first
+
+A quarter of a terabyte has to land somewhere. Run `df -h` before you start, and if the machine is shared, leave real headroom rather than just enough: platforms that manage disk as a resource start taking action well before the disk is actually full.
+
+### The download
+
+With the headroom confirmed, you download it with the Hugging Face CLI:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# pip install huggingface_hub hf_transfer
+root@utho-gpu-rtxpro6000-8-62383:~# HF_XET_HIGH_PERFORMANCE=1 hf download Qwen/Qwen3-235B-A22B-Instruct-2507-FP8
+Downloading bytes: ████████████████████████████████████████████████▏                                                                                                             | 24.4GB,  234MB/s
+Reconstructing (incomplete total...):  13%|███████████████▋                                                                                                             | 10.0GB / 80.0GB,  104MB/s
+Fetching 34 files:   0%|                                                                                                                                                      | 0/34 [00:00<?, ?it/s]
+
+```
+
+`HF_XET_HIGH_PERFORMANCE=1` switches on a downloader that parallelises across connections. On a 236 GB download that is the difference between an hour and most of an afternoon, so it is worth the extra package.
+
+### What you actually get
+
+The download is not one giant file. It arrives as **24 shards**, plus the small text files that describe the model:
+
+```
+config.json
+generation_config.json
+model-00001-of-00024.safetensors
+model-00002-of-00024.safetensors
+...
+model-00024-of-00024.safetensors
+model.safetensors.index.json
+tokenizer.json
+```
+
+Three of those matter to you:
+
+- **`.safetensors`** files hold the actual weights, and unlike the old `.bin` format, simply opening one can never run hidden code on your machine.
+- **`model.safetensors.index.json`** is the master map. The weights are spread over 24 files, and this map says which file each piece lives in. When vLLM needs layer 62, it looks here, sees shard 17, and opens only that file.
+- **`config.json`** is the model's spec sheet: how many layers, how many heads, how many experts. It is a few kilobytes, and it decides almost everything in this post, including how many GPUs you can split across.
+
+One more detail, because a crash in Step 7 depends on it. Because this model is FP8, each weight is a single byte, which cannot record very large and very small numbers accurately at the same time.
+
+The checkpoint works around that by cutting the weights into blocks of 128 by 128 numbers and giving each block one extra number, its **scale**, that the GPU multiplies back in to recover the real weight. These **block scales** ship alongside the weights, and the arrangement is declared in `config.json`:
+
+```json
+"quantization_config": {
+  "quant_method": "fp8",
+  "fmt": "e4m3",
+  "weight_block_size": [128, 128],
+  "activation_scheme": "dynamic"
+}
+```
+
+Remember those block scales. They are the reason for the most annoying crash we hit, down in Step 7.
+
+Do not spend any time on the shard count itself. Ours uses a 10 GB cap, 23 shards of exactly 10.00 GB and a 24th holding the remaining 6.45 GB, and somewhere in the 5 to 10 GB range is the common choice across the Hub.
+
+The layout is fixed by whoever uploaded the model, there is no download flag to change it, and it makes no difference to serving: the weights are identical either way, and safetensors are memory-mapped so the loader reads the byte ranges it wants regardless of how they are grouped. Shard size is a distribution question, not an inference question.
+
+### Where it gets stored
+
+By default everything lands under `~/.cache/huggingface/hub`, in a layout that looks strange the first time you see it:
+
+```
+~/.cache/huggingface/hub/models--Qwen--Qwen3-235B-A22B-Instruct-2507-FP8/
+├── blobs/          <- the real files, named by hash
+├── refs/           <- which commit "main" points at
+└── snapshots/
+    └── e156cb4e.../  <- symlinks with friendly names, pointing into blobs/
+```
+
+The content lives once in `blobs/` under its hash, and `snapshots/` holds human-readable symlinks into it. That is why pulling two revisions of a model does not always double your disk usage, and it is also why `du` and `df` can disagree with your intuition.
+
+The practical consequence for serving: mount `~/.cache/huggingface` into the container and point `HF_HOME` at it. Note that this is the **parent** of the `hub/` directory in the tree above, not `hub/` itself: the libraries append `hub/` themselves, so `HF_HOME=~/.cache/huggingface/hub` sends them looking in `hub/hub/` and they find nothing. That is exactly what the `-v` and `-e HF_HOME` flags in Step 4 are doing. Get it wrong and the container downloads its own 236 GB copy.
+
+One more thing about loading that surprises people. When you split the model over 4 GPUs, vLLM starts 4 separate processes, one per GPU, and **every one of them reads the whole checkpoint**, keeping only the quarter it needs. vLLM's own docs say it plainly: with tensor parallelism, "each process will read the whole model and split it into chunks".
+
+That is 4 x 236 GB of reads, but it is **not** 4 x 236 GB off the SSD, and the difference matters when you are sizing a machine. The operating system keeps recently read files in spare RAM, in what is called the page cache. The first worker to touch a shard pulls it from disk; the other three usually find it already in memory and never go near the drive. So what the SSD actually serves is closer to one pass than four, and the other three passes are memory-speed.
+
+The catch is that this only holds while the model fits in the RAM you have spare. On a box with less free memory than the checkpoint, the early shards get evicted before the later workers ask for them, and you do start paying for real re-reads.
+
+Our own `Model loading took` line, which you can see in Step 4, reported 48.5 seconds, and that is the warm case: we had just finished downloading, so almost all of it was still in page cache. A genuinely cold first load, straight off the drive, takes considerably longer, and it is the number to plan restarts around.
+
+## Step 2: Will it fit? The ten-minute check
+
+It sits after the download here because Step 1 is where the disk hazard bites, but on your next model run this check first: it is ten minutes with a calculator and it can save you a quarter-terabyte download that was never going to fit. The arithmetic is simpler than people expect.
+
+**First, the weights.** One parameter costs this many bytes:
+
+| Format       | Bits per parameter | Bytes per parameter |
+| ------------ | ------------------ | ------------------- |
+| FP32         | 32                 | 4                   |
+| BF16 or FP16 | 16                 | 2                   |
+| FP8          | 8                  | 1                   |
+| FP4 or NVFP4 | 4                  | 0.5                 |
+
+Weights = parameters x bytes per parameter. For our model: 235 billion at 1 byte each, about 236 GB. Our GPU holds 95.01 GiB, so the model is roughly 2.3 times too big for one card. That number alone tells you the minimum GPU count.
+
+**Second, remember weights are only one of three things that must fit:**
+
+1. **The weights.** Fixed size, known before you start.
+2. **The KV cache.** The model's memory of the conversation so far. It grows with prompt length and with how many users you serve at once.
+3. **Working space.** Scratch memory for the calculations, plus framework overhead.
+
+**Third, size the cache.** Every term comes straight out of the model's `config.json`:
+
+```
+bytes per token = 2 x layers x kv_heads x head_dim x bytes_per_number
+```
+
+That leading **2 is not the number of blocks in a layer**. It is there because every token leaves behind **two** things, a key and a value, which is where the "KV" in KV cache comes from. Term by term for our model:
+
+| Term               | Value | Where it comes from                        |
+| ------------------ | ----- | ------------------------------------------ |
+| 2                  | 2     | one key **and** one value per token        |
+| `layers`           | 94    | `num_hidden_layers`                        |
+| `kv_heads`         | 4     | `num_key_value_heads`                      |
+| `head_dim`         | 128   | `head_dim`                                 |
+| `bytes_per_number` | 2     | the cache is kept in BF16, so 2 bytes each |
+
+So `2 x 94 x 4 x 128 x 2 = 192,512 bytes`, call it 188 KiB per token. Sounds small, but this model supports a 262,144-token context, so one single full-length conversation would need about **47 GiB**. That is half a GPU for one user, and it is why "the weights fit, so I am fine" is wrong. It is also why `--max-model-len` exists, as you will see in the flags table.
+
+One piece of good news: under tensor parallelism the KV cache is **divided** across GPUs rather than duplicated, so 4 GPUs give you roughly 4x the conversation room on top of making the weights fit.
+
+{{multi-gpu-memory-fit-animation}}
+
+## Step 3: Pick your split, then check it divides
+
+vLLM gives you three ways to spread a model over GPUs, and they are genuinely different things. Picture a restaurant kitchen that has to produce one dish, and the flag falls out of the picture:
+
+- **Tensor parallelism** (`--tensor-parallel-size`) is four chefs working on the same dish at once, one chopping, one on sauce, one on protein, one plating. They constantly coordinate, but the dish is done fast. It slices every layer across all GPUs: best tokens per second, evenly split memory, and the KV cache gets divided too. The default for GPUs inside one machine, and what we run.
+- **Pipeline parallelism** (`--pipeline-parallel-size`) is four chefs at four stations with the dish moving down the line, where station two cannot start until station one finishes. Very little talking, so it is the tool for spanning machines with a slow network, and it wins on time to first token. But a station that runs slow leaves the others waiting.
+- **Expert parallelism** (`--enable-expert-parallel`) is a kitchen of 128 specialists where each dish needs only 8, spread across four rooms. Mixture-of-experts models only. Its job is trillion-parameter clusters where even a tensor-parallel split cannot hold all the experts. It is **not** a memory saver at our scale, as Step 6 shows.
+
+{{multi-gpu-split-modes-animation}}
+
+The first two are easiest to hold in your head as two ways of cutting a layer cake:
+
+![Pipeline parallelism cuts the layer cake horizontally, so each GPU owns a contiguous block of whole layers; tensor parallelism cuts it vertically, so each GPU owns a slice of every layer](/img/blog/running-a-big-llm-across-multiple-gpus-with-vllm/cake-layers.png)
+
+That is the whole distinction. Pipeline parallelism cuts across the layers and each GPU owns a few of them start to finish. Tensor parallelism cuts down through the layers and every GPU owns a sliver of all 94, which is why they all work on the same token at the same time. Expert parallelism is the odd one out and does not fit the cake picture: it deals whole expert networks to different cards, 32 each in our case.
+
+The drawing shows three cards because it is illustrating the two shapes, not our setup. Card counts are not free choices, which is exactly what the next check is about.
+
+**One cost to know before you pick tensor parallelism.** Because every GPU holds only a sliver of each layer, none of them can finish a layer alone. They each compute a partial answer and then add those together so everyone has the full result. That operation is called an **all-reduce**, and it happens twice per layer, every layer, for every single token.
+
+On a 94-layer model that is 188 all-reduces to produce one token, and on our machine every one of them crosses PCIe rather than NVLink. That communication tax is what Step 6's numbers are really measuring. You do not need the details to run the thing, only to know the tax exists and that the interconnect sets its rate.
+
+**Then the ten-second pre-flight check.** You cannot pick any number for `--tensor-parallel-size`: because attention heads are handed out whole, your TP size must divide the model's head counts. Open `config.json`:
+
+```json
+{
+  "num_hidden_layers": 94,
+  "hidden_size": 4096,
+  "num_attention_heads": 64,
+  "num_key_value_heads": 4,
+  "head_dim": 128,
+  "num_experts": 128,
+  "num_experts_per_tok": 8
+}
+```
+
+For our model:
+
+- `num_attention_heads` is 64, so 2, 4, 8, 16 all divide it cleanly.
+- `num_key_value_heads` is **4**. This is the binding constraint. At `-tp 4` each GPU gets exactly one key/value head. At `-tp 8` there are not enough to go around, and vLLM has to duplicate them across GPUs, which wastes memory and gives you less benefit than you would hope.
+- `num_experts` is 128, which divides evenly by 4 and by 8, so expert parallelism has more freedom than tensor parallelism here.
+
+That is the real lesson: **the KV head count, not the parameter count, usually decides how wide you can go.** It is the first thing we check on any new model, and it takes ten seconds.
+
+## Step 4: The command, and every flag in it
+
+Here is the whole thing. Run this and you have a server; the rest of the step explains every piece of it.
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# docker run -d --name vllm-tp4 \
+  --gpus '"device=1,4,5,6"' \
+  --ipc=host \
+  -p 8000:8000 \
+  -v /root/.cache/huggingface:/root/.cache/huggingface \
+  -e HF_HUB_OFFLINE=1 \
+  -e HF_HOME=/root/.cache/huggingface \
+  -e VLLM_USE_DEEP_GEMM=0 \
+  vllm/vllm-openai:latest \
+    Qwen/Qwen3-235B-A22B-Instruct-2507-FP8 \
+    --served-model-name qwen3-235b \
+    --tensor-parallel-size 4 \
+    --gpu-memory-utilization 0.90 \
+    --max-model-len 32768 \
+    --max-num-seqs 32 \
+    --port 8000
+.
+.
+.
+(Worker_TP0 pid=770) INFO 08-21 18:18:05 [gpu_model_runner.py:5405] Model loading took 55.19 GiB memory and 48.502592 seconds
+(EngineCore pid=558) INFO 08-21 18:21:55 [kv_cache_utils.py:2235] GPU KV cache size: 621,392 tokens
+(EngineCore pid=558) INFO 08-21 18:21:55 [kv_cache_utils.py:2236] Maximum concurrency for 32,768 tokens per request: 18.96x
+(Worker_TP1 pid=771) INFO 08-21 18:22:06 [gpu_worker.py:789] Free memory on device (94.05/95.01 GiB) on startup. Desired GPU memory utilization is (0.9, 85.51 GiB). Actual usage is 56.89 GiB for consumed memory (weights + non-torch), 0.76 GiB for peak activation, and 0.32 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=29407858586` (27.39 GiB) to fit into requested memory, or `--kv-cache-memory=38581581312` (35.93 GiB) to fully utilize gpu memory. Current kv cache memory in use is 27.85 GiB.
+(Worker_TP1, Worker_TP2 and Worker_TP3 print the same line, same numbers, different pid. That they agree exactly is the point: the split is even.)
+
+
+```
+
+The two interesting environment variables here are:
+
+- `HF_HUB_OFFLINE=1` tells the Hugging Face library not to phone home. It uses the local copy, which also means startup does not fail if the network is down.
+- `VLLM_USE_DEEP_GEMM=0` Not optional on our hardware. Without it all four workers die during startup with `Unknown SF transformation`. Step 7 explains why, and it is specific to FP8 block-scaled weights on `sm_120` cards, so try without it first on anything else.
+
+One thing worth knowing about that entrypoint: because it is already `vllm serve`, running `docker run ... vllm/vllm-openai:latest python3 -c "..."` does **not** work the way you expect. Your Python gets handed to `vllm serve` as arguments and you get a confusing parse error. To run something else inside the image, override it:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# docker run --rm --gpus '"device=1,4"' --entrypoint python3 vllm/vllm-openai:latest -c "
+import torch
+print('GPUs visible:', torch.cuda.device_count())
+print('can GPU 0 talk to GPU 1 directly:', torch.cuda.can_device_access_peer(0, 1))
+"
+GPUs visible: 2
+can GPU 0 talk to GPU 1 directly: True
+```
+
+That is a genuinely useful sanity check before you start a long model load, because it confirms the container can see the cards. Do read the second line carefully though: `can_device_access_peer` tells you peer-to-peer addressing is **possible**, not that it is fast.
+
+Ours returns `True` while `nvidia-smi topo -m` still reports `SYS` for that pair, because the transfer is permitted but it is going over PCIe and across sockets. The topology matrix is the one that tells you what performance to expect.
+
+### Every flag, explained
+
+If you only remember one thing from the runbook, make it this table.
+
+| Flag                                | What it does                                                                                              | Why our value                                                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `--tensor-parallel-size 4`          | How many GPUs to slice each layer across. Often shortened to `-tp`.                                       | 236 GB of weights needs at least 3 cards of 95 GiB, and 4 divides the model's head counts cleanly.                             |
+| `--pipeline-parallel-size 1`        | How many groups to cut the layer stack into. Often `-pp`.                                                 | 1 means off. We measure a `-pp 4` build in Step 6.                                                                             |
+| `--enable-expert-parallel`          | Hand out whole experts per GPU instead of slicing every expert. Mixture-of-experts models only.           | Tested both ways in Step 6, the choice a big MoE forces on you.                                                                |
+| `--gpu-memory-utilization 0.90`     | The fraction of each GPU's memory vLLM is allowed to claim, for weights plus KV cache plus working space. | 0.90 leaves a little headroom. Push it to 0.95 for more cache, but leave room or startup fails.                                |
+| `--max-model-len 32768`             | The longest single request, prompt plus reply, in tokens.                                                 | The model supports 262,144, but that would eat 47 GiB of cache for one user. 32,768 is a sane serving value.                   |
+| `--max-num-seqs 32`                 | How many requests may be in flight at once.                                                               | Caps how much KV cache can be demanded simultaneously. Lower it if you see requests being preempted.                           |
+| `--served-model-name qwen3-235b`    | The name clients use in the API.                                                                          | Otherwise clients must send the full checkpoint path.                                                                          |
+| `--port 8000`                       | Port for the OpenAI-compatible API.                                                                       | Convention.                                                                                                                    |
+| `--distributed-executor-backend mp` | How the GPU worker processes are managed: `mp` for plain Python multiprocessing, `ray` for a Ray cluster. | All 4 GPUs are in one machine, so `mp` is the simpler choice. `ray` is for multiple machines.                                  |
+| `--enforce-eager`                   | Skips building optimised CUDA graphs at startup.                                                          | We do **not** use it. It saves memory and starts faster, but generation is slower. Reach for it only if you are out of memory. |
+| `--kv-cache-dtype fp8`              | Stores the conversation cache at 8 bits instead of 16, roughly halving cache memory.                      | We left it at the default so our cache numbers are easy to check by hand. It is a good lever if you need more concurrency.     |
+
+Three rows above describe flags we measured but did not keep: `--pipeline-parallel-size` and `--enable-expert-parallel` are the alternatives benchmarked in Step 6, and `--distributed-executor-backend mp` is already vLLM's default for a single machine, so it is in the table for the day you need `ray` rather than because our command sets it. The command above carries only what our final configuration needs, plus one environment variable:
+
+| Environment variable   | Why you need it                                                                                                                                                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VLLM_USE_DEEP_GEMM=0` | Not optional on our hardware. Without it all four workers die during startup with `Unknown SF transformation`. Step 7 explains why, and it is specific to FP8 block-scaled weights on `sm_120` cards, so try without it first on anything else. |
+
+Two container flags matter just as much, and neither is a vLLM flag:
+
+| Docker flag                 | Why you need it                                                                                                                                                                                    |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--ipc=host`                | The GPU workers are separate processes that pass data through shared memory. Docker's default 64 MB of shared memory is far too small, and leaving this out gives you a confusing hang at startup. |
+| `--gpus '"device=1,4,5,6"'` | Hands specific GPUs to the container. The nested quoting is fussy but required. Inside the container they are renumbered 0 to 3.                                                                   |
+
+## Step 5: How to read the startup log
+
+The startup log is the best teaching tool in the whole stack, and almost nobody reads it. Four lines tell you everything about whether your configuration is sensible.
+
+**Line one, how big the weights are per GPU.** You get one of these per worker:
+
+```
+(Worker_TP0) Model loading took X GiB
+```
+
+If you divide the full model size by your `--tensor-parallel-size` and get roughly this number, the split worked. If this number equals the **whole** model, something is wrong and you are not actually splitting.
+
+**Line two, what is left for conversations.** On vLLM 0.27.1 this arrives inside the long `gpu_worker.py` line you can see in Step 4, phrased as:
+
+```
+Current kv cache memory in use is X GiB
+```
+
+Older versions print a dedicated `Available KV cache memory: X GiB` line instead, so search for both. If the figure is **negative**, your weights plus overhead already exceeded the budget and vLLM will refuse to start. That is the clearest possible signal that you need more GPUs, a smaller number format, or a lower `--max-model-len`.
+
+**Line three, the cache in tokens:**
+
+```
+GPU KV cache size: N tokens
+```
+
+This is the total number of tokens the server can remember across all users at once. You can predict it: take the available cache memory, divide by the bytes-per-token figure from Step 2 (divided by your TP size, since each card keeps only its own heads' share).
+
+**Line four, how many users that really means:**
+
+```
+Maximum concurrency for 32,768 tokens per request: N.NNx
+```
+
+This is the one to show your capacity planner. If it says `2.05x`, then two users can each have a full-length 32k conversation, and a third will have to wait or be preempted. It is simply the previous line divided by `--max-model-len`.
+
+For our run the four figures came out as: `Model loading took 55.19 GiB` per worker, 27.85 GiB of kv cache in use, `GPU KV cache size: 621,392 tokens`, and a maximum concurrency of `18.96x` at 32k.
+
+Predicting that token count by hand, 27.85 GiB divided by 47 KiB per token per card, gives 621,337 against the 621,392 vLLM printed, which is the kind of agreement that tells you the mental model is right.
+
+## Step 6: Benchmark it, and what we would run
+
+Once it was running, we compared all three ways of splitting the same model over the same 4 GPUs: tensor parallelism on its own, tensor parallelism plus expert parallelism, and pure pipeline parallelism. Same hardware, same flags otherwise, same benchmark shape.
+
+Two numbers do most of the talking. **Time to first token** is how long the user waits before anything appears, and **output tokens per second** is how fast the answer then streams. Every configuration trades one against the other, and one idea explains why.
+
+The tradeoff between time to first token and tokens per second comes from the fact that answering a request involves two separate jobs:
+
+- First, the server reads your entire prompt in a single pass. This is where the time to first token is determined.
+- Then, it writes the reply one token at a time, which is where tokens per second are measured.
+- Those 188 exchanges per token (from Step 3) are almost free during output, since they only carry one token’s worth of data each time.
+- During the initial prompt read (for example, a 1,024-token prompt), the same exchanges carry a thousand times more data.
+- As a result:
+  - Tensor parallelism pays most of its communication cost at the beginning (first-token time).
+  - Pipeline parallelism, where each GPU simply passes the result to the next, largely avoids this cost.
+- That’s the core tradeoff, and you’ll see it illustrated in the upcoming benchmarks.
+
+The benchmark is vLLM's own, with tensor parallelism on, 1024 tokens in and 256 tokens out per request, with `--ignore-eos` so every request generates exactly 256 tokens and the comparison is fair:
+
+```bash
+root@utho-gpu-rtxpro6000-8-62383:~# docker exec vllm-tp4 vllm bench serve \
+  --model Qwen/Qwen3-235B-A22B-Instruct-2507-FP8 \
+  --served-model-name qwen3-235b \
+  --base-url http://localhost:8000 \
+  --dataset-name random --random-input-len 1024 --random-output-len 256 \
+  --max-concurrency 1 --num-prompts 12 --seed 42 --ignore-eos
+
+Maximum request concurrency: 1
+100%|██████████| 12/12 [00:55<00:00,  4.62s/it]
+============ Serving Benchmark Result ============
+Benchmark duration (s):                  55.03
+Total input tokens:                      12288
+Total generated tokens:                  3072
+Request throughput (req/s):              0.22
+Output token throughput (tok/s):         55.83
+Total token throughput (tok/s):          279.14
+---------------Time to First Token----------------
+Mean TTFT (ms):                          252.78
+Median TTFT (ms):                        252.43
+-----Time per Output Token (excl. 1st token)------
+Median TPOT (ms):                        17.11
+==================================================
+```
+
+and then again with 32 requests in flight, which is the same command with two numbers changed:
+
+```bash
+--max-concurrency 32 --num-prompts 640
+
+Maximum request concurrency: 32
+100%|██████████| 640/640 [05:23<00:00,  1.98it/s]
+============ Serving Benchmark Result ============
+Benchmark duration (s):                  319.66
+Total input tokens:                      655360
+Total generated tokens:                  163840
+Request throughput (req/s):              2.00
+Output token throughput (tok/s):         512.55
+Total token throughput (tok/s):          2562.73
+---------------Time to First Token----------------
+Mean TTFT (ms):                          3420.78
+Median TTFT (ms):                        3662.67
+-----Time per Output Token (excl. 1st token)------
+Median TPOT (ms):                        47.76
+==================================================
+```
+
+**Why 32 in-flight requests and not some other number?** Because 32 is the ceiling we gave the server ourselves: `--max-num-seqs 32` tells vLLM to work on at most 32 requests per step. Benchmarking at exactly that ceiling shows the server fully loaded, which is the number you actually want for capacity planning.
+
+**And what happens if a 33rd request arrives?** Nothing dramatic, and that is worth knowing. It is not rejected and it does not error. It waits in a queue inside the server, and the moment one of the 32 running requests finishes, it takes the freed slot.
+
+So the cost of oversubscribing is waiting time, not failures: throughput stays flat because the server was already flat out, and the extra request simply sees a longer time to first token.
+
+One subtlety: 32 is not the only ceiling in play. The startup log said this configuration holds about 19 full-length 32k conversations in its KV cache, and our benchmark requests are short, so `--max-num-seqs` is the limit that binds here. With long conversations the cache fills first, and instead of queueing politely vLLM starts preempting: it evicts a running request's cache and recomputes it later. Which ceiling you hit first depends entirely on how long your requests are.
+
+One trap to know before you re-run this. vLLM caches prompt prefixes by default, so firing the same `--seed 42` prompts at a server that has already seen them measures the cache, not the model: ours reported time to first token "improving" from 265 ms to 61 ms that way, which was meaningless. Note that `--no-enable-prefix-caching` is a `vllm serve` flag, not a `vllm bench serve` one, so you cannot switch it off from the benchmark side. Either vary `--seed` between runs, or restart the server with caching disabled. Every figure below comes from a freshly started server, so each configuration began with an empty cache.
+
+### The memory side
+
+We ran the same pair of benchmarks against all three configurations. First, where the memory went:
+
+|                        | TP=4                | TP=4 plus EP        | PP=4                              |
+| ---------------------- | ------------------- | ------------------- | --------------------------------- |
+| Weights per GPU        | 55.19 GiB           | 55.19 GiB           | 55.70 GiB                         |
+| KV cache per GPU       | 27.85 GiB           | 27.96 GiB           | 26.84 GiB                         |
+| Total KV cache         | 621,392 tokens      | **623,696 tokens**  | 555,680 tokens                    |
+| Max concurrency at 32k | 18.96x              | **19.03x**          | 16.96x                            |
+| GPU memory used        | 88,211 MiB on all 4 | 88,209 MiB on all 4 | 84,283 / 87,899 / 87,899 / 84,507 |
+
+**Expert parallelism did not save memory.** It moved 0.37% of extra room into the cache, which is noise. If you were hoping expert parallelism would let you fit a model that otherwise does not fit, this is your warning that it will not.
+
+**Pipeline parallelism cost 10.6% of the cache**, dropping from 621,392 tokens to 555,680, because a pipeline needs extra buffers for the activations travelling between stages and that comes straight out of your conversation capacity.
+
+Look at the last row. Under tensor parallelism all four cards sat at **exactly 88,211 MiB**, the same number on every one. Under pipeline parallelism they ranged from 84,283 to 87,899 MiB, about 3.5 GiB apart, because a layer split cannot be perfectly even when 94 layers go over 4 GPUs and the ends of the model are not symmetric: the first stage carries the token embedding and the last carries the output head. That evenness check is the quickest sanity test you have that a tensor-parallel split is behaving.
+
+### The speed side
+
+| Measurement                             | TP=4         | TP=4 plus EP | PP=4         | Winner             |
+| --------------------------------------- | ------------ | ------------ | ------------ | ------------------ |
+| Median time per token, 1 request        | **17.11 ms** | 19.31 ms     | 21.17 ms     | TP                 |
+| Output tokens/sec, 32 requests          | **512.55**   | 475.20       | 324.02       | TP, by 58% over PP |
+| Median time to first token, 32 requests | 3,663 ms     | 3,666 ms     | **2,471 ms** | PP, by 33%         |
+
+All three configurations were measured in one sitting on the same four cards, at `--num-prompts 640`, against a freshly started server each time.
+
+Tensor parallelism won nearly everything, and one gap deserves attention. At 32 concurrent requests it produced **58% more tokens per second than pipeline parallelism**. That is not a rounding error, it is a different class of performance, and it lines up exactly with the reading-versus-writing split above.
+
+- Tensor parallelism has all four GPUs working on every token.
+- Pipeline parallelism has each GPU working on a different request's stage, and it only pays off when every stage takes the same time.
+
+Ours do not: the memory table above shows the four stages holding 84,283 to 87,899 MiB, because 94 layers do not divide evenly by 4 and the first stage carries the token embedding while the last carries the output head.
+Every uneven stage is a bubble the other three wait on, on every single token. Its median time per token was 24% worse for the same reason.
+
+**Pipeline parallelism did win one thing, and it is the one the theory predicts:** time to first token, by 33%. Reading a 1,024-token prompt is exactly where tensor parallelism's 188 all-reduces get expensive, because each one carries the whole prompt's worth of data rather than a single token's.
+
+Pipeline parallelism hands one activation tensor to the next stage and skips all of it. If your users judge you on how fast the first word appears, that is a real and measurable advantage.
+
+Expert parallelism costing 7% is not a knock on the technique, and it is important not to over-read it. Expert parallelism exists to solve a problem we do not have: models so large that even a tensor-parallel split cannot hold all the experts, on clusters big enough that duplicating experts everywhere would be wasteful.
+
+With 4 GPUs and a model that already fits, we are asking it to do a job it was not designed for and paying an extra network hop per token for nothing. On a 32 or 64 GPU deployment of a trillion-parameter model the answer would very likely flip.
+
+### One number we threw away, and why
+
+Being straight about this, because it is a good lesson in reading your own benchmarks. The very first expert-parallel run at one request at a time reported **28.71 output tokens per second**, which would have made expert parallelism look catastrophic. It was not real. Look at the two TTFT figures from that run:
+
+```
+Mean TTFT (ms):    3987.38
+Median TTFT (ms):   265.56
+```
+
+A mean fifteen times the median means one request behaved completely differently from the other eleven. One request stalled for about 45 seconds, almost certainly a one-off kernel compilation on the first pass through a code path, and that single stall stretched the whole benchmark from 63 seconds to 107 seconds. Since throughput is just tokens divided by wall-clock, one stall wrecked the headline number.
+
+That is why the speed table carries **median time per token** alongside aggregate throughput rather than relying on throughput alone. Median per-token latency does not care that one request had a bad start, so when the two rows agree, as they do for all three configurations above, the throughput figure is trustworthy. When they disagree, believe the median and go looking for a stall.
+
+### What we would actually run
+
+For a 235B MoE on 4 GPUs with no NVLink between them, we would use plain `--tensor-parallel-size 4` and leave both of the others off. It was faster nearly everywhere, it gives the most conversation capacity, it splits memory perfectly evenly, and it is one less thing to reason about.
+
+We would reach for the other two in specific situations, not as general upgrades:
+
+- **Pipeline parallelism** if time to first token is the metric you are judged on, or if you are spanning multiple machines where the network between them is genuinely slow. It was 33% better at first-token latency and it barely touches the interconnect.
+- **Expert parallelism** when the model is so large that even a tensor-parallel split cannot hold all the experts. That is a real problem at trillion-parameter scale and simply is not our problem at 235B on 4 cards.
+
+One more thing worth saying plainly, because it is the biggest caveat on every number above: **our GPUs have no NVLink.** Every one of those 188 all-reduces per token crosses PCIe and the link between CPU sockets.
+
+On a machine with NVLink the all-reduce gets dramatically cheaper, tensor parallelism's one weakness at first-token latency shrinks, and pipeline parallelism's single win would likely disappear. If you are reading this table to plan hardware, the interconnect is the variable to check first.
+
+## Step 7: Errors you will actually hit
+
+Every one of these is a real message we collected while doing this, not a hypothetical.
+
+### "must be divisible by tensor parallel size"
+
+We asked for 3 GPUs, which is a perfectly reasonable-sounding thing to want, and got:
+
+```
+pydantic_core._pydantic_core.ValidationError: 1 validation error for VllmConfig
+  Value error, Total number of attention heads (64) must be divisible by tensor
+  parallel size (3).
+```
+
+**What it means:** the rule from Step 3. 64 heads cannot be shared out evenly among 3 GPUs. Good news, it fails in about a second, before loading a single byte of weights.
+
+**The fix:** pick a `--tensor-parallel-size` that divides **both** head counts, attention and key/value. Do not just reach for the next power of two: `-tp 8` divides our 64 attention heads but not our 4 KV heads, which is the case Step 3 warns about.
+
+### "Failed to load model - not enough GPU memory"
+
+Then we tried 2 GPUs, which puts about 110 GiB of weights on a 95 GiB card. It got most of the way through loading and then died:
+
+```
+ERROR [gpu_model_runner.py:5403] Failed to load model - not enough GPU memory.
+Try lowering --gpu-memory-utilization to free memory for weights, increasing
+--tensor-parallel-size, or using --quantization.
+(original error: CUDA out of memory. Tried to allocate 768.00 MiB. GPU 0 has a
+total capacity of 95.01 GiB of which 438.31 MiB is free. Including non-PyTorch
+memory, this process has 94.57 GiB memory in use.)
+```
+
+**What it means:** exactly what it says. The weights for half this model do not fit on one of these cards. Note the useful detail in there, `438.31 MiB is free` out of `95.01 GiB`, so it filled the card almost exactly and then had nowhere to put the next 768 MiB chunk.
+
+**The fix:** vLLM lists the three real options itself, and for our case only one of them helps. Lowering `--gpu-memory-utilization` would make things worse, not better, because it reduces the space available for weights.
+
+Quantizing further would work but changes the model. So the answer is more GPUs, which is the whole point of this post.
+
+Worth knowing: this one is slow to fail, because it has to read and place most of the weights before it runs out. Budget several minutes, unlike the divisibility error which fails instantly.
+
+### "Unknown SF transformation", the one that cost us the most time
+
+This is the error we did not see coming, and it is worth the whole section. With 4 GPUs and everything sized correctly, all four workers died during startup:
+
+```
+RuntimeError: Assertion error (/workspace/.deps/deepgemm-src/csrc/apis/layout.hpp:60):
+Unknown SF transformation
+```
+
+**What it means:** this model stores its FP8 weights in blocks, with a separate scale factor per 128x128 block, which you can see in its config as `"weight_block_size": [128, 128]`. vLLM hands that kind of matrix multiplication to a library called DeepGEMM, and DeepGEMM did not know how to lay out those scale factors ("SF" is scale factor) on our particular GPU.
+
+The RTX PRO 6000 is Blackwell, but it reports as `sm_120`, which is not the same silicon target as the data-centre Blackwell parts that DeepGEMM is usually exercised on.
+
+Notice how unhelpful the message is if you do not know that background. Nothing in it mentions FP8, quantization, or your GPU.
+
+**The fix**, which is one environment variable:
+
+```
+docker run -d ... -e VLLM_USE_DEEP_GEMM=0 ... vllm/vllm-openai:latest ...
+```
+
+That tells vLLM to use its own FP8 kernels instead of DeepGEMM. Startup then went through cleanly. There is a performance cost to giving up a specialised kernel, so on hardware where DeepGEMM works you would leave it on.
+
+**The general lesson:** a quantized model is a contract between the checkpoint's format and a kernel that understands it. When a big quantized model fails to start on hardware that clearly has enough memory, suspect the kernel and the number format before you suspect your parallelism settings.
+
+### A confusing parse error when you try to run something else in the container
+
+```
+vllm serve: error: argument --compilation-config/-cc: Invalid JSON: expected value at line 2
+```
+
+**What it means:** you ran `docker run ... vllm/vllm-openai:latest python3 -c "..."`, but the image's entrypoint is already `vllm serve`, so your Python source got handed to vLLM as a command-line argument.
+
+**The fix:** `--entrypoint python3`, as shown in Step 4.
+
+### "No available shared memory broadcast block found in 60 seconds"
+
+**What it means:** usually nothing. It shows up while vLLM is busy compiling or capturing CUDA graphs and the worker processes have not checked in for a minute. If it repeats forever and startup never finishes, then you probably forgot `--ipc=host` and the workers cannot pass data to each other through shared memory.
+
+**The fix:** add `--ipc=host`. If you already have it, wait a bit longer, because CUDA graph capture on a big model is genuinely slow.
+
+That is the runbook complete: the model is serving, you know what every flag is doing, and you know the failure modes.
+
+## Wrapping up
+
+Four things to carry out of this, all of them checks you can run in a minute.
+
+**One.** Check your disk before you download. A quarter of a terabyte of weights on a shared machine is a question about everything else living on that disk, not just a storage question. `df -h` first, and leave real headroom.
+
+**Two.** Check `num_key_value_heads` in `config.json` before you plan your hardware. It, not the parameter count, is usually what limits how many GPUs you can split across cleanly. Ours is 4, which is exactly why we run at `-tp 4` and not `-tp 8`.
+
+**Three.** Work out the memory on paper first. Parameters times bytes-per-parameter gives you the weights, and then remember the weights are only one of three things that must fit, alongside the conversation cache and the working space. A model whose weights just barely fit is a model that cannot serve anybody.
+
+**Four.** Read the startup log. `Model loading took`, the kv cache memory figure, `GPU KV cache size` and `Maximum concurrency` tell you, in four lines, whether your setup is sane and how many users it can actually hold. A negative cache number is the clearest error message in the whole stack.
+
+And for a 235B mixture-of-experts model on four GPUs with no NVLink between them, the answer is plain `--tensor-parallel-size 4`. It was faster nearly everywhere, it gives the most conversation capacity, and it splits memory perfectly evenly.
+
+Try it on whatever you have. Two GPUs are enough to see every one of these steps in action, and the log lines mean the same thing whether you are running 4 GPUs or 40. If you hit something we did not cover, tell us and we will add it.
+
+**And check your interconnect before you buy anything.** Every number in Step 6 was measured on GPUs with no NVLink between them, so all 188 all-reduces per token crossed PCIe.
+
+That single fact is why pipeline parallelism managed to win first-token latency at all. On a machine with NVLink we would expect that win to vanish. `nvidia-smi topo -m` tells you which world you are in, and it is the first command we run on any new box.
+
+## Credits and references
+
+- vLLM parallelism and scaling guide: [docs.vllm.ai/en/latest/serving/parallelism_scaling.html](https://docs.vllm.ai/en/latest/serving/parallelism_scaling.html)
+- vLLM memory and optimization docs: [conserving_memory](https://docs.vllm.ai/en/latest/configuration/conserving_memory.html) and [optimization](https://docs.vllm.ai/en/latest/configuration/optimization.html)
+- Model card and config: [huggingface.co/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8](https://huggingface.co/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8)
+- Thanks to the vLLM maintainers, whose startup logging is the best free lesson in distributed inference available anywhere.
+
+---
+
+# Zero Trust in Practice: Migrating from Istio Sidecar to Ambient Mode
+
+- Canonical: https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient
+- Published: 2026-08-31
+- Summary: A hands-on comparison of Istio sidecar and ambient mode for zero-trust service mesh. Same app, same policy, two architectures proven step by step on a local cluster.
+
+Microservices split one problem into many. What used to be a function call inside a single process becomes a network call between separately deployed services and every one of those calls now needs the things a function call got for free - encryption, a way to know who's actually calling and a rule for whether that call should be allowed at all.
+ 
+Handle that inside application code and every team ends up building its own partial version of the same three problems. A service mesh exists to pull all three out of application code entirely into an infrastructure layer that sits next to every service and handles them the same way everywhere.
+ 
+Istio is a service mesh technology where most of that conversation converges. It runs Envoy as its data plane, uses Kubernetes ServiceAccounts as its source of identity and treats encryption, identity and policy as one connected system rather than three separate tools bolted together.
+ 
+What Istio actually operationalizes underneath the feature list is **zero trust**, the principle that nothing on your network gets trusted just because of where it sits. Not "this pod is inside the cluster so it's fine." Every call gets encrypted. Every caller gets a cryptographic identity. Every request gets checked against an explicit rule regardless of where it originated. A zero-trust migration is the actual work of moving a running system from "anything in the cluster can call anything" to that model without rewriting the applications themselves.
+ 
+mTLS covers the encryption and identity half. `AuthorizationPolicy` covers the access-control half.
+ 
+Istio ships two different architectures for delivering both: sidecar mode and ambient mode. They arrive at the same zero-trust outcome through totally different mechanics.
+ 
+Let's try to concretely understand what changes when you move from Istio's sidecar model to ambient mode. The mechanical differences, what gets installed, what a pod looks like before and after, what a policy that works in one mode behaves in the other.
+ 
+So I used a small microservice app, secured it twice on the same cluster once with Istio sidecars and once with ambient.
+ 
+**To follow along you'll need:** a Kubernetes cluster (a local kind cluster is enough), `kubectl` and `istioctl`. Everything here runs on a single local cluster. No cloud account required. The full repo is at `github.com/Prianshu-git/Service-mesh-Zero-Trust-migration`.
+ 
+---
+ 
+## Missing Piece
+ 
+Before touching Istio at all we deploy four plain Kubernetes services with no mesh whatsoever: `frontend`, `orders`, `payments`, `inventory`. Frontend and orders can reasonably call payments. Nothing else should be able to. With no mesh in place none of that was enforced by default.
+ 
+Three things were missing and everything that follows is just those three gaps getting closed twice two different ways:
+ 
+→ **No confidentiality.** Traffic between services was plain HTTP.
+ 
+→ **No authentication.** Payments had no way to cryptographically verify who was actually calling it.
+ 
+→ **No authorization.** Even if it wanted to enforce "only orders may call me" there was nowhere to put that rule.
+ 
+> **Note on the demo architecture:** For this demonstration each "service" is deployed as `kennethreitz/httpbin`: an echo server that reflects back request headers. This lets us inspect mTLS identity headers directly. The actual policy tests are performed by running `curl` from temporary pods or by `kubectl exec` into the `frontend` pod which uses `curlimages/curl`. The app logic is irrelevant. What matters is whether the mesh allows or blocks the traffic.
+ 
+---
+ 
+## Two Architectures, One Goal
+ 
+**Sidecar mode** has been Istio's model since 2017. Every pod that joins the mesh gets a second container injected into it, an Envoy proxy running as `istio-proxy`. A one-time init container installs iptables rules inside the pod's own network namespace so every byte in or out of your app container gets silently rerouted through that sidecar first. The sidecar terminates and originates mTLS, holds that pod's certificate and enforces whatever `AuthorizationPolicy` applies to it. Your application code never changes. But every pod whether or not it ever handles a sensitive request now carries a full proxy.
+ 
+**Ambient mode** splits that same job into two layers instead of bolting a proxy onto every pod. A `ztunnel` runs once per node not once per pod as a DaemonSet. It handles mTLS and workload identity for every pod scheduled on that node using an HTTP CONNECT-based tunnel protocol called HBONE to talk to other nodes. It does not read HTTP. It has no concept of a path or a method. For that ambient adds a second optional component: a **waypoint**, the exact same Envoy binary the sidecar uses but deployed as its own independent workload attached only to the specific service that actually needs L7 rules.
+ 
+In practice this changes how you join the mesh, how you write policy and what you're troubleshooting when the system doesn't do what it says. The rest of this post is that difference proven step by step on the same app on the same cluster.
+ 
+---
+ 
+## The Project
+ 
+To make the comparison honest I set one constraint: the same application, the same intended policy under both architectures so nothing could be explained away by "the app was different."
+ 
+The app is deliberately small and one design detail that matters: **each service gets its own Kubernetes ServiceAccount** not a shared one. Istio's identity model is built entirely on the ServiceAccount a pod runs as not the pod itself. If all four services shared one ServiceAccount there'd be no way to write a policy that says "only orders may call payments" because Istio would have no way to tell orders traffic apart from frontend's. Four ServiceAccounts is what makes the whole zero-trust story expressible at all.
+ 
+The target policy is narrow on purpose: **payments only accepts POST requests to `/post` and only from orders.** Everything else including a direct call from frontend gets denied. That one rule gets implemented twice: once as a sidecar-mode policy and once as an ambient-mode one on the same cluster torn down cleanly between runs so neither phase could quietly lean on leftovers from the other.
+ 
+---
+ 
+## Standing Up the Cluster
+ 
+A local kind cluster is enough for this:
+ 
+```bash
+kind create cluster --name zt-demo
+```
+ 
+```bash
+kubectl get nodes
+```
+ 
+One node, one control plane, `Ready` status. No Istio components exist yet.
+ 
+---
+ 
+## Deploying the Baseline: No Mesh at All
+ 
+```bash
+kubectl apply -f app/
+```
+ 
+![Pods starting up with no mesh](/img/blog/zero-trust-istio-sidecar-vs-ambient/01-pods-no-mesh.png)
+ 
+Four services coming up with zero Istio anywhere in the cluster. `READY 1/1`: one container, no sidecar because there's no mesh to inject one yet.
+ 
+At this point calling payments directly from frontend with no policy anywhere just worked. No mesh means no gate. That's the baseline everything else in this post is measured against.
+ 
+```bash
+kubectl -n zt-demo exec deploy/frontend -- curl -s http://payments/post -X POST -d '{"amount": 500}'
+```
+ 
+```json
+{
+  "args": {},
+  "data": "",
+  "files": {},
+  "form": {
+    "{\"amount\": 500}": ""
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Content-Length": "15",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Host": "payments",
+    "User-Agent": "curl/8.21.0"
+  },
+  "json": null,
+  "origin": "10.244.0.8",
+  "url": "http://payments/post"
+}
+```
+ 
+The response is plain HTTP. No `X-Forwarded-Client-Cert` header. No encryption. No identity. The `origin` field shows the raw pod IP (`10.244.0.8`).
+ 
+---
+ 
+## Phase 1: Sidecar Mode, Step by Step
+ 
+### Install and Inject
+ 
+```bash
+istioctl install --set profile=minimal -y
+kubectl label namespace zt-demo istio-injection=enabled --overwrite
+kubectl -n zt-demo rollout restart deployment orders payments inventory frontend
+```
+ 
+```text
+✓ Istio core installed
+✓ Istiod installed
+✓ Installation complete
+namespace/zt-demo labeled
+deployment.apps/orders restarted
+deployment.apps/payments restarted
+deployment.apps/inventory restarted
+deployment.apps/frontend restarted
+```
+ 
+Labeling a namespace for sidecar injection does nothing to pods that already exist. Kubernetes has no mechanism to add a container to a running pod so every workload has to be recreated. Watch the `READY` column: pods that were `1/1` a moment ago come back `2/2`. The `0/2` pending rows are pods still finishing sidecar startup. This is the first real operational cost of sidecar mode and it's visible directly in the pod list.
+ 
+```bash
+kubectl -n zt-demo wait --for=condition=Ready pod -l app=inventory --timeout=600s
+kubectl -n zt-demo wait --for=condition=Ready pod -l app=orders --timeout=600s
+kubectl -n zt-demo wait --for=condition=Ready pod -l app=payments --timeout=600s
+kubectl -n zt-demo get pods
+```
+ 
+```text
+NAME                         READY   STATUS    RESTARTS   AGE
+frontend-599cd6b667-8sw7c    2/2     Running   0          40s
+inventory-6656996d9d-k798x   2/2     Running   0          40s
+orders-858bc67b6-txzzq       2/2     Running   0          40s
+payments-5cbcb64d66-6jmws    2/2     Running   0          40s
+```
+ 
+All pods now at `2/2`. Every pod carries its own proxy.
+ 
+### mTLS Is Already Working, Before Any Policy Says So
+ 
+```bash
+kubectl apply -f - <<EOF
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: zt-demo
+spec:
+  mtls:
+    mode: STRICT
+EOF
+ 
+kubectl -n zt-demo exec deploy/frontend -- curl -s http://payments/post -X POST -d '{"amount": 500}'
+```
+ 
+```json
+{
+  "args": {},
+  "data": "",
+  "files": {},
+  "form": {
+    "{\"amount\": 500}": ""
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Content-Length": "15",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Host": "payments",
+    "User-Agent": "curl/8.21.0",
+    "X-Envoy-Attempt-Count": "1",
+    "X-Forwarded-Client-Cert": "By=spiffe://cluster.local/ns/zt-demo/sa/payments;Hash=07f2362afe60ca7b0c09b171b56591ad11cb0e1d24683d3b439887e438f8e824;Subject=\"\";URI=spiffe://cluster.local/ns/zt-demo/sa/frontend"
+  },
+  "json": null,
+  "origin": "127.0.0.6",
+  "url": "http://payments/post"
+}
+```
+ 
+This is frontend calling payments directly and it still succeeds because no `AuthorizationPolicy` exists yet. But look at the `X-Forwarded-Client-Cert` header that httpbin echoed back: `URI=spiffe://cluster.local/ns/zt-demo/sa/frontend`. Nothing in the app added that. The **destination sidecar** (payments' `istio-proxy`) extracted the caller's verified mTLS identity from the TLS handshake and attached it to the request before forwarding to the app container. The sidecar already knows exactly who's calling. It just isn't blocking anyone yet.
+ 
+> **Transparent proxy note:** application code always sends plain `http://` to its local proxy. The sidecar transparently upgrades the connection to mutual TLS across the wire, you never change application code to `https://`.
+ 
+> **What's `127.0.0.6`?** It's Envoy's internal loopback redirect IP, used in sidecar mode only. The iptables rules installed inside the pod redirect all outbound traffic through the local Envoy proxy first, so the upstream application sees `127.0.0.6` as the source instead of the real pod IP. Hold onto that, it flips to the real pod IP once we get to ambient mode, where there's no per-pod proxy to redirect through.
+ 
+### Locking It Down: The Sidecar AuthorizationPolicy
+ 
+Before applying one, here's the anatomy of an Istio `AuthorizationPolicy`:
+ 
+- **`action`** - `ALLOW` or `DENY`
+- **`selector` / `targetRefs`** - which workload or Gateway this policy attaches to
+- **`rules`**
+  - **`from`** - source identities (`principals`) allowed to connect
+  - **`to`** - operations allowed: HTTP methods, paths, or ports
+  - **`when`** - optional extra conditions
+The policy below attaches directly to the workload using `selector.matchLabels`. The sidecar inside the `payments` pod evaluates this rule. The `principals` field references the SPIFFE identity derived from the `orders` ServiceAccount.
+ 
+```bash
+kubectl apply -f - <<EOF
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: payments-only-orders
+  namespace: zt-demo
+spec:
+  selector:
+    matchLabels:
+      app: payments
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/zt-demo/sa/orders"
+      to:
+        - operation:
+            methods: ["POST"]
+            paths: ["/post"]
+EOF
+```
+ 
+Now the actual proof. First from orders:
+ 
+```bash
+kubectl run curl-orders -n zt-demo --image=curlimages/curl --restart=Never \
+  --overrides='{"spec":{"serviceAccountName":"orders"}}' \
+  -- curl -s -o /dev/null -w '%{http_code}\n' \
+  http://payments.zt-demo.svc.cluster.local/post -X POST -d '{"amount": 500}'
+```
+ 
+```text
+200
+```
+ 
+Orders gets a `200`.
+ 
+Then from frontend:
+ 
+```bash
+kubectl -n zt-demo exec deploy/frontend -- \
+  curl -s -o /dev/null -w '%{http_code}\n' \
+  http://payments/post -X POST -d '{"amount": 500}'
+```
+ 
+```text
+403
+```
+ 
+Frontend gets a `403`. Same cluster, same service, same everything except its identity. That gap (`200` vs `403` based purely on cryptographic identity) is the entire point of this project.
+ 
+---
+ 
+## Resetting Cleanly Before Switching Architectures
+ 
+Running sidecar and ambient side by side on the same cluster would result in double the control and data plane cost and for our purpose doing that would make it impossible to tell which architecture was responsible for which behavior later. So between phases everything is stripped down.
+ 
+```bash
+istioctl uninstall --purge -y
+kubectl delete namespace zt-demo
+kubectl delete namespace istio-system
+```
+ 
+Both namespaces terminating, back to a clean slate. No leftover certificates, no leftover policies, no ambiguity about which mesh is enforcing what.
+ 
+---
+ 
+## Phase 2: Ambient Mode, Step by Step
+ 
+### Install and Label: No Restart Required
+ 
+```bash
+istioctl install --set profile=ambient -y
+kubectl label namespace zt-demo istio.io/dataplane-mode=ambient --overwrite
+```
+ 
+```text
+✓ Istio core installed
+✓ CNI installed
+✓ Istiod installed
+✓ Ztunnel installed
+✓ Installation complete
+The ambient profile has been installed successfully, enjoy Istio without sidecars!
+namespace/zt-demo labeled
+```
+ 
+Compare the `AGE` column here to the rollout-restart output from Phase 1. Every pod is still the exact same age, the exact same pods that were already running, because ambient mode has no per-pod container to inject. Labeling the namespace was the entire operation. No restart, no downtime.
+ 
+At this point mTLS is already active for every pod in the namespace with zero `PeerAuthentication` resource applied because ztunnel enforces it by default for anything in the mesh.
+ 
+> **Note on ambient mTLS defaults:** In ambient mode ztunnel automatically encrypts in-mesh traffic using mTLS. You only need a `PeerAuthentication` resource if you want to explicitly control the mode (for example `PERMISSIVE` to allow plaintext from outside the mesh or `STRICT` to reject anything non-mTLS). For this demo we rely on the ambient default.
+ 
+### mTLS Active by Default
+ 
+```bash
+kubectl -n zt-demo exec deploy/frontend -- curl -s http://payments/post -X POST -d '{"amount": 500}'
+```
+ 
+```json
+{
+  "args": {},
+  "data": "",
+  "files": {},
+  "form": {
+    "{\"amount\": 500}": ""
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Content-Length": "15",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Host": "payments",
+    "User-Agent": "curl/8.21.0"
+  },
+  "json": null,
+  "origin": "10.244.0.20",
+  "url": "http://payments/post"
+}
+```
+ 
+The call succeeds (`200`) confirming ztunnel is encrypting traffic. But notice: no `X-Forwarded-Client-Cert` header and the `origin` is the real pod IP (`10.244.0.20`), not `127.0.0.6`. In sidecar mode the destination proxy injects the identity header and redirects through localhost. In ambient mode without a waypoint, ztunnel handles encryption at L4 without touching HTTP headers. The identity is still cryptographically verified - you just can't see it in the HTTP response yet.
+ 
+### Where Ambient Draws Its Line: The Fail-Safe Behavior
+ 
+Here is the critical learning moment. When applying the exact same `AuthorizationPolicy` shape that worked cleanly in sidecar mode directly in ambient mode, it got accepted but with a warning attached to its status field:
+ 
+```bash
+kubectl apply -f - <<EOF
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: payments-only-orders
+  namespace: zt-demo
+spec:
+  selector:
+    matchLabels:
+      app: payments
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/zt-demo/sa/orders"
+      to:
+        - operation:
+            methods: ["POST"]
+            paths: ["/post"]
+EOF
+ 
+kubectl -n zt-demo get authorizationpolicy payments-only-orders -o jsonpath='{range .status.conditions[*]}{.type}{"="}{.reason}{" "}{.message}{"\n"}{end}'
+```
+ 
+```text
+ZtunnelAccepted=UnsupportedValue ztunnel does not support HTTP attributes (found: methods, paths). In ambient mode you must use a waypoint proxy to enforce HTTP rules. Within an ALLOW policy, rules matching HTTP attributes are omitted. This will be more restrictive than requested.
+```
+ 
+Istio's own status field states it plainly: ztunnel does not support HTTP attributes (methods, paths). In ambient mode you must use a waypoint proxy to enforce HTTP rules. But here is what the warning does not fully capture: **ztunnel fails safe.** When an `ALLOW` policy contains L7 rules that ztunnel cannot evaluate, ztunnel omits those rules and the policy becomes more restrictive than requested - effectively a **DENY-all** for traffic that would have matched the omitted rules. It does not silently do less than asked. It protects you from misconfiguration by blocking traffic it cannot properly evaluate.
+ 
+In our test the result was a connection failure (`000`) rather than an HTTP `403`.
+ 
+> **`000` vs `403`:** `000` is what curl prints for `%{http_code}` when it never receives an HTTP response at all - here, because ztunnel dropped the TCP connection at Layer 4 before any HTTP exchange could happen. `403` is an actual HTTP response returned by a Layer 7 proxy (like Envoy) after it inspected the request and rejected it. In the frontend test below, curl's own process **exit code** is `56` ("failure in receiving network data") - a separate number from the `000` status placeholder, and further confirmation that the connection was cut, not answered.
+ 
+```bash
+# Test from orders
+kubectl run curl-orders -n zt-demo --image=curlimages/curl --restart=Never \
+  --overrides='{"spec":{"serviceAccountName":"orders"}}' \
+  -- curl -s -o /dev/null -w '%{http_code}\n' \
+  http://payments.zt-demo.svc.cluster.local/post -X POST -d '{"amount": 500}'
+```
+ 
+```text
+000
+```
+ 
+```bash
+# Test from frontend
+kubectl -n zt-demo exec deploy/frontend -- \
+  curl -s -o /dev/null -w '%{http_code}\n' --max-time 5 \
+  http://payments/post -X POST -d '{"amount": 500}'
+```
+ 
+```text
+000
+command terminated with exit code 56
+```
+ 
+Both denied. Orders with the correct identity and frontend without it both get blocked. ztunnel is L4-only by design. L4 gives you identity-based rules like "A can call B" which is exactly what ztunnel enforces. The path-and-method rule I wrote needed the L7 layer which is exactly what the waypoint below exists to provide.
+ 
+![Istio L4 vs L7 security comparison](/img/blog/zero-trust-istio-sidecar-vs-ambient/l4-l7-security-table.png)
+ 
+### The Bridge: Why Waypoints Use Gateway API
+ 
+ztunnel handles Layer 4 (TCP + mTLS) only. It secures the wire and authenticates peers, but it cannot look inside HTTP requests. To enforce policies based on HTTP paths, methods, or headers, Ambient Mesh deploys an on-demand Envoy pod called a **Waypoint**. Istio models waypoints using the standard Kubernetes Gateway API resources rather than inventing a new CRD. The Waypoint acts as an L7 proxy for a specific service, sitting in the data path only when needed.
+ 
+### Bringing in a Waypoint for the One Service That Needs It
+ 
+```bash
+# Install Gateway API CRDs first
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
+ 
+# Create the waypoint
+istioctl waypoint apply --namespace zt-demo --name payments-waypoint --for service
+```
+ 
+```text
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io created
+...
+✓ waypoint zt-demo/payments-waypoint applied
+```
+ 
+Only payments gets a waypoint. Frontend, orders and inventory never do because none of them need HTTP-level policy. ztunnel's L4 identity and encryption is all they ever require.
+ 
+A waypoint is not a custom Istio object. It is a standard Kubernetes Gateway API resource. Here is what gets created:
+ 
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: payments-waypoint
+  namespace: zt-demo
+spec:
+  gatewayClassName: istio-waypoint
+  listeners:
+    - name: mesh
+      port: 15008
+      protocol: HBONE
+```
+ 
+Waypoints plug into the same Gateway API model Kubernetes already has rather than inventing a new one.
+ 
+Once istiod finishes reconciling it, `istioctl waypoint status` confirms it: `Programmed`, assigned to `payments-waypoint.zt-demo.svc.cluster.local:15008`, ready to receive traffic.
+ 
+### The Full Picture, Running
+ 
+```bash
+echo '--- namespace labels ---' && kubectl get namespace zt-demo --show-labels
+echo '--- app pods ---' && kubectl -n zt-demo get pods -o wide
+echo '--- ztunnel pods ---' && kubectl -n istio-system get pods -l app=ztunnel -o wide
+echo '--- waypoint pods ---' && kubectl -n zt-demo get pods -l gateway.networking.k8s.io/gateway-name=payments-waypoint -o wide
+```
+ 
+![Full ambient mesh pod listing](/img/blog/zero-trust-istio-sidecar-vs-ambient/16-full-ambient-view.png)
+ 
+The entire ambient mesh in one view. Every application pod sits at `1/1` READY. No sidecar anywhere. One ztunnel pod for the node. One `payments-waypoint` pod and only one because it's the only service that needed L7. This is the resource story ambient mode makes visible directly in a pod list rather than asserted in a comparison table.
+ 
+### The Nuance
+ 
+Getting the waypoint running was the easy part. The `AuthorizationPolicy` that worked perfectly in sidecar mode does not immediately start enforcing anything once the waypoint existed.
+ 
+In sidecar mode an `AuthorizationPolicy` attaches to a workload with a plain label selector (`selector: matchLabels: app: payments`) because the enforcement point (the sidecar) lives inside that exact pod. In ambient mode HTTP-level enforcement happens on the waypoint, a separate workload. The policy has to explicitly target that waypoint resource.
+ 
+**First attempt: `targetRefs` pointing at the `Gateway`:**
+ 
+```bash
+kubectl apply -f - <<EOF
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: payments-only-orders
+  namespace: zt-demo
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: payments-waypoint
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/zt-demo/sa/orders"
+      to:
+        - operation:
+            methods: ["POST"]
+            paths: ["/post"]
+EOF
+```
+ 
+```bash
+# From orders
+kubectl run curl-orders -n zt-demo --image=curlimages/curl --restart=Never \
+  --overrides='{"spec":{"serviceAccountName":"orders"}}' \
+  -- curl -s -o /dev/null -w '%{http_code}\n' \
+  http://payments.zt-demo.svc.cluster.local/post -X POST -d '{"amount": 500}'
+```
+ 
+```text
+200
+```
+ 
+```bash
+# From frontend
+kubectl -n zt-demo exec deploy/frontend -- \
+  curl -s -o /dev/null -w '%{http_code}\n' \
+  http://payments/post -X POST -d '{"amount": 500}'
+```
+ 
+```text
+200
+```
+ 
+Both get `200`. The policy does not enforce. The waypoint exists. The policy was applied. But traffic bypasses the waypoint entirely.
+ 
+The reason: **the Service has to be told to use the waypoint.** The fix is a *label* on the Kubernetes Service not an annotation and the value is just the waypoint name, not a namespace-qualified path.
+ 
+```bash
+kubectl label service payments istio.io/use-waypoint=payments-waypoint
+```
+ 
+```bash
+kubectl -n zt-demo get service payments --show-labels
+```
+ 
+```text
+NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   LABELS
+payments   ClusterIP   10.96.80.235    <none>        80/TCP    31m   app=payments,istio.io/use-waypoint=payments-waypoint
+```
+ 
+Now the service carries the label `istio.io/use-waypoint=payments-waypoint`. Traffic to payments is routed through the waypoint.
+ 
+Istio's docs recommend `targetRefs: Service` as the more precise option because it binds the policy to the service abstraction rather than the proxy instance. In this demo I used `targetRefs: Gateway` because it feels intuitive: the waypoint is the actual enforcement point so targeting it directly makes the mechanics explicit. Both patterns work. The real gotcha we hit was the `use-waypoint` label on the Service. That is what routes traffic through the waypoint without it, neither Gateway targeting nor Service targeting would have enforced anything. If you are building this for production, use `targetRefs: Service`. It decouples your policy from waypoint lifecycle and reads more naturally: you are protecting the payments service, not the payments-waypoint proxy.
+ 
+```bash
+# Test from orders
+kubectl run curl-orders -n zt-demo --image=curlimages/curl --restart=Never \
+  --overrides='{"spec":{"serviceAccountName":"orders"}}' \
+  -- curl -s -o /dev/null -w '%{http_code}\n' \
+  http://payments.zt-demo.svc.cluster.local/post -X POST -d '{"amount": 500}'
+```
+ 
+```text
+200
+```
+ 
+Orders gets a `200`.
+ 
+```bash
+# Test from frontend
+kubectl -n zt-demo exec deploy/frontend -- \
+  curl -s -o /dev/null -w '%{http_code}\n' \
+  http://payments/post -X POST -d '{"amount": 500}'
+```
+ 
+```text
+403
+```
+ 
+Frontend gets a `403`. Same cluster, same service, same everything except its identity. The gap is identical to sidecar mode. The mechanism underneath is completely different.
+ 
+---
+ 
+## What Actually Changed, Side by Side
+ 
+| Aspect | Sidecar Mode | Ambient Mode |
+|---|---|---|
+| Joining the mesh | Full rollout restart of every deployment required | One label applied to already-running pods. Zero restarts. |
+| Pod shape | Full Envoy proxy in every application pod (`2/2` READY) | No sidecar in application pods. A waypoint is deployed as its own separate pod, only for the service that needs L7 rules. |
+| Policy authoring | `selector.matchLabels` targets the workload directly | `targetRefs` targets the Gateway or Service, plus an `istio.io/use-waypoint` label on the Service |
+| Fail-safe when policy exceeds L4 | Not applicable, every pod has a full proxy | ztunnel accepts the policy without erroring, but fails safe to DENY for HTTP attributes it can't evaluate. The AuthorizationPolicy status field explains why. |
+| mTLS enforcement | Configured via `PeerAuthentication` | Active by default for in-mesh traffic. `PeerAuthentication` is optional, for explicit control. |
+ 
+### What Istio's Own Comparison Publishes
+ 
+Worth citing: Istio reports typical p90/p99 latency of roughly **0.6 to 0.9ms per hop** in sidecar mode since both the source and destination sidecar process every request versus roughly **0.15 to 0.2ms with ztunnel alone** and **0.4 to 0.5ms when a waypoint is in the path**. That's Istio's benchmark in their environment, not mine. Worth verifying on your own hardware and environment.
+ 
+---
+ 
+## Why Run This Yourself Instead of Reading a Comparison Table
+ 
+Every sidecar-vs-ambient article can list the theoretical differences in a table. What a table can't do is show you the exact moment ztunnel refuses your policy and tells you why or make you feel the difference between watching four pods restart and watching a label apply to four pods that never blinked. That gap between reading and running is the actual reason this exists as a runnable project instead of another explainer. Clone it, break it and the L4/L7 split stops being a diagram and starts being something you've debugged.
+ 
+---
+ 
+## What's Next
+ 
+If you want to take this further here are immediate hands-on next steps that extend the core comparison:
+ 
+1. **Verify the fail-safe yourself.** Delete the `payments-waypoint` Gateway but keep the L7 `AuthorizationPolicy` applied. Confirm that all traffic to payments is denied. Then recreate the waypoint, re-apply the Service label and watch access restore. This proves the architecture is protecting you from misconfiguration.
+2. **Try `targetRefs: Service` vs `Gateway`.** We used `kind: Gateway` in this demo. Try switching to `kind: Service` (group: `""`, name: `payments`) and confirm identical behavior. Understand when each approach is more appropriate.
+3. **Add a second waypoint.** Give `inventory` its own waypoint and an L7 policy. Show that waypoints are per-service not per-namespace and that you only pay the L7 proxy cost where you actually need it.
+4. **Measure latency with Fortio.** Run a formal benchmark pass against both modes on the same hardware with Prometheus and Grafana for dashboards to verify Istio's published figures with your own first-hand measurements on a replicable environment.
+
+---
+
+Repository: `github.com/Prianshu-git/Service-mesh-Zero-Trust-migration`
+
+---
+
+# Running Qwen3.8-Flash-Next on a DGX Spark and RTX PRO 6000
+
+- Canonical: https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000
+- Published: 2026-08-27
+
+Qwen dropped Qwen3.8-Flash-Next this week, and the first thing I saw on my timeline was somebody saying it will not fit on a single DGX Spark. The NVFP4 weights are around 135 GB, a Spark has 128 GB of unified memory, so you need two of them.
+
+That is correct. I checked it and I will show you why. But it is also only part of the story, because there is one build of this model that does fit on a single Spark, and the reason it fits turned out to be more interesting than the fitting.
+
+I have a DGX Spark and access to a box with 8 RTX PRO 6000 Blackwell cards, so let's run it on both and see what the numbers actually look like.
+
+In this post we will go through:
+
+- What Qwen3.8-Flash-Next actually is, and why its size is confusing
+- Why "NVFP4 is 135 GB" and "the GGUF is 67 GB" are both true for the same model
+- Getting it running on a single DGX Spark with llama.cpp
+- Getting it running on RTX PRO 6000 with vLLM, and how it scales across 1, 2 and 4 GPUs
+- Why two GPUs beat four on this hardware
+
+Every number in this post was measured on my own machines. Where I quote somebody else's number, I say so.
+
+## What the model is
+
+Qwen3.8-Flash-Next is a mixture-of-experts model. Total parameters are 176.94B, and that splits into two very different halves:
+
+- **125B in the model proper**, of which 512 experts do most of the work. For any given token the router picks only 10 experts plus 1 shared expert.
+- **51B in an N-gram embedding table**, which is a giant lookup table rather than something you do maths with.
+
+Qwen puts the active parameters at about 6B per token. That is the whole point of the design: you get the knowledge of a very large model while paying the compute bill of a small one. Worth noting llama.cpp labels the same model `A3B`, so the two are counting slightly different things, and I have not dug into which is right.
+
+The attention is a hybrid. Three out of every four layers use Gated DeltaNet, which compresses the history into a fixed-size state, and every fourth layer uses Qwen Sparse Attention (QSA), which looks at the full context but only scores it in compressed blocks. Qwen calls this a preview of the Qwen4 architecture, and the model type in `config.json` is literally `qwen4_exp`.
+
+## Why the size question is confusing
+
+Here is where I lost an hour, so let me save you the same trouble.
+
+You would assume "NVFP4" means the whole model is squeezed into 4 bits. It does not. I opened `quantization_config` in both official checkpoints, and both have a `modules_to_not_convert` list. Only the **routed experts** get quantized. Attention, GDN, QSA, shared experts, routers, `lm_head`, embeddings, the vision encoder and the MTP head all stay in BF16.
+
+The routed experts are 120.8B of the 125B, so that still covers most of the model. But the 51B N-gram table is the problem. It is stored as FP8 and expanded to BF16 when loaded, which is about 102 GB sitting in memory.
+
+That is why the four builds are so far apart in size:
+
+| Build | Size on disk | Fits one Spark (121 GiB usable)? |
+| --- | --- | --- |
+| BF16 | 335.3 GiB | No |
+| FP8 | 172.8 GiB | No |
+| NVFP4 | 135.3 GB | No |
+| GGUF `UD-IQ1_S` | 67.55 GiB | **Yes** |
+
+The GGUF is the only build that quantizes the N-gram table too. That is the entire reason it fits.
+
+Now, vLLM has a flag called `VLLM_PLE_CPU_OFFLOAD=1` that pushes that table into host RAM. And this is not a hack somebody bolted on. The Qwen tech report says the tables are "held off the accelerator", and they placed the N-gram layer at **layer 2 specifically so that fetching from host memory overlaps with the compute of layer 1**. The architecture was designed for the table to live somewhere else.
+
+Which is also why that flag does nothing on a Spark. On a Spark, host RAM *is* the same unified pool as GPU memory. There is nowhere to offload to.
+
+## Test environment
+
+| | DGX Spark | RTX PRO 6000 box |
+| --- | --- | --- |
+| GPU | 1x GB10, 128 GB unified (124610 MiB visible to CUDA) | 8x RTX PRO 6000 Blackwell Server Edition, 97887 MiB each |
+| Compute capability | 12.1 | 12.0 |
+| Driver | 580.159.03 | 610.43.02 |
+| Host RAM | shared with GPU | 1259 GB |
+| GPU interconnect | n/a | **No NVLink**, every pair reports `SYS` |
+| Engine | llama.cpp build 30, commit `035e227` | vLLM, image `vllm/vllm-openai:qwen38-flash-next` |
+| Model build | `unsloth/Qwen3.8-Flash-Next-GGUF` UD-IQ1_S | `Qwen/Qwen3.8-Flash-Next-FP8` |
+
+On the RTX box only 4 of the 8 cards were free, so everything below uses GPUs 1, 4, 5 and 6.
+
+## Part 1: the DGX Spark
+
+### llama.cpp support is not merged yet
+
+First problem. My existing llama.cpp knows `QWEN3NEXT` but not `qwen4_exp`, so it simply will not load this model. Support is an open pull request, [#27742](https://github.com/ggml-org/llama.cpp/pull/27742), written by [Daniel Han](https://github.com/danielhanchen) of [Unsloth](https://unsloth.ai) - all 33 commits of it. Converter, text graph, sparse attention, vision and three quantizer fixes. The entire Spark half of this post exists because of that PR.
+
+So we build it:
+
+```bash
+export PATH=$PATH:/usr/local/cuda/bin
+git clone --depth 30 --branch qwen4exp/qwen3.8-flash-next \
+  https://github.com/unslothai/llama.cpp.git ~/llama-qwen4exp
+cd ~/llama-qwen4exp
+cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=121 \
+      -DGGML_CUDA_FA=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release -j 16 \
+      --target llama-server llama-cli llama-bench llama-perplexity
+```
+
+`121` is the GB10 compute capability. Check it worked:
+
+```
+$ ~/llama-qwen4exp/build/bin/llama-cli --version
+version: 0.3.0-dev (build 30, commit 035e227)
+built with GNU 13.3.0 for Linux aarch64
+```
+
+### Getting the weights
+
+```bash
+hf download unsloth/Qwen3.8-Flash-Next-GGUF --local-dir ~/qwen38/gguf
+```
+
+If that stalls at 0 B/s, it is the Xet transport. Set `HF_HUB_DISABLE_XET=1` and keep the worker count at 6 to 8. I tried 24 workers and got `SSL handshake timed out`.
+
+### Running it
+
+```bash
+~/llama-qwen4exp/build/bin/llama-server \
+  -m ~/qwen38/gguf/UD-IQ1_S/Qwen3.8-Flash-Next-UD-IQ1_S-00001-of-00003.gguf \
+  -ngl 999 -c 16384 --host 127.0.0.1 --port 8099 --jinja
+```
+
+It loads in about 30 seconds and sits at 72.5 GiB of the 121 GiB available. That leaves roughly 49 GiB free, which is a lot more headroom than I expected.
+
+Here is llama-bench, three repetitions:
+
+```bash
+~/llama-qwen4exp/build/bin/llama-bench \
+  -m ~/qwen38/gguf/UD-IQ1_S/Qwen3.8-Flash-Next-UD-IQ1_S-00001-of-00003.gguf \
+  -ngl 999 -p 2048,8192,32768 -n 128 -r 3
+```
+
+```
+| model              |      size |    params | backend | ngl |    test |            t/s |
+| qwen4exp A3B IQ1_S | 67.55 GiB | 176.94  B | CUDA    | 999 |  pp2048 | 797.76 ± 2.08  |
+| qwen4exp A3B IQ1_S | 67.55 GiB | 176.94  B | CUDA    | 999 |  pp8192 | 747.53 ± 3.24  |
+| qwen4exp A3B IQ1_S | 67.55 GiB | 176.94  B | CUDA    | 999 | pp32768 | 599.65 ± 1.18  |
+| qwen4exp A3B IQ1_S | 67.55 GiB | 176.94  B | CUDA    | 999 |   tg128 |  34.54 ± 0.18  |
+```
+
+**34.5 tokens per second on a single Spark, for a model with 176.94B parameters.**
+
+I did not believe that at first either, so let's sanity check it two ways.
+
+First against the hardware. The GB10 is specified at about 273 GB/s of memory bandwidth (that is the spec sheet, not something I measured). Decoding reads roughly 5.37 GB per token here, because only 2.36B of the 120.8B expert parameters are touched for any given token. That puts the ceiling around 50 tok/s, and we measured 34.5, or 68% of it. Comfortably under the roof, which is where a real measurement should sit.
+
+Second against my own earlier numbers. When I [benchmarked the dense Qwen3.8-27B on this same Spark](https://blog.kubesimplify.com/qwen3-8-27b-on-dgx-spark) a couple of weeks ago, llama.cpp gave 11.6 tok/s. A sparse 177B model running about three times faster than a dense 27B one is what you would expect when only a small slice is active per token.
+
+### The prefill curve is the interesting bit
+
+Look again at those prefill numbers. Going from 2,048 tokens to 32,768 tokens is 16 times the context, and throughput only drops 25%. That flatness is consistent with QSA doing its job, although I should be honest that I did not run a dense-attention ablation to prove QSA is the cause.
+
+### "IQ1_S" is not a 1-bit model
+
+The quant is called `UD-IQ1_S` and llama.cpp reports `IQ1_S - 1.5625 bpw`, which makes it sound like a 1-bit model. So I dumped the actual tensor types in the file:
+
+| Type | Size | Share |
+| --- | --- | --- |
+| IQ4_NL | 47.92 GiB | 70.9% |
+| IQ1_S | 10.38 GiB | 15.4% |
+| IQ2_XXS | 5.64 GiB | 8.3% |
+| Q5_K, Q8_0, Q4_K, Q6_K, F32, BF16 | 3.63 GiB | 5.4% |
+
+**Effective 3.28 bits per weight, not 1.56.** Seventy percent of the bytes are ordinary 4-bit. Unsloth's dynamic quants spend the bit budget where it matters and squeeze the rest, and the biggest thing getting squeezed is that 51B lookup table.
+
+### What it costs you
+
+A couple of prompts coming back correct is not evidence that a quant is fine, so let's measure it with perplexity.
+
+Quick definition, because the name is confusing and there is now a search company called Perplexity that has nothing to do with this. **Perplexity scores how surprised a model is by text it has never seen.** You feed it real writing and at each word check what probability it gave to the word that actually came next, then boil that down to roughly "how many words was it torn between at each step". **Lower is better.** It runs locally, no API involved.
+
+```bash
+# llama.cpp's own scripts/get-wikitext-2.sh is broken: it does not follow the
+# S3 redirect and leaves you with a 467-byte XML error instead of a zip.
+curl -sL -o /tmp/wt2.zip \
+  "https://huggingface.co/datasets/ggml-org/ci/resolve/main/wikitext-2-raw-v1.zip"
+unzip -oq /tmp/wt2.zip -d /tmp/
+
+~/llama-qwen4exp/build/bin/llama-perplexity \
+  -m ~/qwen38/gguf/UD-IQ1_S/Qwen3.8-Flash-Next-UD-IQ1_S-00001-of-00003.gguf \
+  -f /tmp/wikitext-2-raw/wiki.test.raw -ngl 999 -c 2048
+```
+
+```
+Final estimate: PPL = 4.7876 +/- 0.02848
+```
+
+That is wikitext-2, 145 chunks at context 2048. Daniel Han reports 4.0068 for llama.cpp at high precision and 4.0126 for the reference implementation in the PR write-up. Those are **his** numbers, not mine, and I could not reproduce them because no higher-precision GGUF of this model has been published yet.
+
+Taking his figure at face value, this quant costs roughly 19% higher perplexity. A normal Q4_K_M usually costs 1 to 3%. So it is a real trade, not a free lunch. It answers questions correctly in casual use, and I would still not reach for it when accuracy matters.
+
+## Part 2: RTX PRO 6000 with vLLM
+
+vLLM had day-zero support with a dedicated image, so this side was much less work than the Spark. Getting the 185 GB checkpoint down was the slow part:
+
+```bash
+docker pull vllm/vllm-openai:qwen38-flash-next
+HF_HUB_DISABLE_XET=1 hf download Qwen/Qwen3.8-Flash-Next-FP8 --local-dir /llm/qwen38/fp8
+```
+
+HuggingFace crawled from this box, so I pulled it from ModelScope instead, which serves the identical 145-file manifest.
+
+```bash
+docker run -d --name q38-tp2 --gpus '"device=1,4"' --ipc=host --shm-size=32g \
+  -v /llm/qwen38:/llm/qwen38 -e VLLM_PLE_CPU_OFFLOAD=1 -p 8010:8000 \
+  vllm/vllm-openai:qwen38-flash-next \
+  --model /llm/qwen38/fp8 --served-model-name q38 \
+  --tensor-parallel-size 2 --gpu-memory-utilization 0.90 \
+  --max-model-len 32768 --max-num-seqs 32 \
+  --enable-prefix-caching --no-enable-flashinfer-autotune \
+  --reasoning-parser qwen3
+```
+
+If you leave out `--reasoning-parser qwen3`, the model's thinking text ends up inside the normal reply content. Ask for it.
+
+For the TP4 runs it is the same command with `--gpus '"device=1,4,5,6"'` and
+`--tensor-parallel-size 4`. To compare against keeping the N-gram table on the GPU, set
+`-e VLLM_PLE_CPU_OFFLOAD=0`. For speculative decoding, append the MTP config shown later.
+
+Every config below was benchmarked with exactly the same command, only `$C` changing:
+
+```bash
+docker exec q38-tp2 vllm bench serve \
+  --backend openai-chat --model /llm/qwen38/fp8 --served-model-name q38 \
+  --endpoint /v1/chat/completions --base-url http://localhost:8000 \
+  --dataset-name random --random-input-len 1024 --random-output-len 512 \
+  --max-concurrency $C --num-prompts $((C*4)) --ignore-eos
+```
+
+Before benchmarking anything I asked it a question with a known answer, because a healthy `/health` endpoint does not mean the model is producing sense. It got "a train leaves at 14:35 and arrives at 21:10 the next day" right at 30 hours 35 minutes, so we are good.
+
+### How many GPUs do you need?
+
+`--tensor-parallel-size` (TP) is how many GPUs each layer's weight matrices are sliced across. Not "layer 1 on this GPU, layer 2 on that one", that is pipeline parallelism. TP cuts every matrix into pieces, so each GPU computes a partial answer and then they all swap and add. That swap is an all-reduce and it happens at every layer, for every token.
+
+With the N-gram table offloaded to host RAM, the weights need about 123 GiB on the GPU, and each card has 95.6 GiB. So one card should not be enough. It is not:
+
+```
+torch.OutOfMemoryError: CUDA out of memory. GPU 0 has a total capacity of
+95.01 GiB of which 210.38 MiB is free ... 94.02 GiB is allocated by PyTorch
+```
+
+TP3, by the way, is not an option at all. I assumed this was about the 2 KV heads on the attention layers, so I tried it to be sure, and the real reason is different:
+
+```
+AssertionError: 16 is not divisible by 3
+```
+
+The 16 is `linear_num_key_heads`, the key heads in the Gated DeltaNet layers, and those are 36 of the 48 layers. Your TP size has to divide 16, so the usable values are 1, 2, 4, 8 and 16.
+
+Here is TP2 and TP4, benchmarked with 1024 input and 512 output tokens:
+
+| Config | 1 stream | 32 streams | Median TPOT, 1 stream | KV cache |
+| --- | --- | --- | --- | --- |
+| TP1 | out of memory | - | - | - |
+| TP2 | **81.45 tok/s** | 739.06 tok/s | 10.01 ms | 19.6 GiB |
+| TP4 | 64.61 tok/s | **805.38 tok/s** | 13.85 ms | 48.74 GiB |
+
+**Two GPUs are 26% faster than four for a single user.** That surprised me until I looked at the wiring. This box has no NVLink, and `nvidia-smi topo -m` reports every GPU pair as `SYS`, meaning traffic crosses PCIe and the CPU sockets. Now remember only 6B parameters are active per token, so there is barely any maths to divide up. Splitting a tiny job across more GPUs mostly means paying more postage. The extra cards still earn their keep under load, where the bigger KV cache lets you batch 32 users and win on total throughput.
+
+The practical rule: use the smallest TP that fits in memory, and only go wider when you need the KV cache for longer context or more users.
+
+There is also no pipeline-parallel escape hatch here. The vLLM recipe states the N-gram embedding does not support pipeline parallelism, so on a box with bad interconnect you cannot fall back to PP the way you normally would.
+
+### What does offloading the N-gram table actually cost?
+
+The tech report implies host prefetching is nearly free. On this hardware it is cheap but not free:
+
+| TP4 config | 1 stream | 32 streams | KV cache |
+| --- | --- | --- | --- |
+| N-gram table on GPU | 74.84 tok/s | 772.16 tok/s | 4.7 GiB |
+| N-gram table on host | 64.61 tok/s | 805.38 tok/s | 48.74 GiB |
+
+Keeping the table on the GPU is about 16% faster for one user, because you skip the round trip over PCIe. But it eats the memory your KV cache wanted, and it collapses from 48.74 GiB to 4.7 GiB. Maximum concurrency drops from 74x to 10x.
+
+Unless you are serving exactly one person, offload it.
+
+### Speculative decoding, and why benchmark workload decides the answer
+
+The model ships an MTP head, so let's turn it on:
+
+```bash
+--speculative-config '{"method":"mtp","num_speculative_tokens":3}'
+```
+
+Measured with the same `vllm bench serve` command as everything above, which uses
+synthetic random tokens:
+
+| TP4 config | 1 stream | 32 streams | Median TTFT at 32 |
+| --- | --- | --- | --- |
+| without MTP | 64.61 tok/s | 805.38 tok/s | 2578 ms |
+| with MTP | **87.87 tok/s** | 693.72 tok/s | **588 ms** |
+
+That reads as 36% faster for one user, at the cost of 14% of peak throughput. I nearly
+left it there. Then someone asked what the acceptance rate was, which is the number that
+actually decides whether speculative decoding is worth anything, and I had not measured it.
+
+vLLM exposes it. Here is what the counters say:
+
+| workload | acceptance | mean accepted length |
+| --- | --- | --- |
+| synthetic random, 1024 in / 512 out | 71.3% | 3.14 of max 4 |
+| synthetic random, 512 in / 256 out | 84.4% | 3.53 of max 4 |
+| **real code and prose prompts, greedy** | **55.3%** | **2.66 of max 4** |
+
+Real prompts accept considerably worse than random ones. That is the opposite of what I
+expected, and the reason is worth knowing if you benchmark anything: `--dataset-name random`
+feeds the model random token IDs. Given nonsense, it produces repetitive low-entropy text,
+and a draft head predicts repetitive text very easily. **Random-token benchmarks flatter
+speculative decoding.**
+
+So I re-ran on five genuine prompts, an LRU cache in Python, a Kubernetes explanation, a Go
+CSV reader, a bash one-liner and a plain-English TP explainer, greedy decoding, single
+stream, measuring wall clock:
+
+| TP4, real prompts, temp 0 | tok/s |
+| --- | --- |
+| without MTP | 49.90 |
+| with MTP | **124.93** |
+
+**2.5x.** Far better than the 36% the synthetic benchmark implied, despite the lower
+acceptance rate. Note this is a different measurement method from the table above, wall
+clock across whole requests rather than vLLM's output-token throughput, so compare within
+each table and not across them.
+
+The lesson is not that one number is right and the other wrong. Both are real. It is that
+a speculative decoding result without its workload and its acceptance rate does not tell
+you anything you can act on.
+
+### Does MTP change the answer?
+
+Speculative decoding is supposed to be lossless. The draft head proposes, the full model
+verifies, and rejected tokens are discarded, so the output distribution should be
+untouched. Worth checking rather than trusting.
+
+Same prompt, temperature 0, seed 42, five runs each, on the same four GPUs with the same
+checkpoint, MTP the only variable:
+
+```
+MTP off : 3575aff8aa9c1df5  x5
+MTP on  : 3575aff8aa9c1df5  x5
+```
+
+Byte-identical, and identical to each other. Speculative decoding here costs you nothing in
+output fidelity. Worth knowing if you cache responses or snapshot-test them.
+
+For reference, llama.cpp on the Spark is also fully deterministic across five runs, though
+that is a different box and a different quant so the hashes are not comparable.
+
+One caveat on all of this: single stream. Under continuous batching, vLLM's batch
+composition varies between runs and that is where reproducibility usually breaks, not from
+MTP.
+
+### One card, with NVFP4
+
+There is a community NVFP4 build from RadixArk. It is documented for SGLang, but vLLM picked it up anyway (`Detected ModelOpt NVFP4 checkpoint`):
+
+```bash
+docker run -d --name q38-nvfp4-tp1 --gpus '"device=1"' --ipc=host --shm-size=32g \
+  -v /llm/qwen38:/llm/qwen38 -e VLLM_PLE_CPU_OFFLOAD=1 -p 8012:8000 \
+  vllm/vllm-openai:qwen38-flash-next \
+  --model /llm/qwen38/nvfp4 --served-model-name q38 \
+  --tensor-parallel-size 1 --gpu-memory-utilization 0.93 \
+  --max-model-len 16384 --max-num-seqs 16 \
+  --no-enable-flashinfer-autotune --reasoning-parser qwen3
+```
+
+The weights genuinely fit on a single card:
+
+```
+Actual usage is 74.75 GiB for consumed memory (weights + non-torch),
+1.85 GiB for peak activation, and 0.28 GiB for CUDAGraph memory.
+Current kv cache memory in use is 11.76 GiB.
+```
+
+74.75 GiB of weights on one 95.6 GiB card, with 11.76 GiB of KV cache left over. So the memory answer is yes.
+
+I cannot give you a speed number though. The engine finished loading, captured its CUDA graphs at 06:34:14, and then the API server never came up. Twenty minutes later `Application startup complete` had still not been printed a single time, `/health` was refusing connections, and one CPU core was spinning. The only errors in the log were harmless transformers docstring warnings. RadixArk documented this checkpoint for SGLang and not vLLM, so I am not shocked, but I am not going to invent a number I did not measure.
+
+## Both machines side by side
+
+![Qwen3.8-Flash-Next benchmarks on DGX Spark and RTX PRO 6000](/img/blog/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000/benchmarks-both-machines.png)
+
+| | DGX Spark | RTX PRO 6000 |
+| --- | --- | --- |
+| Build | GGUF UD-IQ1_S, 3.28 bpw | FP8, 172.8 GiB |
+| Engine | llama.cpp (unmerged PR) | vLLM (day-zero support) |
+| GPUs used | 1 | 2 or 4 |
+| Best single stream | 34.5 tok/s | 87.9 tok/s (TP4 + MTP) |
+| Best throughput | not measured | 805 tok/s at 32 streams |
+| Memory | 72.5 of 121 GiB | ~66 GiB per GPU at TP2 |
+
+These are not really competing. One is a desktop box running a heavily compressed build, the other is four datacenter cards running the full FP8 checkpoint. What I find genuinely interesting is that the gap is only about 2.5x.
+
+## What I did not measure
+
+To be straight about the edges of this post:
+
+- **No high-precision perplexity baseline.** The 4.0068 and 4.0126 figures are the PR author's, and no higher-precision GGUF exists yet for me to check them against.
+- **No proof that QSA causes the flat prefill curve.** It is consistent with the architecture, but I ran no ablation.
+- **No NVFP4 throughput.** The weights fit on one card, the server never came up.
+- **No concurrency sweep on the Spark.** llama-bench numbers there are single stream.
+- **No BF16 run anywhere.** At 335 GiB it was not worth the download.
+
+## Thanks
+
+Two things made the Spark side of this possible and both came from the same place.
+
+[Daniel Han](https://x.com/danielhanchen) at [Unsloth](https://x.com/UnslothAI) wrote the
+llama.cpp support in PR [#27742](https://github.com/ggml-org/llama.cpp/pull/27742), every
+commit of it, within a day of the model landing. He also published the dynamic quant that
+is the only build small enough to fit on one Spark, and his write-up of the PR includes
+perplexity and top-1 agreement numbers against the reference implementation, which is what
+let me sanity check my own. That is a lot of careful work given away for free.
+
+Thanks also to the [llama.cpp](https://github.com/ggml-org/llama.cpp) maintainers, and to
+[RadixArk](https://huggingface.co/RadixArk/Qwen3.8-Flash-Next-NVFP4) for the NVFP4
+conversion, which fit on a single RTX PRO 6000 even though I could not get it serving.
+
+## Wrapping up
+
+The claim that started this was right: NVFP4 does not fit on one DGX Spark. But a single Spark still runs this 177B model at 34.5 tok/s through llama.cpp, because Unsloth's GGUF is the one build that also compresses the 51B N-gram table, and it costs you about 19% perplexity to do it.
+
+On the RTX PRO 6000 box the surprise was that two GPUs beat four for a single user. If you are sizing hardware for sparse MoE models, more cards past the point where the weights fit will buy you batch throughput and KV cache, not lower latency, especially without NVLink.
+
+The scripts, recipes and raw benchmark output are in the repo if you want to reproduce any of this. If you run it on different hardware I would love to see your numbers, so send them over on X [@SaiyamPathak](https://x.com/SaiyamPathak).
+
+---
+
 # The Local LLM Glossary: Every Term, Flag, and Number in Plain English
 
 - Canonical: https://blog.kubesimplify.com/local-llm-glossary
