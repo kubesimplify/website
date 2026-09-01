@@ -401,8 +401,7 @@ root@utho-gpu-rtxpro6000-8-62383:~# docker exec vllm-tp4 vllm bench serve \
   --served-model-name qwen3-235b \
   --base-url http://localhost:8000 \
   --dataset-name random --random-input-len 1024 --random-output-len 256 \
-  --max-concurrency 1 --num-prompts 12 --seed 42 --ignore-eos \
-  --no-enable-prefix-caching
+  --max-concurrency 1 --num-prompts 12 --seed 42 --ignore-eos
 
 Maximum request concurrency: 1
 100%|██████████| 12/12 [00:55<00:00,  4.62s/it]
@@ -451,7 +450,7 @@ So the cost of oversubscribing is waiting time, not failures: throughput stays f
 
 One subtlety: 32 is not the only ceiling in play. The startup log said this configuration holds about 19 full-length 32k conversations in its KV cache, and our benchmark requests are short, so `--max-num-seqs` is the limit that binds here. With long conversations the cache fills first, and instead of queueing politely vLLM starts preempting: it evicts a running request's cache and recomputes it later. Which ceiling you hit first depends entirely on how long your requests are.
 
-That `--no-enable-prefix-caching` on the end is not decoration, and we learned it the hard way. With a fixed `--seed 42` and prefix caching on, re-running against a warm server made time to first token "improve" from 265 ms to 61 ms, purely because we had just sent it those same prompts. If you would rather keep caching on, vary the seed between runs instead. Either way, do not compare a cold run against a warm one.
+One trap to know before you re-run this. vLLM caches prompt prefixes by default, so firing the same `--seed 42` prompts at a server that has already seen them measures the cache, not the model: ours reported time to first token "improving" from 265 ms to 61 ms that way, which was meaningless. Note that `--no-enable-prefix-caching` is a `vllm serve` flag, not a `vllm bench serve` one, so you cannot switch it off from the benchmark side. Either vary `--seed` between runs, or restart the server with caching disabled. Every figure below comes from a freshly started server, so each configuration began with an empty cache.
 
 ### The memory side
 
