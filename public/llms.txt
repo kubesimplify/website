@@ -4,7 +4,7 @@
 
 ## About
 
-Kubesimplify is a community-driven publication on cloud-native technologies, with 199 in-depth technical articles by 62 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+Kubesimplify is a community-driven publication on cloud-native technologies, with 201 in-depth technical articles by 63 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
 
 Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
 
@@ -34,9 +34,11 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
 - Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
 
-## Recent posts (most recent 30 of 199)
+## Recent posts (most recent 30 of 201)
 
 - [Running a big LLM across multiple GPUs with vLLM](https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm) (2026-08-31). A runbook for serving a model too big for one GPU: download to serving in seven steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards.
+- [Zero Trust in Practice: Migrating from Istio Sidecar to Ambient Mode](https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient) (2026-08-31). A hands-on comparison of Istio sidecar and ambient mode for zero-trust service mesh. Same app, same policy, two architectures proven step by step on a local cluster.
+- [Running Qwen3.8-Flash-Next on a DGX Spark and RTX PRO 6000](https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000) (2026-08-27)
 - [The Local LLM Glossary: Every Term, Flag, and Number in Plain English](https://blog.kubesimplify.com/local-llm-glossary) (2026-08-18). Plain-English definitions for every term you hit in local LLM posts: prefill and decode, tokens per second, FP8 and NVFP4, Q4_K_M, KV cache, YaRN, Gated DeltaNet, speculative decoding, and every vLLM, llama.cpp, and Ollama flag worth knowing.
 - [Running Qwen3.8-27B on DGX Spark](https://blog.kubesimplify.com/qwen3-8-27b-on-dgx-spark) (2026-08-17). Qwen3.8-27B on DGX Spark with llama.cpp, Ollama, vLLM, and SGLang: the recipes, the tokens per second I measured, MTP speculative decoding, and the sharp edges I hit along the way.
 - [I Ran an AI SRE Copilot on My Own Hardware. Here Is What It Actually Does.](https://blog.kubesimplify.com/nudgebee-ai-sre-copilot-hands-on) (2026-08-17). Running NudgeBee v1.4.0 end to end - a self-hosted AIOps platform behind AI-SRE, AI-FinOps, AI-K8sOps, and agentic automation - on a Mac, a kiac cluster, and a DGX Spark.
@@ -64,12 +66,10 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [Day 6: Run an LLM on Your Laptop - With Docker](https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker) (2026-04-30). \"Pull AI models from Docker Hub, run them locally with GPU acceleration, and build an AI-powered app
 - [A Kubeconfig for GKE That Doesn't Need gcloud](https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud) (2026-04-29)
 - [Day 5: Docker Compose - How Docker Actually Gets Used](https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used) (2026-04-28)
-- [What Actually Happens When kube-scheduler Picks a Node (13 Stages Inside Kubernetes)](https://blog.kubesimplify.com/kube-scheduler-deep-dive) (2026-04-28). How kube-scheduler picks a node: 13 framework stages, 14 Filter plugins, 9 Score plugins, live preemption demo.
-- [Day 4: Breaking Isolation on Purpose - Volumes, Networks, and the Real World](https://blog.kubesimplify.com/day-4-breaking-isolation-on-purpose-volumes-networks-and-the-real-world) (2026-04-27)
 
 ## Topics covered (auto-derived from tags)
 
-- kubernetes (100 articles): https://blog.kubesimplify.com/tag/kubernetes
+- kubernetes (101 articles): https://blog.kubesimplify.com/tag/kubernetes
 - devops (71 articles): https://blog.kubesimplify.com/tag/devops
 - docker (31 articles): https://blog.kubesimplify.com/tag/docker
 - k8s (27 articles): https://blog.kubesimplify.com/tag/k8s
@@ -77,7 +77,7 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - containers (17 articles): https://blog.kubesimplify.com/tag/containers
 - cloud (16 articles): https://blog.kubesimplify.com/tag/cloud
 - nvidia (15 articles): https://blog.kubesimplify.com/tag/nvidia
-- llm (13 articles): https://blog.kubesimplify.com/tag/llm
+- llm (14 articles): https://blog.kubesimplify.com/tag/llm
 - aws (12 articles): https://blog.kubesimplify.com/tag/aws
 - cloud-native (11 articles): https://blog.kubesimplify.com/tag/cloud-native
 - security (11 articles): https://blog.kubesimplify.com/tag/security
@@ -86,18 +86,18 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - git (9 articles): https://blog.kubesimplify.com/tag/git
 - linux-for-beginners (9 articles): https://blog.kubesimplify.com/tag/linux-for-beginners
 - platform-engineering (8 articles): https://blog.kubesimplify.com/tag/platform-engineering
+- ai (8 articles): https://blog.kubesimplify.com/tag/ai
 - local-ai (8 articles): https://blog.kubesimplify.com/tag/local-ai
 - github (8 articles): https://blog.kubesimplify.com/tag/github
 - terraform (8 articles): https://blog.kubesimplify.com/tag/terraform
-- ai (7 articles): https://blog.kubesimplify.com/tag/ai
+- gpu (7 articles): https://blog.kubesimplify.com/tag/gpu
 - docker-images (7 articles): https://blog.kubesimplify.com/tag/docker-images
 - kubesimplify (7 articles): https://blog.kubesimplify.com/tag/kubesimplify
 - linux-basics (7 articles): https://blog.kubesimplify.com/tag/linux-basics
-- gpu (6 articles): https://blog.kubesimplify.com/tag/gpu
 
 ## Top contributors
 
-- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (40 posts)
+- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (41 posts)
 - [Saloni Narang](https://blog.kubesimplify.com/author/saloni-narang) (24 posts)
 - [Kunal Verma](https://blog.kubesimplify.com/author/kunal-verma) (12 posts)
 - [Dipankar Das](https://blog.kubesimplify.com/author/dipankar-das) (9 posts)

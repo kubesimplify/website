@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import productsData from '@/content/products.json';
+import { products } from '@/lib/products';
 import pathsData from '@/content/learning-paths.json';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
 const YouTubeFeed = dynamic(() => import('@/components/YouTubeFeed'), { ssr: false });
 const BlogFeed = dynamic(() => import('@/components/BlogFeed'), { ssr: false });
 
-const { products } = productsData;
 const { paths } = pathsData;
 
 /* ═══════════════════════════════════════════

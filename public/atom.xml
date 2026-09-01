@@ -5,7 +5,7 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-09-01T09:53:53.388Z</updated>
+  <updated>2026-09-01T11:09:44.064Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
@@ -22,6 +22,32 @@
     <category term="nvidia"/>
     <category term="llm"/>
     <category term="platform-engineering"/>
+  </entry>
+  <entry>
+    <title>Zero Trust in Practice: Migrating from Istio Sidecar to Ambient Mode</title>
+    <link href="https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient"/>
+    <id>https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient</id>
+    <updated>2026-08-31T10:00:00.000Z</updated>
+    <published>2026-08-31T10:00:00.000Z</published>
+    <summary>A hands-on comparison of Istio sidecar and ambient mode for zero-trust service mesh. Same app, same policy, two architectures proven step by step on a local cluster.</summary>
+    <category term="istio"/>
+    <category term="service-mesh"/>
+    <category term="zero-trust"/>
+    <category term="kubernetes"/>
+    <category term="ambient-mesh"/>
+  </entry>
+  <entry>
+    <title>Running Qwen3.8-Flash-Next on a DGX Spark and RTX PRO 6000</title>
+    <link href="https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000"/>
+    <id>https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000</id>
+    <updated>2026-08-27T06:30:00.000Z</updated>
+    <published>2026-08-27T06:30:00.000Z</published>
+    <summary></summary>
+    <category term="ai"/>
+    <category term="llm"/>
+    <category term="vllm"/>
+    <category term="llamacpp"/>
+    <category term="gpu"/>
   </entry>
   <entry>
     <title>The Local LLM Glossary: Every Term, Flag, and Number in Plain English</title>

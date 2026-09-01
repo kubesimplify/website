@@ -912,6 +912,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000",
+      "destination": "https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000",
+      "permanent": true
+    },
+    {
       "source": "/blog/sharing-gpus-in-kubernetes-with-hami",
       "destination": "https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami",
       "permanent": true
@@ -1049,6 +1054,11 @@
     {
       "source": "/blog/yours-kindly-drone",
       "destination": "https://blog.kubesimplify.com/yours-kindly-drone",
+      "permanent": true
+    },
+    {
+      "source": "/blog/zero-trust-istio-sidecar-vs-ambient",
+      "destination": "https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient",
       "permanent": true
     },
     {
@@ -2933,6 +2943,17 @@
       ]
     },
     {
+      "source": "/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000",
+      "destination": "https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
       "source": "/sharing-gpus-in-kubernetes-with-hami",
       "destination": "https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami",
       "permanent": true,
@@ -3232,6 +3253,17 @@
     {
       "source": "/yours-kindly-drone",
       "destination": "https://blog.kubesimplify.com/yours-kindly-drone",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/zero-trust-istio-sidecar-vs-ambient",
+      "destination": "https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient",
       "permanent": true,
       "has": [
         {

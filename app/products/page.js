@@ -1,8 +1,6 @@
 import Link from 'next/link';
-import productsData from '@/content/products.json';
+import { products } from '@/lib/products';
 import { safeJsonLd } from '@/lib/jsonld';
-
-const { products } = productsData;
 
 export const metadata = {
   title: 'Open Source Products',

@@ -17,6 +17,22 @@
       <category>vllm</category><category>gpu</category><category>nvidia</category><category>llm</category><category>platform-engineering</category>
     </item>
     <item>
+      <title>Zero Trust in Practice: Migrating from Istio Sidecar to Ambient Mode</title>
+      <link>https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient</guid>
+      <pubDate>Mon, 31 Aug 2026 10:00:00 GMT</pubDate>
+      <description>A hands-on comparison of Istio sidecar and ambient mode for zero-trust service mesh. Same app, same policy, two architectures proven step by step on a local cluster.</description>
+      <category>istio</category><category>service-mesh</category><category>zero-trust</category><category>kubernetes</category><category>ambient-mesh</category>
+    </item>
+    <item>
+      <title>Running Qwen3.8-Flash-Next on a DGX Spark and RTX PRO 6000</title>
+      <link>https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000</guid>
+      <pubDate>Thu, 27 Aug 2026 06:30:00 GMT</pubDate>
+      <description></description>
+      <category>ai</category><category>llm</category><category>vllm</category><category>llamacpp</category><category>gpu</category>
+    </item>
+    <item>
       <title>The Local LLM Glossary: Every Term, Flag, and Number in Plain English</title>
       <link>https://blog.kubesimplify.com/local-llm-glossary</link>
       <guid isPermaLink="true">https://blog.kubesimplify.com/local-llm-glossary</guid>
