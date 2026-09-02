@@ -562,6 +562,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/kagent-part-1-local-ai-agent-kubernetes",
+      "destination": "https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes",
+      "permanent": true
+    },
+    {
       "source": "/blog/keptn-getting-started",
       "destination": "https://blog.kubesimplify.com/keptn-getting-started",
       "permanent": true
@@ -2164,6 +2169,17 @@
     {
       "source": "/k8sgpt-tutorial-when-kubernetes-meets-ai",
       "destination": "https://blog.kubesimplify.com/k8sgpt-tutorial-when-kubernetes-meets-ai",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kagent-part-1-local-ai-agent-kubernetes",
+      "destination": "https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes",
       "permanent": true,
       "has": [
         {
