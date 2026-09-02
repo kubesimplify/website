@@ -5,7 +5,7 @@
   <link href="https://blog.kubesimplify.com/atom.xml" rel="self"/>
   <link href="https://blog.kubesimplify.com/"/>
   <id>https://blog.kubesimplify.com/</id>
-  <updated>2026-09-01T11:10:35.934Z</updated>
+  <updated>2026-09-02T10:41:19.326Z</updated>
   <author>
     <name>Kubesimplify</name>
     <email>hello@kubesimplify.com</email>
@@ -48,6 +48,18 @@
     <category term="vllm"/>
     <category term="llamacpp"/>
     <category term="gpu"/>
+  </entry>
+  <entry>
+    <title>kagent Part 1: Building a Local, Kubernetes-Native AI Agent with Human-in-the-Loop Approval</title>
+    <link href="https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes"/>
+    <id>https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes</id>
+    <updated>2026-08-18T10:00:00.000Z</updated>
+    <published>2026-08-18T10:00:00.000Z</published>
+    <summary>A hands-on lab building a kagent AI agent on a local kind cluster with Ollama: read-only and write-capable agents, human-in-the-loop approval gates, and a practical guide for common issues.</summary>
+    <category term="kagent"/>
+    <category term="kubernetes"/>
+    <category term="ai-agents"/>
+    <category term="human-in-the-loop"/>
   </entry>
   <entry>
     <title>The Local LLM Glossary: Every Term, Flag, and Number in Plain English</title>
