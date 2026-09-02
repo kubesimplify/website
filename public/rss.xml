@@ -6,8 +6,32 @@
     <atom:link href="https://blog.kubesimplify.com/rss.xml" rel="self" type="application/rss+xml"/>
     <description>Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 01 Sep 2026 10:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 16 Sep 2026 10:00:00 GMT</lastBuildDate>
     <generator>Kubesimplify static blog</generator>
+    <item>
+      <title>Inside Kueue: How Kubernetes Decides What Runs Next</title>
+      <link>https://blog.kubesimplify.com/inside-kueue-how-kubernetes-decides-what-runs-next</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/inside-kueue-how-kubernetes-decides-what-runs-next</guid>
+      <pubDate>Wed, 16 Sep 2026 10:00:00 GMT</pubDate>
+      <description>See how Kueue brings order to overloaded Kubernetes clusters by intelligently managing batch workloads with a hands on demo.</description>
+      <category>kubernetes</category><category>kueue</category><category>scheduling</category><category>batch-workloads</category>
+    </item>
+    <item>
+      <title>Kubernetes observability in 2026 with OpenObserve 1.0 as the backend</title>
+      <link>https://blog.kubesimplify.com/kubernetes-observability-in-2026-with-openobserve</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kubernetes-observability-in-2026-with-openobserve</guid>
+      <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
+      <description>A 31 ms full-text search over 4.2 million Kubernetes log rows, and a whole cluster on 43m CPU under 600 MiB: a hands-on run of OpenObserve 1.0 as the backend.</description>
+      <category>kubernetes</category><category>observability</category><category>opentelemetry</category><category>openobserve</category>
+    </item>
+    <item>
+      <title>kagent Part 1: Building a Local, Kubernetes-Native AI Agent with Human-in-the-Loop Approval</title>
+      <link>https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes</link>
+      <guid isPermaLink="true">https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes</guid>
+      <pubDate>Tue, 08 Sep 2026 10:00:00 GMT</pubDate>
+      <description>A hands-on lab building a kagent AI agent on a local kind cluster with Ollama: read-only and write-capable agents, human-in-the-loop approval gates, and a practical guide for common issues.</description>
+      <category>kagent</category><category>kubernetes</category><category>ai-agents</category><category>human-in-the-loop</category>
+    </item>
     <item>
       <title>Running a big LLM across multiple GPUs with vLLM</title>
       <link>https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm</link>

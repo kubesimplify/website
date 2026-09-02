@@ -4,7 +4,7 @@
 
 ## About
 
-Kubesimplify is a community-driven publication on cloud-native technologies, with 201 in-depth technical articles by 63 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+Kubesimplify is a community-driven publication on cloud-native technologies, with 204 in-depth technical articles by 64 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
 
 Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
 
@@ -34,8 +34,11 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
 - Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
 
-## Recent posts (most recent 30 of 201)
+## Recent posts (most recent 30 of 204)
 
+- [Inside Kueue: How Kubernetes Decides What Runs Next](https://blog.kubesimplify.com/inside-kueue-how-kubernetes-decides-what-runs-next) (2026-09-16). See how Kueue brings order to overloaded Kubernetes clusters by intelligently managing batch workloads with a hands on demo.
+- [Kubernetes observability in 2026 with OpenObserve 1.0 as the backend](https://blog.kubesimplify.com/kubernetes-observability-in-2026-with-openobserve) (2026-09-15). A 31 ms full-text search over 4.2 million Kubernetes log rows, and a whole cluster on 43m CPU under 600 MiB: a hands-on run of OpenObserve 1.0 as the backend.
+- [kagent Part 1: Building a Local, Kubernetes-Native AI Agent with Human-in-the-Loop Approval](https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes) (2026-09-08). A hands-on lab building a kagent AI agent on a local kind cluster with Ollama: read-only and write-capable agents, human-in-the-loop approval gates, and a practical guide for common issues.
 - [Running a big LLM across multiple GPUs with vLLM](https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm) (2026-09-01). A runbook for serving a model too big for one GPU: download to serving in seven steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards.
 - [Zero Trust in Practice: Migrating from Istio Sidecar to Ambient Mode](https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient) (2026-08-31). A hands-on comparison of Istio sidecar and ambient mode for zero-trust service mesh. Same app, same policy, two architectures proven step by step on a local cluster.
 - [Running Qwen3.8-Flash-Next on a DGX Spark and RTX PRO 6000](https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000) (2026-08-27)
@@ -63,13 +66,10 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - [NVCF Is Now Open Source: Inside NVIDIA's GPU Function Platform](https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform) (2026-05-11)
 - [How a Kubernetes Service Actually Works (and All 5 Types You Need)](https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need) (2026-05-05)
 - [Day 7: Ship It - and What Comes Next](https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next) (2026-05-04). Your container runs as root and has 18 CVEs. A Docker Captain's guide to hardening, Scout policies, DHI, Sandboxes, and what comes after Docker. 
-- [Day 6: Run an LLM on Your Laptop - With Docker](https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker) (2026-04-30). \"Pull AI models from Docker Hub, run them locally with GPU acceleration, and build an AI-powered app
-- [A Kubeconfig for GKE That Doesn't Need gcloud](https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud) (2026-04-29)
-- [Day 5: Docker Compose - How Docker Actually Gets Used](https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used) (2026-04-28)
 
 ## Topics covered (auto-derived from tags)
 
-- kubernetes (101 articles): https://blog.kubesimplify.com/tag/kubernetes
+- kubernetes (104 articles): https://blog.kubesimplify.com/tag/kubernetes
 - devops (71 articles): https://blog.kubesimplify.com/tag/devops
 - docker (31 articles): https://blog.kubesimplify.com/tag/docker
 - k8s (27 articles): https://blog.kubesimplify.com/tag/k8s
@@ -90,14 +90,14 @@ Authoritative, practitioner-written, citation-friendly. Articles include code ex
 - local-ai (8 articles): https://blog.kubesimplify.com/tag/local-ai
 - github (8 articles): https://blog.kubesimplify.com/tag/github
 - terraform (8 articles): https://blog.kubesimplify.com/tag/terraform
+- ai-agents (7 articles): https://blog.kubesimplify.com/tag/ai-agents
 - gpu (7 articles): https://blog.kubesimplify.com/tag/gpu
 - docker-images (7 articles): https://blog.kubesimplify.com/tag/docker-images
 - kubesimplify (7 articles): https://blog.kubesimplify.com/tag/kubesimplify
-- linux-basics (7 articles): https://blog.kubesimplify.com/tag/linux-basics
 
 ## Top contributors
 
-- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (41 posts)
+- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (42 posts)
 - [Saloni Narang](https://blog.kubesimplify.com/author/saloni-narang) (24 posts)
 - [Kunal Verma](https://blog.kubesimplify.com/author/kunal-verma) (12 posts)
 - [Dipankar Das](https://blog.kubesimplify.com/author/dipankar-das) (9 posts)
