@@ -100,6 +100,7 @@
 /blog/important-concepts-of-operating-systems                                          /important-concepts-of-operating-systems  301!
 /blog/ing-switch-119-annotations-gateway-api-traefik-impact-ratings                    /ing-switch-119-annotations-gateway-api-traefik-impact-ratings  301!
 /blog/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days /ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days  301!
+/blog/inside-kueue-how-kubernetes-decides-what-runs-next                               /inside-kueue-how-kubernetes-decides-what-runs-next  301!
 /blog/installing-prometheus-with-selinux                                               /installing-prometheus-with-selinux  301!
 /blog/introducing-kiac-kubernetes-in-apple-containers                                  /introducing-kiac-kubernetes-in-apple-containers  301!
 /blog/introducing-unikraft-lightweight-virtualization-using-unikernels                 /introducing-unikraft-lightweight-virtualization-using-unikernels  301!
@@ -328,6 +329,7 @@
 /important-concepts-of-operating-systems                                          /blog/important-concepts-of-operating-systems  200!
 /ing-switch-119-annotations-gateway-api-traefik-impact-ratings                    /blog/ing-switch-119-annotations-gateway-api-traefik-impact-ratings  200!
 /ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days /blog/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days  200!
+/inside-kueue-how-kubernetes-decides-what-runs-next                               /blog/inside-kueue-how-kubernetes-decides-what-runs-next  200!
 /installing-prometheus-with-selinux                                               /blog/installing-prometheus-with-selinux  200!
 /introducing-kiac-kubernetes-in-apple-containers                                  /blog/introducing-kiac-kubernetes-in-apple-containers  200!
 /introducing-unikraft-lightweight-virtualization-using-unikernels                 /blog/introducing-unikraft-lightweight-virtualization-using-unikernels  200!
