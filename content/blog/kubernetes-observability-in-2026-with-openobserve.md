@@ -290,6 +290,7 @@ Parquet, a Puffin index container, Vortex. To look inside an index, OpenObserve 
 NODE=$(kubectl -n openobserve get pod o2-openobserve-standalone-0 -o jsonpath='{.spec.nodeName}')
 TTV=$(kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c \
   "cd /proc/1/root/data/stream && find files/default/index/default_logs -name '*.ttv' 2>/dev/null | head -1")
+kubectl -n openobserve delete job ttv-inspect --ignore-not-found   # a Job's template is immutable, so re-runs need this
 sed -e "s#NODE_NAME#$NODE#" -e "s#TTV_PATH#/data/stream/$TTV#" manifests/20-ttv-inspect-job.yaml | kubectl apply -f -
 kubectl -n openobserve wait --for=condition=complete job/ttv-inspect --timeout=180s
 kubectl -n openobserve logs job/ttv-inspect
