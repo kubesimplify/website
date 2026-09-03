@@ -62,6 +62,18 @@ That gives us a bar to hold any backend to:
 
 OpenObserve is a single Rust binary, licensed AGPL-3.0. It ingests logs, metrics, traces, RUM and LLM traces over OTLP (and Elasticsearch bulk, Loki push, Prometheus remote write, Splunk HEC), stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL and PromQL through Apache DataFusion. Its 1.0 release candidate landed on 28 August 2026. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch". Both are vendor claims, so let's look at what is underneath.
 
+Before we go inside, let's put it against the bar we set above and see how it is different:
+
+| | Most stacks today | OpenObserve |
+|---|---|---|
+| Signals | Loki, Prometheus or Mimir, Tempo, one system each | Logs, metrics, traces, RUM and LLM traces in one binary, one data model, retention set per stream in one place |
+| Durable tier | Each system's own storage, its own format | Object storage holds Parquet or Vortex files that DuckDB can read, so the data outlives the tool |
+| Index | Elastic indexes every field, Loki indexes only labels | A full-text index only on the fields you search, kept as a small sidecar next to each data file, columnar scan for the rest |
+| Query | LogQL, PromQL, TraceQL | SQL for logs and traces, PromQL for metrics |
+| Shape | Several deployments to keep healthy | One process on a laptop, the same binary split into ingester, querier, compactor and router on a cluster |
+
+It is not a drop-in replacement for Prometheus, though. For metrics it takes the seat Thanos or Mimir take, long-term storage behind Prometheus with remote write in and PromQL out, and its PromQL engine has gaps that I list in the sharp edges section. Compare it with the whole LGTM stack, Elastic, or Datadog.
+
 ### A log line goes in
 
 ![Write path](/img/blog/kubernetes-observability-in-2026-with-openobserve/write-path.gif)
