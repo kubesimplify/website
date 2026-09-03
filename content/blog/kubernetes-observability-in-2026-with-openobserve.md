@@ -284,10 +284,14 @@ sample.ttv        5046 4131   PFA1
 sample.vortex     5654 5846   VTXF
 ```
 
-Parquet, a Puffin index container, Vortex. To look inside an index, OpenObserve ships `ttv-inspect`. Since the image has no shell, run it as a Job on the same volume (`manifests/20-ttv-inspect-job.yaml`, edit the file path first):
+Parquet, a Puffin index container, Vortex. To look inside an index, OpenObserve ships `ttv-inspect`. The image has no shell, so it runs as a Job on the same volume (`manifests/20-ttv-inspect-job.yaml`). The Job needs two things filled in: the node that holds the volume, because a local-path volume only exists on one node, and the index file to read. Both come from `kubectl`:
 
 ```bash
-kubectl apply -f manifests/20-ttv-inspect-job.yaml
+NODE=$(kubectl -n openobserve get pod o2-openobserve-standalone-0 -o jsonpath='{.spec.nodeName}')
+TTV=$(kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c \
+  "cd /proc/1/root/data/stream && find files/default/index/default_logs -name '*.ttv' 2>/dev/null | head -1")
+sed -e "s#NODE_NAME#$NODE#" -e "s#TTV_PATH#/data/stream/$TTV#" manifests/20-ttv-inspect-job.yaml | kubectl apply -f -
+kubectl -n openobserve wait --for=condition=complete job/ttv-inspect --timeout=180s
 kubectl -n openobserve logs job/ttv-inspect
 ```
 
@@ -295,13 +299,14 @@ kubectl -n openobserve logs job/ttv-inspect
 blob_count        : 6
   row_group_size  : 131072
   segments          : 1
-  total_docs        : 40000 (deleted: 0)
+  total_docs        : 248318 (deleted: 0)
     _all                         text     [indexed, tokenizer=o2]
+    service_name                 text     [indexed,fast, tokenizer=raw]
     trace_id                     text     [indexed,fast, tokenizer=raw]
     _timestamp                   i64      [fast]
 ```
 
-One segment, 40,000 documents for a 40,000 row file, the `_all` field and `trace_id`. Then the test that matters for bar item 3: can another tool read these files? OpenObserve does not ship or use DuckDB. I picked it because it is a single binary that reads Parquet natively and has a Vortex extension.
+One segment, 248,318 documents, which is exactly the row count DuckDB reports for the Vortex file of the same hour below, and the fields `_all`, `service_name` and `trace_id`. Then the test that matters for bar item 3: can another tool read these files? OpenObserve does not ship or use DuckDB. I picked it because it is a single binary that reads Parquet natively and has a Vortex extension.
 
 ```bash
 brew install duckdb
