@@ -267,18 +267,21 @@ kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c \
      19 vortex      <- logs, in Vortex, written by the ingester
 ```
 
-Copy one of each out and look at the first four bytes:
+These are binary columnar files, so `cat` shows nothing useful. What identifies them is the first four bytes. Copy one file of each type out of the pod (the loop picks whatever file `find` sees first, so your names will differ) and look at those bytes:
 
 ```bash
-kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- \
-  cat /proc/1/root/data/stream/files/default/logs/default/2026/09/02/05/75007886576624599041e54.vortex > sample.vortex
-head -c 4 sample.vortex | xxd
+for ext in parquet ttv vortex; do
+  F=$(kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c \
+    "cd /proc/1/root/data/stream && find files/default -name '*.$ext' 2>/dev/null | head -1")
+  kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- cat "/proc/1/root/data/stream/$F" > sample.$ext
+done
+for f in sample.parquet sample.ttv sample.vortex; do printf '%-16s ' "$f"; head -c 4 "$f" | xxd | cut -c10-; done
 ```
 
 ```text
-75007881938856837121645.parquet   5041 5231   PAR1
-7500789921582415872ea86.ttv       5046 4131   PFA1
-7500789921582415872ea86.vortex    5654 5846   VTXF
+sample.parquet    5041 5231   PAR1
+sample.ttv        5046 4131   PFA1
+sample.vortex     5654 5846   VTXF
 ```
 
 Parquet, a Puffin index container, Vortex. To look inside an index, OpenObserve ships `ttv-inspect`. Since the image has no shell, run it as a Job on the same volume (`manifests/20-ttv-inspect-job.yaml`, edit the file path first):
@@ -303,16 +306,19 @@ One segment, 40,000 documents for a 40,000 row file, the `_all` field and `trace
 ```bash
 brew install duckdb
 duckdb -c "INSTALL vortex; LOAD vortex;
-  SELECT level, count(*) AS n FROM read_vortex('sample.vortex') GROUP BY level ORDER BY n DESC;"
+  SELECT k8s_namespace_name AS namespace, count(*) AS rows FROM read_vortex('sample.vortex')
+  GROUP BY 1 ORDER BY rows DESC LIMIT 5;"
 ```
 
-| level | n |
+| namespace | rows |
 |---|---:|
-| info | 36039 |
-| warn | 2780 |
-| error | 1181 |
+| openobserve | 178847 |
+| shop | 61987 |
+| kube-system | 6431 |
+| NULL | 781 |
+| cert-manager | 187 |
 
-If the tool disappeared tomorrow, your data would still be in a bucket, in a format other tools can read.
+That is one hour of container logs for the whole cluster, 248,318 rows, read straight out of the file OpenObserve wrote. Your counts will differ, the point is that the query works at all. If the tool disappeared tomorrow, your data would still be in a bucket, in a format other tools can read.
 
 ### 6. Ask it questions over MCP
 
