@@ -340,7 +340,7 @@ That is one hour of container logs for the whole cluster, 248,318 rows, read str
 
 ### 6. Ask it questions over MCP
 
-The MCP endpoint speaks streamable HTTP, so a curl loop is a client. `mcp.sh` in the repo wraps one JSON-RPC call and reads `O2` and `AUTH`:
+The MCP endpoint speaks streamable HTTP, so a curl loop is a client. `mcp.sh` in the repo wraps one JSON-RPC call and reads the `O2` and `AUTH` variables we exported in step 1, so if you are in a new terminal, export them again first:
 
 ```bash
 ./mcp.sh tools/list | jq -r '.result.tools[].name'
