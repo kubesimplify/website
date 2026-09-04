@@ -503,7 +503,7 @@ WARN ingester::wal: replay wal file: ".../logs/1788326948372735.wal" done, batch
 
 Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac load image checkout:demo` stores the bare name while the kubelet looks for `docker.io/library/checkout:demo`, so tag with the full name. And if you wrap Go's `slog.Handler` to inject trace ids, implement `WithAttrs` and `WithGroup` too, or `logger.With(...)` silently drops your wrapper.
 
-## Sharp edges and where it fits
+## Sharp edges
 
 **Laptop to cluster works.** One Helm install, and the same binary that runs on a laptop was ingesting a whole cluster at under 600 MiB of memory. Cluster mode is a bigger commitment: PostgreSQL, NATS, object storage and the roles chart.
 
@@ -511,11 +511,7 @@ Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac
 
 **Vortex is young here.** Faster on row fetch and larger on disk in the vendor's own numbers, in the open-source build only since July, pinned to a git revision. Try it on a test cluster, watch the release notes before production.
 
-**SLO alerts do not work on single node in rc1.** The SLO math does, the alerts do not, for the read-only client reason above. Watch for the fix before 1.0 final.
-
-**PromQL has gaps.** `histogram_count`, `histogram_sum`, `histogram_fraction`, `sort`, `sort_desc` and the `@` modifier are missing. Test existing Grafana dashboards first.
-
-**Where it fits.** If you want all four Kubernetes signals in one place you can query with SQL, and you want to learn it on a laptop before you bet a cluster on it, this is the fastest path I have found. If you are already sending LLM traces with token and cost attributes, the open-source build understanding the common SDK conventions and computing cost at ingest is the part I would show a sceptical SRE first.
+**PromQL has gaps.** OpenObserve does not run Prometheus's engine, it has its own PromQL evaluator, and `histogram_count`, `histogram_sum`, `histogram_fraction`, `sort`, `sort_desc` and the `@` modifier are not implemented in it yet. Point an existing Grafana dashboard at it and test before you switch.
 
 ## Wrapping up
 
