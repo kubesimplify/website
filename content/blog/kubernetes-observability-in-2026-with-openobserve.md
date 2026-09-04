@@ -10,13 +10,13 @@ cover: /img/blog/kubernetes-observability-in-2026-with-openobserve/cover.png
 draft: false
 ---
 
-**TL;DR:** Collecting telemetry from Kubernetes is solved. Paying to store and search it is not. This post is about why the backend is where the cost lives, what a backend built on object storage and columnar files does differently, and what that looks like when you run OpenObserve 1.0 on a real cluster. I ran it on a three node kiac cluster on my Mac, read the parts of the source that matter, and hit one real bug on the way.
+**TL;DR:** Collecting telemetry from Kubernetes is solved, paying to store and search it is not, and this post is about why the backend is where the cost lives, what a backend built on object storage and columnar files does differently, and what that looks like when you run OpenObserve 1.0 on a real cluster. I ran it on a three node kiac cluster on my Mac, read the parts of the source that matter, and hit one real bug on the way.
 
-Every Kubernetes cluster you run is quietly producing four kinds of evidence about itself: container logs on every node, metrics from the kubelet and kube-state-metrics, traces if your apps are instrumented, and Kubernetes events, which most clusters throw away after an hour. When a pod restarts at 3 am, the question is never "do we have the data". The question is "where did it go, and can I afford to keep it there".
+Every Kubernetes cluster you run is quietly producing four kinds of evidence about itself: container logs on every node, metrics from the kubelet and kube-state-metrics, traces if your apps are instrumented, and Kubernetes events, which most clusters throw away after an hour. When a pod restarts at 3 am you usually do have the data somewhere, the real question is where it went and whether you can afford to keep it there.
 
-That second question is the whole post. Let's look at the problem, what people run today, one backend built differently, and then run it. Where a number comes from the vendor, I say so.
+That second question is what we are after, so let's look at the problem, what people run today, one backend built differently, and then run it. Where a number comes from the vendor, I say so.
 
-## The problem: the backend is where the money goes
+## Why the backend is where the money goes
 
 ![What a Kubernetes cluster emits, and where it goes](/img/blog/kubernetes-observability-in-2026-with-openobserve/01-k8s-signals-two-paths.png)
 
@@ -26,7 +26,7 @@ The collection side is done. In 2026 you run the OpenTelemetry Collector as a Da
 |---|---|
 | Use OpenTelemetry for metrics / traces / logs | 57% / 50% / 48% |
 | Name complexity and overhead as the biggest observability concern | 38% |
-| Name cost as a primary concern | 31% |
+| Name cost as a top-three concern | 31% |
 | Say cost is a priority when picking new tools | 65% |
 
 So why is the backend the expensive part? Because of how the two classic designs store data.
@@ -39,11 +39,11 @@ So why is the backend the expensive part? Because of how the two classic designs
 
 **SaaS per-GB pricing** adds a third pressure. Every debug log line is a line item, so teams sample and drop, which defeats the point of collecting. And the data is getting wider: LLM traces carry tokens, prompts and cost, GPU nodes emit per-process metrics, agents make dozens of model calls per user action.
 
-## The landscape: what we run today, and what we should ask for
+## What we run today, and what we should ask for
 
-The default backend most of us know is the LGTM stack: Loki, Prometheus or Mimir, Tempo, Grafana. It works, and it is what I learned on. It is also four systems with four data models and four retention configurations, and correlation mostly happens by copying a trace id from one screen into another. Elastic gives you full-text search on every field and the hardware bill that comes with it. Datadog gives you everything and charges per host, per custom metric and per indexed log. The same survey found respondents naming 101 different observability technologies in current use.
+The default backend most of us know is the LGTM stack: Loki, Prometheus or Mimir, Tempo, Grafana. It works, and it is what I learned on. It is also four systems with four data models and four retention configurations, and correlation mostly happens by copying a trace id from one screen into another. Elastic gives you full-text search on every field and the hardware bill that comes with it. Datadog gives you everything and charges per host, per custom metric and per indexed log.
 
-The data warehousing world solved a similar problem a few years ago. Think of your phone: you do not keep every photo you ever took on the fast internal storage, you keep them in cheap cloud storage and pull down the ones you need. Object storage is cheap and built for eleven nines of durability, columnar file formats compress extremely well, and modern query engines scan them fast. Iceberg, DuckDB and the cloud warehouses are all built on this. An observability backend built the same way shrinks the expensive tier to only what you search, and puts everything else in a bucket.
+The data warehousing world solved a similar problem a few years ago. Think of your phone: you do not keep every photo you ever took on the fast internal storage, you keep them in cheap cloud storage and pull down the ones you need. Object storage is cheap and built for eleven nines of durability, columnar file formats compress well, and modern query engines scan them fast. Iceberg, DuckDB and the cloud warehouses are all built on this. An observability backend built the same way shrinks the expensive tier to only what you search, and puts everything else in a bucket.
 
 That gives us a bar to hold any backend to:
 
@@ -55,12 +55,12 @@ That gives us a bar to hold any backend to:
 4. High cardinality as a feature: index where you search, columnar scan everywhere else.
 5. SQL for logs and traces, PromQL for metrics.
 6. Correlation built in: trace to logs in one click, alerts that understand SLOs.
-7. AI-ready both ways: understands LLM traces, exposes itself to agents over MCP.
+7. Understands LLM traces coming in, and exposes itself to agents over MCP going out.
 8. A clear open-source core.
 
-## The solution: how OpenObserve is built
+## How OpenObserve is built
 
-OpenObserve is a single Rust binary, licensed AGPL-3.0. It ingests logs, metrics, traces, RUM and LLM traces over OTLP (and Elasticsearch bulk, Loki push, Prometheus remote write, Splunk HEC), stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL and PromQL through Apache DataFusion. Its first 1.0 release candidate landed on 28 August 2026 and a second on 3 September; everything in this post was run on rc1. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch". Both are vendor claims, so let's look at what is underneath.
+OpenObserve is a single Rust binary, licensed AGPL-3.0. It ingests logs, metrics and traces (LLM traces included) over OTLP, RUM from its browser SDK, and keeps compatibility endpoints for Elasticsearch bulk, Loki push, Prometheus remote write and Splunk HEC. It stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL through Apache DataFusion and PromQL with its own evaluator over the same files. Its first 1.0 release candidate landed on 28 August 2026 and a second on 3 September; everything in this post was run on rc1. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch". Both are vendor claims, so let's look at what is underneath.
 
 Before we go inside, let's put it against the bar we set above and see how it is different:
 
@@ -70,7 +70,7 @@ Before we go inside, let's put it against the bar we set above and see how it is
 | Durable tier | Each system's own storage, its own format | Object storage holds Parquet or Vortex files that DuckDB can read, so the data outlives the tool |
 | Index | Elastic indexes every field, Loki indexes only labels | A full-text index only on the fields you search, kept as a small sidecar next to each data file, columnar scan for the rest |
 | Query | LogQL, PromQL, TraceQL | SQL for logs and traces, PromQL for metrics |
-| Shape | Several deployments to keep healthy | One process on a laptop, the same binary split into ingester, querier, compactor and router on a cluster |
+| Shape | Several deployments to keep healthy | One process on a laptop, the same binary split into ingester, querier, compactor, router and scheduler roles on a cluster |
 
 It is not a drop-in replacement for Prometheus, though. For metrics it takes the seat Thanos or Mimir take, long-term storage behind Prometheus with remote write in and PromQL out, and its PromQL engine has gaps that I list in the sharp edges section. Compare it with the whole LGTM stack, Elastic, or Datadog.
 
@@ -78,21 +78,21 @@ It is not a drop-in replacement for Prometheus, though. For metrics it takes the
 
 ![Write path](/img/blog/kubernetes-observability-in-2026-with-openobserve/write-path.gif)
 
-A batch lands over HTTP, its JSON is flattened (`k8s.namespace.name` becomes `k8s_namespace_name`, which is why every screenshot has those long field names) and its schema is checked against the stream. It is appended to a write-ahead log and an in-memory Arrow table at the same time. Every 2 seconds the frozen tables become Parquet, the upload job merges them into one file per stream and hour, writes it to the bucket under `files/{org}/{type}/{stream}/YYYY/MM/DD/HH/`, builds a full-text index for that file as a `.ttv` object, and only then records the file in the `file_list` catalog. If the catalog database is unreachable, nothing is uploaded. There are never orphan objects in the bucket, and I like that a lot.
+A batch lands over HTTP, its JSON is flattened (`k8s.namespace.name` becomes `k8s_namespace_name`, which is why every screenshot has those long field names) and its schema is checked against the stream. It is appended to a write-ahead log and an in-memory Arrow table at the same time. Every 2 seconds the frozen tables become Parquet, the upload job merges the dumps of the same stream, hour and schema into one file per round, writes it to the bucket under `files/{org}/{type}/{stream}/YYYY/MM/DD/HH/`, builds a full-text index for that file as a `.ttv` object, and only then records the file in the `file_list` catalog. If the catalog database is unreachable, nothing is uploaded, and I like that a lot: a database outage cannot litter the bucket. A failure between the upload and the catalog write can still leave an object behind, so the gate closes the common case rather than every case.
 
-Two things you should know: the WAL is flushed but not fsynced per batch by default (`ZO_WAL_FSYNC_DISABLED=true`), a fair trade for a system whose durable tier is the bucket, and the defaults in the code differ from the docs in several places (the WAL rotates at 512 MB, the docs say 64). Trust the binary you run.
+Two things you should know: the WAL is flushed but not fsynced per batch by default (`ZO_WAL_FSYNC_DISABLED=true`), a fair trade for a system whose durable tier is the bucket, and the defaults in the code differ from the docs in several places (the WAL rotates at 512 MB, the docs say 64), so go by the binary you run and not the docs page.
 
 ### The index is a file next to the data
 
 ![Anatomy of a .ttv index file](/img/blog/kubernetes-observability-in-2026-with-openobserve/06-ttv-anatomy.png)
 
-The `.ttv` next to each data file is an Apache Iceberg Puffin container wrapping a single tantivy segment. All configured full-text fields (`message`, `body`, `log` and friends) are concatenated into one indexed column, fields like `trace_id` are stored for exact match, and `_timestamp` is a fast field. Because there is exactly one segment per data file, a document id in the index equals a row number in the data file. That one fact is what makes the query side cheap, as we will see next.
+The `.ttv` next to each data file is an Apache Iceberg Puffin container (Puffin is Iceberg's simple format for index and statistics blobs) wrapping a single segment of tantivy, the Rust full-text search library. All configured full-text fields (`message`, `body`, `log` and friends) are concatenated into one indexed column, fields like `trace_id` are indexed whole for exact match, and `_timestamp` is a fast field. Because there is exactly one segment per data file, a document id in the index equals a row number in the data file. That one fact is what makes the query side cheap, as we will see next.
 
 ### A query comes out
 
 ![How a query finds your rows](/img/blog/kubernetes-observability-in-2026-with-openobserve/query-funnel.gif)
 
-A query asks the catalog for the files that overlap the time range, splits them across queriers, and then throws away as much as it can before reading anything: files that fail the partition keys, files the bloom filters rule out, and then, using the index, everything but the matching rows. The matched row ids become a row bitmap, and the bitmap becomes a Parquet or Vortex access plan that DataFusion reads. Counts, histograms and top-N over indexed fields never open a data file at all. A background compactor merges each finished hour's small files into files of up to 2 GB and rebuilds the index, and a result cache serves repeated dashboard queries.
+A query asks the catalog for the files that overlap the time range, splits them across queriers, and then throws away as much as it can before reading anything: files that fail the partition keys, files the bloom filters rule out, and then, using the index, everything but the matching rows. The matched row ids become a row bitmap, and the bitmap becomes a Parquet or Vortex access plan that DataFusion reads. Counts, histograms and top-N over indexed fields never open a data file at all when the file sits fully inside the query window. A background compactor merges each finished hour's small files into files of up to 2 GB and rebuilds the index, and a result cache serves repeated dashboard queries.
 
 ### What 1.0 adds
 
@@ -104,17 +104,17 @@ A query asks the catalog for the files that overlap the time range, splits them 
 | Indexed counts (8 queries) | 215 ms | 232 ms |
 | Storage for 1 billion rows | 673.5 GB | 710.7 GB |
 
-Faster on the query that hurts, a tie on counts, about 5 percent more disk. It has been open source since July 2026 and is pinned to a git revision, so I would call it new and promising, and not the default for a reason.
+Faster on the query that hurts, a tie on counts, about 5 percent more disk. OpenObserve's Vortex support only left the enterprise build in July 2026 and the crate is pinned to a git revision, so I would call it new and promising, and not the default for a reason.
 
-**An MCP server that does not flood the context window.** The tool catalog is generated from the OpenAPI spec, around 209 tools, but `tools/list` returns only seven: a `tool_search` over the descriptions, a `tools_call` that returns summarised responses, and five pinned tools. Authentication is your own token, so the model inherits your permissions and nothing more. This is my favourite part of the release.
+**An MCP server that does not flood the context window.** The tool catalog is generated from the OpenAPI spec, a couple of hundred tools, but `tools/list` returns only seven: a `tool_search` over the descriptions, a `tools_call` that returns summarised responses, and five pinned tools. Authentication is your own token, so the model inherits your permissions and nothing more. This is the part of the release I was most keen to try.
 
-**SLOs with burn-rate alerts**, a **time index for traces** so a bare trace id no longer scans everything, and **LLM traces from six SDK conventions** priced at ingest. All open source. SSO and RBAC, incidents, anomaly detection, the AI assistant and the service graph UI are enterprise.
+Also new, and all open source: SLOs with burn-rate alerts, a time index for traces so a bare trace id no longer scans everything, and LLM traces from the OpenTelemetry GenAI conventions plus Vercel AI SDK, OpenInference, Langfuse and TraceLoop-style attributes, priced at ingest from a built-in price table (custom pricing is enterprise). SSO and fine-grained RBAC, incidents, anomaly detection, the AI assistant and the service graph UI are enterprise.
 
 ![Open source vs enterprise in 1.0](/img/blog/kubernetes-observability-in-2026-with-openobserve/08-oss-vs-enterprise.png)
 
-## The demo: a whole cluster into one binary
+## Running it: a whole cluster into one binary
 
-Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. Everything the demo uses is in one repo:
+Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq, curl and duckdb on your machine. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, DuckDB 1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Everything the demo uses is in one repo:
 
 ```bash
 git clone https://github.com/saiyam1814/openobserve-k8s-demo
@@ -163,7 +163,7 @@ The official collector chart installs an OpenTelemetry Collector agent as a Daem
 
 ```bash
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.1/cert-manager.yaml
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.158.0/opentelemetry-operator.yaml
 helm upgrade -i o2c openobserve/openobserve-collector -n openobserve-collector --create-namespace \
   -f manifests/collector-values.yaml
 
@@ -181,7 +181,7 @@ Container logs, Kubernetes events and 450 metric streams within a minute, from t
 
 ![Streams page: 470 streams, 1.51 GB ingested, 102.56 MB compressed](/img/blog/kubernetes-observability-in-2026-with-openobserve/12-streams-compression.jpg)
 
-| | |
+| Streams page | Whole cluster |
 |---|---|
 | Ingested | 1.51 GB |
 | Compressed on disk | 102.56 MB (15.1x) |
@@ -201,8 +201,7 @@ kubectl -n shop logs deploy/checkout --tail=1
 ```
 
 ```text
-{"time":"2026-09-02T11:42:23.49Z","level":"INFO","msg":"checkout complete","service":"checkout",
- "order_id":"ord-078698","amount":33.99,"trace_id":"e90e1fcfd449474f10f289a7a6343bad","span_id":"6e4934a37904c62f"}
+{"time":"2026-09-04T05:53:06.35924046Z","level":"ERROR","msg":"payment failed","service":"checkout","version":"1.0.0","order_id":"ord-846683","amount":64.99,"gateway":"stripe-sandbox","error":"payment gateway timeout","trace_id":"a309a2bc90a055def047fb770fc2d00e","span_id":"40f0e133e5d9c8cc"}
 ```
 
 In the UI, traces arrived immediately, three spans per request. From a trace, "View Logs" opens the logs page filtered on that trace id, and the three log lines of that request are right there, including the failed payment.
@@ -213,7 +212,7 @@ In the UI, traces arrived immediately, three spans per request. From a trace, "V
 
 ### 4. Parse the log body at ingest
 
-That link needs `trace_id` to be a column, and the collector delivers each log line as one `body` string. Rather than reconfigure the collector, a realtime pipeline parses it at ingest: source stream `default`, a VRL function, destination stream `default`. Both objects are JSON files you POST:
+That link needs `trace_id` to be a column, and the collector delivers each log line as one `body` string. Rather than reconfigure the collector, a realtime pipeline parses it at ingest: source stream `default`, a VRL function (Vector Remap Language, the transform language from Vector), destination stream `default`. Both objects are JSON files you POST:
 
 ```bash
 curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/functions" \
@@ -264,7 +263,7 @@ And the jump works in both directions. Expand any of those rows and there is a V
 
 ### 5. Look at the files
 
-Now for my favourite part: the write path from the solution section, in a real data directory. The image has no shell, so an ephemeral debug container that shares the process namespace gets you the filesystem through `/proc/1/root`:
+Now for my favourite part: the write path from earlier, in a real data directory. The image has no shell, so an ephemeral debug container that shares the process namespace gets you the filesystem through `/proc/1/root`:
 
 ```bash
 kubectl -n openobserve debug o2-openobserve-standalone-0 --image=busybox:1.36 \
@@ -336,7 +335,7 @@ duckdb -c "INSTALL vortex; LOAD vortex;
 | NULL | 781 |
 | cert-manager | 187 |
 
-That is one hour of container logs for the whole cluster, 248,318 rows, read straight out of the file OpenObserve wrote. Your counts will differ, the point is that the query works at all. If the tool disappeared tomorrow, your data would still be in a bucket, in a format other tools can read.
+That is one hour of container logs for the whole cluster, 248,318 rows, read straight out of the file OpenObserve wrote. Your counts will differ, but the point is that the query works at all. If the tool disappeared tomorrow, your data would still be in a bucket, in a format other tools can read.
 
 ### 6. Ask it questions over MCP
 
@@ -362,10 +361,10 @@ StreamSchema
 
 GetLatestTraces
 
-[{"service_name":"checkout","operation_name":"POST /checkout","errors":26},{"service_name":"checkout","operation_name":"payment.charge","errors":26}]
+[{"service_name":"checkout","operation_name":"POST /checkout","errors":31},{"service_name":"checkout","operation_name":"payment.charge","errors":31}]
 ```
 
-Seven tools, not two hundred, a search that finds the right one by intent, and a summarised answer. To wire this into Claude Code, Cursor or VS Code, the setup page under IAM writes the exact `claude mcp add` command for you, and nudges you toward a read-only credential, which is good advice:
+That is the whole surface an agent sees: seven tools, a search that finds the right one by intent, and a summarised answer. To wire this into Claude Code, Cursor or VS Code, the setup page under IAM writes the exact `claude mcp add` command for you, and nudges you toward a read-only credential, which is good advice:
 
 ![MCP Server setup page with the claude mcp add command](/img/blog/kubernetes-observability-in-2026-with-openobserve/11-mcp-setup-page.jpg)
 
@@ -395,11 +394,11 @@ kubectl -n shop exec deploy/loadgen -- curl -s "http://checkout.shop.svc/chaos?r
 {"fail_rate_percent":60}
 ```
 
-One catch you will hit: the echo server has a private cluster IP and OpenObserve blocks those as webhook destinations (SSRF protection), so the values file sets `ZO_SKIP_SSRF_CHECKS=true`. Fine for a demo, wrong for anything internet-facing. Within a minute the SLO page showed 97.907 percent against 99 and "Budget blown":
+One catch you will hit: the echo server has a private cluster IP and OpenObserve blocks those as webhook destinations (SSRF protection, so a webhook cannot be pointed at internal services), so the values file sets `ZO_SKIP_SSRF_CHECKS=true`. Fine for a demo, wrong for anything internet-facing. Within a minute the SLO page showed 97.907 percent against 99 and "Budget blown":
 
 ![SLO page: checkout-availability, budget blown](/img/blog/kubernetes-observability-in-2026-with-openobserve/09-slo-budget-blown.jpg)
 
-The burn-rate alert stayed quiet, and its evaluations were logged as "frozen (unobserved)". That freeze is deliberate: an SLO alert never resolves while its windows are unmeasured. But the measurements were being written, and the status row the alert reads was written once at creation and never advanced afterwards. Debug logging gave the reason in one line:
+The burn-rate alert stayed quiet, and its evaluations were logged as "frozen (unobserved)". That freeze is deliberate: an SLO alert never fires or resolves while its windows are unmeasured. But the measurements were being written, and the status row the alert reads was written once at creation and never advanced afterwards. Debug logging gave the reason in one line:
 
 ```bash
 kubectl -n openobserve logs o2-openobserve-standalone-0 | grep "\[slo\] pass failed"
@@ -410,7 +409,7 @@ ERROR [slo] pass failed for 7500794280517042176 org=default: DbError# SeaORMErro
   error returned from database: (code: 8) attempt to write a readonly database
 ```
 
-The SLO pass opens the read-only database client and then writes through it. On PostgreSQL that is a normal connection, so cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate, and rc2 has the same line. It is a one-line fix. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
+The SLO pass opens the read-only database client and then writes through it. On PostgreSQL the read-only pool falls back to the normal connection unless you point it at a replica, so most cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate, and rc2 has the same line. It is a one-line fix. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
 
 ```bash
 kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/alerts") | .body | fromjson'
@@ -449,7 +448,7 @@ current hour 2026/09/04/05: 13 files
 
 Thirteen small files in the open hour, one 15 MB Vortex file with one index and one bloom filter for the closed one, and the originals were deleted after the delay we set. Nobody ran anything, this is the background job doing its rounds. (The compactor also logs each merge, but at this log volume the pod log only holds a few minutes, so you have to look right after an hour closes.)
 
-Now the question this whole post is about, what does it cost to keep. The stream stats API reports, per stream, the bytes that came in, the bytes on disk, and the size of the index:
+Now for the question we started with: what does it cost to keep? The stream stats API reports, per stream, the bytes that came in, the bytes on disk, and the size of the index:
 
 ```bash
 for t in logs metrics traces; do
@@ -471,7 +470,7 @@ traces: 1 streams, 727109 rows, 674 MB in, 44 MB on disk, 13 MB index
 | Traces | 674 MB | 44 MB | 13 MB | 12x with index, 15x without |
 | Whole cluster, 15 hours | 23,176 MB | 433 MB | 241 MB | 34x with index, 54x without |
 
-So 23 GB of telemetry from a three node cluster over fifteen hours is 674 MB in the bucket, index included. At S3 standard pricing of 2.3 cents per GB-month, a full month of this cluster is around 32 GB and under a dollar of storage. The bucket is the cheap part; what you pay for is the pod. One honest detail in that table: the logs index is not small, 164 MB against 228 MB of data, because every log body is tokenised into the full-text index. Metrics and traces have no full-text fields and their index is a fraction of the data. If you want logs cheaper still, take fields out of the full-text list.
+So 23 GB of telemetry from a three node cluster over fifteen hours is 674 MB in the bucket, index included. At S3 standard pricing of 2.3 cents per GB-month, a full month of this cluster is around 32 GB and under a dollar of storage. So the storage bill rounds to zero here, and the real cost of running this is the pod's CPU and memory. One detail in that table to notice: the logs index is not small, 164 MB against 228 MB of data, because every log body is tokenised into the full-text index. Metrics and traces have no full-text fields and their index is a fraction of the data. If you want logs cheaper still, take fields out of the full-text list.
 
 Is it fast, though? Three questions over the last 12 hours of logs, 4.2 million rows, on this one pod:
 
@@ -491,9 +490,9 @@ q "SELECT _timestamp, k8s_namespace_name, body FROM \\\"default\\\" WHERE match_
 {"took":31,"total":5,"scan_records":28135,"scan_size":27,"idx_scan_size":0}
 ```
 
-`took` is milliseconds, `scan_size` is the uncompressed size in MB of what the query touched. The count and the group-by looked at all 4.2 million rows in about 60 ms each, which is the columnar scan doing its thing over one column. The full-text search is the funnel from the solution section in one line: 28,135 rows touched out of 4.2 million, 27 MB out of 4,159, in 31 ms, because the index said which rows to open. This is one pod in a VM on a laptop with 12 hours of data, so treat the milliseconds as a shape and not a benchmark. The shape is the point.
+`took` is milliseconds, `scan_size` is the uncompressed size in MB of what the query touched. The count comes from file metadata and took 66 ms. The group-by is the columnar scan reading one column across all 4.2 million rows, 61 ms. The full-text search is the query funnel from earlier in one line: 28,135 rows in the files it had to open, out of 4.2 million, 27 MB out of 4,159, in 31 ms, because the index threw away every file without a hit and then narrowed the rest to the matching rows. This is one pod in a VM on a laptop with 12 hours of data, so treat these milliseconds as a rough shape rather than a benchmark. Watching it skip 99 percent of the data on my own laptop was really fun, though.
 
-One last thing I wanted to see was a restart. A Helm upgrade mid-run restarted the pod for me (`kubectl -n openobserve rollout restart statefulset/o2-openobserve-standalone` does the same), and the startup log walked through the WAL replay from the solution section:
+One last thing I wanted to see was a restart. A Helm upgrade mid-run restarted the pod for me (`kubectl -n openobserve rollout restart statefulset/o2-openobserve-standalone` does the same), and the startup log walked through the WAL replay we saw in the write path:
 
 ```text
 INFO ingester::wal: Scanning lock files from "./data/wal/logs"
@@ -503,9 +502,10 @@ WARN ingester::wal: replay wal file: ".../logs/1788326948372735.wal" done, batch
 ```
 
 Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac load image checkout:demo` stores the bare name while the kubelet looks for `docker.io/library/checkout:demo`, so tag with the full name. And if you wrap Go's `slog.Handler` to inject trace ids, implement `WithAttrs` and `WithGroup` too, or `logger.With(...)` silently drops your wrapper.
-## Sharp edges and an honest take
 
-**Laptop to cluster is real.** One Helm install, and the same binary that runs on a laptop was ingesting a whole cluster at under 600 MiB of memory. Cluster mode is a bigger commitment: PostgreSQL, NATS, object storage and the roles chart.
+## Sharp edges and where it fits
+
+**Laptop to cluster works.** One Helm install, and the same binary that runs on a laptop was ingesting a whole cluster at under 600 MiB of memory. Cluster mode is a bigger commitment: PostgreSQL, NATS, object storage and the roles chart.
 
 **Know what is off by default.** The memory cache, the circuit breakers and synthetics are off, the WAL is not fsynced per batch, and the docs lag the code on several defaults.
 
@@ -515,13 +515,13 @@ Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac
 
 **PromQL has gaps.** `histogram_count`, `histogram_sum`, `histogram_fraction`, `sort`, `sort_desc` and the `@` modifier are missing. Test existing Grafana dashboards first.
 
-**Where it fits.** If you want all four Kubernetes signals in one place you can query with SQL, and you want to learn it on a laptop before you bet a cluster on it, this is the fastest path I have found. If you are already sending LLM traces with token and cost attributes, the open-source build handling six conventions and computing cost at ingest is a real differentiator.
+**Where it fits.** If you want all four Kubernetes signals in one place you can query with SQL, and you want to learn it on a laptop before you bet a cluster on it, this is the fastest path I have found. If you are already sending LLM traces with token and cost attributes, the open-source build understanding the common SDK conventions and computing cost at ingest is the part I would show a sceptical SRE first.
 
 ## Wrapping up
 
-What I hope you take away is that the collector is solved and the backend is the cost, and that a backend built on object storage, columnar files and a selective index changes what observability costs and what you can query. OpenObserve 1.0 is a good worked example of that design. We followed a pod log line into a Vortex file and its index, watched queries prune down to the rows they needed, and saw fifteen hours of a whole cluster's telemetry, 23 GB of it, sit in 674 MB on disk with every field queryable.
+We followed a pod log line into a Vortex file and its index, watched queries prune down to the rows they needed, and saw fifteen hours of a whole cluster's telemetry, 23 GB of it, sit in 674 MB on disk with every field queryable.
 
-Give it a try on a test cluster and let me know how you find it. If you hit the same sharp edges I did, the fixes above should save you an evening.
+Give it a try on a test cluster and tell me how it goes, I am @SaiyamPathak on X and LinkedIn, and I would especially like to hear whether the SLO alerts update for you on PostgreSQL. If you hit the same sharp edges I did, the notes above should save you an evening.
 
 ## Links
 
