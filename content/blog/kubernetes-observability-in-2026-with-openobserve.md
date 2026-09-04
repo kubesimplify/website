@@ -371,18 +371,27 @@ Seven tools, not two hundred, a search that finds the right one by intent, and a
 
 ### 7. Break an SLO
 
-Define an SLO on the checkout traces (a good event is a `POST /checkout` span that did not end in `ERROR`, target 99 percent over 7 days), a webhook echo server to receive alerts, a burn-rate alert on the SLO, and then push the failure rate to 60 percent:
+Define an SLO on the checkout traces (a good event is a `POST /checkout` span that did not end in `ERROR`, target 99 percent over 7 days), deploy a webhook echo server to receive alerts, and create the alert objects. An alert in OpenObserve is three things: a template (the payload body), a destination (where it goes) and the alert itself, so that is three POSTs, all from `manifests/alert-burn-rate.json`. A second, plain scheduled alert on error spans goes in alongside it, you will see why in a moment. Then push the failure rate to 60 percent:
 
 ```bash
 kubectl apply -f manifests/30-alert-sink.yaml
 curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/slos" \
   -d @manifests/slo-checkout-availability.json
-# template, destination and alert are the three objects in manifests/alert-burn-rate.json (README step 7 has the three POSTs)
+SLO=$(curl -s -u $AUTH "$O2/api/default/slos" | jq -r '.list[0].id')
+jq '.template'    manifests/alert-burn-rate.json | curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/alerts/templates" -d @-
+jq '.destination' manifests/alert-burn-rate.json | curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/alerts/destinations" -d @-
+jq --arg id "$SLO" '.alert | .query_condition.slo_condition.slo_id = $id' manifests/alert-burn-rate.json \
+  | curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/v2/default/alerts" -d @-
+curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/v2/default/alerts" -d @manifests/alert-error-spans.json
 kubectl -n shop exec deploy/loadgen -- curl -s "http://checkout.shop.svc/chaos?rate=60"
 ```
 
 ```text
 {"code":200,"message":"SLO saved","id":"7500794280517042176","name":"checkout-availability"}
+{"code":200,"message":"Template saved","id":"3IlAageUwczuTkc0FuyqEEP1dd4","name":"burn-rate-json"}
+{"code":200,"message":"Destination saved","id":"3IlB8cmyOkm43oPUBBduELWjUlI","name":"alert-sink"}
+{"code":200,"message":"Alert saved","id":"3IlBHI5FXraQCVx9pCYEJRwOBuX","name":"checkout-burn-rate"}
+{"code":200,"message":"Alert saved","id":"3IlEZgA5TSGAwDC0Rl3spdfsGut","name":"checkout-error-spans"}
 {"fail_rate_percent":60}
 ```
 
@@ -401,7 +410,7 @@ ERROR [slo] pass failed for 7500794280517042176 org=default: DbError# SeaORMErro
   error returned from database: (code: 8) attempt to write a readonly database
 ```
 
-The SLO pass opens the read-only database client and then writes through it. On PostgreSQL that is a normal connection, so cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate. A one-line fix, filed with the reproduction. Plain alerts are unaffected. A scheduled alert on the same failed spans (`manifests/alert-error-spans.json`) fired within a minute:
+The SLO pass opens the read-only database client and then writes through it. On PostgreSQL that is a normal connection, so cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate. A one-line fix, filed with the reproduction. Plain alerts are unaffected, which is why we created the second one: the scheduled alert on the same failed spans fired within a minute:
 
 ```bash
 kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/alerts") | .body | fromjson'
