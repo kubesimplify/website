@@ -509,7 +509,7 @@ Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac
 
 **Know what is off by default.** The memory cache, the circuit breakers and synthetics are off, the WAL is not fsynced per batch, and the docs lag the code on several defaults.
 
-**Vortex is young here.** Faster on row fetch and larger on disk in the vendor's own numbers, open source since July, pinned to a git revision. Try it on a test cluster, watch the release notes before production.
+**Vortex is young here.** Faster on row fetch and larger on disk in the vendor's own numbers, in the open-source build only since July, pinned to a git revision. Try it on a test cluster, watch the release notes before production.
 
 **SLO alerts do not work on single node in rc1.** The SLO math does, the alerts do not, for the read-only client reason above. Watch for the fix before 1.0 final.
 
