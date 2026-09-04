@@ -410,7 +410,7 @@ ERROR [slo] pass failed for 7500794280517042176 org=default: DbError# SeaORMErro
   error returned from database: (code: 8) attempt to write a readonly database
 ```
 
-The SLO pass opens the read-only database client and then writes through it. On PostgreSQL that is a normal connection, so cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate. A one-line fix, filed with the reproduction. Plain alerts are unaffected, which is why we created the second one: the scheduled alert on the same failed spans fired within a minute:
+The SLO pass opens the read-only database client and then writes through it. On PostgreSQL that is a normal connection, so cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate. A one-line fix, filed with the reproduction. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
 
 ```bash
 kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/alerts") | .body | fromjson'
