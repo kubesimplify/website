@@ -60,7 +60,7 @@ That gives us a bar to hold any backend to:
 
 ## The solution: how OpenObserve is built
 
-OpenObserve is a single Rust binary, licensed AGPL-3.0. It ingests logs, metrics, traces, RUM and LLM traces over OTLP (and Elasticsearch bulk, Loki push, Prometheus remote write, Splunk HEC), stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL and PromQL through Apache DataFusion. Its 1.0 release candidate landed on 28 August 2026. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch". Both are vendor claims, so let's look at what is underneath.
+OpenObserve is a single Rust binary, licensed AGPL-3.0. It ingests logs, metrics, traces, RUM and LLM traces over OTLP (and Elasticsearch bulk, Loki push, Prometheus remote write, Splunk HEC), stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL and PromQL through Apache DataFusion. Its first 1.0 release candidate landed on 28 August 2026 and a second on 3 September; everything in this post was run on rc1. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch". Both are vendor claims, so let's look at what is underneath.
 
 Before we go inside, let's put it against the bar we set above and see how it is different:
 
@@ -78,7 +78,7 @@ It is not a drop-in replacement for Prometheus, though. For metrics it takes the
 
 ![Write path](/img/blog/kubernetes-observability-in-2026-with-openobserve/write-path.gif)
 
-A batch lands over HTTP, its JSON is flattened (`kubernetes.labels.app` becomes `kubernetes_labels_app`, which is why every screenshot has those long field names) and its schema is checked against the stream. It is appended to a write-ahead log and an in-memory Arrow table at the same time. Every 2 seconds the frozen tables become Parquet, the upload job merges them into one file per stream and hour, writes it to the bucket under `files/{org}/{type}/{stream}/YYYY/MM/DD/HH/`, builds a full-text index for that file as a `.ttv` object, and only then records the file in the `file_list` catalog. If the catalog database is unreachable, nothing is uploaded. There are never orphan objects in the bucket, and I like that a lot.
+A batch lands over HTTP, its JSON is flattened (`k8s.namespace.name` becomes `k8s_namespace_name`, which is why every screenshot has those long field names) and its schema is checked against the stream. It is appended to a write-ahead log and an in-memory Arrow table at the same time. Every 2 seconds the frozen tables become Parquet, the upload job merges them into one file per stream and hour, writes it to the bucket under `files/{org}/{type}/{stream}/YYYY/MM/DD/HH/`, builds a full-text index for that file as a `.ttv` object, and only then records the file in the `file_list` catalog. If the catalog database is unreachable, nothing is uploaded. There are never orphan objects in the bucket, and I like that a lot.
 
 Two things you should know: the WAL is flushed but not fsynced per batch by default (`ZO_WAL_FSYNC_DISABLED=true`), a fair trade for a system whose durable tier is the bucket, and the defaults in the code differ from the docs in several places (the WAL rotates at 512 MB, the docs say 64). Trust the binary you run.
 
@@ -177,7 +177,7 @@ k8s_events
 450
 ```
 
-Container logs, Kubernetes events and 450 metric streams within a minute, from the kubelet, cAdvisor, kube-state-metrics and the API server. An hour later the streams page summed up the storage story:
+Container logs, Kubernetes events and 450 metric streams within a minute, from the kubelet, cAdvisor, kube-state-metrics and the API server. Later in the run the streams page summed up the storage story (the `slo_slices` and `triggers` streams come from the SLO step further down, and `checkout_archive` is a 40,000 row backfill I used to test compaction, not covered here):
 
 ![Streams page: 470 streams, 1.51 GB ingested, 102.56 MB compressed](/img/blog/kubernetes-observability-in-2026-with-openobserve/12-streams-compression.jpg)
 
@@ -227,7 +227,7 @@ curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/pi
 {"code":200,"message":"Pipeline created successfully","id":"7500791427660513280","name":"parse-shop-logs"}
 ```
 
-The function is the interesting part:
+The function is the interesting part (abridged here, the version in the repo also copies `span_id`, `order_id`, `amount`, `gateway`, `error` and `sku`):
 
 ```text
 if .k8s_namespace_name == "shop" && exists(.body) {
@@ -254,13 +254,13 @@ curl -s -u $AUTH -H 'Content-Type: application/json' "$O2/api/default/_search?ty
 {"level":"error","msg":"payment failed","order_id":"ord-311027","trace_id":"512dea2672432a9e4b827d48af5e1e1b"}
 ```
 
-In the UI the same fields show up as facets on the left, which is what turns "grep the shop namespace" into clicking `k8s_namespace_name`, then `level`. This is 2.2K error rows out of 184K in 116 ms:
+In the UI the same fields show up as facets on the left, which is what turns "grep the shop namespace" into clicking `k8s_namespace_name`, then `level`. This is 2.2K error rows in 116 ms:
 
 ![Logs page: shop namespace errors with the k8s field facets](/img/blog/kubernetes-observability-in-2026-with-openobserve/02-logs-shop-errors.jpg)
 
-And the jump works in both directions. Expand any of those rows and the trace id is a field with a "View Trace" button next to it:
+And the jump works in both directions. Expand any of those rows and there is a View Trace button on it, because the trace id is now a field:
 
-![An expanded log row after the pipeline: level, msg, order_id and trace_id as fields, with View Trace](/img/blog/kubernetes-observability-in-2026-with-openobserve/03-log-row-trace-id.jpg)
+![An expanded log row after the pipeline: parsed fields such as level, amount and error, with the View Trace button](/img/blog/kubernetes-observability-in-2026-with-openobserve/03-log-row-trace-id.jpg)
 
 ### 5. Look at the files
 
@@ -399,7 +399,7 @@ One catch you will hit: the echo server has a private cluster IP and OpenObserve
 
 ![SLO page: checkout-availability, budget blown](/img/blog/kubernetes-observability-in-2026-with-openobserve/09-slo-budget-blown.jpg)
 
-The burn-rate alert stayed quiet, and its evaluations were logged as "frozen (unobserved)". That freeze is deliberate: an SLO alert never resolves while its windows are unmeasured. But the measurements were being written, and the status row the alert reads never moved. Debug logging gave the reason in one line:
+The burn-rate alert stayed quiet, and its evaluations were logged as "frozen (unobserved)". That freeze is deliberate: an SLO alert never resolves while its windows are unmeasured. But the measurements were being written, and the status row the alert reads was written once at creation and never advanced afterwards. Debug logging gave the reason in one line:
 
 ```bash
 kubectl -n openobserve logs o2-openobserve-standalone-0 | grep "\[slo\] pass failed"
@@ -410,7 +410,7 @@ ERROR [slo] pass failed for 7500794280517042176 org=default: DbError# SeaORMErro
   error returned from database: (code: 8) attempt to write a readonly database
 ```
 
-The SLO pass opens the read-only database client and then writes through it. On PostgreSQL that is a normal connection, so cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate. A one-line fix, filed with the reproduction. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
+The SLO pass opens the read-only database client and then writes through it. On PostgreSQL that is a normal connection, so cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate, and rc2 has the same line. It is a one-line fix. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
 
 ```bash
 kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/alerts") | .body | fromjson'
@@ -422,7 +422,7 @@ kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/a
 
 The alerts page tells the same story in one row each: the SLO-backed alert with no outcome yet, the scheduled one showing its last result.
 
-![Alerts list: the frozen burn-rate alert and the scheduled alert that fired](/img/blog/kubernetes-observability-in-2026-with-openobserve/08-alerts-list.jpg)
+![Alerts list: the SLO-backed alert with no outcome, and the scheduled alert after its first evaluation](/img/blog/kubernetes-observability-in-2026-with-openobserve/08-alerts-list.jpg)
 
 Heal the app with `chaos?rate=2` when you are done.
 
@@ -502,7 +502,7 @@ INFO ingester: Found 5 wal files to replay
 WARN ingester::wal: replay wal file: ".../logs/1788326948372735.wal" done, batch_num: 6, took: 4 ms
 ```
 
-Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac load image checkout:demo` stores the bare name while the kubelet looks for `docker.io/library/checkout:demo`, so tag with the full name (I am fixing this in kiac). And if you wrap Go's `slog.Handler` to inject trace ids, implement `WithAttrs` and `WithGroup` too, or `logger.With(...)` silently drops your wrapper.
+Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac load image checkout:demo` stores the bare name while the kubelet looks for `docker.io/library/checkout:demo`, so tag with the full name. And if you wrap Go's `slog.Handler` to inject trace ids, implement `WithAttrs` and `WithGroup` too, or `logger.With(...)` silently drops your wrapper.
 ## Sharp edges and an honest take
 
 **Laptop to cluster is real.** One Helm install, and the same binary that runs on a laptop was ingesting a whole cluster at under 600 MiB of memory. Cluster mode is a bigger commitment: PostgreSQL, NATS, object storage and the roles chart.
