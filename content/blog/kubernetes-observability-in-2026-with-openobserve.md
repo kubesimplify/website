@@ -426,21 +426,74 @@ The alerts page tells the same story in one row each: the SLO-backed alert with 
 
 Heal the app with `chaos?rate=2` when you are done.
 
-### 8. Watch compaction and a restart
+### 8. Compaction, the bill, and how fast it answers
 
-Hour 05 UTC closed at 06:00. With the 60 second rotation window, the compactor claimed it at 06:03:
+Every hour the ingester leaves behind a pile of small files, and once the hour closes the compactor merges them, rebuilds the index and writes a bloom filter sidecar. You can see both states on disk at once, the open hour and the one before it:
 
 ```bash
-kubectl -n openobserve logs o2-openobserve-standalone-0 | grep -E "COMPACTOR.*logs/default|BLOOM_BUILD.*default_logs" | head -3
+kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c '
+  cd /proc/1/root/data/stream
+  PREV=$(date -u -d @$(( $(date +%s) - 3600 )) +%Y/%m/%d/%H); CUR=$(date -u +%Y/%m/%d/%H)
+  echo "closed hour $PREV (KB, file)"
+  du -ak files/default/logs/default/$PREV files/default/index/default_logs/$PREV files/default/bloom/default_logs/$PREV | grep "\."
+  echo "current hour $CUR: $(ls files/default/logs/default/$CUR | wc -l) files"'
 ```
 
 ```text
-[COMPACTOR:WORKER:0:1] merge small file: files/default/logs/default/2026/09/02/05/75007873864486092802b3a.vortex
-[COMPACTOR:WORKER:0:2] merge small file: files/default/logs/default/2026/09/02/05/75007878844928491532777.vortex
-[BLOOM_BUILD] files/default/bloom/default_logs/2026/09/02/05/1788328991812000.bf: wrote chunk 1/1
+closed hour 2026/09/04/04 (KB, file)
+14924	files/default/logs/default/2026/09/04/04/75015051248633118722d6f.vortex
+11228	files/default/index/default_logs/2026/09/04/04/75015051248633118722d6f.ttv
+516	files/default/bloom/default_logs/2026/09/04/04/1788498194507969.bf
+current hour 2026/09/04/05: 13 files
 ```
 
-Twenty small Vortex files became one 5.9 MB file with a fresh index and a bloom sidecar, and the originals were gone once the deletion delay passed. A Helm upgrade mid-flight restarted the pod, and the startup log walked through the WAL replay from the solution section:
+Thirteen small files in the open hour, one 15 MB Vortex file with one index and one bloom filter for the closed one, and the originals were deleted after the delay we set. Nobody ran anything, this is the background job doing its rounds. (The compactor also logs each merge, but at this log volume the pod log only holds a few minutes, so you have to look right after an hour closes.)
+
+Now the question this whole post is about, what does it cost to keep. The stream stats API reports, per stream, the bytes that came in, the bytes on disk, and the size of the index:
+
+```bash
+for t in logs metrics traces; do
+  curl -s -u $AUTH "$O2/api/default/streams?type=$t" | jq -r --arg t $t \
+    '[.list[].stats] | "\($t): \(length) streams, \(map(.doc_num)|add) rows, \(map(.storage_size)|add|round) MB in, \(map(.compressed_size)|add|round) MB on disk, \(map(.index_size)|add|round) MB index"'
+done
+```
+
+```text
+logs: 4 streams, 5067137 rows, 5173 MB in, 228 MB on disk, 164 MB index
+metrics: 463 streams, 21040362 rows, 17329 MB in, 161 MB on disk, 64 MB index
+traces: 1 streams, 727109 rows, 674 MB in, 44 MB on disk, 13 MB index
+```
+
+| | Came in | On disk | Index | Smaller by |
+|---|---|---|---|---|
+| Logs | 5,173 MB | 228 MB | 164 MB | 13x with index, 23x without |
+| Metrics | 17,329 MB | 161 MB | 64 MB | 77x with index, 108x without |
+| Traces | 674 MB | 44 MB | 13 MB | 12x with index, 15x without |
+| Whole cluster, 15 hours | 23,176 MB | 433 MB | 241 MB | 34x with index, 54x without |
+
+So 23 GB of telemetry from a three node cluster over fifteen hours is 674 MB in the bucket, index included. At S3 standard pricing of 2.3 cents per GB-month, a full month of this cluster is around 32 GB and under a dollar of storage. The bucket is the cheap part; what you pay for is the pod. One honest detail in that table: the logs index is not small, 164 MB against 228 MB of data, because every log body is tokenised into the full-text index. Metrics and traces have no full-text fields and their index is a fraction of the data. If you want logs cheaper still, take fields out of the full-text list.
+
+Is it fast, though? Three questions over the last 12 hours of logs, 4.2 million rows, on this one pod:
+
+```bash
+NOW=$(date +%s); FROM=$((NOW-43200))
+q() { curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/_search?type=logs" \
+  -d "{\"query\":{\"sql\":\"$1\",\"start_time\":${FROM}000000,\"end_time\":${NOW}000000,\"size\":5}}" \
+  | jq -c '{took, total, scan_records, scan_size, idx_scan_size}'; }
+q "SELECT count(*) AS rows FROM \\\"default\\\""
+q "SELECT k8s_namespace_name, count(*) AS rows FROM \\\"default\\\" GROUP BY k8s_namespace_name"
+q "SELECT _timestamp, k8s_namespace_name, body FROM \\\"default\\\" WHERE match_all('readonly database')"
+```
+
+```text
+{"took":66,"total":1,"scan_records":4219547,"scan_size":4159,"idx_scan_size":135}
+{"took":61,"total":4,"scan_records":4219547,"scan_size":4159,"idx_scan_size":135}
+{"took":31,"total":5,"scan_records":28135,"scan_size":27,"idx_scan_size":0}
+```
+
+`took` is milliseconds, `scan_size` is the uncompressed size in MB of what the query touched. The count and the group-by looked at all 4.2 million rows in about 60 ms each, which is the columnar scan doing its thing over one column. The full-text search is the funnel from the solution section in one line: 28,135 rows touched out of 4.2 million, 27 MB out of 4,159, in 31 ms, because the index said which rows to open. This is one pod in a VM on a laptop with 12 hours of data, so treat the milliseconds as a shape and not a benchmark. The shape is the point.
+
+One last thing I wanted to see was a restart. A Helm upgrade mid-run restarted the pod for me (`kubectl -n openobserve rollout restart statefulset/o2-openobserve-standalone` does the same), and the startup log walked through the WAL replay from the solution section:
 
 ```text
 INFO ingester::wal: Scanning lock files from "./data/wal/logs"
@@ -450,7 +503,6 @@ WARN ingester::wal: replay wal file: ".../logs/1788326948372735.wal" done, batch
 ```
 
 Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac load image checkout:demo` stores the bare name while the kubelet looks for `docker.io/library/checkout:demo`, so tag with the full name (I am fixing this in kiac). And if you wrap Go's `slog.Handler` to inject trace ids, implement `WithAttrs` and `WithGroup` too, or `logger.With(...)` silently drops your wrapper.
-
 ## Sharp edges and an honest take
 
 **Laptop to cluster is real.** One Helm install, and the same binary that runs on a laptop was ingesting a whole cluster at under 600 MiB of memory. Cluster mode is a bigger commitment: PostgreSQL, NATS, object storage and the roles chart.
@@ -467,7 +519,7 @@ Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac
 
 ## Wrapping up
 
-What I hope you take away is that the collector is solved and the backend is the cost, and that a backend built on object storage, columnar files and a selective index changes what observability costs and what you can query. OpenObserve 1.0 is a good worked example of that design. We followed a pod log line into a Vortex file and its index, watched queries prune down to the rows they needed, and saw a whole cluster's telemetry stored at a fifteenth of its size with every field queryable.
+What I hope you take away is that the collector is solved and the backend is the cost, and that a backend built on object storage, columnar files and a selective index changes what observability costs and what you can query. OpenObserve 1.0 is a good worked example of that design. We followed a pod log line into a Vortex file and its index, watched queries prune down to the rows they needed, and saw fifteen hours of a whole cluster's telemetry, 23 GB of it, sit in 674 MB on disk with every field queryable.
 
 Give it a try on a test cluster and let me know how you find it. If you hit the same sharp edges I did, the fixes above should save you an evening.
 
