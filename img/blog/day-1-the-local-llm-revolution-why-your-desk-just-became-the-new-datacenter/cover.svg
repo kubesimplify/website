@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Day 1: The Local LLM Revolution</title>
+  <desc id="desc">Cover art showing cloud inference shifting to a local DGX Spark workstation on a desk.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101418"/>
+      <stop offset="0.5" stop-color="#111a17"/>
+      <stop offset="1" stop-color="#17120e"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18222a"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b7ff55"/>
+      <stop offset="1" stop-color="#76b900"/>
+    </linearGradient>
+    <linearGradient id="warm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffcf66"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+    <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse">
+      <path d="M38 0H0V38" fill="none" stroke="#ffffff" stroke-opacity="0.055" stroke-width="1"/>
+    </pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <path d="M0 492C161 452 260 524 404 477C561 426 611 289 792 301C965 312 1058 446 1200 399V630H0Z" fill="#76b900" opacity="0.07"/>
+  <path d="M0 86C132 131 254 123 371 78C522 20 671 18 817 75C969 135 1051 134 1200 83V0H0Z" fill="#38bdf8" opacity="0.06"/>
+
+  <g transform="translate(70 78)">
+    <rect x="0" y="0" width="140" height="34" rx="17" fill="#76b900" opacity="0.16" stroke="#76b900" stroke-opacity="0.65"/>
+    <text x="70" y="23" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="800" fill="#b7ff55">DAY 1</text>
+    <text x="0" y="86" font-family="Inter, Arial, sans-serif" font-size="62" font-weight="900" fill="#f8fafc">The Local LLM</text>
+    <text x="0" y="153" font-family="Inter, Arial, sans-serif" font-size="62" font-weight="900" fill="#f8fafc">Revolution</text>
+    <text x="0" y="210" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="750" fill="#cbd5e1">Your desk just became</text>
+    <text x="0" y="252" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="750" fill="#cbd5e1">the new datacenter.</text>
+
+    <g transform="translate(0 304)">
+      <rect x="0" y="0" width="478" height="74" rx="18" fill="#0f1720" fill-opacity="0.82" stroke="#ffffff" stroke-opacity="0.12"/>
+      <text x="28" y="31" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="18" fill="#b7ff55">ollama run gemma4:26b</text>
+      <text x="28" y="56" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="15" fill="#94a3b8">local inference • private tokens • 58 tok/s</text>
+    </g>
+  </g>
+
+  <g transform="translate(610 80)" filter="url(#shadow)">
+    <rect x="0" y="0" width="492" height="404" rx="34" fill="url(#panel)" stroke="#ffffff" stroke-opacity="0.12"/>
+    <rect x="34" y="40" width="164" height="230" rx="18" fill="#111827" stroke="#334155"/>
+    <rect x="56" y="66" width="120" height="24" rx="7" fill="#263241"/>
+    <rect x="56" y="108" width="120" height="24" rx="7" fill="#263241"/>
+    <rect x="56" y="150" width="120" height="24" rx="7" fill="#263241"/>
+    <rect x="56" y="192" width="120" height="24" rx="7" fill="#263241"/>
+    <circle cx="76" cy="78" r="5" fill="#ef4444"/>
+    <circle cx="76" cy="120" r="5" fill="#f97316"/>
+    <circle cx="76" cy="162" r="5" fill="#facc15"/>
+    <circle cx="76" cy="204" r="5" fill="#22c55e"/>
+    <text x="116" y="308" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800" fill="#94a3b8">cloud endpoint</text>
+
+    <path d="M214 118C267 118 284 91 330 91C382 91 397 127 444 127" fill="none" stroke="#38bdf8" stroke-opacity="0.42" stroke-width="5" stroke-linecap="round"/>
+    <path d="M214 184C278 184 305 217 365 217C407 217 426 196 458 196" fill="none" stroke="#76b900" stroke-opacity="0.52" stroke-width="5" stroke-linecap="round"/>
+    <path d="M226 151H407" stroke="#64748b" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round" stroke-dasharray="9 12"/>
+    <path d="M386 132L418 151L386 170" fill="none" stroke="#b7ff55" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <g transform="translate(292 58)">
+      <rect x="0" y="0" width="138" height="56" rx="14" fill="#0f172a" stroke="#38bdf8" stroke-opacity="0.55"/>
+      <text x="69" y="35" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="18" fill="#e0f2fe">prompt</text>
+      <rect x="22" y="92" width="94" height="42" rx="12" fill="url(#warm)" opacity="0.95"/>
+      <text x="69" y="119" text-anchor="middle" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="15" font-weight="800" fill="#111827">tokens</text>
+      <rect x="-8" y="169" width="154" height="64" rx="16" fill="#0f172a" stroke="#76b900" stroke-opacity="0.7"/>
+      <text x="69" y="197" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800" fill="#f8fafc">local model</text>
+      <text x="69" y="219" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#b7ff55">128 GB unified memory</text>
+    </g>
+  </g>
+
+  <g transform="translate(760 432)" filter="url(#shadow)">
+    <path d="M0 70L70 25L180 62L108 112Z" fill="#17212a" stroke="#4b5563"/>
+    <path d="M70 25L70 140L108 184L108 112Z" fill="#0b1117" stroke="#4b5563"/>
+    <path d="M108 112L180 62L180 150L108 184Z" fill="#111827" stroke="#4b5563"/>
+    <path d="M70 25L180 62V150L70 140Z" fill="url(#spark)" opacity="0.92"/>
+    <path d="M94 68L151 86V128L94 113Z" fill="#0f1720" opacity="0.8"/>
+    <text x="91" y="225" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="900" fill="#f8fafc">DGX Spark</text>
+    <text x="91" y="250" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="14" fill="#94a3b8">desk-scale AI lab</text>
+  </g>
+
+  <g transform="translate(70 553)">
+    <rect x="0" y="0" width="248" height="42" rx="21" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.16"/>
+    <text x="124" y="27" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="800" fill="#e2e8f0">7 DAYS OF DGX SPARK</text>
+  </g>
+  <text x="1130" y="583" text-anchor="end" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="800" fill="#76b900">KubeSimplify</text>
+</svg>

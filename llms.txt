@@ -1,0 +1,118 @@
+# Kubesimplify Blog
+
+> Deep dives on Kubernetes, AI infrastructure, GitOps, and the cloud-native stack, written by practitioners.
+
+## About
+
+Kubesimplify is a community-driven publication on cloud-native technologies, with 201 in-depth technical articles by 63 practitioner authors. We cover Kubernetes (kubelet internals, scheduling, networking, operators), container runtimes (containerd, CRI-O, Docker), GitOps (Argo CD, Flux), service meshes, observability, AI/ML infrastructure on Kubernetes, GPU workloads, platform engineering, and the broader CNCF ecosystem.
+
+Authoritative, practitioner-written, citation-friendly. Articles include code examples, diagrams, and references.
+
+## Site structure
+
+- Main site: https://kubesimplify.com
+- Blog index: https://blog.kubesimplify.com
+- Blog posts: https://blog.kubesimplify.com/{slug}
+- Topic hubs: https://blog.kubesimplify.com/hub/{kubernetes|docker|ai-ml|devops|security|linux}
+- Tags: https://blog.kubesimplify.com/tag/{tag}
+- Authors: https://blog.kubesimplify.com/authors  •  https://blog.kubesimplify.com/author/{handle}
+- RSS feed: https://blog.kubesimplify.com/rss.xml
+- Atom feed: https://blog.kubesimplify.com/atom.xml
+- Sitemap: https://blog.kubesimplify.com/sitemap.xml
+
+## Multi-part series
+
+- 7 Days of Docker: https://blog.kubesimplify.com/series/7-days-of-docker (7-part deep dive by Saloni Narang)
+- 7 Days of Local LLM: https://blog.kubesimplify.com/series/7-days-of-dgx-spark (in progress, by Saiyam Pathak)
+
+## Curated topic hubs (canonical entry points)
+
+- Kubernetes: https://blog.kubesimplify.com/hub/kubernetes (kubelet internals, scheduling, networking, operators, releases)
+- Docker & Containers: https://blog.kubesimplify.com/hub/docker (runtimes, image building, multi-stage, Compose)
+- AI & ML on Cloud Native: https://blog.kubesimplify.com/hub/ai-ml (GPU scheduling, Kubeflow, LLMs on Kubernetes, NVIDIA NVCF)
+- DevOps & Platform: https://blog.kubesimplify.com/hub/devops (GitOps, CI/CD, Terraform, platform engineering)
+- Cloud Native Security: https://blog.kubesimplify.com/hub/security (network policies, Falco, Kyverno, SLSA supply-chain)
+- Linux Fundamentals: https://blog.kubesimplify.com/hub/linux (shell, sysadmin, networking primitives)
+
+## Recent posts (most recent 30 of 201)
+
+- [Running a big LLM across multiple GPUs with vLLM](https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm) (2026-09-01). A runbook for serving a model too big for one GPU: download to serving in seven steps, with every vLLM flag, startup log line and real error explained, plus tensor, pipeline and expert parallelism benchmarked head to head on a 235B model across four RTX PRO 6000 cards.
+- [Zero Trust in Practice: Migrating from Istio Sidecar to Ambient Mode](https://blog.kubesimplify.com/zero-trust-istio-sidecar-vs-ambient) (2026-08-31). A hands-on comparison of Istio sidecar and ambient mode for zero-trust service mesh. Same app, same policy, two architectures proven step by step on a local cluster.
+- [Running Qwen3.8-Flash-Next on a DGX Spark and RTX PRO 6000](https://blog.kubesimplify.com/running-qwen3-8-flash-next-on-dgx-spark-and-rtx-pro-6000) (2026-08-27)
+- [The Local LLM Glossary: Every Term, Flag, and Number in Plain English](https://blog.kubesimplify.com/local-llm-glossary) (2026-08-18). Plain-English definitions for every term you hit in local LLM posts: prefill and decode, tokens per second, FP8 and NVFP4, Q4_K_M, KV cache, YaRN, Gated DeltaNet, speculative decoding, and every vLLM, llama.cpp, and Ollama flag worth knowing.
+- [Running Qwen3.8-27B on DGX Spark](https://blog.kubesimplify.com/qwen3-8-27b-on-dgx-spark) (2026-08-17). Qwen3.8-27B on DGX Spark with llama.cpp, Ollama, vLLM, and SGLang: the recipes, the tokens per second I measured, MTP speculative decoding, and the sharp edges I hit along the way.
+- [I Ran an AI SRE Copilot on My Own Hardware. Here Is What It Actually Does.](https://blog.kubesimplify.com/nudgebee-ai-sre-copilot-hands-on) (2026-08-17). Running NudgeBee v1.4.0 end to end - a self-hosted AIOps platform behind AI-SRE, AI-FinOps, AI-K8sOps, and agentic automation - on a Mac, a kiac cluster, and a DGX Spark.
+- [Running Nemotron 3.5 Lightning on DGX Spark](https://blog.kubesimplify.com/nemotron-3-5-lightning-on-dgx-spark) (2026-08-11). NVIDIA's new Nemotron 3.5 Lightning on DGX Spark: how to run it with Ollama and vLLM, the tokens per second I measured, and how the two paths compare.
+- [HAMi Dynamic MIG on RTX PRO 6000: A Live Kubernetes Test](https://blog.kubesimplify.com/dynamic-mig-in-kubernetes-with-hami) (2026-08-11). Hands-on HAMi Dynamic MIG test on Kubernetes and RTX PRO 6000 Blackwell: setup commands, real allocations, mixed profiles, reclamation, and recovery.
+- [Devin Outposts on Kubernetes: Why Your AI Agent Needs Your Cluster](https://blog.kubesimplify.com/devin-outposts-on-kubernetes) (2026-08-10). Devin Outposts runs AI coding agent sessions as pods on your own Kubernetes cluster, with an open-source operator to manage the fleet.
+- [How to Share GPUs in Kubernetes at Scale with HAMi (Software vGPU Slicing)](https://blog.kubesimplify.com/sharing-gpus-in-kubernetes-with-hami) (2026-07-23). Share NVIDIA GPUs in Kubernetes with HAMi software vGPU slicing: memory and compute limits, Helm configuration, a verified PyTorch manifest, a real RTX PRO 6000 OOM test, and Prometheus monitoring.
+- [Slicing GPUs in Kubernetes with NVIDIA Multi-Instance GPU (MIG)](https://blog.kubesimplify.com/slicing-gpus-in-kubernetes-with-nvidia-mig) (2026-07-20). GPU sharing in Kubernetes explained: time-slicing vs MPS vs MIG, every nvidia-smi command to enable and disable MIG on one GPU or eight, GPU Operator automation, pitfalls, and DCGM monitoring.
+- [Day 5: Local LLM Inference Engines, Wrappers, and What to Pick](https://blog.kubesimplify.com/day-5-local-llm-inference-engines-wrappers-and-what-to-pick) (2026-07-17). A beginner-friendly guide to local LLM inference, with the same Qwen model tested through Ollama, llama.cpp, Docker Model Runner, vLLM, SGLang, and TensorRT-LLM on NVIDIA DGX Spark.
+- [Bonsai 27B on RTX PRO 6000 vs DGX Spark: what actually works](https://blog.kubesimplify.com/bonsai-27b-rtx-pro-6000-dgx-spark) (2026-07-16). Real Bonsai 27B benchmarks on an RTX PRO 6000 and a DGX Spark, including the supported llama.cpp setup, ternary vs 1-bit results, and speculative decoding.
+- [Introducing kiac: Real Kubernetes Nodes on Your Mac, Each Its Own Lightweight VM](https://blog.kubesimplify.com/introducing-kiac-kubernetes-in-apple-containers) (2026-07-06). kiac runs local Kubernetes on macOS where every node is its own lightweight VM via apple/container: kubeadm or k3s flavors, Cilium on a custom kernel, built-in LoadBalancer, Grafana, Gateway API, and clusters that survive reboots.
+- [LLM Costs and Observability with agentgateway on Kubernetes (Part 2)](https://blog.kubesimplify.com/llm-costs-and-observability-with-agentgateway-on-kubernetes) (2026-06-30). Part 2: scrape agentgateway with Prometheus, build a Grafana dashboard of token cost and per-tool usage, see blocked tool calls, and alert on spend.
+- [Controlling MCP Tools with agentgateway on Kubernetes (Part 1)](https://blog.kubesimplify.com/controlling-mcp-tools-with-agentgateway-on-kubernetes) (2026-06-29). Run AI agents behind agentgateway on Kubernetes: route their LLM and MCP tool calls through one proxy, keep secrets out of the agent, and block tools by policy.
+- [Day 4: Quantization Demystified. BF16, FP8, NVFP4, MXFP4, INT4, GGUF, and Why It All Matters](https://blog.kubesimplify.com/day-4-quantization-demystified-bf16-fp8-nvfp4-mxfp4-int4-gguf-and-why-it-all-matters) (2026-06-10). A practical, beginner-friendly guide to BF16, FP8, NVFP4, MXFP4, INT4, and GGUF Q4_K_M on NVIDIA DGX Spark. Bytes per parameter, quality vs size, and which format to pick when.
+- [Day 3: The DGX Spark Unpacked. GB10, Unified Memory, sm_121, and the One Reason This Hardware Exists](https://blog.kubesimplify.com/day-3-the-dgx-spark-unpacked-gb10-unified-memory-sm-121-and-the-one-reason-this-hardware-exists) (2026-06-05). A practical teardown of NVIDIA DGX Spark's GB10 Grace Blackwell Superchip, unified memory, sm_121, NVFP4 tensor cores, memory reporting, and decode limits.
+- [Wandler: Local OpenAI-Compatible Inference With Transformers.js and WebGPU](https://blog.kubesimplify.com/wandler-local-openai-compatible-inference-transformersjs-webgpu) (2026-06-03). A practical Wandler deep dive with a local M1 Max WebGPU demo, real latency numbers, architecture diagrams, and getting-started commands.
+- [mlxcel: A Rust-Native Inference Engine for Apple Silicon, Tested on My M1 Max](https://blog.kubesimplify.com/mlxcel-rust-native-inference-engine-tested-on-m1-max) (2026-05-29). Day-one deep dive into mlxcel v0.1.0, a Rust-native MLX inference engine. Real M1 Max benchmarks vs mlx-lm and Ollama on Llama 3.2 3B and Qwen 2.5 7B, with architecture diagrams and an honest take on TurboQuant.
+- [Day 2: Anatomy of an LLM Inference Request. From Prompt to Answer, Step by Step](https://blog.kubesimplify.com/day-2-anatomy-of-an-llm-inference-request-from-prompt-to-answer-step-by-step) (2026-05-27). A beginner-friendly walkthrough of tokenization, prefill, KV cache, decode, batching, TTFT, and why memory bandwidth shapes local LLM performance on NVIDIA DGX Spark.
+- [How kube-proxy Actually Works: iptables, IPVS, and nftables Inside Out](https://blog.kubesimplify.com/kube-proxy-deep-dive) (2026-05-25). How kube-proxy turns Kubernetes Services into kernel rules. iptables, IPVS, nftables packet paths and which to pick in 2026. Verified against k/k 1.36 source.
+- [Day 1: The Local LLM Revolution. Why Your Desk Just Became the New Datacenter](https://blog.kubesimplify.com/day-1-the-local-llm-revolution-why-your-desk-just-became-the-new-datacenter) (2026-05-25). Why local LLMs are becoming practical in 2026, what changed across open weights, hardware, and inference software, and why DGX Spark makes the desk feel like a small AI lab.
+- [How Kubernetes EndpointSlices Actually Work (and Why Endpoints Had to Die)](https://blog.kubesimplify.com/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die) (2026-05-11)
+- [NVCF Is Now Open Source: Inside NVIDIA's GPU Function Platform](https://blog.kubesimplify.com/nvcf-is-now-open-source-inside-nvidia-s-gpu-function-platform) (2026-05-11)
+- [How a Kubernetes Service Actually Works (and All 5 Types You Need)](https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need) (2026-05-05)
+- [Day 7: Ship It - and What Comes Next](https://blog.kubesimplify.com/day-7-ship-it-and-what-comes-next) (2026-05-04). Your container runs as root and has 18 CVEs. A Docker Captain's guide to hardening, Scout policies, DHI, Sandboxes, and what comes after Docker. 
+- [Day 6: Run an LLM on Your Laptop - With Docker](https://blog.kubesimplify.com/day-6-run-an-llm-on-your-laptop-with-docker) (2026-04-30). \"Pull AI models from Docker Hub, run them locally with GPU acceleration, and build an AI-powered app
+- [A Kubeconfig for GKE That Doesn't Need gcloud](https://blog.kubesimplify.com/a-kubeconfig-for-gke-that-doesnt-need-gcloud) (2026-04-29)
+- [Day 5: Docker Compose - How Docker Actually Gets Used](https://blog.kubesimplify.com/day-5-docker-compose-how-docker-actually-gets-used) (2026-04-28)
+
+## Topics covered (auto-derived from tags)
+
+- kubernetes (101 articles): https://blog.kubesimplify.com/tag/kubernetes
+- devops (71 articles): https://blog.kubesimplify.com/tag/devops
+- docker (31 articles): https://blog.kubesimplify.com/tag/docker
+- k8s (27 articles): https://blog.kubesimplify.com/tag/k8s
+- linux (19 articles): https://blog.kubesimplify.com/tag/linux
+- containers (17 articles): https://blog.kubesimplify.com/tag/containers
+- cloud (16 articles): https://blog.kubesimplify.com/tag/cloud
+- nvidia (15 articles): https://blog.kubesimplify.com/tag/nvidia
+- llm (14 articles): https://blog.kubesimplify.com/tag/llm
+- aws (12 articles): https://blog.kubesimplify.com/tag/aws
+- cloud-native (11 articles): https://blog.kubesimplify.com/tag/cloud-native
+- security (11 articles): https://blog.kubesimplify.com/tag/security
+- dgxspark (10 articles): https://blog.kubesimplify.com/tag/dgxspark
+- go (9 articles): https://blog.kubesimplify.com/tag/go
+- git (9 articles): https://blog.kubesimplify.com/tag/git
+- linux-for-beginners (9 articles): https://blog.kubesimplify.com/tag/linux-for-beginners
+- platform-engineering (8 articles): https://blog.kubesimplify.com/tag/platform-engineering
+- ai (8 articles): https://blog.kubesimplify.com/tag/ai
+- local-ai (8 articles): https://blog.kubesimplify.com/tag/local-ai
+- github (8 articles): https://blog.kubesimplify.com/tag/github
+- terraform (8 articles): https://blog.kubesimplify.com/tag/terraform
+- gpu (7 articles): https://blog.kubesimplify.com/tag/gpu
+- docker-images (7 articles): https://blog.kubesimplify.com/tag/docker-images
+- kubesimplify (7 articles): https://blog.kubesimplify.com/tag/kubesimplify
+- linux-basics (7 articles): https://blog.kubesimplify.com/tag/linux-basics
+
+## Top contributors
+
+- [Saiyam Pathak](https://blog.kubesimplify.com/author/saiyam-pathak) (41 posts)
+- [Saloni Narang](https://blog.kubesimplify.com/author/saloni-narang) (24 posts)
+- [Kunal Verma](https://blog.kubesimplify.com/author/kunal-verma) (12 posts)
+- [Dipankar Das](https://blog.kubesimplify.com/author/dipankar-das) (9 posts)
+- [Anurag Kumar](https://blog.kubesimplify.com/author/anurag-kumar) (8 posts)
+- [Shubham Katara](https://blog.kubesimplify.com/author/shubham-katara) (6 posts)
+- [sysxplore](https://blog.kubesimplify.com/author/sysxplore) (6 posts)
+- [Arnav Barman](https://blog.kubesimplify.com/author/arnav-barman) (5 posts)
+- [Srinivas Karnati](https://blog.kubesimplify.com/author/srinivas-karnati) (4 posts)
+- [Barkatul Mujauddin](https://blog.kubesimplify.com/author/barkatul-mujauddin) (4 posts)
+- [Santoshdts](https://blog.kubesimplify.com/author/santoshdts) (3 posts)
+- [Rishit Dagli](https://blog.kubesimplify.com/author/rishit-dagli) (3 posts)
+- [Bishal Das](https://blog.kubesimplify.com/author/bishal-das) (3 posts)
+- [Brijesh Kori](https://blog.kubesimplify.com/author/brijesh-kori) (3 posts)
+- [Hamees Sayed](https://blog.kubesimplify.com/author/hamees-sayed) (3 posts)
+
+## Crawl policy
+
+All content is freely accessible; no paywall. Citations of canonical URLs (`blog.kubesimplify.com/<slug>`) are encouraged. Author attribution is preserved in each post's schema.org metadata.
