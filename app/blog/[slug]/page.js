@@ -44,6 +44,7 @@ export async function generateMetadata({ params }) {
       siteName: SITE.name,
       images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }],
       publishedTime: post.datePublished,
+      ...(post.dateModified ? { modifiedTime: post.dateModified } : {}),
       authors: post.authors.map((a) => a.name),
       tags: post.tags,
     },
@@ -59,6 +60,18 @@ export async function generateMetadata({ params }) {
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+// Frontmatter `about:` / `mentions:` entry -> schema.org node. `type` defaults
+// to Thing; any extra keys (applicationCategory, description, ...) pass through.
+function entityLd({ type, name, url, sameAs, ...rest }) {
+  return {
+    '@type': type || 'Thing',
+    name,
+    ...(url ? { url } : {}),
+    ...(Array.isArray(sameAs) && sameAs.length ? { sameAs } : {}),
+    ...rest,
+  };
 }
 
 export default async function BlogPost({ params }) {
@@ -83,7 +96,7 @@ export default async function BlogPost({ params }) {
     description: post.seoDescription || undefined,
     image: [ogImage],
     datePublished: post.datePublished,
-    dateModified: post.datePublished,
+    dateModified: post.dateModified || post.datePublished,
     inLanguage: 'en-US',
     isAccessibleForFree: true,
     author: post.authors.map((a) => ({
@@ -113,7 +126,13 @@ export default async function BlogPost({ params }) {
     wordCount: post.words,
     timeRequired: `PT${post.readMinutes}M`,
     articleSection: post.tags[0] || 'Cloud Native',
-    about: post.tags.map((t) => ({ '@type': 'Thing', name: t })),
+    about: [
+      ...post.about.map(entityLd),
+      ...post.tags
+        .filter((t) => !post.about.some((e) => e.name.toLowerCase() === t.toLowerCase()))
+        .map((t) => ({ '@type': 'Thing', name: t })),
+    ],
+    ...(post.mentions.length ? { mentions: post.mentions.map(entityLd) } : {}),
     ...(seriesInfo
       ? {
           isPartOf: {
@@ -233,6 +252,14 @@ export default async function BlogPost({ params }) {
                     ))}
                     <span className="mx-2">·</span>
                     <time dateTime={post.datePublished}>{formatDate(post.datePublished)}</time>
+                    {post.dateModified && (
+                      <>
+                        <span className="mx-2">·</span>
+                        <span>
+                          Updated <time dateTime={post.dateModified}>{formatDate(post.dateModified)}</time>
+                        </span>
+                      </>
+                    )}
                     <span className="mx-2">·</span>
                     <span>{post.readMinutes} min read</span>
                   </div>

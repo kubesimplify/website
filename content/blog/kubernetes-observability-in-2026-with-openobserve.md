@@ -1,16 +1,56 @@
 ---
-title: "Kubernetes observability in 2026, with OpenObserve 1.0 as the backend"
-seoTitle: "Kubernetes observability in 2026 with OpenObserve 1.0"
-seoDescription: "Why the backend is where Kubernetes observability cost lives, what an object-storage and columnar-file backend does differently, and a hands-on run of OpenObserve 1.0 on a kiac cluster."
+title: "Kubernetes observability in 2026 with OpenObserve 1.0 as the backend"
+seoTitle: "Kubernetes observability in 2026 with OpenObserve 1.0 as the backend"
+seoDescription: "A 31 ms full-text search over 4.2 million Kubernetes log rows, and a whole cluster on 43m CPU under 600 MiB: a hands-on run of OpenObserve 1.0 as the backend."
 datePublished: 2026-09-03T00:00:00.000Z
 slug: kubernetes-observability-in-2026-with-openobserve
 author: saiyam-pathak
 tags: ["kubernetes", "observability", "opentelemetry", "openobserve"]
 cover: /img/blog/kubernetes-observability-in-2026-with-openobserve/cover.png
 draft: false
+# Schema.org entities for the BlogPosting JSON-LD. `about` replaces the generic
+# Thing that the "openobserve" tag would otherwise produce; `mentions` names the
+# other projects the post explains.
+about:
+  - type: SoftwareApplication
+    name: OpenObserve
+    url: https://openobserve.ai
+    sameAs:
+      - https://openobserve.ai
+      - https://github.com/openobserve/openobserve
+    applicationCategory: DeveloperApplication
+    description: "Open source observability platform for logs, metrics, traces, RUM and LLM traces, written in Rust, storing Parquet or Vortex files in object storage."
+mentions:
+  - type: SoftwareApplication
+    name: Vortex
+    url: https://vortex.dev
+    sameAs:
+      - https://vortex.dev
+      - https://github.com/vortex-data/vortex
+  - type: SoftwareApplication
+    name: Apache DataFusion
+    url: https://datafusion.apache.org
+    sameAs:
+      - https://datafusion.apache.org
+      - https://github.com/apache/datafusion
+# Rendered as an FAQ section after the post and emitted as FAQPage JSON-LD.
+# Answers are plain text (no markdown) because the template prints them verbatim.
+faq:
+  - q: "Is OpenObserve a Prometheus replacement?"
+    a: "No. It takes the seat Thanos or Mimir take, long-term storage behind Prometheus with remote write in and PromQL out, and its own PromQL evaluator still lacks histogram_count, histogram_sum, histogram_fraction, sort, sort_desc and the @ modifier, so test your dashboards against it before you switch."
+  - q: "Can OpenObserve replace the LGTM stack?"
+    a: "Yes, and that is the fair comparison: logs, metrics, traces, RUM and LLM traces land in one binary with one data model and retention set per stream, where the LGTM stack is Loki, Mimir, Tempo and Grafana with four of everything. It has its own dashboards and alerting, and an existing Grafana dashboard can point at it over PromQL once you have checked the functions it uses."
+  - q: "What file formats does OpenObserve use?"
+    a: "Data is written as Parquet by default, or as Vortex per stream type with ZO_FILE_FORMAT, into S3, GCS, Azure Blob, MinIO or a local disk. Every data file gets a .ttv full-text index beside it, a single tantivy segment inside an Apache Iceberg Puffin container, and DuckDB read the Vortex file in this post directly, with no OpenObserve in the loop."
+  - q: "Does OpenObserve have an MCP server?"
+    a: "Yes, in the open-source build, speaking streamable HTTP from your organisation's API endpoint. It generates a couple of hundred tools from the OpenAPI spec but exposes only seven to the model, a tool_search, a tools_call that returns summarised responses and five pinned tools, and it authenticates with your own token so the model inherits your permissions and nothing more."
+  - q: "How much does OpenObserve compress Kubernetes logs?"
+    a: "On my three node cluster, container logs went from 5,173 MB ingested to 228 MB on disk plus a 164 MB full-text index, which is 23x without the index and 13x with it. Metrics compressed far harder, 108x without the index and 77x with it, because they have no free-text fields to tokenise."
+  - q: "Is Vortex production-ready in OpenObserve?"
+    a: "Not yet, in my view. OpenObserve's Vortex support moved from the enterprise build into open source in July 2026 and pins the crate to a git revision, and the vendor's own numbers show it faster on row fetch but about 5 percent larger on disk, so try it on a test cluster and watch the release notes before making it the default."
 ---
 
-**TL;DR:** Collecting telemetry from Kubernetes is solved, paying to store and search it is not, and this post is about why the backend is where the cost lives, what a backend built on object storage and columnar files does differently, and what that looks like when you run OpenObserve 1.0 on a real cluster. I ran it on a three node kiac cluster on my Mac, read the parts of the source that matter, and hit one real bug on the way.
+**TL;DR:** A full-text search over 4.2 million Kubernetes log rows came back in 31 ms after touching 27 MB of the 4,159 MB in range, and the whole three node cluster's telemetry ran through one [OpenObserve](https://openobserve.ai) 1.0 pod at 43m CPU and under 600 MiB. Collecting telemetry from Kubernetes is solved, paying to store and search it is not, and this post is about why the backend is where the cost lives, what a backend built on object storage and columnar files does differently, and what that looks like on a real cluster. I ran it on a kiac cluster on my Mac, read the parts of the source that matter, and hit one real bug on the way.
 
 Every Kubernetes cluster you run is quietly producing four kinds of evidence about itself: container logs on every node, metrics from the kubelet and kube-state-metrics, traces if your apps are instrumented, and Kubernetes events, which most clusters throw away after an hour. When a pod restarts at 3 am you usually do have the data somewhere, the real question is where it went and whether you can afford to keep it there.
 
@@ -60,9 +100,9 @@ That gives us a bar to hold any backend to:
 
 ## How OpenObserve is built
 
-OpenObserve is a single Rust binary, licensed AGPL-3.0. It ingests logs, metrics and traces (LLM traces included) over OTLP, RUM from its browser SDK, and keeps compatibility endpoints for Elasticsearch bulk, Loki push, Prometheus remote write and Splunk HEC. It stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL through Apache DataFusion and PromQL with its own evaluator over the same files. Its first 1.0 release candidate landed on 28 August 2026 and a second on 3 September; everything in this post was run on rc1. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch". Both are vendor claims, so let's look at what is underneath.
+OpenObserve is a single Rust binary, licensed AGPL-3.0, and [Kubernetes observability](https://openobserve.ai/kubernetes-monitoring/) is the job it is most often put to. It ingests logs, metrics and traces (LLM traces included) over OTLP, RUM from its browser SDK, and keeps compatibility endpoints for Elasticsearch bulk, Loki push, Prometheus remote write and Splunk HEC. It stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL through Apache DataFusion and PromQL with its own evaluator over the same files. Its first 1.0 release candidate landed on 28 August 2026 and a second on 3 September; everything in this post was run on rc1. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch", and the closest thing to public evidence is the vendor's own [one billion log records benchmark against ClickHouse](https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/). These are vendor claims, so let's look at what is underneath.
 
-Before we go inside, let's put it against the bar we set above and see how it is different:
+Before we go inside, let's put it against the bar we set above. Read the table as OpenObserve vs Loki, OpenObserve vs Elasticsearch and OpenObserve vs the full LGTM stack in one place, because those are the backends it replaces in practice:
 
 | | Most stacks today | OpenObserve |
 |---|---|---|
@@ -76,6 +116,8 @@ It is not a drop-in replacement for Prometheus, though. For metrics it takes the
 
 ### A log line goes in
 
+OpenObserve appends every incoming batch to a write-ahead log and an in-memory Arrow table, turns the frozen tables into Parquet or Vortex files, uploads each file to object storage with a `.ttv` full-text index beside it, and only then records the file in its `file_list` catalog.
+
 ![Write path](/img/blog/kubernetes-observability-in-2026-with-openobserve/write-path.gif)
 
 A batch lands over HTTP, its JSON is flattened (`k8s.namespace.name` becomes `k8s_namespace_name`, which is why every screenshot has those long field names) and its schema is checked against the stream. It is appended to a write-ahead log and an in-memory Arrow table at the same time. Every 2 seconds the frozen tables become Parquet, the upload job merges the dumps of the same stream, hour and schema into one file per round, writes it to the bucket under `files/{org}/{type}/{stream}/YYYY/MM/DD/HH/`, builds a full-text index for that file as a `.ttv` object, and only then records the file in the `file_list` catalog. If the catalog database is unreachable, nothing is uploaded, and I like that a lot: a database outage cannot litter the bucket. A failure between the upload and the catalog write can still leave an object behind, so the gate closes the common case rather than every case.
@@ -84,11 +126,15 @@ Two things you should know: the WAL is flushed but not fsynced per batch by defa
 
 ### The index is a file next to the data
 
+OpenObserve stores its full-text index as a separate `.ttv` file next to each Parquet or Vortex data file, a single tantivy segment inside an Apache Iceberg Puffin container.
+
 ![Anatomy of a .ttv index file](/img/blog/kubernetes-observability-in-2026-with-openobserve/06-ttv-anatomy.png)
 
-The `.ttv` next to each data file is an Apache Iceberg Puffin container (Puffin is Iceberg's simple format for index and statistics blobs) wrapping a single segment of tantivy, the Rust full-text search library. All configured full-text fields (`message`, `body`, `log` and friends) are concatenated into one indexed column, fields like `trace_id` are indexed whole for exact match, and `_timestamp` is a fast field. Because there is exactly one segment per data file, a document id in the index equals a row number in the data file. That one fact is what makes the query side cheap, as we will see next.
+Puffin is Iceberg's simple container format for index and statistics blobs, and tantivy is the Rust full-text search library. All configured full-text fields (`message`, `body`, `log` and friends) are concatenated into one indexed column, fields like `trace_id` are indexed whole for exact match, and `_timestamp` is a fast field. Because there is exactly one segment per data file, a document id in the index equals a row number in the data file. That one fact is what makes the query side cheap, as we will see next.
 
 ### A query comes out
+
+OpenObserve answers a query by asking the `file_list` catalog for the files in the time range, pruning them with partition keys, bloom filters and the `.ttv` index down to a bitmap of matching rows, and handing only those rows to Apache DataFusion to read out of Parquet or Vortex.
 
 ![How a query finds your rows](/img/blog/kubernetes-observability-in-2026-with-openobserve/query-funnel.gif)
 
@@ -96,7 +142,7 @@ A query asks the catalog for the files that overlap the time range, splits them 
 
 ### What 1.0 adds
 
-**Vortex as a file format.** `ZO_FILE_FORMAT=parquet,logs=vortex` writes logs as Vortex, a columnar format from SpiralDB that is now a Linux Foundation project, built for random access, which is exactly the shape of a "show me these 100 log lines" query. OpenObserve's own August 2026 comparison, one billion log records with everything but the format identical, vendor-run but public:
+**Vortex as a file format.** `ZO_FILE_FORMAT=parquet,logs=vortex` writes logs as Vortex, a columnar format from SpiralDB that is now a Linux Foundation project, built for random access, which is exactly the shape of a "show me these 100 log lines" query. [OpenObserve's own August 2026 comparison](https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/), one billion log records with everything but the format identical, vendor-run but public:
 
 | Workload | Parquet | Vortex |
 |---|---|---|
@@ -106,9 +152,9 @@ A query asks the catalog for the files that overlap the time range, splits them 
 
 Faster on the query that hurts, a tie on counts, about 5 percent more disk. OpenObserve's Vortex support only left the enterprise build in July 2026 and the crate is pinned to a git revision, so I would call it new and promising, and not the default for a reason.
 
-**An MCP server that does not flood the context window.** The tool catalog is generated from the OpenAPI spec, a couple of hundred tools, but `tools/list` returns only seven: a `tool_search` over the descriptions, a `tools_call` that returns summarised responses, and five pinned tools. Authentication is your own token, so the model inherits your permissions and nothing more. This is the part of the release I was most keen to try.
+**An [MCP server](https://openobserve.ai/docs/integration/ai/mcp/) that does not flood the context window.** The tool catalog is generated from the OpenAPI spec, a couple of hundred tools, but `tools/list` returns only seven: a `tool_search` over the descriptions, a `tools_call` that returns summarised responses, and five pinned tools. Authentication is your own token, so the model inherits your permissions and nothing more. This is the part of the release I was most keen to try.
 
-Also new, and all open source: SLOs with burn-rate alerts, a time index for traces so a bare trace id no longer scans everything, and LLM traces from the OpenTelemetry GenAI conventions plus Vercel AI SDK, OpenInference, Langfuse and TraceLoop-style attributes, priced at ingest from a built-in price table (custom pricing is enterprise). SSO and fine-grained RBAC, incidents, anomaly detection, the AI assistant and the service graph UI are enterprise.
+Also new, and all open source: [SLOs with burn-rate alerts](https://openobserve.ai/docs/user-guide/analytics/slos/), a time index for traces so a bare trace id no longer scans everything, and LLM traces from the OpenTelemetry GenAI conventions plus Vercel AI SDK, OpenInference, Langfuse and TraceLoop-style attributes, priced at ingest from a built-in price table (custom pricing is enterprise). SSO and fine-grained RBAC, incidents, anomaly detection, the AI assistant and the service graph UI are enterprise.
 
 ![Open source vs enterprise in 1.0](/img/blog/kubernetes-observability-in-2026-with-openobserve/08-oss-vs-enterprise.png)
 
@@ -139,7 +185,7 @@ NAME                                TYPE           CLUSTER-IP     EXTERNAL-IP   
 service/o2-openobserve-standalone   LoadBalancer   10.100.30.54   192.168.64.10   5080:30148/TCP,5081:32552/TCP
 ```
 
-The values file pins the 1.0.0-rc1 image, asks for a LoadBalancer Service, and sets three things worth knowing:
+The chart comes from [charts.openobserve.ai](https://charts.openobserve.ai), and the values file pins the 1.0.0-rc1 image, asks for a LoadBalancer Service, and sets three things worth knowing:
 
 ```yaml
 config:
