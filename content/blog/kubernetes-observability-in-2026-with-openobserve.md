@@ -150,7 +150,7 @@ A query asks the catalog for the files that overlap the time range, splits them 
 | Indexed counts (8 queries) | 215 ms | 232 ms |
 | Storage for 1 billion rows | 673.5 GB | 710.7 GB |
 
-Faster on the query that hurts, a tie on counts, about 5 percent more disk. OpenObserve's Vortex support only left the enterprise build in July 2026 and the crate is pinned to a git revision, so I would call it new and promising, and not the default for a reason.
+Faster on the query that hurts, a tie on counts, about 5 percent more disk. The vendor's [metrics benchmark against Prometheus and Mimir](https://openobserve.ai/blog/openobserve-vs-prometheus-mimir-metrics-benchmark/) ran the same two formats side by side as well, and there Vortex was about 3x faster on filtered histogram queries with the two formats within a gigabyte of each other on disk. OpenObserve's Vortex support only left the enterprise build in July 2026 and the crate is pinned to a git revision, so I would call it new and promising, and not the default for a reason.
 
 **An [MCP server](https://openobserve.ai/docs/integration/ai/mcp/) that does not flood the context window.** The tool catalog is generated from the OpenAPI spec, a couple of hundred tools, but `tools/list` returns only seven: a `tool_search` over the descriptions, a `tools_call` that returns summarised responses, and five pinned tools. Authentication is your own token, so the model inherits your permissions and nothing more. This is the part of the release I was most keen to try.
 
