@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">The four-layer local LLM stack</title>
+  <desc id="desc">Interface, inference engine, hardware, and model weights arranged as the local LLM stack.</desc>
+  <style>
+    text{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+    .title{font-size:42px;font-weight:800;fill:#0f172a}
+    .sub{font-size:21px;fill:#475569}
+    .layer{font-size:28px;font-weight:800;fill:#0f172a}
+    .body{font-size:18px;fill:#334155}
+    .day{font-size:17px;font-weight:800;fill:#475569}
+    .side{font-size:16px;fill:#64748b}
+  </style>
+  <rect width="1200" height="760" rx="30" fill="#ffffff"/>
+  <text x="600" y="76" text-anchor="middle" class="title">The four-layer local LLM stack</text>
+  <text x="600" y="112" text-anchor="middle" class="sub">Every confusing thing in the rest of the series lives in one of these layers.</text>
+
+  <g transform="translate(260 160)">
+    <rect width="680" height="104" rx="18" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="3"/>
+    <text x="34" y="44" class="layer">Layer 4: Interface</text>
+    <text x="34" y="76" class="body">Chat UI, OpenAI-compatible API, or an agent framework such as Hermes Agent.</text>
+    <text x="706" y="61" class="day">UI</text>
+  </g>
+  <g transform="translate(260 292)">
+    <rect width="680" height="104" rx="18" fill="#fff7ed" stroke="#f97316" stroke-width="3"/>
+    <text x="34" y="44" class="layer">Layer 3: Inference engine</text>
+    <text x="34" y="76" class="body">Ollama, llama.cpp, vLLM, SGLang, Docker Model Runner, or NIM.</text>
+    <text x="706" y="61" class="day">Runtime</text>
+  </g>
+  <g transform="translate(260 424)">
+    <rect width="680" height="104" rx="18" fill="#f0fdf4" stroke="#22c55e" stroke-width="3"/>
+    <text x="34" y="44" class="layer">Layer 2: Hardware</text>
+    <text x="34" y="76" class="body">GB10 Grace Blackwell Superchip with 128 GB unified memory.</text>
+    <text x="706" y="61" class="day">Chip</text>
+  </g>
+  <g transform="translate(260 556)">
+    <rect width="680" height="104" rx="18" fill="#ecfeff" stroke="#06b6d4" stroke-width="3"/>
+    <text x="34" y="44" class="layer">Layer 1: Model weights</text>
+    <text x="34" y="76" class="body">The billions of parameters loaded into memory for inference.</text>
+    <text x="706" y="61" class="day">Weights</text>
+  </g>
+
+  <path d="M600 264 L600 292" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+  <path d="M586 278 L600 292 L614 278" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M600 396 L600 424" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+  <path d="M586 410 L600 424 L614 410" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M600 528 L600 556" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+  <path d="M586 542 L600 556 L614 542" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="88" y="360" class="side">prompt flows down</text>
+  <text x="88" y="392" class="side">tokens stream back up</text>
+  <path d="M188 278 L188 570" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 12"/>
+  <path d="M176 556 L188 570 L200 556" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M214 570 L214 278" stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 12"/>
+  <path d="M202 292 L214 278 L226 292" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

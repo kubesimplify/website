@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="625" viewBox="0 0 780 625">
+  <rect width="780" height="625" fill="#ffffff"/>
+  <style>
+    .title { font: 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1f2937; }
+    .sub { font: 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+    .code { font: 16px "SFMono-Regular", Consolas, monospace; fill: #111827; }
+    .code-small { font: 14px "SFMono-Regular", Consolas, monospace; fill: #6b7280; }
+    .h { font: 20px "SFMono-Regular", Consolas, monospace; }
+    .body { font: 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+    .note { font: 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  </style>
+
+  <text x="390" y="52" text-anchor="middle" class="title">free -h on Spark: what each column means</text>
+  <text x="390" y="82" text-anchor="middle" class="sub">The CPU and GPU see one shared memory pool.</text>
+
+  <rect x="45" y="115" width="690" height="165" rx="8" fill="#f9fafb" stroke="#1f2937" stroke-width="2"/>
+  <text x="70" y="150" class="code">$ free -h</text>
+  <text x="70" y="185" class="code">              total   used   free  shared  buff/cache  available</text>
+  <text x="70" y="220" class="code">Mem:          120Gi   47Gi   62Gi   1.0Gi       10Gi       72Gi</text>
+  <text x="70" y="255" class="code">Swap:           0B     0B     0B</text>
+  <text x="505" y="255" class="code-small"># vLLM workload loaded</text>
+
+  <rect x="45" y="315" width="220" height="125" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text x="155" y="350" text-anchor="middle" class="h" fill="#1d4ed8">total = 120Gi</text>
+  <text x="65" y="382" class="body">The whole unified pool.</text>
+  <text x="65" y="407" class="body">About 128 GB raw,</text>
+  <text x="65" y="432" class="body">minus system reserves.</text>
+
+  <rect x="290" y="315" width="220" height="125" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="400" y="350" text-anchor="middle" class="h" fill="#b45309">used = 47Gi</text>
+  <text x="310" y="382" class="body">Model memory, KV cache,</text>
+  <text x="310" y="407" class="body">CPU work, and services.</text>
+  <text x="310" y="432" class="note" fill="#92400e">This is not just "VRAM".</text>
+
+  <rect x="535" y="315" width="220" height="125" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+  <text x="645" y="350" text-anchor="middle" class="h" fill="#15803d">available = 72Gi</text>
+  <text x="555" y="382" class="body">Best number to watch.</text>
+  <text x="555" y="407" class="body">What new workloads</text>
+  <text x="555" y="432" class="body">can realistically use.</text>
+
+  <rect x="45" y="475" width="710" height="95" rx="8" fill="#fff1f2" stroke="#ef4444" stroke-width="2"/>
+  <text x="390" y="508" text-anchor="middle" class="h" fill="#991b1b">nvidia-smi memory.* returns N/A on Spark</text>
+  <text x="70" y="538" class="body">There is no private GPU VRAM pool to report.</text>
+  <text x="70" y="563" class="note" fill="#991b1b">Use free -h available plus swap. Do not double-count memory; it is one pool.</text>
+</svg>

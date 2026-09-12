@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="400" viewBox="0 0 760 400" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="760" height="400" fill="#fcfcfb"/>
+  <defs>
+    <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#898781"/>
+    </marker>
+  </defs>
+
+  <text x="24" y="34" font-size="17" font-weight="600" fill="#0b0b0b">How Bonsai 27B gets from 54 GB to your GPU</text>
+
+  <!-- stage 1: base model -->
+  <rect x="24" y="70" width="180" height="76" rx="8" fill="none" stroke="#0b0b0b" stroke-width="1.5"/>
+  <text x="114" y="96" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">Qwen3.6-27B</text>
+  <text x="114" y="114" font-size="12" fill="#52514e" text-anchor="middle">FP16 weights · 54 GB</text>
+  <text x="114" y="130" font-size="12" fill="#52514e" text-anchor="middle">hybrid attention · 262K ctx</text>
+
+  <!-- arrow with label -->
+  <line x1="204" y1="108" x2="286" y2="108" stroke="#898781" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <text x="245" y="176" font-size="11.5" fill="#52514e" text-anchor="middle">distill + re-train</text>
+  <text x="245" y="192" font-size="11.5" fill="#52514e" text-anchor="middle">into low-bit form</text>
+
+  <!-- stage 2: two variants stacked -->
+  <rect x="290" y="56" width="200" height="64" rx="8" fill="none" stroke="#2a78d6" stroke-width="2"/>
+  <text x="390" y="80" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">Ternary: −1, 0, +1</text>
+  <text x="390" y="98" font-size="12" fill="#52514e" text-anchor="middle">1.71 bits/weight · 5.9 GB</text>
+
+  <rect x="290" y="132" width="200" height="64" rx="8" fill="none" stroke="#2a78d6" stroke-width="2"/>
+  <text x="390" y="156" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">1-bit: −1, +1</text>
+  <text x="390" y="174" font-size="12" fill="#52514e" text-anchor="middle">1.125 bits/weight · 3.9 GB</text>
+
+  <!-- arrows to engines -->
+  <line x1="490" y1="88" x2="552" y2="88" stroke="#898781" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <line x1="490" y1="164" x2="552" y2="164" stroke="#898781" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+  <!-- stage 3: engines -->
+  <rect x="556" y="56" width="180" height="64" rx="8" fill="none" stroke="#0b0b0b" stroke-width="1.5"/>
+  <text x="646" y="80" font-size="12.5" font-weight="600" fill="#0b0b0b" text-anchor="middle">llama.cpp: PrismML fork</text>
+  <text x="646" y="98" font-size="12" fill="#52514e" text-anchor="middle">branch “prism” (CUDA)</text>
+
+  <rect x="556" y="132" width="180" height="64" rx="8" fill="none" stroke="#0b0b0b" stroke-width="1.5"/>
+  <text x="646" y="156" font-size="12.5" font-weight="600" fill="#0b0b0b" text-anchor="middle">llama.cpp: official</text>
+  <text x="646" y="174" font-size="12" fill="#52514e" text-anchor="middle">1-bit kernel already merged</text>
+
+  <!-- why it is fast note -->
+  <rect x="24" y="230" width="712" height="64" rx="8" fill="none" stroke="#c3c2b7" stroke-width="1.5"/>
+  <text x="40" y="254" font-size="12.5" font-weight="600" fill="#0b0b0b">Why fewer bits = faster generation</text>
+  <text x="40" y="274" font-size="12" fill="#52514e">Generating one token means reading every weight once. Reading 6.7 GB per token instead of 54 GB (or ~15 GB for 4-bit)</text>
+  <text x="40" y="290" font-size="12" fill="#52514e">is why a 27B model can decode at 120+ tok/s on one GPU and still run on a laptop or phone.</text>
+
+  <!-- hardware row: what we measured -->
+  <g font-size="12.5" fill="#0b0b0b">
+    <text x="24" y="342" font-size="12" fill="#52514e">Measured in this post:</text>
+    <rect x="200" y="322" width="250" height="46" rx="8" fill="none" stroke="#c3c2b7" stroke-width="1.5"/>
+    <text x="325" y="342" text-anchor="middle" font-weight="600">RTX PRO 6000 (96 GB)</text>
+    <text x="325" y="359" text-anchor="middle" fill="#52514e">120–156 tok/s generation</text>
+    <rect x="486" y="322" width="250" height="46" rx="8" fill="none" stroke="#c3c2b7" stroke-width="1.5"/>
+    <text x="611" y="342" text-anchor="middle" font-weight="600">DGX Spark GB10 (128 GB)</text>
+    <text x="611" y="359" text-anchor="middle" fill="#52514e">28–43 tok/s generation</text>
+  </g>
+</svg>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="620" viewBox="0 0 760 620">
+  <rect width="760" height="620" fill="#ffffff"/>
+  <style>
+    .title { font: 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1f2937; }
+    .sub { font: 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+    .box-title { font: 19px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .body { font: 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+    .mono { font: 23px "SFMono-Regular", Consolas, monospace; fill: #ea580c; }
+  </style>
+
+  <text x="380" y="55" text-anchor="middle" class="title">Spark, the whole story in one picture</text>
+  <text x="380" y="86" text-anchor="middle" class="sub">The pieces that decide decode tokens per second on this box.</text>
+
+  <ellipse cx="380" cy="145" rx="105" ry="42" fill="#ffedd5" stroke="#f97316" stroke-width="3"/>
+  <text x="380" y="142" text-anchor="middle" class="mono">sm_121</text>
+  <text x="380" y="168" text-anchor="middle" class="body" fill="#9a3412">compute capability</text>
+
+  <line x1="380" y1="187" x2="150" y2="225" stroke="#6b7280" stroke-width="3"/>
+  <line x1="380" y1="187" x2="380" y2="225" stroke="#6b7280" stroke-width="3"/>
+  <line x1="380" y1="187" x2="610" y2="225" stroke="#6b7280" stroke-width="3"/>
+
+  <rect x="40" y="225" width="220" height="125" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text x="150" y="260" text-anchor="middle" class="box-title" fill="#1d4ed8">5th-gen tensor cores</text>
+  <text x="65" y="294" class="body">Native NVFP4 and FP8</text>
+  <text x="65" y="320" class="body">BF16 support path</text>
+  <text x="65" y="340" class="body">Format decides bytes</text>
+
+  <rect x="280" y="225" width="240" height="125" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+  <text x="400" y="260" text-anchor="middle" class="box-title" fill="#15803d">128 GB unified LPDDR5x</text>
+  <text x="305" y="294" class="body">About 273 GB/s bandwidth</text>
+  <text x="305" y="320" class="body">One shared CPU + GPU pool</text>
+  <text x="305" y="340" class="body">Less copying, simpler fits</text>
+
+  <rect x="540" y="225" width="180" height="125" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="630" y="260" text-anchor="middle" class="box-title" fill="#b45309">Grace CPU</text>
+  <text x="560" y="294" class="body">20 Arm cores</text>
+  <text x="560" y="320" class="body">Runs OS + Docker</text>
+  <text x="560" y="340" class="body">Feeds the engine</text>
+
+  <rect x="40" y="390" width="315" height="105" rx="8" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="198" y="425" text-anchor="middle" class="box-title" fill="#5b21b6">Inference engine on top</text>
+  <text x="65" y="459" class="body">Ollama / llama.cpp / vLLM</text>
+  <text x="65" y="484" class="body">SGLang / NIM / TensorRT-LLM</text>
+
+  <rect x="395" y="390" width="325" height="105" rx="8" fill="#fdf2f8" stroke="#ec4899" stroke-width="2"/>
+  <text x="558" y="425" text-anchor="middle" class="box-title" fill="#9d174d">What that buys you</text>
+  <text x="420" y="459" class="body">Each new token reads active weights.</text>
+  <text x="420" y="484" class="body">Smaller bytes + more bandwidth = faster.</text>
+
+  <rect x="40" y="535" width="720" height="65" rx="8" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+  <text x="60" y="562" class="body">Plain English: Spark is a memory-first LLM box.</text>
+  <text x="60" y="585" class="body">Model format + engine decide how much bandwidth becomes tok/s.</text>
+</svg>
