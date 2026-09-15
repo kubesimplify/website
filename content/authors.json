@@ -620,5 +620,17 @@
       "hashnode": "https://hashnode.com/@kameshs"
     },
     "postCount": 1
+  },
+  "ekam-walia": {
+    "handle": "ekam-walia",
+    "name": "Ekamveer Walia",
+    "avatar": "/img/authors/ekam-walia.jpg",
+    "bio": "I am an open source contributor and software engineer exploring the intersection of cloud infrastructure, distributed systems, and AI. I enjoy building scalable software, contributing upstream, and continuously learning new technologies.",
+    "socials": {
+      "hashnode": "https://hashnode.com/@ekamwalia",
+      "linkedin": "https://www.linkedin.com/in/ekamveerwalia/",
+      "github": "https://github.com/ekam-walia"
+    },
+    "postCount": 1
   }
 }
