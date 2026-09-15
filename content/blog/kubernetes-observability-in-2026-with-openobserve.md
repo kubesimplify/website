@@ -100,7 +100,7 @@ That gives us a bar to hold any backend to:
 
 ## How OpenObserve is built
 
-OpenObserve is a single Rust binary, licensed AGPL-3.0, and [Kubernetes observability](https://openobserve.ai/kubernetes-monitoring/) is the job it is most often put to. It ingests logs, metrics and traces (LLM traces included) over OTLP, RUM from its browser SDK, and keeps compatibility endpoints for Elasticsearch bulk, Loki push, Prometheus remote write and Splunk HEC. It stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL through Apache DataFusion and PromQL with its own evaluator over the same files. Its first 1.0 release candidate landed on 28 August 2026 and 1.0.0 went GA on 11 September. The walkthrough below was run on rc1, before GA, so I went back afterwards and re-checked the two things here that are version-sensitive against 1.0.0 itself: the MCP step and a bug I hit in the SLO step. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch", and the closest thing to public evidence is the vendor's own [one billion log records benchmark against ClickHouse](https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/). These are vendor claims, so let's look at what is underneath.
+OpenObserve is a single Rust binary, licensed AGPL-3.0, and [Kubernetes observability](https://openobserve.ai/kubernetes-monitoring/) is the job it is most often put to. It ingests logs, metrics and traces (LLM traces included) over OTLP, RUM from its browser SDK, and keeps compatibility endpoints for Elasticsearch bulk, Loki push, Prometheus remote write and Splunk HEC. It stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL through Apache DataFusion and PromQL with its own evaluator over the same files. Its first 1.0 release candidate landed on 28 August 2026 and 1.0.0 went GA on 11 September. The walkthrough below was run on rc1, before GA, so I went back afterwards and re-checked the two parts most likely to have moved at GA: the MCP step and a bug I hit in the SLO step. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch", and the closest thing to public evidence is the vendor's own [one billion log records benchmark against ClickHouse](https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/). These are vendor claims, so let's look at what is underneath.
 
 Before we go inside, let's put it against the bar we set above. Read the table as OpenObserve vs Loki, OpenObserve vs Elasticsearch and OpenObserve vs the full LGTM stack in one place, because those are the backends it replaces in practice:
 
@@ -160,7 +160,7 @@ Also new, and all open source: [SLOs with burn-rate alerts](https://openobserve.
 
 ## Running it: a whole cluster into one binary
 
-Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Steps 6 and 7 were then re-run on 15 September against 1.0.0 GA, because both turned out to depend on the version, so every number in those two steps is from the shipped release. Everything the demo uses is in one repo:
+Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, and OpenObserve v1.0.0-rc1 for the original runs, though the values file in the repo now pins 1.0.0, which is what you will get. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Step 6 I then re-ran in full on 15 September against 1.0.0 GA, so every number in it is from the shipped release. In step 7 I re-checked only the SLO bug against GA, so that step shows the rc1 run first and the GA re-check after it, each labelled. Everything the demo uses is in one repo:
 
 ```bash
 git clone https://github.com/saiyam1814/openobserve-k8s-demo
@@ -185,7 +185,7 @@ NAME                                TYPE           CLUSTER-IP     EXTERNAL-IP   
 service/o2-openobserve-standalone   LoadBalancer   10.100.30.54   192.168.64.10   5080:30148/TCP,5081:32552/TCP
 ```
 
-The chart comes from [charts.openobserve.ai](https://charts.openobserve.ai), and the values file pins the image, 1.0.0 now that it is out, asks for a LoadBalancer Service, and sets three things worth knowing:
+The chart comes from [charts.openobserve.ai](https://charts.openobserve.ai), and the values file pins the image at 1.0.0, asks for a LoadBalancer Service, and sets three things worth knowing:
 
 ```yaml
 config:
@@ -368,7 +368,7 @@ One segment, 248,318 documents, and the fields `_all`, `service_name` and `trace
 
 That leaves bar item 3, and with the index accounted for, the magic bytes above are what the case rests on. `PAR1` and `VTXF` say these are Parquet and Vortex containers, `PFA1` says the index is an Iceberg Puffin blob, and four bytes are enough to rule out a private format wearing a borrowed extension. They are not enough to certify every page inside, so take it as a strong hint rather than a proof. The two formats also travel differently. Parquet is read by Spark, pandas and every warehouse you can name, while Vortex is young enough that its reader list is still short, which is one more reason the sharp edges below say to keep it on a test cluster. What holds for both is that your bucket ends up holding open formats rather than a private one, which is what you want from an archive and what you need on the day you migrate.
 
-Worth saying plainly, because it is the obvious wrong turn: that is a property of the storage, not a way to work. An engine pointed straight at these files skips the catalog, the index, the bloom filters and the compactor, which is to say it skips everything that makes a query fast. To search this cluster you use OpenObserve's own query path, and the next step points an agent at exactly that.
+Worth saying plainly, because reading files out of a bucket yourself is the obvious wrong turn here: open formats are a property of the storage, not a way to work. An engine pointed straight at these files skips the catalog, the index, the bloom filters and the compactor, which is to say it skips everything that makes a query fast. To search this cluster you use OpenObserve's own query path, and the next step points an agent at exactly that.
 
 ### 6. Ask it questions over MCP
 
@@ -376,7 +376,7 @@ The MCP server is in the open-source build and needed no enabling on this instal
 
 ![MCP Server setup page with the claude mcp add command](/img/blog/kubernetes-observability-in-2026-with-openobserve/11-mcp-setup-page.jpg)
 
-The Claude Code tab is a one-liner: your organisation's MCP endpoint, plus a token the page mints. Copy it, or build the same header from the credentials we exported in step 1. One rc1 wrinkle, in case you pin that build like I did: its copy button leaves the `Authorization:` name off the header, so the command comes back 401 until you put it back. That was fixed in rc2.
+The Claude Code tab is a one-liner: your organisation's MCP endpoint, plus a token the page mints. Copy it, or build the same header from the credentials we exported in step 1:
 
 ```bash
 claude mcp add openobserve "$O2/api/default/mcp" -t http \
@@ -414,7 +414,7 @@ One caveat on the window: the traces stream only has data from 06:51:49Z
 onward, so the full-hour query is really covering ~8.5 minutes.
 ```
 
-Two things in there I did not ask for and would have had to work out myself: that the 104 error spans are 52 requests rather than 104 incidents, and that my "last hour" was really about eight minutes, because the cluster was that young. It reached both by writing its own SQL, five queries in all, after reading the schema. The other tabs wire the same server into Cursor, VS Code and the rest.
+Two things in there I did not ask for and would have had to work out myself: that the 104 error spans are 52 requests rather than 104 incidents, and that my "last hour" was really about eight minutes, because the cluster was that young. Back on the setup page, the other tabs wire the same server into Cursor, VS Code and the rest.
 
 The endpoint speaks streamable HTTP, so a curl loop is a client too, and it shows the path an agent takes. `mcp.sh` in the repo wraps one JSON-RPC call and reads `O2` and `AUTH` from step 1, so export them again if you are in a new terminal:
 
@@ -469,7 +469,7 @@ kubectl -n shop exec deploy/loadgen -- curl -s "http://checkout.shop.svc/chaos?r
 {"fail_rate_percent":60}
 ```
 
-One catch you will hit: the echo server has a private cluster IP and OpenObserve blocks those as webhook destinations (SSRF protection, so a webhook cannot be pointed at internal services), so the values file sets `ZO_SKIP_SSRF_CHECKS=true`. Fine for a demo, wrong for anything internet-facing. Within a minute the SLO page showed 97.907 percent against 99 and "Budget blown":
+One catch you will hit: the echo server has a private cluster IP and OpenObserve blocks those as webhook destinations (SSRF protection, so a webhook cannot be pointed at internal services), so the values file sets `ZO_SKIP_SSRF_CHECKS=true`. Fine for a demo, wrong for anything internet-facing. Within a minute the SLO page, still rc1 at this point, showed 97.907 percent against 99 and "Budget blown":
 
 ![SLO page: checkout-availability, budget blown](/img/blog/kubernetes-observability-in-2026-with-openobserve/09-slo-budget-blown.jpg)
 
@@ -486,7 +486,7 @@ ERROR [slo] pass failed for 7500794280517042176 org=default: DbError# SeaORMErro
 
 The SLO pass opens the read-only database client and then writes through it. On PostgreSQL the read-only pool falls back to the normal connection unless you point it at a replica, so most cluster deployments are fine. On SQLite, which every single-node install uses, the write fails.
 
-I expected this to be gone by now, because 1.0.0's release notes say the storage layer "split into separate ORM read/write clients (retiring the sqlite write lock)". So I upgraded this cluster to 1.0.0 GA and ran the step again. The SLO backfilled its slices, reached full coverage, computed an SLI of 98.009 percent against the 99 target, and then stopped. Twenty minutes later, with the load generator still failing 60 percent of payments, `computed_at` had not moved, `stale_watermark` was still true, the burn rate was still reading 1.99, and the same `attempt to write a readonly database` line was back in the log. The burn-rate alert never fired, because the row it reads never advanced.
+I expected this to be gone by now, because 1.0.0's release notes say the storage layer "split into separate ORM read/write clients (retiring the sqlite write lock)". So I upgraded this cluster to 1.0.0 GA and ran the step again. On GA the SLO backfilled its slices, reached full coverage, computed an SLI of 98.009 percent against the 99 target, and then stopped. Twenty minutes later, with the load generator still failing 60 percent of payments, `computed_at` had not moved, `stale_watermark` was still true, the burn rate was still reading 1.99, and the same `attempt to write a readonly database` line was back in the log. The burn-rate alert never fired, because the row it reads never advanced.
 
 So this one survived GA on the single-node path. It looks like a small fix, the write just needs the read-write client, and none of it affects a cluster deployment on PostgreSQL. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
 
@@ -497,6 +497,8 @@ kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/a
 ```text
 {"alert":"checkout-error-spans","stream":"traces/default","org":"default","type":"scheduled","level":"critical","fired_at":"2026-09-02T06:34:44","url":"/web/short/f0a29971a7f5701d?org_identifier=default"}
 ```
+
+The timestamp gives it away as the rc1 run, and plain alerts behave the same on GA.
 
 The alerts page tells the same story in one row each: the SLO-backed alert with no outcome yet, the scheduled one showing its last result. That screenshot is from the rc1 run, and 1.0.0 behaves the same way.
 
@@ -569,7 +571,7 @@ q "SELECT _timestamp, k8s_namespace_name, body FROM \\\"default\\\" WHERE match_
 {"took":31,"total":5,"scan_records":28135,"scan_size":27,"idx_scan_size":0}
 ```
 
-`took` is milliseconds, `scan_size` is the uncompressed size in MB of what the query touched. The count comes from file metadata and took 66 ms. The group-by is the columnar scan reading one column across all 4.2 million rows, 61 ms. The full-text search is the query funnel from earlier in one line: 28,135 rows in the files it had to open, out of 4.2 million, 27 MB out of 4,159, in 31 ms, because the index threw away every file without a hit and then narrowed the rest to the matching rows. This is one pod in a VM on a laptop with 12 hours of data, so treat these milliseconds as a rough shape rather than a benchmark. Watching it skip 99 percent of the data on my own laptop was really fun, though.
+`took` is milliseconds, `scan_size` is the uncompressed size in MB of what the query touched. The count comes from file metadata and took 66 ms. The group-by is the columnar scan reading one column across all 4.2 million rows, 61 ms. The full-text search is the query funnel from earlier in one line: 28,135 rows in the files it had to open, out of 4.2 million, 27 MB out of 4,159, in 31 ms, because the index threw away every file without a hit and then narrowed the rest to the matching rows. Do not read `idx_scan_size` as the proof of that, by the way: it reports 0 on the very row where the index did the most work, and 135 on the two that scanned everything. I reproduced the same inversion on 1.0.0, so take the drop in `scan_records` as the number that matters. This is one pod in a VM on a laptop with 12 hours of data, so treat these milliseconds as a rough shape rather than a benchmark. Watching it skip 99 percent of the data on my own laptop was really fun, though.
 
 One last thing I wanted to see was a restart. A Helm upgrade mid-run restarted the pod for me (`kubectl -n openobserve rollout restart statefulset/o2-openobserve-standalone` does the same), and the startup log walked through the WAL replay we saw in the write path:
 
@@ -598,7 +600,7 @@ Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac
 
 We followed a pod log line into a Vortex file and its index, watched queries prune down to the rows they needed, and saw fifteen hours of a whole cluster's telemetry, 23 GB of it, sit in 674 MB on disk with every field queryable.
 
-Give it a try on a test cluster and tell me how it goes, I am @SaiyamPathak on X and LinkedIn, and I would especially like to hear whether the SLO alerts advance for you on PostgreSQL, since the SQLite path is still stuck on 1.0.0. If you hit the same sharp edges I did, the notes above should save you an evening.
+Give it a try on a test cluster and tell me how it goes, I am @SaiyamPathak on X and LinkedIn, and I would especially like to hear whether the SLO alerts advance for you on PostgreSQL, since the SQLite path still has this bug in 1.0.0. If you hit the same sharp edges I did, the notes above should save you an evening.
 
 ## Links
 
