@@ -1,4 +1,13 @@
 {
+  "ishwar": {
+    "handle": "ishwar",
+    "name": "Ishwar",
+    "avatar": "/img/authors/ishwar.jpg",
+    "bio": "Software engineer interested in search engines, retrieval systems, and AI infrastructure.",
+    "socials": {
+      "github": "https://github.com/ishwar170695"
+    }
+  },
   "shubham-katara": {
     "handle": "shubham-katara",
     "name": "Shubham Katara",
