@@ -45,7 +45,7 @@ faq:
   - q: "Does OpenObserve have an MCP server?"
     a: "Yes, in the open-source build, speaking streamable HTTP from your organisation's API endpoint. It generates a couple of hundred tools from the OpenAPI spec but exposes only seven to the model, a tool_search, a tools_call that returns summarised responses and five pinned tools, and it authenticates with your own token so the model inherits your permissions and nothing more."
   - q: "How much does OpenObserve compress Kubernetes logs?"
-    a: "On my three node cluster, container logs went from 5,173 MB ingested to 228 MB on disk plus a 164 MB full-text index, which is 23x without the index and 13x with it. Metrics compressed far harder, 108x without the index and 77x with it, because they have no free-text fields to tokenise."
+    a: "On my three node cluster, logs went from 5,173 MB ingested to 228 MB on disk plus a 164 MB full-text index across all four log streams, which is 23x without the index and 13x with it. Metrics compressed far harder, 108x without the index and 77x with it, because they have no free-text fields to tokenise."
   - q: "Is Vortex production-ready in OpenObserve?"
     a: "Not yet, in my view. OpenObserve's Vortex support moved from the enterprise build into open source in July 2026 and pins the crate to a git revision, and the vendor's own numbers show it faster on row fetch but about 5 percent larger on disk, so try it on a test cluster and watch the release notes before making it the default."
 ---
@@ -223,7 +223,7 @@ k8s_events
 450
 ```
 
-Container logs, Kubernetes events and 450 metric streams within a minute, from the kubelet, cAdvisor, kube-state-metrics and the API server. Later in the run the streams page summed up the storage story (the `slo_slices` and `triggers` streams come from the SLO step further down, and `checkout_archive` is a 40,000 row backfill I used to test compaction, not covered here):
+Container logs, Kubernetes events and 450 metric streams within a minute, from the kubelet, cAdvisor, kube-state-metrics and the API server. A few hours into the run, long before the fifteen-hour totals in step 8, the streams page summed up the storage story so far (the `slo_slices` and `triggers` streams come from the SLO step further down, and `checkout_archive` is a 40,000 row backfill I used to test compaction, not covered here):
 
 ![Streams page: 470 streams, 1.51 GB ingested, 102.56 MB compressed](/img/blog/kubernetes-observability-in-2026-with-openobserve/12-streams-compression.jpg)
 
@@ -320,7 +320,7 @@ kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c \
 
 ```text
    3989 parquet     <- metrics
-   3674 ttv         <- one index per data file
+   3674 ttv         <- an index per data file, give or take the open hour
      19 vortex      <- logs, in Vortex, written by the ingester
 ```
 
@@ -341,7 +341,7 @@ sample.ttv        5046 4131   PFA1
 sample.vortex     5654 5846   VTXF
 ```
 
-Parquet, a Puffin index container, Vortex. To look inside an index, OpenObserve ships `ttv-inspect`. The image has no shell, so it runs as a Job on the same volume (`manifests/20-ttv-inspect-job.yaml`). The Job needs two things filled in: the node that holds the volume, because a local-path volume only exists on one node, and the index file to read. Both come from `kubectl`:
+Parquet, a Puffin index container, Vortex. To look inside an index, OpenObserve ships `ttv-inspect`. With no shell in the image, that runs as a Job on the same volume (`manifests/20-ttv-inspect-job.yaml`). The Job needs two things filled in: the node that holds the volume, because a local-path volume only exists on one node, and the index file to read. Both come from `kubectl`:
 
 ```bash
 NODE=$(kubectl -n openobserve get pod o2-openobserve-standalone-0 -o jsonpath='{.spec.nodeName}')
@@ -488,7 +488,7 @@ The SLO pass opens the read-only database client and then writes through it. On 
 
 I expected this to be gone by now, because 1.0.0's release notes say the storage layer "split into separate ORM read/write clients (retiring the sqlite write lock)". So I upgraded this cluster to 1.0.0 GA and ran the step again. On GA the SLO backfilled its slices, reached full coverage, computed an SLI of 98.009 percent against the 99 target, and then stopped. Twenty minutes later, with the load generator still failing 60 percent of payments, `computed_at` had not moved, `stale_watermark` was still true, the burn rate was still reading 1.99, and the same `attempt to write a readonly database` line was back in the log. The burn-rate alert never fired, because the row it reads never advanced.
 
-So this one survived GA on the single-node path. It looks like a small fix, the write just needs the read-write client, and none of it affects a cluster deployment on PostgreSQL. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
+So this one survived GA on the single-node path, and the reason turned out to be more interesting than the bug. The fix exists. I reported this during the rc1 run, and [the patch that closed it](https://github.com/openobserve/openobserve/pull/14192) moved that write onto the read-write client and merged into `main` on 9 September. 1.0.0 was tagged on the 11th without it: at the tag, `commit_status` still takes the read-only handle, and on `main` it does not. So the 1.0.0 line was cut from a branch that never got the backport, which is a release-process miss rather than an unsolved problem, and it should land in the first patch release. None of it affects a cluster deployment on PostgreSQL. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
 
 ```bash
 kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/alerts") | .body | fromjson'
@@ -571,7 +571,7 @@ q "SELECT _timestamp, k8s_namespace_name, body FROM \\\"default\\\" WHERE match_
 {"took":31,"total":5,"scan_records":28135,"scan_size":27,"idx_scan_size":0}
 ```
 
-`took` is milliseconds, `scan_size` is the uncompressed size in MB of what the query touched. The count comes from file metadata and took 66 ms. The group-by is the columnar scan reading one column across all 4.2 million rows, 61 ms. The full-text search is the query funnel from earlier in one line: 28,135 rows in the files it had to open, out of 4.2 million, 27 MB out of 4,159, in 31 ms, because the index threw away every file without a hit and then narrowed the rest to the matching rows. Do not read `idx_scan_size` as the proof of that, by the way: it reports 0 on the very row where the index did the most work, and 135 on the two that scanned everything. I reproduced the same inversion on 1.0.0, so take the drop in `scan_records` as the number that matters. This is one pod in a VM on a laptop with 12 hours of data, so treat these milliseconds as a rough shape rather than a benchmark. Watching it skip 99 percent of the data on my own laptop was really fun, though.
+`took` is milliseconds, `scan_size` is the uncompressed size in MB of what the query touched. The count comes from file metadata and took 66 ms, which is the slowest of the three and a fair reminder that at this size everything is fast enough that the ordering is mostly noise. The group-by is the columnar scan reading one column across all 4.2 million rows, 61 ms. The full-text search is the query funnel from earlier in one line: 28,135 rows in the files it had to open, out of 4.2 million, 27 MB out of 4,159, in 31 ms, because the index threw away every file without a hit and then narrowed the rest to the matching rows. Do not read `idx_scan_size` as the proof of that, by the way: it reports 0 on the very row where the index did the most work, and 135 on the two that scanned everything. I reproduced the same inversion on 1.0.0, so take the drop in `scan_records` as the number that matters. This is one pod in a VM on a laptop with 12 hours of data, so treat these milliseconds as a rough shape rather than a benchmark. Watching it skip 99 percent of the data on my own laptop was really fun, though.
 
 One last thing I wanted to see was a restart. A Helm upgrade mid-run restarted the pod for me (`kubectl -n openobserve rollout restart statefulset/o2-openobserve-standalone` does the same), and the startup log walked through the WAL replay we saw in the write path:
 
@@ -592,7 +592,7 @@ Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac
 
 **Vortex is young here.** Faster on row fetch and larger on disk in the vendor's own numbers, in the open-source build only since July, pinned to a git revision. Try it on a test cluster, watch the release notes before production.
 
-**SLO alerts do not fire on a single node.** The SLO measures and the page updates, but the status row the alert reads stops advancing the first time a pass tries to write it, because that write goes through the read-only database client and SQLite refuses it. I hit this on rc1 and again on 1.0.0 GA. Cluster deployments on PostgreSQL are not affected, and plain alerts work fine.
+**SLO alerts do not fire on a single node.** The SLO measures and the page updates, but the status row the alert reads stops advancing the first time a pass tries to write it, because that write goes through the read-only database client and SQLite refuses it. I hit this on rc1 and again on 1.0.0 GA, where it is a missed backport rather than an open bug: the fix merged to `main` two days before the tag. Cluster deployments on PostgreSQL are not affected, and plain alerts work fine.
 
 **PromQL has gaps.** OpenObserve does not run Prometheus's engine, it has its own PromQL evaluator, and `histogram_count`, `histogram_sum`, `histogram_fraction`, `sort`, `sort_desc` and the `@` modifier are not implemented in it yet. Point an existing Grafana dashboard at it and test before you switch.
 
