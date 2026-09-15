@@ -160,7 +160,7 @@ Also new, and all open source: [SLOs with burn-rate alerts](https://openobserve.
 
 ## Running it: a whole cluster into one binary
 
-Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Steps 6 and 7 were then re-run on 15 September against 1.0.0 GA, because both turned out to depend on the version. Everything the demo uses is in one repo:
+Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Steps 6 and 7 were then re-run on 15 September against 1.0.0 GA, because both turned out to depend on the version, so every number in those two steps is from the shipped release. Everything the demo uses is in one repo:
 
 ```bash
 git clone https://github.com/saiyam1814/openobserve-k8s-demo
@@ -383,37 +383,38 @@ claude mcp add openobserve "$O2/api/default/mcp" -t http \
   --header "Authorization: Basic $(printf %s "$AUTH" | base64)"
 ```
 
-After that the question goes in the editor rather than into a SELECT. I asked it "which checkout operations threw errors in the last hour, and how many?" and it listed the streams, read the traces schema, then wrote and ran four queries of its own. This was the one that answered the question:
+After that the question goes in the editor rather than into a SELECT. I asked it "which checkout operations threw errors in the last hour, and how many?" and it listed the streams, read the traces schema, then wrote and ran five queries of its own. This was the one that gave it the error rate:
 
 ```sql
-SELECT operation_name, status_message, http_response_status_code,
-       COUNT(*) AS cnt, COUNT(DISTINCT trace_id) AS traces
-FROM "default" WHERE service_name = 'checkout' AND span_status = 'ERROR'
-GROUP BY operation_name, status_message, http_response_status_code
-ORDER BY cnt DESC
+SELECT operation_name, count(*) AS total,
+       sum(case when span_status='ERROR' then 1 else 0 end) AS errors
+FROM "default" WHERE service_name = 'checkout'
+GROUP BY operation_name ORDER BY total DESC
 ```
 
 And this is what came back, trimmed. The failures in it are mine, `checkout` drops 2 percent of payments on purpose, and this cluster had only been ingesting for a few minutes:
 
 ```text
-77 failed checkouts. Two operations in the checkout service reported ERROR,
-both in the same 77 traces:
+Two operations threw errors, 52 failures each, the same 52 checkout requests.
 
-  payment.charge    77    payment gateway timeout
-  POST /checkout    77    HTTP 502 (root span, no status message)
+  service   operation           spans   errors   error msg
+  checkout  payment.charge      2,412      52    payment gateway timeout
+  checkout  POST /checkout      2,412      52    (empty, propagated)
+  checkout  inventory.reserve   2,412       0    -
 
-inventory.reserve recorded zero errors (3,500 spans, all UNSET).
+104 error spans across 52 distinct trace IDs, so it is 52 failed checkouts,
+not 104. payment.charge fails with a gateway timeout and the parent
+POST /checkout span inherits the ERROR status with no message of its own.
+inventory.reserve is clean, which puts the fault squarely at the payment
+gateway boundary rather than anywhere upstream in checkout.
 
-- Error rate: 77 of 3,500 checkout requests = 2.2%
-- COUNT(DISTINCT trace_id) confirms these are 77 traces, not 154. Each failed
-  checkout is one payment.charge timeout propagating up to a 502 on the root
-  span. The payment gateway is the single root cause.
-- Errors span 05:02:29Z to 05:15:15Z. Worth noting: the traces stream only holds
-  data from 05:02:19Z onward, so the "last hour" window is effectively the last
-  ~13 minutes of ingestion, and there is no earlier data for a baseline.
+Failure rate: 52 / 2,412 = 2.15% of checkout requests.
+
+One caveat on the window: the traces stream only has data from 06:51:49Z
+onward, so the full-hour query is really covering ~8.5 minutes.
 ```
 
-Two things in there I did not ask for and would have had to work out myself: that the 154 error spans are 77 requests rather than 154 incidents, and that my "last hour" was really thirteen minutes, because the cluster was that young. The other tabs wire the same server into Cursor, VS Code and the rest.
+Two things in there I did not ask for and would have had to work out myself: that the 104 error spans are 52 requests rather than 104 incidents, and that my "last hour" was really about eight minutes, because the cluster was that young. It reached both by writing its own SQL, five queries in all, after reading the schema. The other tabs wire the same server into Cursor, VS Code and the rest.
 
 The endpoint speaks streamable HTTP, so a curl loop is a client too, and it shows the path an agent takes. `mcp.sh` in the repo wraps one JSON-RPC call and reads `O2` and `AUTH` from step 1, so export them again if you are in a new terminal:
 
@@ -437,10 +438,10 @@ StreamSchema
 
 GetLatestTraces
 
-[{"service_name":"checkout","operation_name":"payment.charge","errors":84},{"service_name":"checkout","operation_name":"POST /checkout","errors":84}]
+[{"service_name":"checkout","operation_name":"payment.charge","errors":61},{"service_name":"checkout","operation_name":"POST /checkout","errors":61}]
 ```
 
-Three calls: the tool list, a search that turns plain intent into the right tool, and the answer. The count has moved on from the agent's 77 because the load generator kept running between the two, which is its own small reminder that "the last hour" is a moving window. I wrote that SQL by hand to show the path. The registration above is so that you do not have to.
+Three calls: the tool list, a search that turns plain intent into the right tool, and the answer. The count has moved on from the agent's 52 because the load generator kept running between the two, which is its own small reminder that "the last hour" is a moving window. I wrote that SQL by hand to show the path. The registration above is so that you do not have to.
 
 ### 7. Break an SLO
 
