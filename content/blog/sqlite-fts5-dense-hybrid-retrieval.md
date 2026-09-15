@@ -10,7 +10,7 @@ cover: /img/blog/sqlite-fts5-dense-hybrid-retrieval/cover.jpg
 tags: ["ai", "rag", "search", "sqlite"]
 ---
 
-I asked my legal assistant prototype a simple question:
+I asked LawDecoder, my open-source legal assistant prototype, a simple question:
 
 > *"Someone forged my signature."*
 
@@ -42,7 +42,7 @@ The vector embedding model was not broken. It was doing exactly what it was trai
 
 Because words like *"forgery"*, *"signature"*, and *"counterfeit"* live in the same broad conceptual neighborhood of fraud, the retriever ranked counterfeit coin provisions above the actual definition of document forgery. The model generalized too aggressively, missing `BNS Section 336` because the word *"signature"* was semantically distant from generic statutory descriptions.
 
-```
+```text
 Vector-Only Search (Fails on exact terms):
 Query ──> Embedding Model ──> Vector DB ──> Generalized Results (e.g. Counterfeit Coins)
 
@@ -91,7 +91,7 @@ Think of SQLite as storage on disk, and RAM as your active working set.
 
 In a standard prototype, developers often load full document strings, metadata, and embeddings directly into application memory.
 
-```
+```text
 Before (v1: ~438 MB Heap / ~500 MB RSS):
 162 MB JSON file on disk
        ↓
@@ -111,6 +111,8 @@ SQLite Database (Disk: 16.4 MB)
 Application RAM
   └── Section IDs + compact 384-dimension Float32Array vectors (7.17 MB raw buffer)
 ```
+
+![Process Resident Memory (RSS) and Heap comparison between v1 and v2](/img/blog/sqlite-fts5-dense-hybrid-retrieval/chart_memory.png)
 
 The important architectural change was not simply using SQLite. We stopped loading the entire legal corpus as JavaScript objects. The full text stays on disk, while only the compact vector representation needed for scoring stays in memory.
 
@@ -175,7 +177,7 @@ const vectorCache = [
 ];
 ```
 
-For 4,892 legal sections, 4,892 vectors $\times$ 384 dimensions $\times$ 4 bytes per float equals **7.17 MB** of raw vector data in RAM. When a user submits a query, we compute cosine similarity against this typed cache using a tight numeric loop to produce the top 50 semantic candidates.
+For 4,892 legal sections, 4,892 vectors × 384 dimensions × 4 bytes per float equals **7.17 MB** of raw vector data in RAM. When a user submits a query, we compute cosine similarity against this typed cache using a tight numeric loop to produce the top 50 semantic candidates.
 
 ---
 
@@ -224,7 +226,7 @@ To evaluate the system, we tested the retrieval pipeline across a corpus of **4,
 ### Benchmark Setup & Environment
 
 * **Processor:** AMD Ryzen 5 5600H (6 cores, 12 threads)
-* **Runtime:** Node.js v22.16, `better-sqlite3` v3.53 in WAL mode
+* **Runtime:** Node.js v22.16, `better-sqlite3` v12.11 (SQLite 3.53) in WAL mode
 * **Embedding Model:** `Xenova/all-MiniLM-L6-v2` (384-dimensional vectors)
 * **Corpus Size:** 4,892 legal sections in SQLite (16.4 MB file)
 * **Memory Measurement:** Process-level resident memory (RSS) and active V8 heap allocations
@@ -273,6 +275,8 @@ Dense + FTS5 (RRF):     90% (9/10)
 | **Stage 3: Hybrid Search (RRF)** | 90% (9/10) | High recall; combines exact statutory terminology with colloquial layman phrasing. |
 | **Stage 4: Full Pipeline (+ Domain Reranker)** | 90% (9/10) | Maintains 90% recall while cleanly prioritizing document forgery statutes over counterfeit coin laws for signature queries. |
 
+While a 10-query evaluation set is an indicative domain benchmark rather than a statistically settled aggregate, it spans key representative practice areas—criminal law, criminal procedure, cyber crime, family law, evidence law, and consumer protection—specifically selected to stress-test known retrieval edge cases like semantic drift, overlapping statutory codes, and duplicate provisions.
+
 In this evaluation, the biggest retrieval improvement came from combining two complementary search methods. The domain reranker did not increase aggregate accuracy on this set, but it provided a useful deterministic guardrail for a known failure mode: for the signature-forgery query, the reranker demoted the counterfeit-currency candidates and promoted document-forgery provisions to the top of the final ranking.
 
 ---
@@ -289,9 +293,13 @@ Because this architecture runs locally without a separate server, it fits neatly
 
 ## System Screens
 
-### Developer Mode & Citations
+### Developer Mode & Live Citations
 Transparent citation view with the Developer Mode toggle enabled, showing retrieval selection methods, BM25 matches, and fused RRF ranks for the top 5 retrieved sections:
 ![LawDecoder citation view in developer mode displaying RRF ranks and selection reasons](/img/blog/sqlite-fts5-dense-hybrid-retrieval/citations_view.png)
+
+### Developer Notes & Benchmark Dashboard
+Evaluation and benchmark dashboard in Developer Mode, tracking latency comparisons, memory footprint reductions, and component hit rates:
+![LawDecoder developer dashboard showing performance comparisons and benchmark results](/img/blog/sqlite-fts5-dense-hybrid-retrieval/developer_notes_tab.png)
 
 ---
 
@@ -317,9 +325,11 @@ The complete source code, SQLite indexing pipeline, and standalone benchmark har
 
 **GitHub Repository:** https://github.com/ishwar170695/LawDecoder
 
-You can run the controlled benchmark and ablation study locally:
+You can run the controlled benchmark and ablation study locally (note that running the benchmark requires the SQLite database and vector embeddings generated during backend initialization):
 
 ```bash
 cd backend
-npm run benchmark
+npm install
+node server.js      # Automatically compiles laws.db and vectors on first boot
+npm run benchmark   # Runs the 4-stage ablation and latency evaluation
 ```
