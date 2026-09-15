@@ -325,11 +325,10 @@ The complete source code, SQLite indexing pipeline, and standalone benchmark har
 
 **GitHub Repository:** https://github.com/ishwar170695/LawDecoder
 
-You can run the controlled benchmark and ablation study locally (note that running the benchmark requires the SQLite database and vector embeddings generated during backend initialization):
+The benchmark harness and ablation test suite can be run directly from the backend directory:
 
 ```bash
 cd backend
 npm install
-node server.js      # Automatically compiles laws.db and vectors on first boot
-npm run benchmark   # Runs the 4-stage ablation and latency evaluation
+npm run benchmark   # Runs the 4-stage ablation and latency evaluation against the benchmark dataset
 ```
