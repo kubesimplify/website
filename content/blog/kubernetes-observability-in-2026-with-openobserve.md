@@ -100,7 +100,7 @@ That gives us a bar to hold any backend to:
 
 ## How OpenObserve is built
 
-OpenObserve is a single Rust binary, licensed AGPL-3.0, and [Kubernetes observability](https://openobserve.ai/kubernetes-monitoring/) is the job it is most often put to. It ingests logs, metrics and traces (LLM traces included) over OTLP, RUM from its browser SDK, and keeps compatibility endpoints for Elasticsearch bulk, Loki push, Prometheus remote write and Splunk HEC. It stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL through Apache DataFusion and PromQL with its own evaluator over the same files. Its first 1.0 release candidate landed on 28 August 2026 and a second on 3 September; everything in this post was run on rc1. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch", and the closest thing to public evidence is the vendor's own [one billion log records benchmark against ClickHouse](https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/). These are vendor claims, so let's look at what is underneath.
+OpenObserve is a single Rust binary, licensed AGPL-3.0, and [Kubernetes observability](https://openobserve.ai/kubernetes-monitoring/) is the job it is most often put to. It ingests logs, metrics and traces (LLM traces included) over OTLP, RUM from its browser SDK, and keeps compatibility endpoints for Elasticsearch bulk, Loki push, Prometheus remote write and Splunk HEC. It stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL through Apache DataFusion and PromQL with its own evaluator over the same files. Its first 1.0 release candidate landed on 28 August 2026 and 1.0.0 went GA on 11 September. The walkthrough below was run on rc1, before GA, so I went back afterwards and re-checked the two things here that are version-sensitive against 1.0.0 itself: the MCP step and a bug I hit in the SLO step. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch", and the closest thing to public evidence is the vendor's own [one billion log records benchmark against ClickHouse](https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/). These are vendor claims, so let's look at what is underneath.
 
 Before we go inside, let's put it against the bar we set above. Read the table as OpenObserve vs Loki, OpenObserve vs Elasticsearch and OpenObserve vs the full LGTM stack in one place, because those are the backends it replaces in practice:
 
@@ -160,7 +160,7 @@ Also new, and all open source: [SLOs with burn-rate alerts](https://openobserve.
 
 ## Running it: a whole cluster into one binary
 
-Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. The MCP exchange in step 6 comes from a third, shorter run on 15 September, on a fresh cluster of the same shape. Everything the demo uses is in one repo:
+Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Steps 6 and 7 were then re-run on 15 September against 1.0.0 GA, because both turned out to depend on the version. Everything the demo uses is in one repo:
 
 ```bash
 git clone https://github.com/saiyam1814/openobserve-k8s-demo
@@ -185,7 +185,7 @@ NAME                                TYPE           CLUSTER-IP     EXTERNAL-IP   
 service/o2-openobserve-standalone   LoadBalancer   10.100.30.54   192.168.64.10   5080:30148/TCP,5081:32552/TCP
 ```
 
-The chart comes from [charts.openobserve.ai](https://charts.openobserve.ai), and the values file pins the 1.0.0-rc1 image, asks for a LoadBalancer Service, and sets three things worth knowing:
+The chart comes from [charts.openobserve.ai](https://charts.openobserve.ai), and the values file pins the image, 1.0.0 now that it is out, asks for a LoadBalancer Service, and sets three things worth knowing:
 
 ```yaml
 config:
@@ -483,7 +483,11 @@ ERROR [slo] pass failed for 7500794280517042176 org=default: DbError# SeaORMErro
   error returned from database: (code: 8) attempt to write a readonly database
 ```
 
-The SLO pass opens the read-only database client and then writes through it. On PostgreSQL the read-only pool falls back to the normal connection unless you point it at a replica, so most cluster deployments are fine. On SQLite, which every single-node install uses, the write fails, so SLO alerts stay frozen in local mode on this release candidate, and rc2 has the same line. It is a one-line fix. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
+The SLO pass opens the read-only database client and then writes through it. On PostgreSQL the read-only pool falls back to the normal connection unless you point it at a replica, so most cluster deployments are fine. On SQLite, which every single-node install uses, the write fails.
+
+I expected this to be gone by now, because 1.0.0's release notes say the storage layer "split into separate ORM read/write clients (retiring the sqlite write lock)". So I upgraded this cluster to 1.0.0 GA and ran the step again. The SLO backfilled its slices, reached full coverage, computed an SLI of 98.009 percent against the 99 target, and then stopped. Twenty minutes later, with the load generator still failing 60 percent of payments, `computed_at` had not moved, `stale_watermark` was still true, the burn rate was still reading 1.99, and the same `attempt to write a readonly database` line was back in the log. The burn-rate alert never fired, because the row it reads never advanced.
+
+So this one survived GA on the single-node path. It looks like a small fix, the write just needs the read-write client, and none of it affects a cluster deployment on PostgreSQL. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
 
 ```bash
 kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/alerts") | .body | fromjson'
@@ -493,7 +497,7 @@ kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/a
 {"alert":"checkout-error-spans","stream":"traces/default","org":"default","type":"scheduled","level":"critical","fired_at":"2026-09-02T06:34:44","url":"/web/short/f0a29971a7f5701d?org_identifier=default"}
 ```
 
-The alerts page tells the same story in one row each: the SLO-backed alert with no outcome yet, the scheduled one showing its last result.
+The alerts page tells the same story in one row each: the SLO-backed alert with no outcome yet, the scheduled one showing its last result. That screenshot is from the rc1 run, and 1.0.0 behaves the same way.
 
 ![Alerts list: the SLO-backed alert with no outcome, and the scheduled alert after its first evaluation](/img/blog/kubernetes-observability-in-2026-with-openobserve/08-alerts-list.jpg)
 
@@ -585,20 +589,22 @@ Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac
 
 **Vortex is young here.** Faster on row fetch and larger on disk in the vendor's own numbers, in the open-source build only since July, pinned to a git revision. Try it on a test cluster, watch the release notes before production.
 
+**SLO alerts do not fire on a single node.** The SLO measures and the page updates, but the status row the alert reads stops advancing the first time a pass tries to write it, because that write goes through the read-only database client and SQLite refuses it. I hit this on rc1 and again on 1.0.0 GA. Cluster deployments on PostgreSQL are not affected, and plain alerts work fine.
+
 **PromQL has gaps.** OpenObserve does not run Prometheus's engine, it has its own PromQL evaluator, and `histogram_count`, `histogram_sum`, `histogram_fraction`, `sort`, `sort_desc` and the `@` modifier are not implemented in it yet. Point an existing Grafana dashboard at it and test before you switch.
 
 ## Wrapping up
 
 We followed a pod log line into a Vortex file and its index, watched queries prune down to the rows they needed, and saw fifteen hours of a whole cluster's telemetry, 23 GB of it, sit in 674 MB on disk with every field queryable.
 
-Give it a try on a test cluster and tell me how it goes, I am @SaiyamPathak on X and LinkedIn, and I would especially like to hear whether the SLO alerts update for you on PostgreSQL. If you hit the same sharp edges I did, the notes above should save you an evening.
+Give it a try on a test cluster and tell me how it goes, I am @SaiyamPathak on X and LinkedIn, and I would especially like to hear whether the SLO alerts advance for you on PostgreSQL, since the SQLite path is still stuck on 1.0.0. If you hit the same sharp edges I did, the notes above should save you an evening.
 
 ## Links
 
 - Companion repo with the values files, demo app, manifests and step-by-step README: https://github.com/saiyam1814/openobserve-k8s-demo
 - OpenObserve docs: https://openobserve.ai/docs
 - Helm charts (standalone and collector): https://github.com/openobserve/openobserve-helm-chart
-- 1.0.0-rc1 release: https://github.com/openobserve/openobserve/releases/tag/v1.0.0-rc1
+- 1.0.0 release: https://github.com/openobserve/openobserve/releases/tag/v1.0.0
 - OpenObserve vs ClickHouse benchmark (vendor-run): https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/
 - Vortex file format: https://vortex.dev
 - Grafana Labs Observability Survey 2026: https://grafana.com/observability-survey/
