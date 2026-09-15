@@ -376,7 +376,7 @@ The MCP server is in the open-source build and needed no enabling on this instal
 
 ![MCP Server setup page with the claude mcp add command](/img/blog/kubernetes-observability-in-2026-with-openobserve/11-mcp-setup-page.jpg)
 
-The Claude Code tab is a one-liner: your organisation's MCP endpoint, plus a token the page mints. One snag, which I checked in the UI source rather than assume: that tab emits `--header "Basic ..."` without the header name, so the command as copied comes back 401, while the Cursor, VS Code and Codex tabs all wrap the same value in `Authorization` correctly. Put the name back, or build the whole header from the credentials we exported in step 1:
+The Claude Code tab is a one-liner: your organisation's MCP endpoint, plus a token the page mints. One snag, which I checked in the UI source rather than assume: that tab emits `--header "Basic ..."` without the header name, so the command as copied comes back 401, while the Cursor, VS Code and Codex tabs all wrap the same value in `Authorization` correctly. I [reported it](https://github.com/openobserve/openobserve/issues/14489), and it is a one-line fix in their UI. Until it lands, put the header name back yourself, or build the whole thing from the credentials we exported in step 1:
 
 ```bash
 claude mcp add openobserve "$O2/api/default/mcp" -t http \
@@ -393,7 +393,7 @@ GROUP BY operation_name, status_message, http_response_status_code
 ORDER BY cnt DESC
 ```
 
-And this is what came back, trimmed:
+And this is what came back, trimmed. The failures in it are mine, `checkout` drops 2 percent of payments on purpose, and this cluster had only been ingesting for a few minutes:
 
 ```text
 77 failed checkouts. Two operations in the checkout service reported ERROR,
