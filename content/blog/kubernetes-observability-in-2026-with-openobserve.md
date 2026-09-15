@@ -41,7 +41,7 @@ faq:
   - q: "Can OpenObserve replace the LGTM stack?"
     a: "Yes, and that is the fair comparison: logs, metrics, traces, RUM and LLM traces land in one binary with one data model and retention set per stream, where the LGTM stack is Loki, Mimir, Tempo and Grafana with four of everything. It has its own dashboards and alerting, and an existing Grafana dashboard can point at it over PromQL once you have checked the functions it uses."
   - q: "What file formats does OpenObserve use?"
-    a: "Data is written as Parquet by default, or as Vortex per stream type with ZO_FILE_FORMAT, into S3, GCS, Azure Blob, MinIO or a local disk. Every data file gets a .ttv full-text index beside it, a single tantivy segment inside an Apache Iceberg Puffin container, and DuckDB read the Vortex file in this post directly, with no OpenObserve in the loop."
+    a: "Data is written as Parquet by default, or as Vortex per stream type with ZO_FILE_FORMAT, into S3, GCS, Azure Blob, MinIO or a local disk. Every data file gets a .ttv full-text index beside it, a single tantivy segment inside an Apache Iceberg Puffin container, and both are open formats rather than a private one, so the files in your bucket outlive the tool."
   - q: "Does OpenObserve have an MCP server?"
     a: "Yes, in the open-source build, speaking streamable HTTP from your organisation's API endpoint. It generates a couple of hundred tools from the OpenAPI spec but exposes only seven to the model, a tool_search, a tools_call that returns summarised responses and five pinned tools, and it authenticates with your own token so the model inherits your permissions and nothing more."
   - q: "How much does OpenObserve compress Kubernetes logs?"
@@ -107,7 +107,7 @@ Before we go inside, let's put it against the bar we set above. Read the table a
 | | Most stacks today | OpenObserve |
 |---|---|---|
 | Signals | Loki, Prometheus or Mimir, Tempo, one system each | Logs, metrics, traces, RUM and LLM traces in one binary, one data model, retention set per stream in one place |
-| Durable tier | Each system's own storage, its own format | Object storage holds Parquet or Vortex files that DuckDB can read, so the data outlives the tool |
+| Durable tier | Each system's own storage, its own format | Object storage holds open Parquet or Vortex files, so the data outlives the tool |
 | Index | Elastic indexes every field, Loki indexes only labels | A full-text index only on the fields you search, kept as a small sidecar next to each data file, columnar scan for the rest |
 | Query | LogQL, PromQL, TraceQL | SQL for logs and traces, PromQL for metrics |
 | Shape | Several deployments to keep healthy | One process on a laptop, the same binary split into ingester, querier, compactor, router and scheduler roles on a cluster |
@@ -160,7 +160,7 @@ Also new, and all open source: [SLOs with burn-rate alerts](https://openobserve.
 
 ## Running it: a whole cluster into one binary
 
-Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq, curl and duckdb on your machine. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, DuckDB 1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Everything the demo uses is in one repo:
+Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Everything the demo uses is in one repo:
 
 ```bash
 git clone https://github.com/saiyam1814/openobserve-k8s-demo
@@ -364,28 +364,28 @@ blob_count        : 6
     _timestamp                   i64      [fast]
 ```
 
-One segment, 248,318 documents, which is exactly the row count DuckDB reports for the Vortex file of the same hour below, and the fields `_all`, `service_name` and `trace_id`. Then the test that matters for bar item 3: can another tool read these files? OpenObserve does not ship or use DuckDB. I picked it because it is a single binary that reads Parquet natively and has a Vortex extension.
+One segment, 248,318 documents, and the fields `_all`, `service_name` and `trace_id`. One index file sitting beside one data file, which is the shape the write path promised.
 
-```bash
-brew install duckdb
-duckdb -c "INSTALL vortex; LOAD vortex;
-  SELECT k8s_namespace_name AS namespace, count(*) AS rows FROM read_vortex('sample.vortex')
-  GROUP BY 1 ORDER BY rows DESC LIMIT 5;"
-```
+That leaves bar item 3, and with the index accounted for, the magic bytes above are what the case rests on. `PAR1` and `VTXF` say these are Parquet and Vortex containers, `PFA1` says the index is an Iceberg Puffin blob, and four bytes are enough to rule out a private format wearing a borrowed extension. They are not enough to certify every page inside, so take it as a strong hint rather than a proof. The two formats also travel differently. Parquet is read by Spark, pandas and every warehouse you can name, while Vortex is young enough that its reader list is still short, which is one more reason the sharp edges below say to keep it on a test cluster. What holds for both is that your bucket ends up holding open formats rather than a private one, which is what you want from an archive and what you need on the day you migrate.
 
-| namespace | rows |
-|---|---:|
-| openobserve | 178847 |
-| shop | 61987 |
-| kube-system | 6431 |
-| NULL | 781 |
-| cert-manager | 187 |
-
-That is one hour of container logs for the whole cluster, 248,318 rows, read straight out of the file OpenObserve wrote. Your counts will differ, but the point is that the query works at all. If the tool disappeared tomorrow, your data would still be in a bucket, in a format other tools can read.
+Worth saying plainly, because it is the obvious wrong turn: that is a property of the storage, not a way to work. An engine pointed straight at these files skips the catalog, the index, the bloom filters and the compactor, which is to say it skips everything that makes a query fast. To search this cluster you use OpenObserve's own query path, and the next step points an agent at exactly that.
 
 ### 6. Ask it questions over MCP
 
-The MCP endpoint speaks streamable HTTP, so a curl loop is a client. `mcp.sh` in the repo wraps one JSON-RPC call and reads the `O2` and `AUTH` variables we exported in step 1, so if you are in a new terminal, export them again first:
+The MCP server is in the open-source build and needed no enabling on this install, so the other way into this cluster is to register it with an agent and ask in English. The setup page under IAM writes the command for you, one tab per client, and nudges you toward a read-only credential, which is good advice:
+
+![MCP Server setup page with the claude mcp add command](/img/blog/kubernetes-observability-in-2026-with-openobserve/11-mcp-setup-page.jpg)
+
+The Claude Code tab is a one-liner: your organisation's MCP endpoint, plus a token the page mints for the header. Copy that as it stands, or build the same header from the credentials we exported in step 1:
+
+```bash
+claude mcp add openobserve "$O2/api/default/mcp" -t http \
+  --header "Authorization: Basic $(printf %s "$AUTH" | base64)"
+```
+
+After that, "which checkout operations threw errors in the last hour" is a question for the editor rather than a SELECT you compose, and the other tabs wire the same server into Cursor, VS Code and the rest.
+
+The endpoint speaks streamable HTTP, so a curl loop is a client too, and it shows the path an agent takes. `mcp.sh` in the repo wraps one JSON-RPC call and reads `O2` and `AUTH` from step 1, so export them again if you are in a new terminal:
 
 ```bash
 ./mcp.sh tools/list | jq -r '.result.tools[].name'
@@ -410,9 +410,7 @@ GetLatestTraces
 [{"service_name":"checkout","operation_name":"POST /checkout","errors":31},{"service_name":"checkout","operation_name":"payment.charge","errors":31}]
 ```
 
-That is the whole surface an agent sees: seven tools, a search that finds the right one by intent, and a summarised answer. To wire this into Claude Code, Cursor or VS Code, the setup page under IAM writes the exact `claude mcp add` command for you, and nudges you toward a read-only credential, which is good advice:
-
-![MCP Server setup page with the claude mcp add command](/img/blog/kubernetes-observability-in-2026-with-openobserve/11-mcp-setup-page.jpg)
+Three calls: the tool list, a search that turns plain intent into the right tool, and the answer. I wrote that SQL by hand to show the path. The registration above is so that you do not have to.
 
 ### 7. Break an SLO
 
