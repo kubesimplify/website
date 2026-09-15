@@ -6,7 +6,7 @@ datePublished: 2026-09-14T12:00:00.000Z
 slug: sqlite-fts5-dense-hybrid-retrieval
 author: ishwar
 draft: false
-cover: /img/blog/sqlite-fts5-dense-hybrid-retrieval/cover.jpg
+cover: /img/blog/sqlite-fts5-dense-hybrid-retrieval/cover.webp
 tags: ["ai", "rag", "search", "sqlite"]
 ---
 
@@ -63,7 +63,7 @@ Instead of relying on vector search alone, a hybrid retrieval system combines tw
 
 Here is how a query flows through the entire system from start to finish:
 
-![Hybrid Retrieval Pipeline Architecture](/img/blog/sqlite-fts5-dense-hybrid-retrieval/diagram_pipeline.png)
+![Hybrid Retrieval Pipeline Architecture](/img/blog/sqlite-fts5-dense-hybrid-retrieval/diagram_pipeline.webp)
 
 > **In one sentence:** Search twice (keyword and vector), merge the candidates, apply a domain guardrail, load the best laws from disk, and send only the top provisions to the language model.
 
@@ -112,7 +112,7 @@ Application RAM
   └── Section IDs + compact 384-dimension Float32Array vectors (7.17 MB raw buffer)
 ```
 
-![Process Resident Memory (RSS) and Heap comparison between v1 and v2](/img/blog/sqlite-fts5-dense-hybrid-retrieval/chart_memory.png)
+![Process Resident Memory (RSS) and Heap comparison between v1 and v2](/img/blog/sqlite-fts5-dense-hybrid-retrieval/chart_memory.webp)
 
 The important architectural change was not simply using SQLite. We stopped loading the entire legal corpus as JavaScript objects. The full text stays on disk, while only the compact vector representation needed for scoring stays in memory.
 
@@ -295,11 +295,11 @@ Because this architecture runs locally without a separate server, it fits neatly
 
 ### Developer Mode & Live Citations
 Transparent citation view with the Developer Mode toggle enabled, showing retrieval selection methods, BM25 matches, and fused RRF ranks for the top 5 retrieved sections:
-![LawDecoder citation view in developer mode displaying RRF ranks and selection reasons](/img/blog/sqlite-fts5-dense-hybrid-retrieval/citations_view.png)
+![LawDecoder citation view in developer mode displaying RRF ranks and selection reasons](/img/blog/sqlite-fts5-dense-hybrid-retrieval/citations_view.webp)
 
 ### Developer Notes & Benchmark Dashboard
 Evaluation and benchmark dashboard in Developer Mode, tracking latency comparisons, memory footprint reductions, and component hit rates:
-![LawDecoder developer dashboard showing performance comparisons and benchmark results](/img/blog/sqlite-fts5-dense-hybrid-retrieval/developer_notes_tab.png)
+![LawDecoder developer dashboard showing performance comparisons and benchmark results](/img/blog/sqlite-fts5-dense-hybrid-retrieval/developer_notes_tab.webp)
 
 ---
 
