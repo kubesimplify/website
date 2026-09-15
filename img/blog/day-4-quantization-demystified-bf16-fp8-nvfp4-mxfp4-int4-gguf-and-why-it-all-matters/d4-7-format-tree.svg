@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1380" viewBox="0 0 1600 1380">
+  <rect width="1600" height="1380" fill="#ffffff"/>
+  <style>
+    .title { font: 900 44px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #172033; }
+    .subtitle { font: 600 24px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #64748b; }
+    .col { font: 900 24px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #475569; text-transform: uppercase; letter-spacing: .06em; }
+    .use { font: 900 28px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #172033; }
+    .pick { font: 900 28px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+    .body { font: 650 23px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #334155; }
+    .footer { font: 850 25px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #064e3b; }
+  </style>
+
+  <text x="800" y="76" class="title" text-anchor="middle">Which quantization format should I pick?</text>
+  <text x="800" y="118" class="subtitle" text-anchor="middle">A beginner decision map for Spark workflows</text>
+
+  <rect x="110" y="165" width="1380" height="64" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="160" y="205" class="col">Use case</text>
+  <text x="630" y="205" class="col">Pick first</text>
+  <text x="1030" y="205" class="col">Beginner warning</text>
+
+  <g transform="translate(110 260)">
+    <rect width="1380" height="145" rx="18" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+    <text x="50" y="55" class="use">Training or fine-tuning</text>
+    <text x="520" y="55" class="pick" fill="#1e3a8a">BF16 base + LoRA</text>
+    <text x="930" y="45" class="body">Start simple. Use low-precision</text>
+    <text x="930" y="78" class="body">trainable bases only with a tested recipe.</text>
+  </g>
+
+  <g transform="translate(110 430)">
+    <rect width="1380" height="145" rx="18" fill="#f0fdf4" stroke="#76b900" stroke-width="2"/>
+    <text x="50" y="55" class="use">Serving a large model</text>
+    <text x="520" y="55" class="pick" fill="#166534">NVFP4</text>
+    <text x="930" y="45" class="body">Needs a real NVFP4 artifact</text>
+    <text x="930" y="78" class="body">and a Blackwell-aware engine.</text>
+  </g>
+
+  <g transform="translate(110 600)">
+    <rect width="1380" height="145" rx="18" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
+    <text x="50" y="55" class="use">Easy local chat</text>
+    <text x="520" y="55" class="pick" fill="#831843">GGUF Q4_K_M</text>
+    <text x="930" y="45" class="body">Best catalog and simplest path</text>
+    <text x="930" y="78" class="body">through Ollama or llama.cpp.</text>
+  </g>
+
+  <g transform="translate(110 770)">
+    <rect width="1380" height="145" rx="18" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+    <text x="50" y="55" class="use">Model ships MXFP4</text>
+    <text x="520" y="55" class="pick" fill="#5b21b6">MXFP4</text>
+    <text x="930" y="45" class="body">Use it if engine support is good.</text>
+    <text x="930" y="78" class="body">The format alone does not guarantee speed.</text>
+  </g>
+
+  <g transform="translate(110 940)">
+    <rect width="1380" height="145" rx="18" fill="#fff7ed" stroke="#f97316" stroke-width="2"/>
+    <text x="50" y="55" class="use">Only AWQ or GPTQ available</text>
+    <text x="520" y="55" class="pick" fill="#9a3412">Use it</text>
+    <text x="930" y="45" class="body">It is INT4-style compression.</text>
+    <text x="930" y="78" class="body">Quality depends on calibration.</text>
+  </g>
+
+  <g transform="translate(110 1110)">
+    <rect width="1380" height="145" rx="18" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="50" y="55" class="use">Need the smallest file</text>
+    <text x="520" y="55" class="pick" fill="#334155">IQ3 / IQ2</text>
+    <text x="930" y="45" class="body">Good for experiments.</text>
+    <text x="930" y="78" class="body">Avoid for critical reasoning and coding.</text>
+  </g>
+
+  <rect x="160" y="1300" width="1280" height="64" rx="18" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+  <text x="800" y="1342" class="footer" text-anchor="middle">Spark default: BF16 for training, NVFP4 for supported serving, GGUF Q4_K_M for easy local use.</text>
+</svg>

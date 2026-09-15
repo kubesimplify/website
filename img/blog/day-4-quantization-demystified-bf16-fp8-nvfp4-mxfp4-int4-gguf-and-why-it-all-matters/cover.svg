@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.62" stop-color="#0b1324"/>
+      <stop offset="1" stop-color="#102015"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#76b900"/>
+      <stop offset="1" stop-color="#05caff"/>
+    </linearGradient>
+    <filter id="softShadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1040" cy="86" r="230" fill="#76b900" opacity="0.13"/>
+  <circle cx="120" cy="575" r="250" fill="#05caff" opacity="0.11"/>
+  <path d="M0 474 C170 390 320 430 510 350 C640 295 790 302 1200 210 L1200 630 L0 630 Z" fill="#05caff" opacity="0.045"/>
+
+  <rect x="76" y="74" width="238" height="40" rx="20" fill="#10231f" stroke="#76b900" stroke-width="1.5"/>
+  <text x="96" y="101" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="20" font-weight="900" fill="#76b900">7 Days of Local LLM</text>
+
+  <text x="76" y="178" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="58" font-weight="950" fill="#f8fafc">Day 4: Quantization</text>
+  <text x="76" y="244" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="58" font-weight="950" fill="#f8fafc">Demystified</text>
+
+  <text x="78" y="322" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="25" font-weight="650" fill="#dbe5f2">BF16, FP8, NVFP4, MXFP4, INT4, GGUF.</text>
+  <text x="78" y="360" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="25" font-weight="650" fill="#dbe5f2">What fits, what runs fast, what quality survives.</text>
+
+  <g filter="url(#softShadow)">
+    <rect x="668" y="104" width="428" height="402" rx="28" fill="#101827" stroke="#3b4a64" stroke-width="2"/>
+    <rect x="696" y="132" width="168" height="34" rx="17" fill="#12261d" stroke="#76b900" stroke-width="1.5"/>
+    <text x="716" y="155" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="900" fill="#a7f04d">70B weights</text>
+
+    <text x="706" y="210" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="25" font-weight="900" fill="#f8fafc">Memory changes the story</text>
+
+    <text x="706" y="258" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="21" font-weight="850" fill="#fecaca">BF16</text>
+    <text x="1008" y="258" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="21" font-weight="850" fill="#fecaca" text-anchor="end">~140 GB</text>
+    <rect x="706" y="276" width="332" height="18" rx="9" fill="#451a1a" stroke="#ef4444" stroke-width="1.5"/>
+
+    <text x="706" y="336" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="21" font-weight="850" fill="#bfdbfe">FP8</text>
+    <text x="1008" y="336" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="21" font-weight="850" fill="#bfdbfe" text-anchor="end">~70 GB</text>
+    <rect x="706" y="354" width="166" height="18" rx="9" fill="#172554" stroke="#3b82f6" stroke-width="1.5"/>
+
+    <text x="706" y="414" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="21" font-weight="850" fill="#dcfce7">NVFP4</text>
+    <text x="1008" y="414" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="21" font-weight="850" fill="#dcfce7" text-anchor="end">~40 GB</text>
+    <rect x="706" y="432" width="96" height="18" rx="9" fill="#163516" stroke="#76b900" stroke-width="1.5"/>
+
+    <rect x="706" y="468" width="304" height="1" fill="#334155"/>
+    <text x="706" y="488" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="800" fill="#cbd5e1">Smaller weights leave room for KV cache.</text>
+  </g>
+
+  <g transform="translate(78 506)">
+    <rect width="345" height="74" rx="16" fill="#0f172a" stroke="#26364f" stroke-width="1.5"/>
+    <circle cx="38" cy="37" r="13" fill="url(#accent)"/>
+    <text x="62" y="32" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="18" font-weight="900" fill="#f8fafc">Kubesimplify</text>
+    <text x="62" y="54" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="14" font-weight="750" fill="#94a3b8">Local AI, explained from first principles</text>
+  </g>
+</svg>

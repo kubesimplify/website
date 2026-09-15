@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 840" width="1600" height="840">
+  <style>
+    text { font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif; }
+  </style>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e1b4b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="840" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.06" stroke="#94a3b8" stroke-width="1">
+    <line x1="0" y1="0" x2="0" y2="840"/><line x1="80" y1="0" x2="80" y2="840"/>
+    <line x1="160" y1="0" x2="160" y2="840"/><line x1="240" y1="0" x2="240" y2="840"/>
+    <line x1="320" y1="0" x2="320" y2="840"/><line x1="400" y1="0" x2="400" y2="840"/>
+    <line x1="480" y1="0" x2="480" y2="840"/><line x1="560" y1="0" x2="560" y2="840"/>
+    <line x1="640" y1="0" x2="640" y2="840"/><line x1="720" y1="0" x2="720" y2="840"/>
+    <line x1="800" y1="0" x2="800" y2="840"/><line x1="880" y1="0" x2="880" y2="840"/>
+    <line x1="960" y1="0" x2="960" y2="840"/><line x1="1040" y1="0" x2="1040" y2="840"/>
+    <line x1="1120" y1="0" x2="1120" y2="840"/><line x1="1200" y1="0" x2="1200" y2="840"/>
+    <line x1="1280" y1="0" x2="1280" y2="840"/><line x1="1360" y1="0" x2="1360" y2="840"/>
+    <line x1="1440" y1="0" x2="1440" y2="840"/><line x1="1520" y1="0" x2="1520" y2="840"/>
+    <line x1="0" y1="80" x2="1600" y2="80"/><line x1="0" y1="160" x2="1600" y2="160"/>
+    <line x1="0" y1="240" x2="1600" y2="240"/><line x1="0" y1="320" x2="1600" y2="320"/>
+    <line x1="0" y1="400" x2="1600" y2="400"/><line x1="0" y1="480" x2="1600" y2="480"/>
+    <line x1="0" y1="560" x2="1600" y2="560"/><line x1="0" y1="640" x2="1600" y2="640"/>
+    <line x1="0" y1="720" x2="1600" y2="720"/><line x1="0" y1="800" x2="1600" y2="800"/>
+  </g>
+
+  <!-- Accent bar top -->
+  <rect x="120" y="170" width="70" height="5" rx="2" fill="#4a9eed"/>
+  <rect x="200" y="170" width="70" height="5" rx="2" fill="#8b5cf6"/>
+  <rect x="280" y="170" width="70" height="5" rx="2" fill="#22c55e"/>
+
+  <!-- Title -->
+  <text x="120" y="230" font-size="52" font-weight="800" fill="#f1f5f9" letter-spacing="-1">What Claude Code's Leaked Source</text>
+  <text x="120" y="295" font-size="52" font-weight="800" fill="#f1f5f9" letter-spacing="-1">Actually Teaches About</text>
+  <text x="120" y="360" font-size="52" font-weight="800" fill="#f1f5f9" letter-spacing="-1">Building AI Agents</text>
+
+  <!-- Subtitle -->
+  <text x="120" y="410" font-size="22" fill="#94a3b8" font-weight="400">512K lines of TypeScript, verified against the actual source code</text>
+
+  <!-- Three panels -->
+  <!-- Panel 1: Agent Loop -->
+  <rect x="120" y="460" width="420" height="250" rx="12" fill="#1e3a5f" fill-opacity="0.5" stroke="#4a9eed" stroke-width="1.5"/>
+  <text x="150" y="500" font-size="22" font-weight="700" fill="#4a9eed">Agent Loop</text>
+  <text x="150" y="528" font-size="16" fill="#94a3b8">query.ts — 1,729 lines</text>
+
+  <!-- Mini flowchart inside panel 1 -->
+  <rect x="150" y="548" width="100" height="30" rx="6" fill="#1e3a5f" stroke="#4a9eed" stroke-width="1"/>
+  <text x="167" y="568" font-size="12" fill="#e2e8f0">Setup</text>
+  <rect x="265" y="548" width="100" height="30" rx="6" fill="#1e3a5f" stroke="#4a9eed" stroke-width="1"/>
+  <text x="275" y="568" font-size="12" fill="#e2e8f0">Model Call</text>
+  <rect x="380" y="548" width="100" height="30" rx="6" fill="#1e3a5f" stroke="#4a9eed" stroke-width="1"/>
+  <text x="399" y="568" font-size="12" fill="#e2e8f0">Tools</text>
+  <line x1="250" y1="563" x2="265" y2="563" stroke="#4a9eed" stroke-width="1.5"/>
+  <line x1="365" y1="563" x2="380" y2="563" stroke="#4a9eed" stroke-width="1.5"/>
+
+  <rect x="150" y="593" width="100" height="30" rx="6" fill="#1e3a5f" stroke="#4a9eed" stroke-width="1"/>
+  <text x="162" y="613" font-size="12" fill="#e2e8f0">Recovery</text>
+  <rect x="265" y="593" width="100" height="30" rx="6" fill="#2d1b69" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="275" y="613" font-size="12" fill="#e2e8f0">Continue?</text>
+
+  <!-- Loop arrow -->
+  <path d="M365,608 C420,608 440,558 480,558 C500,558 500,520 460,520 C440,520 200,520 170,535" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="420" y="650" font-size="13" fill="#8b5cf6" font-weight="500">7 continue sites</text>
+
+  <!-- Panel 2: Compaction -->
+  <rect x="590" y="460" width="420" height="250" rx="12" fill="#2d1b69" fill-opacity="0.4" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="620" y="500" font-size="22" font-weight="700" fill="#8b5cf6">5 Compaction Strategies</text>
+  <text x="620" y="528" font-size="16" fill="#94a3b8">Context window management</text>
+
+  <rect x="620" y="548" width="110" height="26" rx="5" fill="#1e3a5f" stroke="#4a9eed" stroke-width="1"/>
+  <text x="650" y="566" font-size="12" fill="#e2e8f0">Snip</text>
+  <rect x="745" y="548" width="145" height="26" rx="5" fill="#1a4d2e" stroke="#22c55e" stroke-width="1"/>
+  <text x="766" y="566" font-size="12" fill="#e2e8f0">Microcompact</text>
+
+  <rect x="620" y="585" width="165" height="26" rx="5" fill="#2d1b69" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="637" y="603" font-size="12" fill="#e2e8f0">Context Collapse</text>
+  <rect x="800" y="585" width="50" height="18" rx="4" fill="#5c3d1a" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="808" y="598" font-size="9" fill="#f59e0b">FLAG</text>
+
+  <rect x="620" y="622" width="140" height="26" rx="5" fill="#5c3d1a" stroke="#f59e0b" stroke-width="1"/>
+  <text x="642" y="640" font-size="12" fill="#e2e8f0">Autocompact</text>
+
+  <rect x="620" y="659" width="175" height="26" rx="5" fill="#5c1a1a" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="637" y="677" font-size="12" fill="#e2e8f0">Reactive Compact</text>
+  <rect x="808" y="659" width="50" height="18" rx="4" fill="#5c3d1a" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="816" y="672" font-size="9" fill="#f59e0b">FLAG</text>
+
+  <!-- Panel 3: ToolSearch -->
+  <rect x="1060" y="460" width="420" height="250" rx="12" fill="#1a4d2e" fill-opacity="0.4" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="1090" y="500" font-size="22" font-weight="700" fill="#22c55e">ToolSearch</text>
+  <text x="1090" y="528" font-size="16" fill="#94a3b8">Deferred loading for 200+ tools</text>
+
+  <!-- Core tools -->
+  <rect x="1090" y="548" width="75" height="26" rx="5" fill="#1a4d2e" stroke="#22c55e" stroke-width="1"/>
+  <text x="1105" y="566" font-size="12" fill="#e2e8f0">Read</text>
+  <rect x="1175" y="548" width="75" height="26" rx="5" fill="#1a4d2e" stroke="#22c55e" stroke-width="1"/>
+  <text x="1194" y="566" font-size="12" fill="#e2e8f0">Edit</text>
+  <rect x="1260" y="548" width="75" height="26" rx="5" fill="#1a4d2e" stroke="#22c55e" stroke-width="1"/>
+  <text x="1277" y="566" font-size="12" fill="#e2e8f0">Bash</text>
+  <rect x="1345" y="548" width="50" height="26" rx="5" fill="#1a4d2e" stroke="#22c55e" stroke-width="1"/>
+  <text x="1361" y="566" font-size="11" fill="#94a3b8">...</text>
+
+  <!-- Deferred grid -->
+  <g opacity="0.35">
+    <rect x="1090" y="590" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1160" y="590" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1230" y="590" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1300" y="590" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1370" y="590" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1090" y="618" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1160" y="618" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1230" y="618" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1300" y="618" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1370" y="618" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1090" y="646" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1160" y="646" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1230" y="646" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1300" y="646" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+    <rect x="1370" y="646" width="62" height="22" rx="4" fill="#1a4d2e" stroke="#22c55e" stroke-width="0.8"/>
+  </g>
+  <text x="1170" y="695" font-size="14" fill="#22c55e" font-weight="500">200+ tools, loaded on demand</text>
+
+  <!-- Bottom stats bar -->
+  <rect x="120" y="745" width="200" height="3" rx="1" fill="#4a9eed" opacity="0.6"/>
+  <rect x="590" y="745" width="200" height="3" rx="1" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="1060" y="745" width="200" height="3" rx="1" fill="#22c55e" opacity="0.6"/>
+
+  <text x="120" y="775" font-size="18" font-weight="600" fill="#4a9eed">512K lines</text>
+  <text x="120" y="798" font-size="14" fill="#64748b">verified against source</text>
+
+  <text x="590" y="775" font-size="18" font-weight="600" fill="#8b5cf6">81 feature flags</text>
+  <text x="590" y="798" font-size="14" fill="#64748b">compile-time gated</text>
+
+  <text x="1060" y="775" font-size="18" font-weight="600" fill="#22c55e">Every claim checked</text>
+  <text x="1060" y="798" font-size="14" fill="#64748b">not AI slop</text>
+
+  <!-- Author -->
+  <text x="1350" y="178" font-size="16" fill="#64748b">saiyampathak.com</text>
+</svg>
