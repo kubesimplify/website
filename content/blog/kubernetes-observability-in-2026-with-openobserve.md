@@ -2,7 +2,7 @@
 title: "Kubernetes observability in 2026 with OpenObserve 1.0 as the backend"
 seoTitle: "Kubernetes observability in 2026 with OpenObserve 1.0 as the backend"
 seoDescription: "A 31 ms full-text search over 4.2 million Kubernetes log rows, and a whole cluster on 43m CPU under 600 MiB: a hands-on run of OpenObserve 1.0 as the backend."
-datePublished: 2026-09-03T00:00:00.000Z
+datePublished: 2026-09-15T00:00:00.000Z
 slug: kubernetes-observability-in-2026-with-openobserve
 author: saiyam-pathak
 tags: ["kubernetes", "observability", "opentelemetry", "openobserve"]
@@ -160,7 +160,7 @@ Also new, and all open source: [SLOs with burn-rate alerts](https://openobserve.
 
 ## Running it: a whole cluster into one binary
 
-Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Everything the demo uses is in one repo:
+Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, OpenObserve v1.0.0-rc1. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. The MCP exchange in step 6 comes from a third, shorter run on 15 September, on a fresh cluster of the same shape. Everything the demo uses is in one repo:
 
 ```bash
 git clone https://github.com/saiyam1814/openobserve-k8s-demo
@@ -383,7 +383,37 @@ claude mcp add openobserve "$O2/api/default/mcp" -t http \
   --header "Authorization: Basic $(printf %s "$AUTH" | base64)"
 ```
 
-After that, "which checkout operations threw errors in the last hour" is a question for the editor rather than a SELECT you compose, and the other tabs wire the same server into Cursor, VS Code and the rest.
+After that the question goes in the editor rather than into a SELECT. I asked it "which checkout operations threw errors in the last hour, and how many?" and it listed the streams, read the traces schema, then wrote and ran four queries of its own. This was the one that answered the question:
+
+```sql
+SELECT operation_name, status_message, http_response_status_code,
+       COUNT(*) AS cnt, COUNT(DISTINCT trace_id) AS traces
+FROM "default" WHERE service_name = 'checkout' AND span_status = 'ERROR'
+GROUP BY operation_name, status_message, http_response_status_code
+ORDER BY cnt DESC
+```
+
+And this is what came back, trimmed:
+
+```text
+77 failed checkouts. Two operations in the checkout service reported ERROR,
+both in the same 77 traces:
+
+  payment.charge    77    payment gateway timeout
+  POST /checkout    77    HTTP 502 (root span, no status message)
+
+inventory.reserve recorded zero errors (3,500 spans, all UNSET).
+
+- Error rate: 77 of 3,500 checkout requests = 2.2%
+- COUNT(DISTINCT trace_id) confirms these are 77 traces, not 154. Each failed
+  checkout is one payment.charge timeout propagating up to a 502 on the root
+  span. The payment gateway is the single root cause.
+- Errors span 05:02:29Z to 05:15:15Z. Worth noting: the traces stream only holds
+  data from 05:02:19Z onward, so the "last hour" window is effectively the last
+  ~13 minutes of ingestion, and there is no earlier data for a baseline.
+```
+
+Two things in there I did not ask for and would have had to work out myself: that the 154 error spans are 77 requests rather than 154 incidents, and that my "last hour" was really thirteen minutes, because the cluster was that young. The other tabs wire the same server into Cursor, VS Code and the rest.
 
 The endpoint speaks streamable HTTP, so a curl loop is a client too, and it shows the path an agent takes. `mcp.sh` in the repo wraps one JSON-RPC call and reads `O2` and `AUTH` from step 1, so export them again if you are in a new terminal:
 
@@ -407,10 +437,10 @@ StreamSchema
 
 GetLatestTraces
 
-[{"service_name":"checkout","operation_name":"POST /checkout","errors":31},{"service_name":"checkout","operation_name":"payment.charge","errors":31}]
+[{"service_name":"checkout","operation_name":"payment.charge","errors":84},{"service_name":"checkout","operation_name":"POST /checkout","errors":84}]
 ```
 
-Three calls: the tool list, a search that turns plain intent into the right tool, and the answer. I wrote that SQL by hand to show the path. The registration above is so that you do not have to.
+Three calls: the tool list, a search that turns plain intent into the right tool, and the answer. The count has moved on from the agent's 77 because the load generator kept running between the two, which is its own small reminder that "the last hour" is a moving window. I wrote that SQL by hand to show the path. The registration above is so that you do not have to.
 
 ### 7. Break an SLO
 
