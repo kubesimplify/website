@@ -114,7 +114,7 @@ Application RAM
 
 ![Process Resident Memory (RSS) and Heap comparison between v1 and v2](/img/blog/sqlite-fts5-dense-hybrid-retrieval/chart_memory.webp)
 
-The important architectural change was not simply using SQLite. We stopped loading the entire legal corpus as JavaScript objects. The full text stays on disk, while only the compact vector representation needed for scoring stays in memory.
+The important architectural change was not simply using SQLite. We stopped loading the entire legal corpus as heavy JavaScript objects. The full text stays on disk, while we keep only document IDs and compact `Float32Array` embeddings in memory for scoring.
 
 When a query runs, the system scores the compact vectors, searches the SQLite full-text index, and fetches the full legal text from SQLite only for the final top matches. This reduced active JavaScript heap usage from roughly 438 MB to 16 MB.
 
