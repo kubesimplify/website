@@ -114,6 +114,7 @@
 /blog/iptables-demo                                                                    /iptables-demo  301!
 /blog/istio-service-mesh                                                               /istio-service-mesh  301!
 /blog/k8sgpt-tutorial-when-kubernetes-meets-ai                                         /k8sgpt-tutorial-when-kubernetes-meets-ai  301!
+/blog/kagent-part-1-local-ai-agent-kubernetes                                          /kagent-part-1-local-ai-agent-kubernetes  301!
 /blog/keptn-getting-started                                                            /keptn-getting-started  301!
 /blog/ksctl-making-kubernetes-easy-across-clouds                                       /ksctl-making-kubernetes-easy-across-clouds  301!
 /blog/kube-proxy-deep-dive                                                             /kube-proxy-deep-dive  301!
@@ -342,6 +343,7 @@
 /iptables-demo                                                                    /blog/iptables-demo  200!
 /istio-service-mesh                                                               /blog/istio-service-mesh  200!
 /k8sgpt-tutorial-when-kubernetes-meets-ai                                         /blog/k8sgpt-tutorial-when-kubernetes-meets-ai  200!
+/kagent-part-1-local-ai-agent-kubernetes                                          /blog/kagent-part-1-local-ai-agent-kubernetes  200!
 /keptn-getting-started                                                            /blog/keptn-getting-started  200!
 /ksctl-making-kubernetes-easy-across-clouds                                       /blog/ksctl-making-kubernetes-easy-across-clouds  200!
 /kube-proxy-deep-dive                                                             /blog/kube-proxy-deep-dive  200!
