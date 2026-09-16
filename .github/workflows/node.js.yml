@@ -21,4 +21,16 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
+    # Guard against the committed output of scripts/generate-redirects.mjs
+    # drifting from content/blog. `prebuild` regenerates these during every
+    # deploy, so stale copies never break the live site -- which is exactly
+    # why the drift goes unnoticed until someone diffs them by hand.
+    - name: Routing artifacts are in sync with content/blog
+      run: |
+        npm run blog:redirects
+        if ! git diff --quiet -- public/_redirects public/_worker.js public/_routes.json vercel.json; then
+          echo "::error::Routing artifacts are stale. Run 'npm run blog:redirects' and commit the result."
+          git diff --stat -- public/_redirects public/_worker.js public/_routes.json vercel.json
+          exit 1
+        fi
     - run: npm run build
