@@ -492,6 +492,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/inside-kueue-how-kubernetes-decides-what-runs-next",
+      "destination": "https://blog.kubesimplify.com/inside-kueue-how-kubernetes-decides-what-runs-next",
+      "permanent": true
+    },
+    {
       "source": "/blog/installing-prometheus-with-selinux",
       "destination": "https://blog.kubesimplify.com/installing-prometheus-with-selinux",
       "permanent": true
@@ -2010,6 +2015,17 @@
     {
       "source": "/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
       "destination": "https://blog.kubesimplify.com/ing-switch-migrate-from-ingress-nginx-to-traefik-or-gateway-api-in-minutes-not-days",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/inside-kueue-how-kubernetes-decides-what-runs-next",
+      "destination": "https://blog.kubesimplify.com/inside-kueue-how-kubernetes-decides-what-runs-next",
       "permanent": true,
       "has": [
         {
