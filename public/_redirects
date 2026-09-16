@@ -133,6 +133,7 @@
 /blog/kubernetes-containerd-setup                                                      /kubernetes-containerd-setup  301!
 /blog/kubernetes-crio                                                                  /kubernetes-crio  301!
 /blog/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers /kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers  301!
+/blog/kubernetes-observability-in-2026-with-openobserve                                /kubernetes-observability-in-2026-with-openobserve  301!
 /blog/kubernetes-on-apple-macbooks-m-series                                            /kubernetes-on-apple-macbooks-m-series  301!
 /blog/kubernetes-scheduling-the-complete-guide                                         /kubernetes-scheduling-the-complete-guide  301!
 /blog/kubernetes-v133-key-features-updates-and-what-you-need-to-know                   /kubernetes-v133-key-features-updates-and-what-you-need-to-know  301!
@@ -362,6 +363,7 @@
 /kubernetes-containerd-setup                                                      /blog/kubernetes-containerd-setup  200!
 /kubernetes-crio                                                                  /blog/kubernetes-crio  200!
 /kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers /blog/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers  200!
+/kubernetes-observability-in-2026-with-openobserve                                /blog/kubernetes-observability-in-2026-with-openobserve  200!
 /kubernetes-on-apple-macbooks-m-series                                            /blog/kubernetes-on-apple-macbooks-m-series  200!
 /kubernetes-scheduling-the-complete-guide                                         /blog/kubernetes-scheduling-the-complete-guide  200!
 /kubernetes-v133-key-features-updates-and-what-you-need-to-know                   /blog/kubernetes-v133-key-features-updates-and-what-you-need-to-know  200!
