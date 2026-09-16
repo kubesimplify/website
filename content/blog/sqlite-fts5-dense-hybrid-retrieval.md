@@ -275,7 +275,7 @@ Dense + FTS5 (RRF):     90% (9/10)
 | **Stage 3: Hybrid Search (RRF)** | 90% (9/10) | High recall; combines exact statutory terminology with colloquial layman phrasing. |
 | **Stage 4: Full Pipeline (+ Domain Reranker)** | 90% (9/10) | Maintains 90% recall while cleanly prioritizing document forgery statutes over counterfeit coin laws for signature queries. |
 
-While a 10-query evaluation set is an indicative domain benchmark rather than a statistically settled aggregate, it spans key representative practice areas—criminal law, criminal procedure, cyber crime, family law, evidence law, and consumer protection—specifically selected to stress-test known retrieval edge cases like semantic drift, overlapping statutory codes, and duplicate provisions.
+While a 10-query evaluation set is an indicative domain benchmark rather than a statistically settled aggregate, it spans key representative practice areas: criminal law, criminal procedure, cyber crime, family law, evidence law, and consumer protection, specifically selected to stress-test known retrieval edge cases like semantic drift, overlapping statutory codes, and duplicate provisions.
 
 In this evaluation, the biggest retrieval improvement came from combining two complementary search methods. The domain reranker did not increase aggregate accuracy on this set, but it provided a useful deterministic guardrail for a known failure mode: for the signature-forgery query, the reranker demoted the counterfeit-currency candidates and promoted document-forgery provisions to the top of the final ranking.
 
@@ -321,14 +321,10 @@ If your retrieval-augmented generation system is hallucinating or missing obviou
 
 ## Code & Repository
 
-The complete source code, SQLite indexing pipeline, and standalone benchmark harness are available on GitHub:
+The complete source code, SQLite indexing pipeline, and standalone benchmark harness implementation are available on GitHub:
 
 **GitHub Repository:** https://github.com/ishwar170695/LawDecoder
 
-The benchmark harness and ablation test suite can be run directly from the backend directory:
+Because the full vector dataset (~162 MB) exceeds repository file size limits, the benchmark harness runs against local evaluation datasets. You can inspect the benchmark harness implementation in `backend/benchmark.js` and view the full query-by-query recorded results and 4-stage ablation in [evaluation_queries.md](https://github.com/ishwar170695/LawDecoder/blob/main/evaluation_queries.md).
 
-```bash
-cd backend
-npm install
-npm run benchmark   # Runs the 4-stage ablation and latency evaluation against the benchmark dataset
-```
+
