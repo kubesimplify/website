@@ -2,9 +2,10 @@
 title: "Inside Kueue: How Kubernetes Decides What Runs Next"
 seoTitle: "Inside Kueue: How Kubernetes Decides What Runs Next"
 seoDescription: "See how Kueue brings order to overloaded Kubernetes clusters by intelligently managing batch workloads with a hands on demo."
-datePublished: 2026-08-19T10:00:00.000Z
+datePublished: 2026-09-16T10:00:00.000Z
 slug: inside-kueue-how-kubernetes-decides-what-runs-next
 author: ekam-walia
+draft: false
 cover: /img/blog/inside-kueue-how-kubernetes-decides-what-runs-next/cover-blog.webp
 tags: ["kubernetes", "kueue", "scheduling", "batch-workloads"]
 ---
@@ -29,8 +30,6 @@ Resources available? → No → Pod sits in 'Pending' state until resources free
 ```
 
 Meanwhile, other important jobs also queue up and fight for the same resources.
-
-![Flowchart for default Scheduling on Kubernetes](/img/blog/inside-kueue-how-kubernetes-decides-what-runs-next/default-job-scheduling.webp)
 
 The key issues which one can face using default K8s scheduler:
 
@@ -136,15 +135,17 @@ Wasted resources: 75% of the job's allocation is wasted
 ```
 
 **With gang scheduling (Kueue):**
-Job says: "I need 4 pods or nothing"
-**Kueue checks: Can I fit all 4?**
+
+Job says: "I need 4 pods or nothing", and Kueue checks whether it can fit all 4:
+
 ```text
-  Yes? Admit all 4, they start together ✅✅✅✅
-  No? Queue all 4, none start yet ⏳⏳⏳⏳
+Yes? Admit all 4, they start together ✅✅✅✅
+No?  Queue all 4, none start yet ⏳⏳⏳⏳
 ```
 
-***Result***: Either 100% of the job runs, or 0%
-Wasted resources: None (no idle pods)
+- **Result**: either 100% of the job runs, or 0%
+- **Wasted resources**: none, because there are no idle pods
+
 This is **Gang Scheduling**, and it's why distributed jobs absolutely need it.
 
 ## Why Batch Jobs Are Hard on Kubernetes, understanding Deadlock Scenario
@@ -183,7 +184,7 @@ Kueue's Core principle is to only admit a job to the cluster when we're 100% sur
 4. Visibility: You see exactly why a job is queued and when it'll run
 5. Resource Quotas: Each team gets a guaranteed slice of the cluster
 
-### Understanding Objects in Kueue 
+### Understanding Objects in Kueue
 
 1. **Workload**
 What it is: A wrapper around your Kubernetes Job that Kueue understands.
@@ -224,14 +225,14 @@ Job → Workload → LocalQueue → ClusterQueue → Resources Available? → AD
 
 ![Flowchart for Scheduling with Kueue on Kubernetes](/img/blog/inside-kueue-how-kubernetes-decides-what-runs-next/kueue-job-sched.webp)
 
-## Installation of Kueue 
+## Installation of Kueue
 
-Kueue is just a Kubernetes controller. 
+Kueue is just a Kubernetes controller.
 
 **Step 1**: Install Kueue from Official Manifests
 
 ```bash
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.19.2/manifests.yaml
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.19.4/manifests.yaml
 ```
 
 That's it. Kueue controller is now running.
@@ -466,8 +467,10 @@ job-job-a-big-cb1a1     default   demo-queue    True                  4m40s
 job-job-b-small-c8c54   default                                       47s
 ```
 
-Job A: ADMITTED (using 8 of 10 CPUs) Job B: NOT ADMITTED (only 2 CPUs available, but needs 5)
-Job B is stuck in the queue! It's waiting for resources.
+- Job A: ADMITTED (using 8 of 10 CPUs)
+- Job B: NOT ADMITTED (only 2 CPUs available, but it needs 5)
+
+Job B is stuck in the queue, waiting for resources.
 
 **Step 8**: See Why Job B Is Waiting
 
@@ -502,7 +505,7 @@ Events:
   Warning  Pending  2m10s  kueue-admission  couldn't assign flavors to pod set main: insufficient unused quota for cpu in flavor default, 3 more needed
 ```
 
-**Step 9**: Free Up Resources (Delete Job B)
+**Step 9**: Free Up Resources (Delete Job A)
 
 ```bash
 kubectl delete job job-a-big -n kueue-demo
@@ -668,7 +671,7 @@ Also check if it is working properly by using this command:
 kubectl get pods -n deadlock-demo
 ```
 
-it should show something like this 
+it should show something like this
 
 ```text
 (base) ekamwalia % kubectl get pods -n deadlock-demo
@@ -707,7 +710,7 @@ spec:
             cpu: "400m"
             memory: "512Mi"
 ```
-Apply it: 
+Apply it:
 
 ```bash
 kubectl apply -f job-b.yaml
@@ -715,7 +718,7 @@ kubectl apply -f job-b.yaml
 
 The Deadlock Appears, lets investigate it:
 
-First, lets check pods 
+First, lets check pods
 
 ```bash
 kubectl get pods -n deadlock-demo
@@ -792,7 +795,7 @@ Events:
   Warning  FailedCreate      39s    job-controller  Error creating: pods "job-b-gang-z5xbd" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
 ```
 
-🔴 This is the deadlock! The Job controller is desperately trying to create Pod 2, but it CANNOT, as we can see an error in our terminal 
+🔴 This is the deadlock! The Job controller is desperately trying to create Pod 2, but it CANNOT, as we can see an error in our terminal
 ```text
 Warning  FailedCreate      39s    job-controller  Error creating: pods "job-b-gang-z5xbd" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
 ```
@@ -929,7 +932,7 @@ job-job-a-takes-800m-c8bc8   default   smart-queue   True                  10s
 
 ✅ Job A is admitted and running, just like before.
 
-**Step 6: Apply Job B WITH Gang Scheduling** 
+**Step 6: Apply Job B WITH Gang Scheduling**
 
 ```yaml
 apiVersion: batch/v1
@@ -971,7 +974,7 @@ Now if we check the status of the workloads by
 kubectl get workloads -n kueue-demo
 ```
 
-we should see something like 
+we should see something like
 
 ```text
 (base) ekamwalia % kubectl get workloads -n kueue-demo
@@ -988,7 +991,7 @@ Also if we use describe command on Job B by
 kubectl describe job job-b-gang -n kueue-demo
 ```
 
-We should see something like this 
+We should see something like this
 
 ```text
 (base) ekamwalia % kubectl describe job job-b-gang -n kueue-demo
@@ -1082,17 +1085,20 @@ And that's the key point: Job is now properly scheduled and working. Kueue admit
 Kubernetes is great at running microservices, but batch jobs are a different beast. They're resource hungry, they need coordination, and they don't play nice with others.
 Kueue fixes this.
 In our demo, we saw the exact same job behave two completely different ways:
-- Without Kueue: One pod running uselessly, one pod stuck forever, 400m CPU wasted, and a deadlock that would last 10 minutes.
-- With Kueue: The entire job held back gracefully. Zero resources wasted. When resources freed up, both pods started together.
-- The magic? One label:
-```bash
+- Without Kueue: one pod running uselessly, its partner never created at all, 400m CPU held hostage, and a deadlock that lasts until Job A exits 10 minutes later.
+- With Kueue: the entire job held back gracefully. Zero resources wasted. When Job A was deleted, both pods started together.
+
+The magic? One label:
+
+```yaml
 kueue.x-k8s.io/queue-name: default
 ```
-That's it. No complex configs, no custom schedulers just intelligent resource management that actually works.
+
+That's it. No complex configs, no custom schedulers, just intelligent resource management that actually works.
 The next time someone deploys a batch job that tries to eat your cluster, Kueue will be there to say: "Wait your turn."
 
 ### Resources
 
 - [Official Kueue Docs](https://kueue.sigs.k8s.io/)
 - [GitHub](https://github.com/kubernetes-sigs/kueue)
-- Install: `kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.19.2/manifests.yaml`
+- Install: `kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.19.4/manifests.yaml`
