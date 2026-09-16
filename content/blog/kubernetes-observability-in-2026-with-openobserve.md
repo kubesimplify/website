@@ -3,6 +3,7 @@ title: "Kubernetes observability in 2026 with OpenObserve 1.0 as the backend"
 seoTitle: "Kubernetes observability in 2026 with OpenObserve 1.0 as the backend"
 seoDescription: "A 31 ms full-text search over 4.2 million Kubernetes log rows, and a whole cluster on 43m CPU under 600 MiB: a hands-on run of OpenObserve 1.0 as the backend."
 datePublished: 2026-09-15T00:00:00.000Z
+dateModified: 2026-09-16T00:00:00.000Z
 slug: kubernetes-observability-in-2026-with-openobserve
 author: saiyam-pathak
 tags: ["kubernetes", "observability", "opentelemetry", "openobserve"]
@@ -160,7 +161,7 @@ Also new, and all open source: [SLOs with burn-rate alerts](https://openobserve.
 
 ## Running it: a whole cluster into one binary
 
-Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, and OpenObserve v1.0.0-rc1 for the original runs, though the values file in the repo now pins 1.0.0, which is what you will get. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Step 6 I then re-ran in full on 15 September against 1.0.0 GA, so every number in it is from the shipped release. In step 7 I re-checked only the SLO bug against GA, so that step shows the rc1 run first and the GA re-check after it, each labelled. Everything the demo uses is in one repo:
+Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, and OpenObserve v1.0.0-rc1 for the original runs, though the values file in the repo now pins 1.0.0, which is what you will get. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Step 6 I then re-ran in full on 15 September against 1.0.0 GA, so every number in it is from the shipped release, and I re-checked the SLO step again on 1.0.1 on 16 September. In step 7 I re-checked only the SLO bug against GA, so that step shows the rc1 run first and the GA re-check after it, each labelled. Everything the demo uses is in one repo:
 
 ```bash
 git clone https://github.com/saiyam1814/openobserve-k8s-demo
@@ -488,7 +489,11 @@ The SLO pass opens the read-only database client and then writes through it. On 
 
 I expected this to be gone by now, because 1.0.0's release notes say the storage layer "split into separate ORM read/write clients (retiring the sqlite write lock)". So I upgraded this cluster to 1.0.0 GA and ran the step again. On GA the SLO backfilled its slices, reached full coverage, computed an SLI of 98.009 percent against the 99 target, and then stopped. Twenty minutes later, with the load generator still failing 60 percent of payments, `computed_at` had not moved, `stale_watermark` was still true, the burn rate was still reading 1.99, and the same `attempt to write a readonly database` line was back in the log. The burn-rate alert never fired, because the row it reads never advanced.
 
-So this one survived GA on the single-node path, and the reason turned out to be more interesting than the bug. The fix exists. I reported this during the rc1 run, and [the patch that closed it](https://github.com/openobserve/openobserve/pull/14192) moved that write onto the read-write client and merged into `main` on 9 September. 1.0.0 was tagged on the 11th without it: at the tag, `commit_status` still takes the read-only handle, and on `main` it does not. The backport onto the release branch landed on the 12th, one day too late for the tag, and there is no patch release yet, so the image you can pull today still has it. A release-timing miss rather than an unsolved problem. If you want working SLO alerts on a single node before that patch ships, point the metadata store at PostgreSQL instead of SQLite and keep `ZO_LOCAL_MODE=true`, because the read-only Postgres client falls back to the read-write connection and the failing write succeeds. None of it affects a cluster deployment on PostgreSQL. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
+So this one survived GA on the single-node path, and the reason turned out to be more interesting than the bug. The fix exists. I reported this during the rc1 run, and [the patch that closed it](https://github.com/openobserve/openobserve/pull/14192) moved that write onto the read-write client and merged into `main` on 9 September. 1.0.0 was tagged on the 11th without it: at the tag, `commit_status` still takes the read-only handle, and on `main` it does not. The backport onto the release branch landed on the 12th, one day too late for the tag.
+
+**Fixed in 1.0.1, which shipped on 16 September.** I re-ran this on a fresh single-node install with SQLite, the exact configuration that fails on 1.0.0, and it behaves: no `readonly database` line anywhere in the log, `stale_watermark` goes false, and the status row keeps advancing on every pass with the SLI and burn rate moving as new measurements land. So on 1.0.1 you do not need to do anything, and the PostgreSQL workaround below is only for anyone still pinned to 1.0.0.
+
+If you are stuck on 1.0.0 for some reason, point the metadata store at PostgreSQL instead of SQLite and keep `ZO_LOCAL_MODE=true`, because the read-only Postgres client falls back to the read-write connection and the failing write succeeds. None of it affects a cluster deployment on PostgreSQL. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
 
 ```bash
 kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/alerts") | .body | fromjson'
@@ -592,7 +597,7 @@ Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac
 
 **Vortex is young here.** Faster on row fetch and larger on disk in the vendor's own numbers, in the open-source build only since July, pinned to a git revision. Try it on a test cluster, watch the release notes before production.
 
-**SLO alerts do not fire on a single node.** The SLO measures and the page updates, but the status row the alert reads stops advancing the first time a pass tries to write it, because that write goes through the read-only database client and SQLite refuses it. I hit this on rc1 and again on 1.0.0 GA, where it is a missed backport rather than an open bug: the fix merged to `main` two days before the tag. Cluster deployments on PostgreSQL are not affected, and plain alerts work fine.
+**SLO alerts did not fire on a single node, until 1.0.1.** On rc1 and 1.0.0 the status row the alert reads stopped advancing the first time a pass tried to write it, because that write went through the read-only database client and SQLite refused it. 1.0.1 fixes it and I have verified that on SQLite. Worth knowing only if you are pinned to 1.0.0, where the workaround is PostgreSQL as the metadata store.
 
 **PromQL has gaps.** OpenObserve does not run Prometheus's engine, it has its own PromQL evaluator, and `histogram_count`, `histogram_sum`, `histogram_fraction`, `sort`, `sort_desc` and the `@` modifier are not implemented in it yet. Point an existing Grafana dashboard at it and test before you switch.
 
@@ -607,7 +612,7 @@ Give it a try on a test cluster and tell me how it goes, I am @SaiyamPathak on X
 - Companion repo with the values files, demo app, manifests and step-by-step README: https://github.com/saiyam1814/openobserve-k8s-demo
 - OpenObserve docs: https://openobserve.ai/docs
 - Helm charts (standalone and collector): https://github.com/openobserve/openobserve-helm-chart
-- 1.0.0 release: https://github.com/openobserve/openobserve/releases/tag/v1.0.0
+- 1.0.1 release, which carries the SLO fix: https://github.com/openobserve/openobserve/releases/tag/v1.0.1
 - OpenObserve vs ClickHouse benchmark (vendor-run): https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/
 - Vortex file format: https://vortex.dev
 - Grafana Labs Observability Survey 2026: https://grafana.com/observability-survey/
