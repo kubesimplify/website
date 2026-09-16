@@ -657,6 +657,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/kubernetes-observability-in-2026-with-openobserve",
+      "destination": "https://blog.kubesimplify.com/kubernetes-observability-in-2026-with-openobserve",
+      "permanent": true
+    },
+    {
       "source": "/blog/kubernetes-on-apple-macbooks-m-series",
       "destination": "https://blog.kubesimplify.com/kubernetes-on-apple-macbooks-m-series",
       "permanent": true
@@ -2378,6 +2383,17 @@
     {
       "source": "/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
       "destination": "https://blog.kubesimplify.com/kubernetes-management-with-rust-a-dive-into-generic-client-go-controller-abstractions-and-crd-macros-with-kubers",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/kubernetes-observability-in-2026-with-openobserve",
+      "destination": "https://blog.kubesimplify.com/kubernetes-observability-in-2026-with-openobserve",
       "permanent": true,
       "has": [
         {
