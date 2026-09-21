@@ -5,6 +5,2331 @@
 
 ---
 
+# Inside Kueue: How Kubernetes Decides What Runs Next
+
+- Canonical: https://blog.kubesimplify.com/inside-kueue-how-kubernetes-decides-what-runs-next
+- Published: 2026-09-16
+- Summary: See how Kueue brings order to overloaded Kubernetes clusters by intelligently managing batch workloads with a hands on demo.
+
+Your Kubernetes cluster works great for microservices until someone deploys a batch job
+that eats every GPU and CPU on the machine. Suddenly critical workloads starve, distributed
+jobs deadlock halfway through, and the scheduler has no idea what should run first.
+**Kueue fixes this.** It's a smart traffic controller that queues batch workloads fairly,
+prevents deadlock, and guarantees resources before a job ever touches your cluster.
+In this blog, we'll see why Kubernetes' default scheduler breaks on batch jobs, and then
+build Kueue from scratch with working demos you can run today.
+
+## How Scheduling actually works on Kubernetes
+
+### Kubernetes default scheduler works like this:
+
+```text
+Pod lands → Scheduler checks if it fits on any node.
+
+Resources available? → Yes → Pod gets scheduled
+
+Resources available? → No → Pod sits in 'Pending' state until resources free up.
+```
+
+Meanwhile, other important jobs also queue up and fight for the same resources.
+
+The key issues which one can face using default K8s scheduler:
+
+1. Job fairness across teams
+2. Deadlock issue (Some jobs require all pods to sync for run)
+3. Queue management (who should go first?)
+4. Resource quotas (how much can each team use?)
+5. Preemption (can I pause a low-priority job to run a critical one?)
+
+## The Relatable Problem
+
+Let us suppose that your team is running Kubernetes, and everything is working well. Microservices deploy smoothly. Then one day, someone deploys a Batch Job, maybe it's a machine learning model training job or a big data processing pipeline.
+
+The job starts and immediately grabs every available GPU, CPU, and memory on the cluster. Meanwhile, other important workloads are left waiting for resources that won't become available anytime soon. In some cases, this can even create a deadlock: workloads are waiting on resources held by other workloads, while the cluster has no effective way to decide what should run first.
+
+Sound familiar? This is the issue that Kueue is built to solve.
+
+## Batch Jobs, Gang Scheduling, and Deadlock
+
+Let's start with the basics, because not everyone has run batch jobs before.
+
+### Traditional Microservices vs Batch Workloads
+
+### Microservices (what your cluster probably handles now):
+
+1. Run 24/7 (or close to it)
+2. Need modest, predictable resources
+3. React to incoming requests
+
+**Example**: A web API serving user requests
+
+### Batch Workloads (what breaks your cluster):
+
+1. Stateful (distributed state across pods)
+2. All or nothing (5 of 8 pods running = job hangs)
+3. Long running (hours, days, weeks)
+4. Coordinated (all pods must sync regularly)
+5. Resource intensive (GPUs, TPUs, high CPU)
+6. Run for a fixed time, then stop
+7. Don't react to requests; just 'process all this data'
+
+**Example**: Training an ML model on 1TB of data, processing tonight's logs, running backups
+
+### Real examples of Batch Workloads
+
+1. **Machine Learning Training** - Needs: 8 GPUs, 256GB RAM for 4 hours
+- Then: Stops completely
+2. **Data Pipeline** - Needs: 64 CPUs, 512GB RAM to process logs
+- Then: Stops, waits for tomorrow
+3. **Big Data Job (Spark, Hadoop)** - Needs: 100 CPUs, 500GB RAM in one shot
+ - Then: Finishes
+
+### Why Jobs Need to Run Simultaneously (The Gang Scheduling Story)
+
+Imagine you're running a distributed machine learning job. Think of it like a team project where 4 people need to work together:
+```text
+Job = 4 workers (4 separate pods)
+Team Member 1: "I'm ready!"
+Team Member 2: "I'm ready!"
+Team Member 3: "I'm ready!"
+Team Member 4: "Still waiting for a computer..."
+```
+
+**What happens?**
+
+```text
+Members 1-3 sit around wasting time.
+The job doesn't progress.
+Resources are used but no work gets done.
+This is the gang scheduling problem.
+```
+
+### Why ALL Pods Must Start Together
+
+Distributed jobs have dependencies between their pods:
+
+```text
+Pod 1 needs to talk to Pod 2
+Pod 2 needs to receive from Pod 3
+Pod 3 needs data from Pod 4
+
+If Pod 4 is stuck in "Pending..."
+→ Pod 3 can't send data
+→ Pod 2 can't receive from Pod 3
+→ Pod 1 is blocked
+→ All 4 pods run but do NOTHING
+```
+
+**Without gang scheduling:**
+
+```text
+Scheduler tries to place 4 pods
+Puts Pod 1 ✅
+Puts Pod 2 ✅
+Puts Pod 3 ✅
+Can't fit Pod 4 ❌
+```
+
+```text
+Result: 3 pods running, 1 waiting
+Status: 3 pods doing nothing (waiting for Pod 4)
+Wasted resources: 75% of the job's allocation is wasted
+```
+
+**With gang scheduling (Kueue):**
+
+Job says: "I need 4 pods or nothing", and Kueue checks whether it can fit all 4:
+
+```text
+Yes? Admit all 4, they start together ✅✅✅✅
+No?  Queue all 4, none start yet ⏳⏳⏳⏳
+```
+
+- **Result**: either 100% of the job runs, or 0%
+- **Wasted resources**: none, because there are no idle pods
+
+This is **Gang Scheduling**, and it's why distributed jobs absolutely need it.
+
+## Why Batch Jobs Are Hard on Kubernetes, understanding Deadlock Scenario
+
+```text
+Kubernetes scheduler doesn't understand gang scheduling:
+It doesn't know: "These 8 pods are a team that needs resources together"
+It treats each pod independently
+So it partially schedules the job
+Partially scheduled distributed job = **DEADLOCK**
+```
+
+This is where Kueue comes in.
+
+## Meet Kueue: Your Cluster's Traffic Controller
+Kueue is a job queuing and quota management system for Kubernetes Batch Workloads.
+It's a smart traffic controller that:
+
+1. Collects all jobs in organized queues
+2. Checks available resources before admitting anything
+3. Allocates fairly based on priority and quotas
+4. Admits jobs atomically (all or nothing for distributed jobs)
+
+### With Kueue :
+
+```text
+User Job → KUEUE (Smart Gatekeeper) → Kubernetes Scheduler → Pods created → No deadlock
+```
+Kueue's Core principle is to only admit a job to the cluster when we're 100% sure we have enough resources for ALL its pods.
+
+## Why You Actually Need Kueue
+
+1. Fairness: Teams don't starve each other
+2. Gang Scheduling: Distributed jobs run all together or queue together
+3. Priorities: Critical jobs can be prioritized over experimental ones
+4. Visibility: You see exactly why a job is queued and when it'll run
+5. Resource Quotas: Each team gets a guaranteed slice of the cluster
+
+### Understanding Objects in Kueue
+
+1. **Workload**
+What it is: A wrapper around your Kubernetes Job that Kueue understands.
+
+Plain English: When you submit a Job to Kueue, Kueue wraps it in a 'Workload' object that tracks its status in the queue.
+
+2. **LocalQueue**
+What it is: A queue for jobs in a specific namespace.
+
+Plain English: Think of it as a 'job submission desk' in your namespace. When your team submits a job, it goes into this queue first.
+
+3. **ClusterQueue**
+What it is: A higher level queue that holds the actual resource budget.
+
+Plain English: This is where the real resource management happens. It's the 'headquarters' that decides "OK, we have 100 CPUs available. Which job gets them? Jobs from all namespaces compete here based on priority and fairness."
+
+4. **ResourceFlavor**
+What it is: A label for a type of resource in your cluster.
+
+Plain English: It's like saying "we have two types of computers: expensive GPUs and cheap CPUs. Let me label them differently."
+
+5. **ResourceQuota**
+What it is: How much of a resource a ClusterQueue can use.
+
+Plain English: "This queue can use up to 100 CPUs, 500GB RAM, and 16 GPUs. Not more."
+
+6. **Admission**
+What it is: When Kueue says "yes, your job can now run."
+
+Plain English: The job has been waiting in the queue. Kueue checked the available resources and decided "OK, go ahead and run."
+
+### How these objects Work Together
+
+```text
+Job → Workload → LocalQueue → ClusterQueue → Resources Available? → ADMITTED → Scheduler → Pods → Running → Complete → Resources Released → Next Job
+```
+
+
+![Flowchart for Scheduling with Kueue on Kubernetes](/img/blog/inside-kueue-how-kubernetes-decides-what-runs-next/kueue-job-sched.webp)
+
+## Installation of Kueue
+
+Kueue is just a Kubernetes controller.
+
+**Step 1**: Install Kueue from Official Manifests
+
+```bash
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.19.4/manifests.yaml
+```
+
+That's it. Kueue controller is now running.
+
+**Step 2**: Verify Installation
+
+```bash
+kubectl get pods -n kueue-system
+```
+
+You should see:
+
+```text
+NAME                                        READY   STATUS    RESTARTS   AGE
+kueue-controller-manager-69866f4b8d-4vf5x   1/1     Running   0          65s
+```
+
+**Step 3**: Verify Custom Resources are Installed
+
+```bash
+kubectl get crds | grep kueue
+```
+
+You should see:
+
+```text
+admissionchecks.kueue.x-k8s.io               2026-08-25T12:08:48Z
+clusterqueues.kueue.x-k8s.io                 2026-08-25T12:08:48Z
+cohorts.kueue.x-k8s.io                       2026-08-25T12:08:48Z
+localqueues.kueue.x-k8s.io                   2026-08-25T12:08:48Z
+multikueueclusters.kueue.x-k8s.io            2026-08-25T12:08:48Z
+multikueueconfigs.kueue.x-k8s.io             2026-08-25T12:08:48Z
+provisioningrequestconfigs.kueue.x-k8s.io    2026-08-25T12:08:48Z
+resourceflavors.kueue.x-k8s.io               2026-08-25T12:08:49Z
+topologies.kueue.x-k8s.io                    2026-08-25T12:08:49Z
+workloadpriorityclasses.kueue.x-k8s.io       2026-08-25T12:08:49Z
+workloads.kueue.x-k8s.io                     2026-08-25T12:08:49Z
+```
+
+Done! Kueue is ready.
+
+## Demo: How Scheduling actually works in Kueue
+
+Let's see Kueue in action with a simple scenario.
+
+### Setup: Create the Namespace
+
+```bash
+kubectl create namespace kueue-demo
+```
+
+**Step 1**: Create a ResourceFlavor
+
+This tells Kueue about the resources available in your cluster:
+
+```yaml
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ResourceFlavor
+metadata:
+  name: default
+spec: {}
+```
+
+Save as `resource-flavor.yaml` and apply:
+
+```bash
+kubectl apply -f resource-flavor.yaml
+```
+
+**Step 2**: Create a ClusterQueue
+
+This is where we set resource limits:
+
+```yaml
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ClusterQueue
+metadata:
+  name: demo-queue
+spec:
+  namespaceSelector: {}
+  resourceGroups:
+    - coveredResources:
+        - cpu
+        - memory
+      flavors:
+        - name: default
+          resources:
+            - name: cpu
+              nominalQuota: "10"        # Only 10 CPUs available
+            - name: memory
+              nominalQuota: "20Gi"      # Only 20GB RAM available
+```
+
+Save as `cluster-queue.yaml` and apply:
+
+```bash
+kubectl apply -f cluster-queue.yaml
+```
+
+**Step 3**: Create a LocalQueue
+
+This connects the namespace to the ClusterQueue:
+
+```yaml
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: LocalQueue
+metadata:
+  name: default
+  namespace: kueue-demo
+spec:
+  clusterQueue: demo-queue
+```
+Save as `local-queue.yaml` and apply:
+
+```bash
+kubectl apply -f local-queue.yaml
+```
+
+**Step 4**: Create Job A (The Resource Hog)
+
+This job will use 8 out of 10 CPUs:
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-a-big
+  namespace: kueue-demo
+  labels:
+    kueue.x-k8s.io/queue-name: default
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: container
+        image: ubuntu:22.04
+        command: ["sleep", "300"]
+        resources:
+          requests:
+            cpu: "8"
+            memory: "12Gi"
+          limits:
+            cpu: "8"
+            memory: "12Gi"
+```
+
+Save as `job-a.yaml` and apply:
+
+```bash
+kubectl apply -f job-a.yaml
+```
+
+**Step 5**: Watch What Happens
+
+```bash
+kubectl get workloads -n kueue-demo
+```
+
+You should see:
+
+```text
+NAME                  QUEUE     RESERVED IN   ADMITTED   FINISHED   AGE
+job-job-a-big-cb1a1   default   demo-queue    True                  18s
+```
+
+also check local queue, if the job is admitted or not
+
+```bash
+kubectl get localqueue -n kueue-demo
+```
+
+should show
+
+```text
+NAME      CLUSTERQUEUE   PENDING WORKLOADS   ADMITTED WORKLOADS
+default   demo-queue     0                   1
+```
+
+Job A is ADMITTED because 8 CPUs fit within the 10 CPUs available.
+
+**Step 6**: Create Job B (The Starved Job)
+
+Now create another job that also needs resources:
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-b-small
+  namespace: kueue-demo
+  labels:
+    kueue.x-k8s.io/queue-name: default
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: container
+        image: ubuntu:22.04
+        command: ["sleep", "300"]
+        resources:
+          requests:
+            cpu: "5"
+            memory: "8Gi"
+          limits:
+            cpu: "5"
+            memory: "8Gi"
+```
+
+Save as `job-b.yaml` and apply:
+
+```bash
+kubectl apply -f job-b.yaml -n kueue-demo
+```
+
+**Step 7**: Watch the Queue
+
+```bash
+kubectl get workloads -n kueue-demo
+```
+
+Now you see:
+
+```text
+NAME                    QUEUE     RESERVED IN   ADMITTED   FINISHED   AGE
+job-job-a-big-cb1a1     default   demo-queue    True                  4m40s
+job-job-b-small-c8c54   default                                       47s
+```
+
+- Job A: ADMITTED (using 8 of 10 CPUs)
+- Job B: NOT ADMITTED (only 2 CPUs available, but it needs 5)
+
+Job B is stuck in the queue, waiting for resources.
+
+**Step 8**: See Why Job B Is Waiting
+
+```bash
+kubectl describe workload job-job-b-small-c8c54 -n kueue-demo
+```
+
+Output:
+```text
+Status:
+  Conditions:
+    Last Transition Time:  2026-08-25T12:30:48Z
+    Message:               couldn't assign flavors to pod set main: insufficient unused quota for cpu in flavor default, 3 more needed
+    Observed Generation:   1
+    Reason:                Pending
+    Status:                False
+    Type:                  QuotaReserved
+    Last Transition Time:  2026-08-25T12:30:48Z
+    Message:               Not all pods are ready or succeeded
+    Observed Generation:   1
+    Reason:                WaitForStart
+    Status:                False
+    Type:                  PodsReady
+  Resource Requests:
+    Name:  main
+    Resources:
+      Cpu:     5
+      Memory:  8Gi
+Events:
+  Type     Reason   Age    From             Message
+  ----     ------   ----   ----             -------
+  Warning  Pending  2m10s  kueue-admission  couldn't assign flavors to pod set main: insufficient unused quota for cpu in flavor default, 3 more needed
+```
+
+**Step 9**: Free Up Resources (Delete Job A)
+
+```bash
+kubectl delete job job-a-big -n kueue-demo
+```
+
+Now immediately check the workloads:
+
+```bash
+kubectl get workloads -n kueue-demo
+```
+
+output
+
+```text
+NAME                    QUEUE     RESERVED IN   ADMITTED   FINISHED   AGE
+job-job-b-small-c8c54   default   demo-queue    True                  5m20s
+```
+
+Magic! Job B is now **ADMITTED**. Kueue automatically moved it up the queue and gave it the freed resources.
+
+What Just Happened:
+
+```text
+Job A grabbed the big resources
+Job B arrived but couldn't fit
+Job A deleted, releasing resources
+Kueue saw the freed resources
+Kueue admitted Job B
+Job B ran
+```
+
+This is fair resource management. This is what **Kueue** does.
+
+**NOTE:** We label every Job explicitly. Kueue will also adopt an unlabeled Job when the namespace has a LocalQueue named `default` (LocalQueue defaulting), which is why a queue named anything else needs the label.
+
+## The Real Deadlock Demo (Gang Scheduling)
+
+**The Real Problem (Without Kueue)**
+
+```text
+ResourceQuota allows: 1500m CPU total
+
+Job A arrives:
+- Requests: 800m CPU
+- Gets admitted, uses 800m
+- Remaining: 700m CPU available
+
+Job B arrives (GANG JOB - needs 2 pods):
+- Each pod requests 400m CPU (800m total)
+- Pod 1 is created, bringing the total request to 1200m
+- Pod 2 would bring the total to 1600m, which exceeds the 1500m quota
+- The ResourceQuota rejects Pod 2, so it is never created
+
+Result:
+- Job B has only one of its two pods
+- Job B cannot make progress because its gang is incomplete
+- Job A is holding 800m CPU
+- The remaining 300m cannot satisfy another 400m pod
+- Nothing can progress until Job A releases resources = DEADLOCK
+```
+
+**Why is this Deadlock:**
+
+```text
+Job B CANNOT WORK with only one of its two 400m pods. It needs both pods.
+- If it's a distributed ML job with 2 workers
+- Worker 1 needs to sync with Worker 2
+- Worker 1 starts with 400m CPU
+- Worker 2 is never created because 1200m + 400m exceeds the 1500m quota
+- Worker 1 sits idle waiting for Worker 2 = DEADLOCK
+
+Meanwhile:
+- Job A holds 800m CPU for 600 seconds
+- Job B uses 400m CPU for 600 seconds
+- Only 300m CPU is available, which is insufficient for another 400m pod
+- System is stuck
+```
+
+### Let's create a Deadlock scenario first:
+
+**The Setup**
+
+We have a cluster with limited resources. To simulate this, we'll use a ResourceQuota that caps our namespace at 1500m CPU (1.5 cores) and 2Gi memory.
+
+**Step 1: Let's clean up the Kueue demo so we start with a fresh cluster.**
+
+```bash
+kubectl delete ns kueue-demo
+kubectl delete clusterqueue demo-queue
+```
+
+**Step 2: Let's first create a Namespace**
+
+```bash
+kubectl create namespace deadlock-demo
+```
+
+**Step 3: Let's create a ResourceQuota**
+
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: cpu-limit
+  namespace: deadlock-demo
+spec:
+  hard:
+    requests.cpu: "1500m"
+    requests.memory: "2Gi"
+    limits.cpu: "1500m"
+    limits.memory: "2Gi"
+```
+Apply it:
+
+```bash
+kubectl apply -f resource-quota.yaml
+```
+
+**The Players**
+
+We'll run two jobs:
+
+```text
+Job A: A long running job that takes 800m CPU (runs for 10 minutes)
+Job B: A gang job needing 800m CPU total (2 pods × 400m each)
+```
+
+**Step 4: Create and Apply Job A (Takes 800m CPU)**
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-a-takes-800m
+  namespace: deadlock-demo
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: cpu-hog
+        image: busybox:latest
+        command: ["sleep", "600"]
+        resources:
+          requests:
+            cpu: "800m"
+            memory: "1Gi"
+          limits:
+            cpu: "800m"
+            memory: "1Gi"
+```
+Apply it:
+
+```bash
+kubectl apply -f job-a.yaml
+```
+
+Also check if it is working properly by using this command:
+
+```bash
+kubectl get pods -n deadlock-demo
+```
+
+it should show something like this
+
+```text
+(base) ekamwalia % kubectl get pods -n deadlock-demo
+
+NAME                     READY   STATUS    RESTARTS   AGE
+job-a-takes-800m-8jchw   1/1     Running   0          1m24s
+```
+
+✅ Job A is happily running, consuming 800m CPU. We have 700m CPU left.
+
+**Step 5: Create Job B (Gang Job - 2 Pods × 400m Each = 800m Total)**
+
+Now comes the interesting part. Job B is a gang job it needs both pods running together to do any work. Think of it as a distributed computation where workers need to communicate:
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-b-gang
+  namespace: deadlock-demo
+spec:
+  completions: 2
+  parallelism: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: gang-worker
+        image: busybox:latest
+        command: ["sh", "-c", "echo 'Pod started. Waiting for partner pod...'; sleep 600"]
+        resources:
+          requests:
+            cpu: "400m"
+            memory: "512Mi"
+          limits:
+            cpu: "400m"
+            memory: "512Mi"
+```
+Apply it:
+
+```bash
+kubectl apply -f job-b.yaml
+```
+
+The Deadlock Appears, lets investigate it:
+
+First, lets check pods
+
+```bash
+kubectl get pods -n deadlock-demo
+```
+
+you should see something like
+
+```text
+(base) ekamwalia % kubectl get pods -n deadlock-demo
+
+NAME                     READY   STATUS    RESTARTS   AGE
+job-a-takes-800m-8jchw   1/1     Running   0          4m36s
+job-b-gang-mzb7c         1/1     Running   0          3m33s
+```
+
+⚠️ Wait only ONE pod of Job B is running! The second pod is missing.
+
+Second, lets describe upon Job B
+```text
+(base) ekamwalia % kubectl describe job job-b-gang -n deadlock-demo
+
+Name:             job-b-gang
+Namespace:        deadlock-demo
+Selector:         batch.kubernetes.io/controller-uid=240f3121-8b06-4b59-ac21-81667cc03f7e
+Labels:           batch.kubernetes.io/controller-uid=240f3121-8b06-4b59-ac21-81667cc03f7e
+                  batch.kubernetes.io/job-name=job-b-gang
+                  controller-uid=240f3121-8b06-4b59-ac21-81667cc03f7e
+                  job-name=job-b-gang
+Annotations:      <none>
+Parallelism:      2
+Completions:      2
+Completion Mode:  NonIndexed
+Suspend:          false
+Backoff Limit:    6
+Start Time:       Thu, 03 Sep 2026 21:20:19 +0530
+Pods Statuses:    1 Active (1 Ready) / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  batch.kubernetes.io/controller-uid=240f3121-8b06-4b59-ac21-81667cc03f7e
+           batch.kubernetes.io/job-name=job-b-gang
+           controller-uid=240f3121-8b06-4b59-ac21-81667cc03f7e
+           job-name=job-b-gang
+  Containers:
+   gang-worker:
+    Image:      busybox:latest
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sh
+      -c
+      echo 'Pod started. Waiting for partner pod...'; sleep 600
+    Limits:
+      cpu:     400m
+      memory:  512Mi
+    Requests:
+      cpu:         400m
+      memory:      512Mi
+    Environment:   <none>
+    Mounts:        <none>
+  Volumes:         <none>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Events:
+  Type     Reason            Age    From            Message
+  ----     ------            ----   ----            -------
+  Normal   SuccessfulCreate  3m39s  job-controller  Created pod: job-b-gang-mzb7c
+  Warning  FailedCreate      3m39s  job-controller  Error creating: pods "job-b-gang-kbnll" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+  Warning  FailedCreate      3m38s  job-controller  Error creating: pods "job-b-gang-lvbbv" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+  Warning  FailedCreate      3m36s  job-controller  Error creating: pods "job-b-gang-bx9k2" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+  Warning  FailedCreate      3m35s  job-controller  Error creating: pods "job-b-gang-ccwgt" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+  Warning  FailedCreate      3m27s  job-controller  Error creating: pods "job-b-gang-k5cnf" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+  Warning  FailedCreate      3m11s  job-controller  Error creating: pods "job-b-gang-nxrdm" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+  Warning  FailedCreate      2m39s  job-controller  Error creating: pods "job-b-gang-hg6vq" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+  Warning  FailedCreate      99s    job-controller  Error creating: pods "job-b-gang-x72gx" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+  Warning  FailedCreate      39s    job-controller  Error creating: pods "job-b-gang-z5xbd" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+```
+
+🔴 This is the deadlock! The Job controller is desperately trying to create Pod 2, but it CANNOT, as we can see an error in our terminal
+```text
+Warning  FailedCreate      39s    job-controller  Error creating: pods "job-b-gang-z5xbd" is forbidden: exceeded quota: cpu-limit, requested: limits.cpu=400m,requests.cpu=400m, used: limits.cpu=1200m,requests.cpu=1200m, limited: limits.cpu=1500m,requests.cpu=1500m
+```
+
+which means
+```text
+Job B Pod 1 has: 400m CPU
+Total used: 1200m CPU
+Pod 2 needs: 400m more (would be 1600m, but limit is 1500m)
+```
+
+Pod 1 is running but completely useless! It's just sitting there, holding 400m CPU hostage while waiting for its partner that will never come.
+
+
+### Now let's use Kueue to solve this problem
+
+Before starting the Kueue version, clean up the previous demo and release its resources:
+
+```bash
+kubectl delete ns deadlock-demo
+```
+
+**Step 1: Create a separate Namespace named kueue-demo**
+
+```bash
+kubectl create ns kueue-demo
+```
+
+**Step 2: Create Resource Flavor and Apply it**
+
+```yaml
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ResourceFlavor
+metadata:
+  name: default-flavor
+```
+
+```bash
+kubectl apply -f resourceflavor.yaml
+```
+
+**Step 3: Create ClusterQueue (Same 1500m CPU limit)**
+
+```yaml
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ClusterQueue
+metadata:
+  name: smart-queue
+spec:
+  namespaceSelector: {}
+  resourceGroups:
+    - coveredResources:
+        - cpu
+        - memory
+      flavors:
+        - name: default-flavor
+          resources:
+            - name: cpu
+              nominalQuota: "1500m"
+            - name: memory
+              nominalQuota: "2Gi"
+```
+```bash
+kubectl apply -f cluster-queue.yaml
+```
+
+**Step 4: Create LocalQueue**
+
+```yaml
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: LocalQueue
+metadata:
+  name: default
+  namespace: kueue-demo
+spec:
+  clusterQueue: smart-queue
+```
+
+```bash
+kubectl apply -f localqueue.yaml
+```
+
+**Step 5: Apply Job A (Same as before - Takes 800m CPU)**
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-a-takes-800m
+  namespace: kueue-demo
+  labels:
+    kueue.x-k8s.io/queue-name: default
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: cpu-hog
+        image: busybox:latest
+        command: ["sleep", "600"]
+        resources:
+          requests:
+            cpu: "800m"
+            memory: "1Gi"
+          limits:
+            cpu: "800m"
+            memory: "1Gi"
+```
+Apply it:
+
+```bash
+kubectl apply -f job-a.yaml
+```
+
+Also investigate Job A by:
+
+```bash
+kubectl get pods -n kueue-demo
+kubectl get workloads -n kueue-demo
+```
+It should show something like
+
+```text
+(base) ekamwalia % kubectl get pods -n kueue-demo
+kubectl get workloads -n kueue-demo
+NAME                     READY   STATUS    RESTARTS   AGE
+job-a-takes-800m-jphv6   1/1     Running   0          10s
+NAME                         QUEUE     RESERVED IN   ADMITTED   FINISHED   AGE
+job-job-a-takes-800m-c8bc8   default   smart-queue   True                  10s
+
+```
+
+✅ Job A is admitted and running, just like before.
+
+**Step 6: Apply Job B WITH Gang Scheduling**
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-b-gang
+  namespace: kueue-demo
+  labels:
+    kueue.x-k8s.io/queue-name: default
+spec:
+  completions: 2
+  parallelism: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: gang-worker
+        image: busybox:latest
+        command: ["sh", "-c", "echo 'Pod started. Waiting for partner pod...'; sleep 600"]
+        resources:
+          requests:
+            cpu: "400m"
+            memory: "512Mi"
+          limits:
+            cpu: "400m"
+            memory: "512Mi"
+```
+
+Apply it:
+```bash
+kubectl apply -f job-b.yaml
+```
+
+**Kueue** Prevents the Deadlock
+
+Now if we check the status of the workloads by
+
+```bash
+kubectl get workloads -n kueue-demo
+```
+
+we should see something like
+
+```text
+(base) ekamwalia % kubectl get workloads -n kueue-demo
+NAME                         QUEUE     RESERVED IN   ADMITTED   FINISHED   AGE
+job-job-a-takes-800m-c8bc8   default   smart-queue   True                  2m31s
+job-job-b-gang-c597e         default                                       76s
+```
+
+Notice the empty "ADMITTED" column for Job B! Kueue has NOT admitted it because it knows there aren't enough resources for the ENTIRE job.
+
+Also if we use describe command on Job B by
+
+```bash
+kubectl describe job job-b-gang -n kueue-demo
+```
+
+We should see something like this
+
+```text
+(base) ekamwalia % kubectl describe job job-b-gang -n kueue-demo
+Name:             job-b-gang
+Namespace:        kueue-demo
+Selector:         batch.kubernetes.io/controller-uid=ad359556-8a8f-4e45-9ac5-d67ded14fd35
+Labels:           kueue.x-k8s.io/queue-name=default
+Annotations:      <none>
+Parallelism:      2
+Completions:      2
+Completion Mode:  NonIndexed
+Suspend:          true
+Backoff Limit:    6
+Pods Statuses:    0 Active (0 Ready) / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  batch.kubernetes.io/controller-uid=ad359556-8a8f-4e45-9ac5-d67ded14fd35
+           batch.kubernetes.io/job-name=job-b-gang
+           controller-uid=ad359556-8a8f-4e45-9ac5-d67ded14fd35
+           job-name=job-b-gang
+  Containers:
+   gang-worker:
+    Image:      busybox:latest
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sh
+      -c
+      echo 'Pod started. Waiting for partner pod...'; sleep 600
+    Limits:
+      cpu:     400m
+      memory:  512Mi
+    Requests:
+      cpu:         400m
+      memory:      512Mi
+    Environment:   <none>
+    Mounts:        <none>
+  Volumes:         <none>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Events:
+  Type    Reason           Age    From                        Message
+  ----    ------           ----   ----                        -------
+  Normal  CreatedWorkload  2m48s  batch/job-kueue-controller  Created Workload: kueue-demo/job-job-b-gang-c597e
+  Normal  Suspended        2m48s  job-controller              Job suspended
+```
+
+THIS is the difference! Kueue automatically:
+
+```text
+Intercepted the Job creation
+Calculated total resource needs (2 × 400m = 800m)
+Checked available resources (only 700m free)
+Suspended the ENTIRE job no partial admission!
+```
+
+Note the `Suspend: true` line: Kueue set that itself when it held the job back.
+
+Now delete Job A to release its resources:
+
+```bash
+kubectl delete job job-a-takes-800m -n kueue-demo
+```
+
+Kueue immediately admits the waiting gang job. Check the workloads:
+
+```bash
+kubectl get workloads -n kueue-demo
+```
+
+```text
+NAME                         QUEUE     RESERVED IN   ADMITTED   FINISHED   AGE
+job-job-b-gang-c597e         default   smart-queue   True                  3m12s
+```
+
+Both pods can now be created together:
+
+```bash
+kubectl get pods -n kueue-demo
+```
+
+```text
+NAME                          READY   STATUS    RESTARTS   AGE
+job-b-gang-c597e-7xk4m        1/1     Running   0          34s
+job-b-gang-c597e-z8r9p        1/1     Running   0          34s
+```
+
+And that's the key point: Job is now properly scheduled and working. Kueue admitted the whole gang only after the queue had capacity, and the job ran as a coordinated unit instead of fighting the scheduler.
+
+## Wrapping up
+
+Kubernetes is great at running microservices, but batch jobs are a different beast. They're resource hungry, they need coordination, and they don't play nice with others.
+Kueue fixes this.
+In our demo, we saw the exact same job behave two completely different ways:
+- Without Kueue: one pod running uselessly, its partner never created at all, 400m CPU held hostage, and a deadlock that lasts until Job A exits 10 minutes later.
+- With Kueue: the entire job held back gracefully. Zero resources wasted. When Job A was deleted, both pods started together.
+
+The magic? One label:
+
+```yaml
+kueue.x-k8s.io/queue-name: default
+```
+
+That's it. No complex configs, no custom schedulers, just intelligent resource management that actually works.
+The next time someone deploys a batch job that tries to eat your cluster, Kueue will be there to say: "Wait your turn."
+
+### Resources
+
+- [Official Kueue Docs](https://kueue.sigs.k8s.io/)
+- [GitHub](https://github.com/kubernetes-sigs/kueue)
+- Install: `kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/v0.19.4/manifests.yaml`
+
+---
+
+# Kubernetes observability in 2026 with OpenObserve 1.0 as the backend
+
+- Canonical: https://blog.kubesimplify.com/kubernetes-observability-in-2026-with-openobserve
+- Published: 2026-09-15
+- Summary: A 31 ms full-text search over 4.2 million Kubernetes log rows, and a whole cluster on 43m CPU under 600 MiB: a hands-on run of OpenObserve 1.0 as the backend.
+
+**TL;DR:** A full-text search over 4.2 million Kubernetes log rows came back in 31 ms after touching 27 MB of the 4,159 MB in range, and the whole three node cluster's telemetry ran through one [OpenObserve](https://openobserve.ai) 1.0 pod at 43m CPU and under 600 MiB. Collecting telemetry from Kubernetes is solved, paying to store and search it is not, and this post is about why the backend is where the cost lives, what a backend built on object storage and columnar files does differently, and what that looks like on a real cluster. I ran it on a kiac cluster on my Mac, read the parts of the source that matter, and hit one real bug on the way.
+
+Every Kubernetes cluster you run is quietly producing four kinds of evidence about itself: container logs on every node, metrics from the kubelet and kube-state-metrics, traces if your apps are instrumented, and Kubernetes events, which most clusters throw away after an hour. When a pod restarts at 3 am you usually do have the data somewhere, the real question is where it went and whether you can afford to keep it there.
+
+That second question is what we are after, so let's look at the problem, what people run today, one backend built differently, and then run it. Where a number comes from the vendor, I say so.
+
+## Why the backend is where the money goes
+
+![What a Kubernetes cluster emits, and where it goes](/img/blog/kubernetes-observability-in-2026-with-openobserve/01-k8s-signals-two-paths.png)
+
+The collection side is done. In 2026 you run the OpenTelemetry Collector as a DaemonSet on every node, it reads container stdout, scrapes the kubelet, watches the API server for events and receives OTLP from your apps. The Grafana Labs Observability Survey 2026 (1,363 respondents) shows how settled that is, and where the pain moved:
+
+| What the survey found | Share |
+|---|---|
+| Use OpenTelemetry for metrics / traces / logs | 57% / 50% / 48% |
+| Name complexity and overhead as the biggest observability concern | 38% |
+| Name cost as a top-three concern | 31% |
+| Say cost is a priority when picking new tools | 65% |
+
+So why is the backend the expensive part? Because of how the two classic designs store data.
+
+![Where the money goes: index-heavy vs columnar on object storage](/img/blog/kubernetes-observability-in-2026-with-openobserve/02-index-heavy-vs-columnar.png)
+
+**Index-heavy stores** like Elasticsearch build an inverted index over every field at ingest and keep hot data on replicated SSD. You pay three times: CPU to build the index, disk for index plus data plus replicas, and RAM to keep the index hot. Every new high-cardinality field makes it worse.
+
+**Label-based stores** like Loki went the other way. They index a handful of labels and scan the rest. That is cheap until you need to query by something with many values. A pod name, a request id, a trace id: the moment you want those as query dimensions you are told to keep cardinality down, and the thing you most want to search by becomes the thing you cannot index.
+
+**SaaS per-GB pricing** adds a third pressure. Every debug log line is a line item, so teams sample and drop, which defeats the point of collecting. And the data is getting wider: LLM traces carry tokens, prompts and cost, GPU nodes emit per-process metrics, agents make dozens of model calls per user action.
+
+## What we run today, and what we should ask for
+
+The default backend most of us know is the LGTM stack: Loki, Prometheus or Mimir, Tempo, Grafana. It works, and it is what I learned on. It is also four systems with four data models and four retention configurations, and correlation mostly happens by copying a trace id from one screen into another. Elastic gives you full-text search on every field and the hardware bill that comes with it. Datadog gives you everything and charges per host, per custom metric and per indexed log.
+
+The data warehousing world solved a similar problem a few years ago. Think of your phone: you do not keep every photo you ever took on the fast internal storage, you keep them in cheap cloud storage and pull down the ones you need. Object storage is cheap and built for eleven nines of durability, columnar file formats compress well, and modern query engines scan them fast. Iceberg, DuckDB and the cloud warehouses are all built on this. An observability backend built the same way shrinks the expensive tier to only what you search, and puts everything else in a bucket.
+
+That gives us a bar to hold any backend to:
+
+![The bar: eight things a Kubernetes observability backend should do](/img/blog/kubernetes-observability-in-2026-with-openobserve/03-eight-point-bar.png)
+
+1. OpenTelemetry-native ingest, plus compatibility endpoints so existing agents keep working.
+2. One process on a laptop, roles on a cluster, same binary.
+3. Object storage as the durable tier, in an open file format, so the data outlives the tool.
+4. High cardinality as a feature: index where you search, columnar scan everywhere else.
+5. SQL for logs and traces, PromQL for metrics.
+6. Correlation built in: trace to logs in one click, alerts that understand SLOs.
+7. Understands LLM traces coming in, and exposes itself to agents over MCP going out.
+8. A clear open-source core.
+
+## How OpenObserve is built
+
+OpenObserve is a single Rust binary, licensed AGPL-3.0, and [Kubernetes observability](https://openobserve.ai/kubernetes-monitoring/) is the job it is most often put to. It ingests logs, metrics and traces (LLM traces included) over OTLP, RUM from its browser SDK, and keeps compatibility endpoints for Elasticsearch bulk, Loki push, Prometheus remote write and Splunk HEC. It stores everything as Parquet or Vortex files in S3, GCS, Azure Blob, MinIO or a local disk, indexes only the fields you search, and answers SQL through Apache DataFusion and PromQL with its own evaluator over the same files. Its first 1.0 release candidate landed on 28 August 2026 and 1.0.0 went GA on 11 September. The walkthrough below was run on rc1, before GA, so I went back afterwards and re-checked the two parts most likely to have moved at GA: the MCP step and a bug I hit in the SLO step. The README claims a 2 PB per day deployment and "140x lower storage cost than Elasticsearch", and the closest thing to public evidence is the vendor's own [one billion log records benchmark against ClickHouse](https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/). These are vendor claims, so let's look at what is underneath.
+
+Before we go inside, let's put it against the bar we set above. Read the table as OpenObserve vs Loki, OpenObserve vs Elasticsearch and OpenObserve vs the full LGTM stack in one place, because those are the backends it replaces in practice:
+
+| | Most stacks today | OpenObserve |
+|---|---|---|
+| Signals | Loki, Prometheus or Mimir, Tempo, one system each | Logs, metrics, traces, RUM and LLM traces in one binary, one data model, retention set per stream in one place |
+| Durable tier | Each system's own storage, its own format | Object storage holds open Parquet or Vortex files, so the data outlives the tool |
+| Index | Elastic indexes every field, Loki indexes only labels | A full-text index only on the fields you search, kept as a small sidecar next to each data file, columnar scan for the rest |
+| Query | LogQL, PromQL, TraceQL | SQL for logs and traces, PromQL for metrics |
+| Shape | Several deployments to keep healthy | One process on a laptop, the same binary split into ingester, querier, compactor, router and scheduler roles on a cluster |
+
+It is not a drop-in replacement for Prometheus, though. For metrics it takes the seat Thanos or Mimir take, long-term storage behind Prometheus with remote write in and PromQL out, and its PromQL engine has gaps that I list in the sharp edges section. Compare it with the whole LGTM stack, Elastic, or Datadog.
+
+### A log line goes in
+
+OpenObserve appends every incoming batch to a write-ahead log and an in-memory Arrow table, turns the frozen tables into Parquet or Vortex files, uploads each file to object storage with a `.ttv` full-text index beside it, and only then records the file in its `file_list` catalog.
+
+![Write path](/img/blog/kubernetes-observability-in-2026-with-openobserve/write-path.gif)
+
+A batch lands over HTTP, its JSON is flattened (`k8s.namespace.name` becomes `k8s_namespace_name`, which is why every screenshot has those long field names) and its schema is checked against the stream. It is appended to a write-ahead log and an in-memory Arrow table at the same time. Every 2 seconds the frozen tables become Parquet, the upload job merges the dumps of the same stream, hour and schema into one file per round, writes it to the bucket under `files/{org}/{type}/{stream}/YYYY/MM/DD/HH/`, builds a full-text index for that file as a `.ttv` object, and only then records the file in the `file_list` catalog. If the catalog database is unreachable, nothing is uploaded, and I like that a lot: a database outage cannot litter the bucket. A failure between the upload and the catalog write can still leave an object behind, so the gate closes the common case rather than every case.
+
+Two things you should know: the WAL is flushed but not fsynced per batch by default (`ZO_WAL_FSYNC_DISABLED=true`), a fair trade for a system whose durable tier is the bucket, and the defaults in the code differ from the docs in several places (the WAL rotates at 512 MB, the docs say 64), so go by the binary you run and not the docs page.
+
+### The index is a file next to the data
+
+OpenObserve stores its full-text index as a separate `.ttv` file next to each Parquet or Vortex data file, a single tantivy segment inside an Apache Iceberg Puffin container.
+
+![Anatomy of a .ttv index file](/img/blog/kubernetes-observability-in-2026-with-openobserve/06-ttv-anatomy.png)
+
+Puffin is Iceberg's simple container format for index and statistics blobs, and tantivy is the Rust full-text search library. All configured full-text fields (`message`, `body`, `log` and friends) are concatenated into one indexed column, fields like `trace_id` are indexed whole for exact match, and `_timestamp` is a fast field. Because there is exactly one segment per data file, a document id in the index equals a row number in the data file. That one fact is what makes the query side cheap, as we will see next.
+
+### A query comes out
+
+OpenObserve answers a query by asking the `file_list` catalog for the files in the time range, pruning them with partition keys, bloom filters and the `.ttv` index down to a bitmap of matching rows, and handing only those rows to Apache DataFusion to read out of Parquet or Vortex.
+
+![How a query finds your rows](/img/blog/kubernetes-observability-in-2026-with-openobserve/query-funnel.gif)
+
+A query asks the catalog for the files that overlap the time range, splits them across queriers, and then throws away as much as it can before reading anything: files that fail the partition keys, files the bloom filters rule out, and then, using the index, everything but the matching rows. The matched row ids become a row bitmap, and the bitmap becomes a Parquet or Vortex access plan that DataFusion reads. Counts, histograms and top-N over indexed fields never open a data file at all when the file sits fully inside the query window. A background compactor merges each finished hour's small files into files of up to 2 GB and rebuilds the index, and a result cache serves repeated dashboard queries.
+
+### What 1.0 adds
+
+**Vortex as a file format.** `ZO_FILE_FORMAT=parquet,logs=vortex` writes logs as Vortex, a columnar format from SpiralDB that is now a Linux Foundation project, built for random access, which is exactly the shape of a "show me these 100 log lines" query. [OpenObserve's own August 2026 comparison](https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/), one billion log records with everything but the format identical, vendor-run but public:
+
+| Workload | Parquet | Vortex |
+|---|---|---|
+| Row fetch with LIMIT 100 (8 queries) | 1,114 ms | 436 ms |
+| Indexed counts (8 queries) | 215 ms | 232 ms |
+| Storage for 1 billion rows | 673.5 GB | 710.7 GB |
+
+Faster on the query that hurts, a tie on counts, about 5 percent more disk. The vendor's [metrics benchmark against Prometheus and Mimir](https://openobserve.ai/blog/openobserve-vs-prometheus-mimir-metrics-benchmark/) ran the same two formats side by side as well, and there Vortex was about 3x faster on filtered histogram queries with the two formats within a gigabyte of each other on disk. OpenObserve's Vortex support only left the enterprise build in July 2026 and the crate is pinned to a git revision, so I would call it new and promising, and not the default for a reason.
+
+**An [MCP server](https://openobserve.ai/docs/integration/ai/mcp/) that does not flood the context window.** The tool catalog is generated from the OpenAPI spec, a couple of hundred tools, but `tools/list` returns only seven: a `tool_search` over the descriptions, a `tools_call` that returns summarised responses, and five pinned tools. Authentication is your own token, so the model inherits your permissions and nothing more. This is the part of the release I was most keen to try.
+
+Also new, and all open source: [SLOs with burn-rate alerts](https://openobserve.ai/docs/user-guide/analytics/slos/), a time index for traces so a bare trace id no longer scans everything, and LLM traces from the OpenTelemetry GenAI conventions plus Vercel AI SDK, OpenInference, Langfuse and TraceLoop-style attributes, priced at ingest from a built-in price table (custom pricing is enterprise). SSO and fine-grained RBAC, incidents, anomaly detection, the AI assistant and the service graph UI are enterprise.
+
+![Open source vs enterprise in 1.0](/img/blog/kubernetes-observability-in-2026-with-openobserve/08-oss-vs-enterprise.png)
+
+## Running it: a whole cluster into one binary
+
+Let's run it. I used kiac (Kubernetes in Apple Containers), where every node is its own lightweight VM on macOS. It works the same on kind or k3d. You need kubectl, helm, jq and curl on your machine, plus Claude Code if you want the MCP step in your editor. Versions: Kubernetes v1.36.1 via kiac v0.5.1, Helm v4.1.4, and OpenObserve v1.0.0-rc1 for the original runs, though the values file in the repo now pins 1.0.0, which is what you will get. I ran the whole thing twice, on 2 and 4 September, and the step 8 numbers are from the second run, which I left up for 15 hours. Step 6 I then re-ran in full on 15 September against 1.0.0 GA, so every number in it is from the shipped release, and I re-checked the SLO step again on 1.0.1 on 16 September. In step 7 I re-checked only the SLO bug against GA, so that step shows the rc1 run first and the GA re-check after it, each labelled. Everything the demo uses is in one repo:
+
+```bash
+git clone https://github.com/saiyam1814/openobserve-k8s-demo
+cd openobserve-k8s-demo
+```
+
+### 1. Cluster and OpenObserve
+
+```bash
+kiac create cluster --name o2 --workers 2 --memory 4G --cp-memory 4G
+helm repo add openobserve https://charts.openobserve.ai
+helm upgrade -i o2 openobserve/openobserve-standalone -n openobserve --create-namespace \
+  -f manifests/o2-values.yaml
+kubectl -n openobserve get pods,svc
+```
+
+```text
+NAME                              READY   STATUS    RESTARTS   AGE
+pod/o2-openobserve-standalone-0   1/1     Running   0          58s
+
+NAME                                TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)
+service/o2-openobserve-standalone   LoadBalancer   10.100.30.54   192.168.64.10   5080:30148/TCP,5081:32552/TCP
+```
+
+The chart comes from [charts.openobserve.ai](https://charts.openobserve.ai), and the values file pins the image at 1.0.0, asks for a LoadBalancer Service, and sets three things worth knowing:
+
+```yaml
+config:
+  ZO_FILE_FORMAT: "parquet,logs=vortex"        # the 1.0 feature under test
+  ZO_MAX_FILE_RETENTION_TIME: "60"             # demo pacing: rotate every 60s instead of 600s
+  ZO_COMPACT_DELETE_FILES_DELAY_MINUTES: "10"  # demo pacing: drop compacted-away files after 10 min
+```
+
+That EXTERNAL-IP and the chart's default root user are all the later steps need, so let's put them in two variables. Change the password the moment this is more than a demo.
+
+```bash
+export O2=http://192.168.64.10:5080          # your LoadBalancer IP will differ
+export AUTH='root@example.com:Complexpass#123'
+```
+
+Log in at `$O2` with that user. The home page is empty. Let's fix that.
+
+### 2. Collect everything the cluster emits
+
+The official collector chart installs an OpenTelemetry Collector agent as a DaemonSet and a gateway, both managed by the OpenTelemetry Operator, so cert-manager and the operator go first:
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.1/cert-manager.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.158.0/opentelemetry-operator.yaml
+helm upgrade -i o2c openobserve/openobserve-collector -n openobserve-collector --create-namespace \
+  -f manifests/collector-values.yaml
+
+curl -s -u $AUTH "$O2/api/default/streams?type=logs"    | jq -r '.list[].name'
+curl -s -u $AUTH "$O2/api/default/streams?type=metrics" | jq '.list | length'
+```
+
+```text
+default
+k8s_events
+450
+```
+
+Container logs, Kubernetes events and 450 metric streams within a minute, from the kubelet, cAdvisor, kube-state-metrics and the API server. A few hours into the run, long before the fifteen-hour totals in step 8, the streams page summed up the storage story so far (the `slo_slices` and `triggers` streams come from the SLO step further down, and `checkout_archive` is a 40,000 row backfill I used to test compaction, not covered here):
+
+![Streams page: 470 streams, 1.51 GB ingested, 102.56 MB compressed](/img/blog/kubernetes-observability-in-2026-with-openobserve/12-streams-compression.jpg)
+
+| Streams page | Whole cluster |
+|---|---|
+| Ingested | 1.51 GB |
+| Compressed on disk | 102.56 MB (15.1x) |
+| Index | 43.41 MB |
+| Container logs alone | 267.62 MB in, 11.55 MB out (23.2x) |
+| OpenObserve pod, all roles | 43m CPU, 597Mi memory (`kubectl top pod`) |
+
+### 3. An application with traces and logs
+
+Cluster telemetry is half the picture. The other half is your own app, so I wrote a small stand-in: `checkout`, a Go HTTP service that takes an order, reserves inventory, charges a card and fails a configurable share of payments. It is under 200 lines in `app/`, instrumented with the standard OpenTelemetry Go SDK with nothing vendor-specific in the code, and it logs JSON to stdout with the trace id on every line. A load generator sends five checkouts a second.
+
+```bash
+container build -t docker.io/library/checkout:demo app     # docker build works too
+kiac load image docker.io/library/checkout:demo --name o2       # kind load docker-image on kind
+kubectl apply -f manifests/10-shop.yaml
+kubectl -n shop logs deploy/checkout --tail=1
+```
+
+```text
+{"time":"2026-09-04T05:53:06.35924046Z","level":"ERROR","msg":"payment failed","service":"checkout","version":"1.0.0","order_id":"ord-846683","amount":64.99,"gateway":"stripe-sandbox","error":"payment gateway timeout","trace_id":"a309a2bc90a055def047fb770fc2d00e","span_id":"40f0e133e5d9c8cc"}
+```
+
+In the UI, traces arrived immediately, three spans per request. From a trace, "View Logs" opens the logs page filtered on that trace id, and the three log lines of that request are right there, including the failed payment.
+
+![A checkout trace: three spans, two errors](/img/blog/kubernetes-observability-in-2026-with-openobserve/05-trace-detail-3-spans.jpg)
+
+![Trace to logs: the three log lines of one failed checkout](/img/blog/kubernetes-observability-in-2026-with-openobserve/06-trace-to-logs.jpg)
+
+### 4. Parse the log body at ingest
+
+That link needs `trace_id` to be a column, and the collector delivers each log line as one `body` string. Rather than reconfigure the collector, a realtime pipeline parses it at ingest: source stream `default`, a VRL function (Vector Remap Language, the transform language from Vector), destination stream `default`. Both objects are JSON files you POST:
+
+```bash
+curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/functions" \
+  -d @manifests/function-parse-checkout-json.json
+curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/pipelines" \
+  -d @manifests/pipeline-parse-shop-logs.json
+```
+
+```text
+{"code":200,"message":"Function saved successfully"}
+{"code":200,"message":"Pipeline created successfully","id":"7500791427660513280","name":"parse-shop-logs"}
+```
+
+The function is the interesting part (abridged here, the version in the repo also copies `span_id`, `order_id`, `amount`, `gateway`, `error` and `sku`):
+
+```text
+if .k8s_namespace_name == "shop" && exists(.body) {
+  parsed, err = parse_json(string!(.body))
+  if err == null && is_object(parsed) {
+    .level = downcase(string!(parsed.level))
+    .msg = parsed.msg
+    .trace_id = parsed.trace_id
+  }
+}
+.
+```
+
+A minute later the new fields are columns, and a search over the API shows the join key sitting right there:
+
+```bash
+curl -s -u $AUTH -H 'Content-Type: application/json' "$O2/api/default/_search?type=logs" -d '{"query":{
+  "sql":"SELECT level, msg, order_id, trace_id FROM \"default\" WHERE k8s_namespace_name='"'"'shop'"'"' AND level='"'"'error'"'"' ORDER BY _timestamp DESC",
+  "start_time":'$(( $(date +%s) - 600 ))000000',"end_time":'$(date +%s)000000',"size":2}}' | jq -c '.hits[] | del(._timestamp)'
+```
+
+```text
+{"level":"error","msg":"payment failed","order_id":"ord-648398","trace_id":"e826c2d59bc16d05923d1d654bafcd4c"}
+{"level":"error","msg":"payment failed","order_id":"ord-311027","trace_id":"512dea2672432a9e4b827d48af5e1e1b"}
+```
+
+In the UI the same fields show up as facets on the left, which is what turns "grep the shop namespace" into clicking `k8s_namespace_name`, then `level`. This is 2.2K error rows in 116 ms:
+
+![Logs page: shop namespace errors with the k8s field facets](/img/blog/kubernetes-observability-in-2026-with-openobserve/02-logs-shop-errors.jpg)
+
+And the jump works in both directions. Expand any of those rows and there is a View Trace button on it, because the trace id is now a field:
+
+![An expanded log row after the pipeline: parsed fields such as level, amount and error, with the View Trace button](/img/blog/kubernetes-observability-in-2026-with-openobserve/03-log-row-trace-id.jpg)
+
+### 5. Look at the files
+
+Now for my favourite part: the write path from earlier, in a real data directory. The image has no shell, so an ephemeral debug container that shares the process namespace gets you the filesystem through `/proc/1/root`:
+
+```bash
+kubectl -n openobserve debug o2-openobserve-standalone-0 --image=busybox:1.36 \
+  --target=openobserve-standalone --container=toolbox --profile=general -- sleep 86400
+kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c \
+  'cd /proc/1/root/data/stream && find files/default -type f | sed "s/.*\.//" | sort | uniq -c'
+```
+
+```text
+   3989 parquet     <- metrics
+   3674 ttv         <- an index per data file, give or take the open hour
+     19 vortex      <- logs, in Vortex, written by the ingester
+```
+
+These are binary columnar files, so `cat` shows nothing useful. What identifies them is the first four bytes. Copy one file of each type out of the pod (the loop picks whatever file `find` sees first, so your names will differ) and look at those bytes:
+
+```bash
+for ext in parquet ttv vortex; do
+  F=$(kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c \
+    "cd /proc/1/root/data/stream && find files/default -name '*.$ext' 2>/dev/null | head -1")
+  kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- cat "/proc/1/root/data/stream/$F" > sample.$ext
+done
+for f in sample.parquet sample.ttv sample.vortex; do printf '%-16s ' "$f"; head -c 4 "$f" | xxd | cut -c10-; done
+```
+
+```text
+sample.parquet    5041 5231   PAR1
+sample.ttv        5046 4131   PFA1
+sample.vortex     5654 5846   VTXF
+```
+
+Parquet, a Puffin index container, Vortex. To look inside an index, OpenObserve ships `ttv-inspect`. With no shell in the image, that runs as a Job on the same volume (`manifests/20-ttv-inspect-job.yaml`). The Job needs two things filled in: the node that holds the volume, because a local-path volume only exists on one node, and the index file to read. Both come from `kubectl`:
+
+```bash
+NODE=$(kubectl -n openobserve get pod o2-openobserve-standalone-0 -o jsonpath='{.spec.nodeName}')
+TTV=$(kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c \
+  "cd /proc/1/root/data/stream && find files/default/index/default_logs -name '*.ttv' 2>/dev/null | head -1")
+kubectl -n openobserve delete job ttv-inspect --ignore-not-found   # a Job's template is immutable, so re-runs need this
+sed -e "s#NODE_NAME#$NODE#" -e "s#TTV_PATH#/data/stream/$TTV#" manifests/20-ttv-inspect-job.yaml | kubectl apply -f -
+kubectl -n openobserve wait --for=condition=complete job/ttv-inspect --timeout=180s
+kubectl -n openobserve logs job/ttv-inspect
+```
+
+```text
+blob_count        : 6
+  row_group_size  : 131072
+  segments          : 1
+  total_docs        : 248318 (deleted: 0)
+    _all                         text     [indexed, tokenizer=o2]
+    service_name                 text     [indexed,fast, tokenizer=raw]
+    trace_id                     text     [indexed,fast, tokenizer=raw]
+    _timestamp                   i64      [fast]
+```
+
+One segment, 248,318 documents, and the fields `_all`, `service_name` and `trace_id`. One index file sitting beside one data file, which is the shape the write path promised.
+
+That leaves bar item 3, and with the index accounted for, the magic bytes above are what the case rests on. `PAR1` and `VTXF` say these are Parquet and Vortex containers, `PFA1` says the index is an Iceberg Puffin blob, and four bytes are enough to rule out a private format wearing a borrowed extension. They are not enough to certify every page inside, so take it as a strong hint rather than a proof. The two formats also travel differently. Parquet is read by Spark, pandas and every warehouse you can name, while Vortex is young enough that its reader list is still short, which is one more reason the sharp edges below say to keep it on a test cluster. What holds for both is that your bucket ends up holding open formats rather than a private one, which is what you want from an archive and what you need on the day you migrate.
+
+Worth saying plainly, because reading files out of a bucket yourself is the obvious wrong turn here: open formats are a property of the storage, not a way to work. An engine pointed straight at these files skips the catalog, the index, the bloom filters and the compactor, which is to say it skips everything that makes a query fast. To search this cluster you use OpenObserve's own query path, and the next step points an agent at exactly that.
+
+### 6. Ask it questions over MCP
+
+The MCP server is in the open-source build and needed no enabling on this install, so the other way into this cluster is to register it with an agent and ask in English. The setup page under IAM writes the command for you, one tab per client, and nudges you toward a read-only credential, which is good advice:
+
+![MCP Server setup page with the claude mcp add command](/img/blog/kubernetes-observability-in-2026-with-openobserve/11-mcp-setup-page.jpg)
+
+The Claude Code tab is a one-liner: your organisation's MCP endpoint, plus a token the page mints. Copy it, or build the same header from the credentials we exported in step 1:
+
+```bash
+claude mcp add openobserve "$O2/api/default/mcp" -t http \
+  --header "Authorization: Basic $(printf %s "$AUTH" | base64)"
+```
+
+After that the question goes in the editor rather than into a SELECT. I asked it "which checkout operations threw errors in the last hour, and how many?" and it listed the streams, read the traces schema, then wrote and ran five queries of its own. This was the one that gave it the error rate:
+
+```sql
+SELECT operation_name, count(*) AS total,
+       sum(case when span_status='ERROR' then 1 else 0 end) AS errors
+FROM "default" WHERE service_name = 'checkout'
+GROUP BY operation_name ORDER BY total DESC
+```
+
+And this is what came back, trimmed. The failures in it are mine, `checkout` drops 2 percent of payments on purpose, and this cluster had only been ingesting for a few minutes:
+
+```text
+Two operations threw errors, 52 failures each, the same 52 checkout requests.
+
+  service   operation           spans   errors   error msg
+  checkout  payment.charge      2,412      52    payment gateway timeout
+  checkout  POST /checkout      2,412      52    (empty, propagated)
+  checkout  inventory.reserve   2,412       0    -
+
+104 error spans across 52 distinct trace IDs, so it is 52 failed checkouts,
+not 104. payment.charge fails with a gateway timeout and the parent
+POST /checkout span inherits the ERROR status with no message of its own.
+inventory.reserve is clean, which puts the fault squarely at the payment
+gateway boundary rather than anywhere upstream in checkout.
+
+Failure rate: 52 / 2,412 = 2.15% of checkout requests.
+
+One caveat on the window: the traces stream only has data from 06:51:49Z
+onward, so the full-hour query is really covering ~8.5 minutes.
+```
+
+Two things in there I did not ask for and would have had to work out myself: that the 104 error spans are 52 requests rather than 104 incidents, and that my "last hour" was really about eight minutes, because the cluster was that young. Back on the setup page, the other tabs wire the same server into Cursor, VS Code and the rest.
+
+The endpoint speaks streamable HTTP, so a curl loop is a client too, and it shows the path an agent takes. `mcp.sh` in the repo wraps one JSON-RPC call and reads `O2` and `AUTH` from step 1, so export them again if you are in a new terminal:
+
+```bash
+./mcp.sh tools/list | jq -r '.result.tools[].name'
+./mcp.sh tools/call '{"name":"tool_search","arguments":{"query":"list traces with errors","limit":1}}' \
+  | jq -r '.result.content[0].text | fromjson | .tools[0].name'
+./mcp.sh tools/call '{"name":"tools_call","arguments":{"tool":"SearchSQL","detail":"summary","args":{"org_id":"default","type":"traces",
+  "request_body":{"query":{"sql":"SELECT service_name, operation_name, count(*) AS errors FROM \"default\" WHERE span_status='"'"'ERROR'"'"' GROUP BY service_name, operation_name","start_time":'$(( $(date +%s) - 3600 ))000000',"end_time":'$(date +%s)000000',"size":10}}}}}' \
+  | jq -c '.result.structuredContent.hits'
+```
+
+```text
+tool_search
+tools_call
+GetLatestTraces
+PrometheusRangeQuery
+SearchSQL
+StreamList
+StreamSchema
+
+GetLatestTraces
+
+[{"service_name":"checkout","operation_name":"payment.charge","errors":61},{"service_name":"checkout","operation_name":"POST /checkout","errors":61}]
+```
+
+Three calls: the tool list, a search that turns plain intent into the right tool, and the answer. The count has moved on from the agent's 52 because the load generator kept running between the two, which is its own small reminder that "the last hour" is a moving window. I wrote that SQL by hand to show the path. The registration above is so that you do not have to.
+
+### 7. Break an SLO
+
+Define an SLO on the checkout traces (a good event is a `POST /checkout` span that did not end in `ERROR`, target 99 percent over 7 days), deploy a webhook echo server to receive alerts, and create the alert objects. An alert in OpenObserve is three things: a template (the payload body), a destination (where it goes) and the alert itself, so that is three POSTs, all from `manifests/alert-burn-rate.json`. A second, plain scheduled alert on error spans goes in alongside it, you will see why in a moment. Then push the failure rate to 60 percent:
+
+```bash
+kubectl apply -f manifests/30-alert-sink.yaml
+curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/slos" \
+  -d @manifests/slo-checkout-availability.json
+SLO=$(curl -s -u $AUTH "$O2/api/default/slos" | jq -r '.list[0].id')
+jq '.template'    manifests/alert-burn-rate.json | curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/alerts/templates" -d @-
+jq '.destination' manifests/alert-burn-rate.json | curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/alerts/destinations" -d @-
+jq --arg id "$SLO" '.alert | .query_condition.slo_condition.slo_id = $id' manifests/alert-burn-rate.json \
+  | curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/v2/default/alerts" -d @-
+curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/v2/default/alerts" -d @manifests/alert-error-spans.json
+kubectl -n shop exec deploy/loadgen -- curl -s "http://checkout.shop.svc/chaos?rate=60"
+```
+
+```text
+{"code":200,"message":"SLO saved","id":"7500794280517042176","name":"checkout-availability"}
+{"code":200,"message":"Template saved","id":"3IlAageUwczuTkc0FuyqEEP1dd4","name":"burn-rate-json"}
+{"code":200,"message":"Destination saved","id":"3IlB8cmyOkm43oPUBBduELWjUlI","name":"alert-sink"}
+{"code":200,"message":"Alert saved","id":"3IlBHI5FXraQCVx9pCYEJRwOBuX","name":"checkout-burn-rate"}
+{"code":200,"message":"Alert saved","id":"3IlEZgA5TSGAwDC0Rl3spdfsGut","name":"checkout-error-spans"}
+{"fail_rate_percent":60}
+```
+
+One catch you will hit: the echo server has a private cluster IP and OpenObserve blocks those as webhook destinations (SSRF protection, so a webhook cannot be pointed at internal services), so the values file sets `ZO_SKIP_SSRF_CHECKS=true`. Fine for a demo, wrong for anything internet-facing. Within a minute the SLO page, still rc1 at this point, showed 97.907 percent against 99 and "Budget blown":
+
+![SLO page: checkout-availability, budget blown](/img/blog/kubernetes-observability-in-2026-with-openobserve/09-slo-budget-blown.jpg)
+
+The burn-rate alert stayed quiet, and its evaluations were logged as "frozen (unobserved)". That freeze is deliberate: an SLO alert never fires or resolves while its windows are unmeasured. But the measurements were being written, and the status row the alert reads was written once at creation and never advanced afterwards. Debug logging gave the reason in one line:
+
+```bash
+kubectl -n openobserve logs o2-openobserve-standalone-0 | grep "\[slo\] pass failed"
+```
+
+```text
+ERROR [slo] pass failed for 7500794280517042176 org=default: DbError# SeaORMError# Execution Error:
+  error returned from database: (code: 8) attempt to write a readonly database
+```
+
+The SLO pass opens the read-only database client and then writes through it. On PostgreSQL the read-only pool falls back to the normal connection unless you point it at a replica, so most cluster deployments are fine. On SQLite, which every single-node install uses, the write fails.
+
+I expected this to be gone by now, because 1.0.0's release notes say the storage layer "split into separate ORM read/write clients (retiring the sqlite write lock)". So I upgraded this cluster to 1.0.0 GA and ran the step again. On GA the SLO backfilled its slices, reached full coverage, computed an SLI of 98.009 percent against the 99 target, and then stopped. Twenty minutes later, with the load generator still failing 60 percent of payments, `computed_at` had not moved, `stale_watermark` was still true, the burn rate was still reading 1.99, and the same `attempt to write a readonly database` line was back in the log. The burn-rate alert never fired, because the row it reads never advanced.
+
+So this one survived GA on the single-node path, and the reason turned out to be more interesting than the bug. The fix exists. I reported this during the rc1 run, and [the patch that closed it](https://github.com/openobserve/openobserve/pull/14192) moved that write onto the read-write client and merged into `main` on 9 September. 1.0.0 was tagged on the 11th without it: at the tag, `commit_status` still takes the read-only handle, and on `main` it does not. The backport onto the release branch landed on the 12th, one day too late for the tag.
+
+**Fixed in 1.0.1, which shipped on 16 September.** I re-ran this on a fresh single-node install with SQLite, the exact configuration that fails on 1.0.0, and it behaves: no `readonly database` line anywhere in the log, `stale_watermark` goes false, and the status row keeps advancing on every pass with the SLI and burn rate moving as new measurements land. So on 1.0.1 you do not need to do anything, and the PostgreSQL workaround below is only for anyone still pinned to 1.0.0.
+
+If you are stuck on 1.0.0 for some reason, point the metadata store at PostgreSQL instead of SQLite and keep `ZO_LOCAL_MODE=true`, because the read-only Postgres client falls back to the read-write connection and the failing write succeeds. None of it affects a cluster deployment on PostgreSQL. Plain alerts are unaffected, which is why we created the second one. The scheduled alert on the same failed spans evaluates once at creation, where it usually reports Normal, and fires on the next run a minute later, so give it that minute before reading the echo server:
+
+```bash
+kubectl -n shop logs deploy/alert-sink | jq -R -c 'fromjson? | select(.path=="/alerts") | .body | fromjson'
+```
+
+```text
+{"alert":"checkout-error-spans","stream":"traces/default","org":"default","type":"scheduled","level":"critical","fired_at":"2026-09-02T06:34:44","url":"/web/short/f0a29971a7f5701d?org_identifier=default"}
+```
+
+The timestamp gives it away as the rc1 run, and plain alerts behave the same on GA.
+
+The alerts page tells the same story in one row each: the SLO-backed alert with no outcome yet, the scheduled one showing its last result. That screenshot is from the rc1 run, and 1.0.0 behaves the same way.
+
+![Alerts list: the SLO-backed alert with no outcome, and the scheduled alert after its first evaluation](/img/blog/kubernetes-observability-in-2026-with-openobserve/08-alerts-list.jpg)
+
+Heal the app with `chaos?rate=2` when you are done.
+
+### 8. Compaction, the bill, and how fast it answers
+
+Every hour the ingester leaves behind a pile of small files, and once the hour closes the compactor merges them, rebuilds the index and writes a bloom filter sidecar. You can see both states on disk at once, the open hour and the one before it:
+
+```bash
+kubectl -n openobserve exec o2-openobserve-standalone-0 -c toolbox -- sh -c '
+  cd /proc/1/root/data/stream
+  PREV=$(date -u -d @$(( $(date +%s) - 3600 )) +%Y/%m/%d/%H); CUR=$(date -u +%Y/%m/%d/%H)
+  echo "closed hour $PREV (KB, file)"
+  du -ak files/default/logs/default/$PREV files/default/index/default_logs/$PREV files/default/bloom/default_logs/$PREV | grep "\."
+  echo "current hour $CUR: $(ls files/default/logs/default/$CUR | wc -l) files"'
+```
+
+```text
+closed hour 2026/09/04/04 (KB, file)
+14924	files/default/logs/default/2026/09/04/04/75015051248633118722d6f.vortex
+11228	files/default/index/default_logs/2026/09/04/04/75015051248633118722d6f.ttv
+516	files/default/bloom/default_logs/2026/09/04/04/1788498194507969.bf
+current hour 2026/09/04/05: 13 files
+```
+
+Thirteen small files in the open hour, one 15 MB Vortex file with one index and one bloom filter for the closed one, and the originals were deleted after the delay we set. Nobody ran anything, this is the background job doing its rounds. (The compactor also logs each merge, but at this log volume the pod log only holds a few minutes, so you have to look right after an hour closes.)
+
+Now for the question we started with: what does it cost to keep? The stream stats API reports, per stream, the bytes that came in, the bytes on disk, and the size of the index:
+
+```bash
+for t in logs metrics traces; do
+  curl -s -u $AUTH "$O2/api/default/streams?type=$t" | jq -r --arg t $t \
+    '[.list[].stats] | "\($t): \(length) streams, \(map(.doc_num)|add) rows, \(map(.storage_size)|add|round) MB in, \(map(.compressed_size)|add|round) MB on disk, \(map(.index_size)|add|round) MB index"'
+done
+```
+
+```text
+logs: 4 streams, 5067137 rows, 5173 MB in, 228 MB on disk, 164 MB index
+metrics: 463 streams, 21040362 rows, 17329 MB in, 161 MB on disk, 64 MB index
+traces: 1 streams, 727109 rows, 674 MB in, 44 MB on disk, 13 MB index
+```
+
+| | Came in | On disk | Index | Smaller by |
+|---|---|---|---|---|
+| Logs | 5,173 MB | 228 MB | 164 MB | 13x with index, 23x without |
+| Metrics | 17,329 MB | 161 MB | 64 MB | 77x with index, 108x without |
+| Traces | 674 MB | 44 MB | 13 MB | 12x with index, 15x without |
+| Whole cluster, 15 hours | 23,176 MB | 433 MB | 241 MB | 34x with index, 54x without |
+
+So 23 GB of telemetry from a three node cluster over fifteen hours is 674 MB in the bucket, index included. At S3 standard pricing of 2.3 cents per GB-month, a full month of this cluster is around 32 GB and under a dollar of storage. So the storage bill rounds to zero here, and the real cost of running this is the pod's CPU and memory. One detail in that table to notice: the logs index is not small, 164 MB against 228 MB of data, because every log body is tokenised into the full-text index. Metrics and traces have no full-text fields and their index is a fraction of the data. If you want logs cheaper still, take fields out of the full-text list.
+
+Is it fast, though? Three questions over the last 12 hours of logs, 4.2 million rows, on this one pod:
+
+```bash
+NOW=$(date +%s); FROM=$((NOW-43200))
+q() { curl -s -u $AUTH -H 'Content-Type: application/json' -X POST "$O2/api/default/_search?type=logs" \
+  -d "{\"query\":{\"sql\":\"$1\",\"start_time\":${FROM}000000,\"end_time\":${NOW}000000,\"size\":5}}" \
+  | jq -c '{took, total, scan_records, scan_size, idx_scan_size}'; }
+q "SELECT count(*) AS rows FROM \\\"default\\\""
+q "SELECT k8s_namespace_name, count(*) AS rows FROM \\\"default\\\" GROUP BY k8s_namespace_name"
+q "SELECT _timestamp, k8s_namespace_name, body FROM \\\"default\\\" WHERE match_all('readonly database')"
+```
+
+```text
+{"took":66,"total":1,"scan_records":4219547,"scan_size":4159,"idx_scan_size":135}
+{"took":61,"total":4,"scan_records":4219547,"scan_size":4159,"idx_scan_size":135}
+{"took":31,"total":5,"scan_records":28135,"scan_size":27,"idx_scan_size":0}
+```
+
+`took` is milliseconds, `scan_size` is the uncompressed size in MB of what the query touched. The count comes from file metadata and took 66 ms, which is the slowest of the three and a fair reminder that at this size everything is fast enough that the ordering is mostly noise. The group-by is the columnar scan reading one column across all 4.2 million rows, 61 ms. The full-text search is the query funnel from earlier in one line: 28,135 rows in the files it had to open, out of 4.2 million, 27 MB out of 4,159, in 31 ms, because the index threw away every file without a hit and then narrowed the rest to the matching rows. Do not read `idx_scan_size` as the proof of that, by the way: it reports 0 on the very row where the index did the most work, and 135 on the two that scanned everything. I reproduced the same inversion on 1.0.0, so take the drop in `scan_records` as the number that matters. This is one pod in a VM on a laptop with 12 hours of data, so treat these milliseconds as a rough shape rather than a benchmark. Watching it skip 99 percent of the data on my own laptop was really fun, though.
+
+One last thing I wanted to see was a restart. A Helm upgrade mid-run restarted the pod for me (`kubectl -n openobserve rollout restart statefulset/o2-openobserve-standalone` does the same), and the startup log walked through the WAL replay we saw in the write path:
+
+```text
+INFO ingester::wal: Scanning lock files from "./data/wal/logs"
+INFO ingester::wal: Clean orphan par files done
+INFO ingester: Found 5 wal files to replay
+WARN ingester::wal: replay wal file: ".../logs/1788326948372735.wal" done, batch_num: 6, took: 4 ms
+```
+
+Nothing was lost. Two things that cost me time, neither about OpenObserve: `kiac load image checkout:demo` stores the bare name while the kubelet looks for `docker.io/library/checkout:demo`, so tag with the full name. And if you wrap Go's `slog.Handler` to inject trace ids, implement `WithAttrs` and `WithGroup` too, or `logger.With(...)` silently drops your wrapper.
+
+## Sharp edges
+
+**Laptop to cluster works.** One Helm install, and the same binary that runs on a laptop was ingesting a whole cluster at under 600 MiB of memory. Cluster mode is a bigger commitment: PostgreSQL, NATS, object storage and the roles chart.
+
+**Know what is off by default.** The memory cache, the circuit breakers and synthetics are off, the WAL is not fsynced per batch, and the docs lag the code on several defaults.
+
+**Vortex is young here.** Faster on row fetch and larger on disk in the vendor's own numbers, in the open-source build only since July, pinned to a git revision. Try it on a test cluster, watch the release notes before production.
+
+**SLO alerts did not fire on a single node, until 1.0.1.** On rc1 and 1.0.0 the status row the alert reads stopped advancing the first time a pass tried to write it, because that write went through the read-only database client and SQLite refused it. 1.0.1 fixes it and I have verified that on SQLite. Worth knowing only if you are pinned to 1.0.0, where the workaround is PostgreSQL as the metadata store.
+
+**PromQL has gaps.** OpenObserve does not run Prometheus's engine, it has its own PromQL evaluator, and `histogram_count`, `histogram_sum`, `histogram_fraction`, `sort`, `sort_desc` and the `@` modifier are not implemented in it yet. Point an existing Grafana dashboard at it and test before you switch.
+
+## Wrapping up
+
+We followed a pod log line into a Vortex file and its index, watched queries prune down to the rows they needed, and saw fifteen hours of a whole cluster's telemetry, 23 GB of it, sit in 674 MB on disk with every field queryable.
+
+Give it a try on a test cluster and tell me how it goes, I am @SaiyamPathak on X and LinkedIn, and I would especially like to hear whether the SLO alerts advance for you on PostgreSQL, since the SQLite path still has this bug in 1.0.0. If you hit the same sharp edges I did, the notes above should save you an evening.
+
+## Links
+
+- Companion repo with the values files, demo app, manifests and step-by-step README: https://github.com/saiyam1814/openobserve-k8s-demo
+- OpenObserve docs: https://openobserve.ai/docs
+- Helm charts (standalone and collector): https://github.com/openobserve/openobserve-helm-chart
+- 1.0.1 release, which carries the SLO fix: https://github.com/openobserve/openobserve/releases/tag/v1.0.1
+- OpenObserve vs ClickHouse benchmark (vendor-run): https://openobserve.ai/blog/openobserve-vs-clickhouse-one-billion-logs-benchmark/
+- Vortex file format: https://vortex.dev
+- Grafana Labs Observability Survey 2026: https://grafana.com/observability-survey/
+- kiac: https://github.com/saiyam1814/kiac
+
+---
+
+# kagent Part 1: Building a Local, Kubernetes-Native AI Agent with Human-in-the-Loop Approval
+
+- Canonical: https://blog.kubesimplify.com/kagent-part-1-local-ai-agent-kubernetes
+- Published: 2026-09-08
+- Summary: A hands-on lab building a kagent AI agent on a local kind cluster with Ollama: read-only and write-capable agents, human-in-the-loop approval gates, and a practical guide for common issues.
+
+A chatbot can explain Kubernetes to you. An agent can decide what to inspect next, pick a tool, read the result, and act on it. Which means the question is no longer "can a model talk about my cluster?" but "can it operate on my cluster in a way I can actually trust?" A write-capable agent can make a change unless the system explicitly stops it, that's the boundary this lab is built around.
+
+kagent is a Kubernetes-native framework for building exactly that. It gives you a runtime, a set of Kubernetes CRDs like `Agent` and `ModelConfig`, and MCP-backed tool integrations that let a model reason about a live cluster and call real tools against it, not just describe what it would do, but actually do it.
+
+Once a model can call tools, the design question stops being "is the answer good?" and becomes "what is this thing actually allowed to do, and who signs off before it does it?" That's what this lab is about.
+
+**kagent vs. k8sgpt, briefly:** k8sgpt runs fixed analyzers against your cluster, collects structured findings, and has a model explain them. There's no loop where the model chooses what to do next. kagent runs an actual agent loop, the model decides which tool to call, reads the result, and decides whether to call another tool or answer the user. That's materially different, which is why least-privilege tooling and approval gates matter so much here.
+
+This is Part 1 of a short series. In this one, we build a fully local kagent stack running on a single laptop: kind cluster, kagent, Ollama serving a small model in-cluster, a read-only agent, and a write-capable agent gated behind human approval. No cloud API key, no external LLM dependency, nothing that leaves your machine. Budget about 45 to 60 minutes hands-on if you're following along.
+
+## What you'll build
+
+By the end of this lab you'll have, all running locally:
+
+- A kind cluster with kagent installed
+- Ollama serving `qwen2.5:1.5b` as an in-cluster model service
+- A **read-only** agent that can inspect cluster state but cannot change anything
+- A **write-capable** agent whose destructive actions pause for your explicit approval
+In other words:
+
+- You interact through the kagent dashboard.
+- The agent decides which tool to call.
+- The tool server talks to the Kubernetes API.
+- Model inference happens locally, through Ollama.
+- Write operations pause for your approval before they execute.
+![Architecture diagram: a kind node with a user, the kagent controller/UI, Ollama, the Kubernetes MCP tool server, and an approval gate before any write-capable tool call](/img/blog/kagent-part-1-local-ai-agent-kubernetes/architecture-diagram.jpg)
+
+**Prerequisites:** Docker, `kind`, `kubectl`, and Helm, plus enough memory to run a small local model alongside the kagent stack. A laptop with 16GB RAM is comfortable. Keep the model small: this walkthrough uses `qwen2.5:1.5b`.
+
+Record your host before starting so the timings have useful context:
+
+```bash
+system_profiler SPHardwareDataType | grep -E "Chip|Total Number of Cores|Memory:"
+docker info --format 'Docker: {{.NCPU}} CPUs, {{.MemTotal}} bytes'
+```
+
+The measurements reported here came from an Apple M4 with 10 cores and 16 GB RAM, with Docker allocated 10 CPUs and 8,321,515,520 bytes (about 7.75 GiB).
+
+This is a deliberately patient lab on CPU inference. In one run, the read-only pod-listing answer generated 1,183 tokens at 2-4 tokens/sec, which took roughly 5-10 minutes; the approval interaction generated about 144 tokens and took about a minute. Across Step 7 and the complete Step 9 workflow, budget roughly 15-40 minutes of waiting for model output. A healthy cluster can look idle while Ollama is working.
+
+Clone the lab repo before you start, every step below references files inside it:
+
+```bash
+git clone https://github.com/Prianshu-git/Kagent-demo
+cd Kagent-demo
+```
+
+```yaml
+# 00-cluster/kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: kagent-security-lab
+nodes:
+  - role: control-plane
+```
+
+---
+
+## Step 1: Create the cluster
+
+Start with a clean kind cluster:
+
+```bash
+kind create cluster --name kagent-security-lab --config 00-cluster/kind-config.yaml
+kubectl cluster-info --context kind-kagent-security-lab
+```
+
+kind's config file doesn't reliably set the cluster name on every version - passing `--name` explicitly guarantees the context comes up as `kind-kagent-security-lab`, which every command later in this lab assumes.
+
+This creates the local Kubernetes environment that will host kagent and Ollama. A healthy cluster should show the control plane and core Kubernetes components up.
+
+**Checkpoint:** run `kubectl get nodes` and confirm one node in `Ready` status.
+
+---
+
+## Step 2: Install kagent
+
+kagent uses a two-step Helm install: CRDs first, then the app itself.
+
+```bash
+helm install kagent-crds oci://ghcr.io/kagent-dev/kagent/helm/kagent-crds \
+  --namespace kagent \
+  --create-namespace \
+  --version 0.9.12
+
+helm install kagent oci://ghcr.io/kagent-dev/kagent/helm/kagent \
+  --namespace kagent \
+  --set providers.default=ollama \
+  --version 0.9.12
+
+# give the deployments a moment to create their pods before waiting on them:
+# running `kubectl wait` immediately after `helm install` can fail with
+# "no matching resources found" if the pods don't exist yet
+sleep 15
+kubectl wait --for=condition=ready pod --all -n kagent --timeout=180s
+```
+
+Version pinning matters because kagent changes frequently. This lab uses kagent `0.9.12`.
+
+```bash
+kubectl get pods -n kagent -o wide
+```
+
+On a fresh cluster, the kagent controller may log transient failures before Postgres is ready. That's normal. Give it a moment to converge, then validate the pod state. The system recovers on its own.
+
+**Checkpoint:** every pod in the `kagent` namespace is `Running`.
+
+---
+
+## Step 3: Deploy Ollama in the cluster
+
+The lab defines the Ollama deployment in `01-local-llm/ollama-deployment.yaml`.
+
+```bash
+kubectl apply -f 01-local-llm/ollama-deployment.yaml
+kubectl wait --for=condition=ready pod -l app=ollama -n ollama --timeout=120s
+```
+
+Validate the Service and endpoints:
+
+```bash
+kubectl get svc -n ollama
+kubectl get endpoints -n ollama
+```
+
+```text
+NAME     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+ollama   ClusterIP   10.96.147.225   <none>        80/TCP    153m
+```
+
+```text
+NAME     ENDPOINTS           AGE
+ollama   10.244.0.30:11434   153m
+```
+
+The Service has a real endpoint. That's your confirmation the in-cluster model service is reachable from the rest of Kubernetes.
+
+**Checkpoint:** the Service has an endpoint IP address.
+
+---
+
+## Step 4: Pull a local model
+
+This lab uses `qwen2.5:1.5b`, a 1.5-billion-parameter model optimized for CPU inference.
+
+```bash
+kubectl exec -n ollama deploy/ollama -- ollama pull qwen2.5:1.5b
+kubectl exec -n ollama deploy/ollama -- ollama list
+```
+
+Terminal output from pulling the model:
+
+```text
+pulling manifest
+pulling 183715c43589: 48% ▕████████          ▏ 471 MB/986 MB  2.5 MB/s   3m26s
+pulling 183715c43589: 72% ▕█████████████     ▏ 713 MB/986 MB  1.1 MB/s   4m17s
+pulling 183715c43589: 94% ▕████████████████  ▏ 928 MB/986 MB   16 KB/s  58m29s
+pulling 183715c43589: 100% ▕█████████████████ ▏ 985 MB/986 MB  1.8 MB/s      0s
+verifying sha256 digest
+writing manifest
+success
+```
+
+After the pull completes, check what models are available:
+
+```text
+NAME               ID              SIZE      MODIFIED
+qwen2.5:1.5b       65ec06548149    986 MB    About an hour ago
+llama3.2:latest    a80c4f17acd5    2.0 GB    14 hours ago
+llama3.2:3b        a80c4f17acd5    2.0 GB    15 hours ago
+```
+
+**Why `qwen2.5:1.5b`?** The immediate reason is resource pressure, not a claim that a model with half the parameters should be an order of magnitude faster. This deployment is capped at `2 vCPU / 4Gi`, and it also has another `ModelConfig` available for `llama3.2:3b`; keep one model resident at a time with `ollama stop` when comparing them. In a clean direct `ollama run --verbose` check at these limits, the Qwen run generated at 0.38 tokens/sec. The Llama check timed out and the pod was subsequently OOM-killed, so there is not a trustworthy Llama tokens/sec number to publish from that run. Give Ollama enough memory and CPU before drawing a model-quality or model-speed conclusion.
+
+**Checkpoint:** `ollama list` shows the model downloaded and ready.
+
+---
+
+## Step 5: Connect kagent to the local model
+
+The model config lives in `01-local-llm/modelconfig.yaml`:
+
+```yaml
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: local-model-config
+  namespace: kagent
+spec:
+  model: qwen2.5:1.5b
+  provider: Ollama
+  ollama:
+    host: http://ollama.ollama.svc.cluster.local
+```
+
+Apply it:
+
+```bash
+kubectl apply -f 01-local-llm/modelconfig.yaml
+kubectl get modelconfig -n kagent -o wide
+```
+
+```text
+NAME                   PROVIDER   MODEL
+default-model-config   Ollama     llama3.2:3b
+local-model-config     Ollama     qwen2.5:1.5b
+```
+
+(`default-model-config` stays on `llama3.2:3b` here. This lab never uses it, since every agent below points explicitly at `local-model-config`.)
+
+Before moving to the agent layer, validate the model directly:
+
+```bash
+kubectl exec -n ollama deploy/ollama -- ollama run qwen2.5:1.5b "reply with the single word: ready"
+```
+
+```text
+ready
+```
+
+That proves the model is reachable and generating before any agent starts making tool calls.
+
+**Checkpoint:** the model responds with "ready".
+
+---
+
+## Step 6: Access the kagent dashboard
+
+Before you open the UI, forward the dashboard service to your machine:
+
+```bash
+kubectl port-forward -n kagent service/kagent-ui 8082:8080
+```
+
+Leave that running in its own terminal. The dashboard is now at **http://localhost:8082**. Every remaining step in this lab uses that URL.
+
+---
+
+## Step 7: Build your first agent (read-only)
+
+The first agent is intentionally narrow. It's defined in `02-first-agent/agent.yaml`:
+
+```yaml
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: local-k8s-agent
+  namespace: kagent
+spec:
+  type: Declarative
+  declarative:
+    modelConfig: local-model-config
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-tool-server
+          toolNames:
+            - k8s_get_resources
+            - k8s_get_available_api_resources
+            - k8s_describe_resource
+            - k8s_get_pod_logs
+```
+
+Every tool this agent has access to is read-only. It can inspect cluster state, but it cannot mutate anything. This is one of the clearest, cheapest ways to establish a secure-by-default agent posture: don't grant a tool the agent doesn't need for the job it's doing.
+
+Deploy it:
+
+```bash
+kubectl apply -f 02-first-agent/agent.yaml
+kubectl get agent -n kagent
+```
+
+![kagent's Agent Details panel for local-k8s-agent, showing its four read-only tools and description: "Read-only Kubernetes inspection agent, running entirely against an in-cluster local model. No write access at this stage."](/img/blog/kagent-part-1-local-ai-agent-kubernetes/read-only-agent-details.png)
+
+Notice the agent's own description confirms its scope before you even ask it anything. No write tools are listed, because none are attached.
+
+Open the kagent dashboard at `http://localhost:8082`, select `local-k8s-agent`, and ask:
+
+> What pods are running in the kagent namespace?
+
+That's the simplest possible end-to-end validation: the agent calls `k8s_get_resources` with appropriate filters, reads the response, and answers based on what it finds. The answer should match what `kubectl get pods -n kagent` shows you directly.
+
+![local-k8s-agent answering "What pods are running in the kagent namespace?" with an expanded k8s_get_resources tool call and a table of 20 pods](/img/blog/kagent-part-1-local-ai-agent-kubernetes/read-only-agent-query.png)
+
+*(This particular cluster has extra agents from other work running alongside the lab. On a fresh cluster you'll see just `local-k8s-agent` and `local-hitl-agent` here, and possibly the core kagent components.)*
+
+**Checkpoint:** the agent's answer reflects the actual cluster state.
+
+---
+
+## Step 8: Add a write-capable agent behind approval gates
+
+Now we reach the real security boundary: write operations.
+
+`03-human-in-the-loop/hitl-agent.yaml` enables destructive tools, but marks them for approval:
+
+```yaml
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: local-hitl-agent
+  namespace: kagent
+spec:
+  type: Declarative
+  declarative:
+    modelConfig: local-model-config
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-tool-server
+          toolNames:
+            - k8s_get_resources
+            - k8s_describe_resource
+            - k8s_get_pod_logs
+            - k8s_get_events
+            - k8s_get_resource_yaml
+            - k8s_apply_manifest
+            - k8s_delete_resource
+            - k8s_patch_resource
+          requireApproval:
+            - k8s_apply_manifest
+            - k8s_delete_resource
+            - k8s_patch_resource
+```
+
+The `requireApproval` list is the whole story here. It's the difference between "the model can propose a change" and "the model can make a change." Everything in that list pauses for human approval before it executes.
+
+Deploy it:
+
+```bash
+kubectl apply -f 03-human-in-the-loop/hitl-agent.yaml
+kubectl get agent -n kagent local-hitl-agent -o wide
+```
+
+```text
+NAME               TYPE          RUNTIME   READY   ACCEPTED
+local-hitl-agent   Declarative   python    True    True
+```
+
+![kagent's Agent Details panel for local-hitl-agent, showing k8s_apply_manifest and k8s_delete_resource each tagged "Requires approval before execution"](/img/blog/kagent-part-1-local-ai-agent-kubernetes/hitl-agent-tools.png)
+
+The `requireApproval` YAML above isn't just declared, it's visibly enforced in the UI: every write-capable tool on this agent is flagged before you've asked it to do anything.
+
+---
+
+## Step 9: Walk through the human-in-the-loop workflow
+
+Open the kagent dashboard and select `local-hitl-agent`. This is a four-part sequence. Do them in order, since each one demonstrates a different piece of the approval boundary.
+
+### 9.1: Read without approval
+
+Ask:
+
+> List all pods in the kagent namespace.
+
+This executes immediately. It's a read operation, so it's never gated. Only the tools in `requireApproval` pause.
+
+### 9.2: Approve a write
+
+Ask:
+
+> Create a ConfigMap called test-config in the default namespace with the key message set to hello.
+
+The agent proposes the write and the action pauses in the UI waiting for you.
+
+![kagent HITL approval screen showing a pending ConfigMap creation, with the full manifest visible and Approve/Reject buttons](/img/blog/kagent-part-1-local-ai-agent-kubernetes/hitl-approval-pending.png)
+
+Approve it.
+
+![kagent HITL approval screen showing the confirmed state after approval](/img/blog/kagent-part-1-local-ai-agent-kubernetes/hitl-approval-confirmed.png)
+
+Then verify it landed:
+
+```bash
+kubectl get configmap test-config -n default -o yaml
+```
+
+This is the critical point of the whole lab: the model proposed the action, but the human approval gate is the actual boundary between a suggestion and a real mutation.
+
+### 9.3: Reject a delete
+
+Ask:
+
+> Delete the ConfigMap test-config in the default namespace.
+
+Again it stops at the approval gate. This time, type a reason into the box and click **Reject** instead of Approve:
+
+> Resource still in use
+
+![Rejection reason being entered for the pending delete request, with Reject and Cancel buttons visible](/img/blog/kagent-part-1-local-ai-agent-kubernetes/hitl-rejection-reason.png)
+
+![kagent HITL screen after the delete is rejected, showing a "Rejected" status and the agent confirming the ConfigMap remains in the default namespace](/img/blog/kagent-part-1-local-ai-agent-kubernetes/hitl-rejection-confirmed.png)
+
+The agent understood the request, proposed the call, and then backed off cleanly when you said no. It didn't retry, argue, or find another way to delete the resource. That's the behavior you actually want from a tool with delete access.
+
+Verify the resource is untouched:
+
+```bash
+kubectl get configmap test-config -n default
+```
+
+**A nice extra behavior worth showing:** after backing off, the agent offered to check whether anything was actually depending on `test-config`, since the rejection reason I gave it was "Resource still in use." I said yes, and it came back with a small structured choice instead of guessing what I meant:
+
+![Agent asking a follow-up question with three quick-action options: check pods and deployments, force delete, or do nothing](/img/blog/kagent-part-1-local-ai-agent-kubernetes/hitl-dependency-check-prompt.png)
+
+I picked **"Check pods and deployments for references to test-config."** The agent called `k8s_get_resource_yaml` and `k8s_get_resources` against the `default` namespace and reported back:
+
+![Agent's result after checking pods and deployments, reporting that neither nginx-smoke nor pg-smoke references test-config and no deployments exist in the namespace](/img/blog/kagent-part-1-local-ai-agent-kubernetes/hitl-dependency-check-result.png)
+
+`test-config` isn't actually referenced by anything in the namespace. The "still in use" reason I gave was just a convenient excuse to test a rejection, not a real dependency. The agent's own investigation surfaced that: no pods or deployments pointed at it, so as far as the cluster is concerned it's safe to delete whenever I actually want to. This is a small but telling moment. The agent didn't just accept the rejection and stop, it offered a concrete next step for resolving *why* the resource was flagged as in use, then went and checked rather than taking my word for it.
+
+### 9.4: Use an ambiguous prompt
+
+Ask:
+
+> Set up a namespace for my application.
+
+This is intentionally vague, with no namespace name or other parameters. A well-behaved agent should ask a clarifying question rather than guess.
+
+The agent will ask:
+
+> What should the namespace be called?
+
+This is why agentic systems aren't just "LLM with tools." Sometimes the correct action is to stop and ask. Proceeding on a guess would make things worse, not better.
+
+---
+
+## Understanding performance: token speed and resource limits
+
+You probably noticed each interaction took a while. The measurements below describe this particular pod's resource ceiling, not an immutable property of local models: the Ollama deployment was capped at 2 vCPU and 4Gi of memory, and its last restart was `OOMKilled` while testing the larger model. The other floor is structural: an agent interaction needs several model passes, so even a better-resourced runtime still has more work to do than a single chat completion.
+
+You can watch it happen directly:
+
+```bash
+kubectl logs -n ollama deploy/ollama --tail=50
+```
+
+For a reproducible direct comparison, stop the previous model and use the same short prompt for each model:
+
+```bash
+kubectl exec -n ollama deploy/ollama -- ollama stop qwen2.5:1.5b
+kubectl exec -n ollama deploy/ollama -- ollama run --verbose qwen2.5:1.5b \
+  'Explain Kubernetes pods in one concise sentence.'
+kubectl exec -n ollama deploy/ollama -- ollama stop llama3.2:3b
+kubectl exec -n ollama deploy/ollama -- ollama run --verbose llama3.2:3b \
+  'Explain Kubernetes pods in one concise sentence.'
+```
+
+At the `2 vCPU / 4Gi` limits used for this run, Qwen reported:
+
+```text
+eval count: 26 token(s)
+eval duration: 1m8.797653711s
+eval rate: 0.38 tokens/s
+```
+*Note: this 26-token sample was taken immediately after ollama stop, so model reload time dominates the measurement. Steady-state generation sits around 2 t/s, the slot print_timing logs later in this section show this directly.*
+
+The corresponding Llama run timed out before Ollama returned usable verbose metrics, and the pod's last state was `OOMKilled` with exit code 137. Do not turn that failed run into a speed ratio. To test whether more capacity changes the result, apply the following setting, wait for the replacement pod to be `Ready`, and run the same sequence again:
+
+```bash
+kubectl set resources deployment/ollama -n ollama \
+  --limits=cpu=6,memory=8Gi --requests=cpu=2,memory=4Gi
+```
+
+Record the actual limits and both `eval rate` values with the result. On a Docker allocation below 8Gi, this pod may remain Pending alongside the kagent stack.
+
+During an earlier agent run, Ollama's generation timings looked like this:
+
+```text
+slot print_timing: id  0 | task 96 | n_gen =    100, tg =   1.92 t/s, tg_3s =   1.94 t/s
+slot print_timing: id  0 | task 96 | n_gen =    110, tg =   2.00 t/s, tg_3s =   3.33 t/s
+slot print_timing: id  0 | task 96 | n_gen =    127, tg =   2.18 t/s, tg_3s =   5.01 t/s
+slot print_timing: id  0 | task 96 | n_gen =    140, tg =   2.15 t/s, tg_3s =   1.97 t/s
+```
+
+The agent loop multiplies that cost, because a single interaction involves several full passes through the model: reasoning about the question, selecting a tool call, reading the tool result, reasoning about that result, deciding on the next action, and generating the final answer. Each of those is a separate pass through the model. More tool steps mean more passes, which means slower overall.
+
+Fully local AI is a real, workable option. It is not low-latency under a constrained local pod, and resource limits are a variable you can tune before changing models. If you're building on this, keep prompts short, keep the tool list narrow, keep one model resident at a time, give Ollama enough RAM and CPU, and reach for a GPU-backed node if you have one.
+
+---
+
+## What this lab actually proves
+
+Strip away the specific commands and this lab demonstrated one thing: a local AI agent can operate inside a real Kubernetes environment, with a real approval boundary, without depending on a hosted model or a cloud key.
+
+The architecture is explicit:
+
+- The model runs inside the cluster through Ollama.
+- Agent logic is defined declaratively in kagent CRDs.
+- Tools are exposed through a dedicated tool server, not called directly.
+- Tool access is narrowed to the smallest set of operations each agent actually needs.
+- Write operations require explicit human approval before execution.
+Two guardrails did all the work here:
+
+1. **Least-privilege tool selection.** The read-only agent literally cannot mutate anything.
+2. **Human approval for writes.** The write-capable agent can propose but not execute alone.
+Neither is exotic. They're the minimum viable safety controls for any agentic Kubernetes workflow that's allowed to touch cluster state.
+
+---
+
+## Notes on model selection and behavior
+
+One thing worth flagging as you experiment: smaller models like `qwen2.5:1.5b` are optimized for speed over reasoning depth. They're excellent at structured tool calling, which is what agents need most, but they can occasionally reach for the wrong tool entirely.
+
+Here's a real example from this lab. Asked "how many namespaces are currently in my cluster," `local-k8s-agent` called `k8s_get_available_api_resources`, a tool that lists API resource *types*, not namespaces, and then confidently answered "There are currently 51 namespaces in your cluster." A kind cluster running kagent and Ollama has something like seven. The model didn't hallucinate a number out of nowhere; it grabbed the wrong tool and then reported that tool's item count as a namespace count.
+
+![local-k8s-agent incorrectly answering a namespace count by calling k8s_get_available_api_resources instead of a namespace-listing tool](/img/blog/kagent-part-1-local-ai-agent-kubernetes/hallucination-wrong-tool.png)
+
+That failure mode sits one layer upstream of tool output: the tools themselves return ground truth, but nothing guarantees the model calls the *right* tool for the question. That's exactly why read-only scoping and approval gates matter. They bound what a wrong tool choice, or a wrong action, can actually do to your cluster.
+
+If you want to compare a larger model, rerun the direct benchmark after giving Ollama enough memory and CPU; this run did not produce a trustworthy `llama3.2:3b` rate. The architecture stays exactly the same either way.
+
+---
+
+## Current cluster status
+
+By the time you finish, your lab should look roughly like this:
+
+> The pod ages below (13h, 14h, 17h) are from a long-running dev cluster, not a fresh run of this lab. If you're following along on a clean cluster, expect ages in minutes. You'll also only see `local-k8s-agent` and `local-hitl-agent` alongside the core kagent components. The extra `*-agent` pods here (`cilium-*`, `istio-agent`, `kgateway-agent`, and so on) are from other work on this particular cluster and aren't part of this lab.
+
+```text
+NAME                                             READY   STATUS    RESTARTS       AGE
+kagent-controller-99b4bb79d-cm5jn                1/1     Running   0              13h
+kagent-grafana-mcp-678857cd56-s55kt              1/1     Running   0              17h
+kagent-kmcp-controller-manager-76bb479b6-h2zq9   1/1     Running   13             17h
+kagent-postgresql-85766c5f8c-vfjbr               1/1     Running   0              17h
+kagent-querydoc-65cdb65878-h9bx7                 1/1     Running   0              17h
+kagent-tools-7548fb9ffd-r54kh                    1/1     Running   0              13h
+kagent-ui-75bd88cc5c-2wl2k                       1/1     Running   0              13h
+local-hitl-agent-6497c985f4-phjdc                1/1     Running   0              5m
+local-k8s-agent-65d9f49888-qgjjg                 1/1     Running   0              5m
+```
+
+Your core agents:
+
+```text
+NAME                TYPE          RUNTIME   READY   ACCEPTED
+local-hitl-agent     Declarative   python    True    True
+local-k8s-agent      Declarative   python    True    True
+```
+
+Your model config:
+
+```text
+NAME                   PROVIDER   MODEL
+default-model-config   Ollama     llama3.2:3b
+local-model-config     Ollama     qwen2.5:1.5b
+```
+
+---
+
+## Troubleshooting: what you might hit along the way
+
+None of these are unusual for a local, multi-component stack. They're worth knowing about before you hit them.
+
+### Model-name mismatch in default config
+
+If you see:
+
+```text
+model 'llama3.2' not found (status code: 404)
+```
+
+...it usually means `default-model-config` is pointing at a model name that doesn't match what's actually being served. Fix it directly:
+
+```bash
+kubectl patch modelconfig default-model-config -n kagent --type merge -p '{"spec":{"model":"qwen2.5:1.5b","ollama":{"host":"http://ollama.ollama.svc.cluster.local"}}}'
+```
+
+Re-check:
+
+```bash
+kubectl get modelconfig -n kagent -o wide
+```
+
+The model itself can be perfectly healthy while the agent is still broken, because the config is pointing at the wrong value. Local AI stacks are still software stacks. They fail like software.
+
+### Startup race with the database
+
+On a fresh cluster, the kagent controller can start logging failures before Postgres is actually ready. It looks like a broken install. It isn't. The system recovers on its own once the database comes up. Give it a minute, then check pod state rather than reacting to the first error line you see:
+
+```bash
+kubectl get pods -n kagent -o wide
+```
+
+### Scheduling pressure in kind
+
+The Ollama pod can hit memory pressure if the node is already busy running the rest of the kagent stack. The fix is to right-size the request for a small model rather than assuming a large, GPU-style resource request. This whole lab is designed to run comfortably on a laptop-sized node.
+
+### kind image cache mismatch
+
+Even if an image already exists on your host Docker daemon, the kind node needs it loaded into its own container runtime separately. Check directly on the control-plane node:
+
+```bash
+docker exec kagent-security-lab-control-plane crictl images | grep -i ollama
+```
+
+If that comes back empty, pull and load it explicitly:
+
+```bash
+docker pull ollama/ollama:latest
+kind load docker-image ollama/ollama:latest --name kagent-security-lab
+```
+
+Then reapply the Deployment and let the pod recreate.
+
+These four are good reminders that AI infrastructure is still infrastructure. It needs the same checks as any other cluster workload: readiness, scheduling, image propagation, dependency ordering.
+
+---
+
+## Cleanup
+
+When you're done, remove the local cluster entirely:
+
+```bash
+kind delete cluster --name kagent-security-lab
+```
+
+Or, if you just want to clean up the test ConfigMap from the HITL workflow:
+
+```bash
+kubectl delete configmap test-config -n default --ignore-not-found
+```
+
+---
+
+## Final takeaway
+
+The big lesson here isn't that local AI is instant, or that securing an agentic workflow is trivial. It's that local, secure, Kubernetes-native agent workloads are genuinely possible. But they're real systems, not a clever prompt with a couple of tools bolted on. They need a model runtime, a tool surface, a structured agent loop, an approval boundary, and an honest understanding of where the performance and operational bottlenecks actually live.
+
+That's the real question this lab was built around: not "can AI manage Kubernetes?" but "how do we make that capability useful, observable, and safe enough to run near real infrastructure?"
+
+**Part 2** picks up exactly where this leaves off. Least-privilege tools and a human approval gate are a solid starting point, but they're not the whole security story for an agent allowed anywhere near a real cluster. Next up: scoping agents with **RBAC and ClusterRoles**, routing and controlling agent traffic through **agentgateway**, and getting real **metrics and observability** into what these agents are actually doing.
+
+Repository: [`Prianshu-git/Kagent-demo`](https://github.com/Prianshu-git/Kagent-demo)
+
+---
+
 # Running a big LLM across multiple GPUs with vLLM
 
 - Canonical: https://blog.kubesimplify.com/running-a-big-llm-across-multiple-gpus-with-vllm
