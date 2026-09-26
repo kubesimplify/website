@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">What made local LLMs real in 2025-26</title>
+  <desc id="desc">Open weights, hardware memory, and inference software converging to make local LLMs practical on DGX Spark.</desc>
+  <style>
+    text{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+    .title{font-size:42px;font-weight:800;fill:#0f172a}
+    .sub{font-size:22px;fill:#475569}
+    .card-title{font-size:25px;font-weight:800;fill:#0f172a}
+    .body{font-size:18px;fill:#334155}
+    .small{font-size:16px;fill:#64748b}
+    .pill{font-size:15px;font-weight:700;fill:#0f172a}
+  </style>
+  <rect width="1200" height="720" rx="28" fill="#f8fafc"/>
+  <rect x="38" y="38" width="1124" height="644" rx="26" fill="#ffffff" stroke="#dbeafe"/>
+  <text x="600" y="96" text-anchor="middle" class="title">The local LLM shift</text>
+  <text x="600" y="132" text-anchor="middle" class="sub">Three curves finally crossed: weights, hardware, and software.</text>
+
+  <g transform="translate(82 190)">
+    <rect width="300" height="258" rx="20" fill="#ecfeff" stroke="#06b6d4" stroke-width="3"/>
+    <circle cx="54" cy="54" r="28" fill="#67e8f9"/>
+    <text x="54" y="61" text-anchor="middle" class="pill">1</text>
+    <text x="92" y="52" class="card-title">Open weights</text>
+    <text x="92" y="84" class="small">Models caught up</text>
+    <text x="34" y="136" class="body">Llama, Qwen, Mistral,</text>
+    <text x="34" y="166" class="body">DeepSeek, Gemma, and</text>
+    <text x="34" y="196" class="body">Nemotron put serious</text>
+    <text x="34" y="226" class="body">capability outside APIs.</text>
+  </g>
+
+  <g transform="translate(450 190)">
+    <rect width="300" height="258" rx="20" fill="#f0fdf4" stroke="#22c55e" stroke-width="3"/>
+    <circle cx="54" cy="54" r="28" fill="#86efac"/>
+    <text x="54" y="61" text-anchor="middle" class="pill">2</text>
+    <text x="92" y="52" class="card-title">Hardware fits</text>
+    <text x="92" y="84" class="small">Memory stopped being tiny</text>
+    <text x="34" y="136" class="body">128 GB unified memory</text>
+    <text x="34" y="166" class="body">means real 70B-120B</text>
+    <text x="34" y="196" class="body">models can live on one</text>
+    <text x="34" y="226" class="body">desk machine.</text>
+  </g>
+
+  <g transform="translate(818 190)">
+    <rect width="300" height="258" rx="20" fill="#fff7ed" stroke="#f97316" stroke-width="3"/>
+    <circle cx="54" cy="54" r="28" fill="#fdba74"/>
+    <text x="54" y="61" text-anchor="middle" class="pill">3</text>
+    <text x="92" y="52" class="card-title">Software works</text>
+    <text x="92" y="84" class="small">Inference became productized</text>
+    <text x="34" y="136" class="body">Ollama, llama.cpp, vLLM,</text>
+    <text x="34" y="166" class="body">SGLang, LM Studio, NIM,</text>
+    <text x="34" y="196" class="body">and Docker Model Runner</text>
+    <text x="34" y="226" class="body">made setup boring.</text>
+  </g>
+
+  <path d="M382 319 C410 319 421 319 450 319" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M430 305 L450 319 L430 333" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M750 319 C778 319 789 319 818 319" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M798 305 L818 319 L798 333" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g transform="translate(176 520)">
+    <rect width="848" height="92" rx="22" fill="#0f172a"/>
+    <text x="424" y="38" text-anchor="middle" font-size="25" font-weight="800" fill="#ffffff">Result: your desk becomes a practical AI lab</text>
+    <text x="424" y="70" text-anchor="middle" font-size="18" fill="#cbd5e1">Not API-only. Not cluster-only. Local inference, local data, local iteration.</text>
+  </g>
+</svg>

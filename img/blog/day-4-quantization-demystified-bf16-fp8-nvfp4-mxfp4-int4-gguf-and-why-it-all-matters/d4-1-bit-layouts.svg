@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1180" viewBox="0 0 1600 1180">
+  <rect width="1600" height="1180" fill="#ffffff"/>
+  <style>
+    .title { font: 900 46px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #172033; }
+    .subtitle { font: 600 25px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #64748b; }
+    .name { font: 900 32px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #172033; }
+    .bits { font: 850 22px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #0f172a; }
+    .body { font: 600 23px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #334155; }
+    .small { font: 800 19px Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; fill: #334155; }
+  </style>
+
+  <text x="800" y="78" class="title" text-anchor="middle">Floating point formats, in plain English</text>
+  <text x="800" y="122" class="subtitle" text-anchor="middle">Sign = direction, exponent = range, mantissa = detail</text>
+
+  <g transform="translate(90 175)">
+    <rect width="690" height="215" rx="18" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="36" y="54" class="name">FP32</text>
+    <rect x="36" y="82" width="130" height="38" rx="10" fill="#fee2e2" stroke="#ef4444"/>
+    <text x="101" y="108" class="small" text-anchor="middle">1 sign</text>
+    <rect x="182" y="82" width="170" height="38" rx="10" fill="#dbeafe" stroke="#3b82f6"/>
+    <text x="267" y="108" class="small" text-anchor="middle">8 exponent</text>
+    <rect x="368" y="82" width="210" height="38" rx="10" fill="#dcfce7" stroke="#22c55e"/>
+    <text x="473" y="108" class="small" text-anchor="middle">23 mantissa</text>
+    <text x="36" y="154" class="body">Big reference format: wide range and fine detail.</text>
+    <text x="36" y="188" class="body">Great for checking math, expensive for serving.</text>
+  </g>
+
+  <g transform="translate(820 175)">
+    <rect width="690" height="215" rx="18" fill="#f0fdf4" stroke="#86c232" stroke-width="2"/>
+    <text x="36" y="54" class="name">BF16</text>
+    <rect x="36" y="82" width="130" height="38" rx="10" fill="#fee2e2" stroke="#ef4444"/>
+    <text x="101" y="108" class="small" text-anchor="middle">1 sign</text>
+    <rect x="182" y="82" width="170" height="38" rx="10" fill="#dbeafe" stroke="#3b82f6"/>
+    <text x="267" y="108" class="small" text-anchor="middle">8 exponent</text>
+    <rect x="368" y="82" width="190" height="38" rx="10" fill="#dcfce7" stroke="#22c55e"/>
+    <text x="463" y="108" class="small" text-anchor="middle">7 mantissa</text>
+    <text x="36" y="154" class="body">Same range as FP32, fewer detail bits.</text>
+    <text x="36" y="188" class="body">Stable default for training and fine-tuning.</text>
+  </g>
+
+  <g transform="translate(90 430)">
+    <rect width="690" height="215" rx="18" fill="#eff6ff" stroke="#60a5fa" stroke-width="2"/>
+    <text x="36" y="54" class="name">FP16</text>
+    <rect x="36" y="82" width="130" height="38" rx="10" fill="#fee2e2" stroke="#ef4444"/>
+    <text x="101" y="108" class="small" text-anchor="middle">1 sign</text>
+    <rect x="182" y="82" width="170" height="38" rx="10" fill="#dbeafe" stroke="#3b82f6"/>
+    <text x="267" y="108" class="small" text-anchor="middle">5 exponent</text>
+    <rect x="368" y="82" width="200" height="38" rx="10" fill="#dcfce7" stroke="#22c55e"/>
+    <text x="468" y="108" class="small" text-anchor="middle">10 mantissa</text>
+    <text x="36" y="154" class="body">More detail than BF16, but less range.</text>
+    <text x="36" y="188" class="body">Can overflow more easily when values swing.</text>
+  </g>
+
+  <g transform="translate(820 430)">
+    <rect width="690" height="215" rx="18" fill="#fff7ed" stroke="#fb923c" stroke-width="2"/>
+    <text x="36" y="54" class="name">FP8 E4M3</text>
+    <rect x="36" y="82" width="130" height="38" rx="10" fill="#fee2e2" stroke="#ef4444"/>
+    <text x="101" y="108" class="small" text-anchor="middle">1 sign</text>
+    <rect x="182" y="82" width="170" height="38" rx="10" fill="#dbeafe" stroke="#3b82f6"/>
+    <text x="267" y="108" class="small" text-anchor="middle">4 exponent</text>
+    <rect x="368" y="82" width="190" height="38" rx="10" fill="#dcfce7" stroke="#22c55e"/>
+    <text x="463" y="108" class="small" text-anchor="middle">3 mantissa</text>
+    <text x="36" y="154" class="body">One byte per number, with more detail.</text>
+    <text x="36" y="188" class="body">Often useful for inference weights/activations.</text>
+  </g>
+
+  <g transform="translate(90 685)">
+    <rect width="690" height="215" rx="18" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+    <text x="36" y="54" class="name">FP8 E5M2</text>
+    <rect x="36" y="82" width="130" height="38" rx="10" fill="#fee2e2" stroke="#ef4444"/>
+    <text x="101" y="108" class="small" text-anchor="middle">1 sign</text>
+    <rect x="182" y="82" width="170" height="38" rx="10" fill="#dbeafe" stroke="#3b82f6"/>
+    <text x="267" y="108" class="small" text-anchor="middle">5 exponent</text>
+    <rect x="368" y="82" width="190" height="38" rx="10" fill="#dcfce7" stroke="#22c55e"/>
+    <text x="463" y="108" class="small" text-anchor="middle">2 mantissa</text>
+    <text x="36" y="154" class="body">More range, less detail than E4M3.</text>
+    <text x="36" y="188" class="body">Useful when values get very large or tiny.</text>
+  </g>
+
+  <g transform="translate(820 685)">
+    <rect width="690" height="215" rx="18" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+    <text x="36" y="54" class="name">FP4 E2M1</text>
+    <rect x="36" y="82" width="130" height="38" rx="10" fill="#fee2e2" stroke="#ef4444"/>
+    <text x="101" y="108" class="small" text-anchor="middle">1 sign</text>
+    <rect x="182" y="82" width="170" height="38" rx="10" fill="#dbeafe" stroke="#3b82f6"/>
+    <text x="267" y="108" class="small" text-anchor="middle">2 exponent</text>
+    <rect x="368" y="82" width="190" height="38" rx="10" fill="#dcfce7" stroke="#22c55e"/>
+    <text x="463" y="108" class="small" text-anchor="middle">1 mantissa</text>
+    <text x="36" y="154" class="body">Only 16 possible codes. Tiny, but rough.</text>
+    <text x="36" y="188" class="body">Needs local scaling tricks to work for LLMs.</text>
+  </g>
+
+  <rect x="120" y="955" width="1360" height="155" rx="20" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="160" y="1010" class="name">Beginner mental model</text>
+  <text x="160" y="1053" class="body">More exponent bits = bigger safe range. More mantissa bits = finer detail.</text>
+  <text x="160" y="1088" class="body">Smaller formats save memory, but they need better scaling and better kernels.</text>
+</svg>
