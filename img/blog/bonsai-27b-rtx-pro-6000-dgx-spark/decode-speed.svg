@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="470" viewBox="0 0 760 470" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="760" height="470" fill="#fcfcfb"/>
+  <text x="24" y="34" font-size="17" font-weight="600" fill="#0b0b0b">Batch-1 decode speed, tokens per second</text>
+  <text x="24" y="54" font-size="12.5" fill="#52514e">Bonsai 27B (llama.cpp) vs base Qwen3.6-27B NVFP4 (vLLM 0.25.1) · higher is better</text>
+
+  <!-- gridlines every 40 tok/s: x = 210 + v*3.125 (500px / 160) -->
+  <g stroke="#e1e0d9" stroke-width="1">
+    <line x1="335" y1="72" x2="335" y2="420"/>
+    <line x1="460" y1="72" x2="460" y2="420"/>
+    <line x1="585" y1="72" x2="585" y2="420"/>
+    <line x1="710" y1="72" x2="710" y2="420"/>
+  </g>
+
+  <!-- ===== Panel 1: RTX PRO 6000 ===== -->
+  <text x="24" y="90" font-size="13" font-weight="600" fill="#52514e">RTX PRO 6000 (one GPU, 96 GB, ~1.8 TB/s)</text>
+  <!-- bars: y start 102, h 22, gap 10 -->
+  <!-- Q2_0 + drafter 156.4 -> w 488.75 -->
+  <text x="202" y="118" font-size="12.5" fill="#0b0b0b" text-anchor="end">Ternary Q2_0 + drafter</text>
+  <path d="M210 102 h484.75 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-484.75 z" fill="#2a78d6"/>
+  <text x="704" y="118" font-size="12.5" font-weight="600" fill="#0b0b0b">156.4</text>
+  <!-- Q1_0 133.7 -> w 417.8 -->
+  <text x="202" y="150" font-size="12.5" fill="#0b0b0b" text-anchor="end">1-bit Q1_0</text>
+  <path d="M210 134 h413.8 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-413.8 z" fill="#2a78d6"/>
+  <text x="633" y="150" font-size="12.5" font-weight="600" fill="#0b0b0b">133.7</text>
+  <!-- Q2_0 120.7 -> w 377.2 -->
+  <text x="202" y="182" font-size="12.5" fill="#0b0b0b" text-anchor="end">Ternary Q2_0</text>
+  <path d="M210 166 h373.2 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-373.2 z" fill="#2a78d6"/>
+  <text x="592" y="182" font-size="12.5" font-weight="600" fill="#0b0b0b">120.7</text>
+  <!-- vLLM 58.9 -> w 184.1 -->
+  <text x="202" y="214" font-size="12.5" fill="#0b0b0b" text-anchor="end">Qwen3.6 NVFP4 · vLLM</text>
+  <path d="M210 198 h180.1 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-180.1 z" fill="#008300"/>
+  <text x="399" y="214" font-size="12.5" font-weight="600" fill="#0b0b0b">58.9</text>
+
+  <!-- ===== Panel 2: DGX Spark ===== -->
+  <text x="24" y="256" font-size="13" font-weight="600" fill="#52514e">DGX Spark GB10 (128 GB unified, ~273 GB/s)</text>
+  <!-- Q1_0 42.8 -> w 133.75 -->
+  <text x="202" y="284" font-size="12.5" fill="#0b0b0b" text-anchor="end">1-bit Q1_0</text>
+  <path d="M210 268 h129.75 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-129.75 z" fill="#2a78d6"/>
+  <text x="349" y="284" font-size="12.5" font-weight="600" fill="#0b0b0b">42.8</text>
+  <!-- Q2_0 28.5 -> w 89.1 -->
+  <text x="202" y="316" font-size="12.5" fill="#0b0b0b" text-anchor="end">Ternary Q2_0</text>
+  <path d="M210 300 h85.1 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-85.1 z" fill="#2a78d6"/>
+  <text x="304" y="316" font-size="12.5" font-weight="600" fill="#0b0b0b">28.5</text>
+  <!-- Q2_0 + drafter 17.6 -> w 55 -->
+  <text x="202" y="348" font-size="12.5" fill="#0b0b0b" text-anchor="end">Ternary Q2_0 + drafter</text>
+  <path d="M210 332 h51 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-51 z" fill="#2a78d6"/>
+  <text x="270" y="348" font-size="12.5" font-weight="600" fill="#0b0b0b">17.6</text>
+  <text x="340" y="348" font-size="11.5" fill="#52514e">← drafter makes the Spark 37% slower</text>
+  <!-- vLLM 10.6 -> w 33.1 -->
+  <text x="202" y="380" font-size="12.5" fill="#0b0b0b" text-anchor="end">Qwen3.6 NVFP4 · vLLM</text>
+  <path d="M210 364 h29.1 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-29.1 z" fill="#008300"/>
+  <text x="248" y="380" font-size="12.5" font-weight="600" fill="#0b0b0b">10.6</text>
+
+  <!-- axis -->
+  <line x1="210" y1="420" x2="710" y2="420" stroke="#c3c2b7" stroke-width="1"/>
+  <line x1="210" y1="72" x2="210" y2="420" stroke="#c3c2b7" stroke-width="1"/>
+  <g font-size="11.5" fill="#898781">
+    <text x="210" y="438" text-anchor="middle">0</text>
+    <text x="335" y="438" text-anchor="middle">40</text>
+    <text x="460" y="438" text-anchor="middle">80</text>
+    <text x="585" y="438" text-anchor="middle">120</text>
+    <text x="710" y="438" text-anchor="middle">160</text>
+    <text x="460" y="458" text-anchor="middle">tokens per second (one user, generating)</text>
+  </g>
+
+  <!-- legend -->
+  <g font-size="12" fill="#52514e">
+    <rect x="530" y="26" width="12" height="12" rx="3" fill="#2a78d6"/>
+    <text x="548" y="36">Bonsai 27B · llama.cpp</text>
+    <rect x="530" y="44" width="12" height="12" rx="3" fill="#008300"/>
+    <text x="548" y="54">Qwen3.6-27B · vLLM</text>
+  </g>
+</svg>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">DGX Spark hardware context</title>
+  <desc id="desc">GB10 CPU and GPU sharing 128 GB LPDDR5x unified memory inside a small desktop machine.</desc>
+  <style>
+    text{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+    .title{font-size:42px;font-weight:800;fill:#0f172a}
+    .sub{font-size:21px;fill:#475569}
+    .head{font-size:25px;font-weight:800;fill:#0f172a}
+    .body{font-size:18px;fill:#334155}
+    .tiny{font-size:15px;fill:#64748b}
+    .mono{font-family:Roboto Mono,Menlo,monospace;font-size:17px;fill:#0f172a}
+  </style>
+  <rect width="1200" height="760" rx="30" fill="#f8fafc"/>
+  <text x="600" y="76" text-anchor="middle" class="title">DGX Spark: the one-paragraph hardware story</text>
+  <text x="600" y="112" text-anchor="middle" class="sub">A desk-sized GB10 system with enough unified memory to hold real models.</text>
+
+  <rect x="122" y="170" width="956" height="402" rx="32" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+  <rect x="178" y="222" width="304" height="218" rx="22" fill="#ecfeff" stroke="#06b6d4" stroke-width="3"/>
+  <text x="330" y="270" text-anchor="middle" class="head">Grace CPU</text>
+  <text x="330" y="306" text-anchor="middle" class="body">20 Arm cores</text>
+  <text x="330" y="336" text-anchor="middle" class="tiny">10 Cortex-X925</text>
+  <text x="330" y="362" text-anchor="middle" class="tiny">10 Cortex-A725</text>
+  <text x="330" y="396" text-anchor="middle" class="mono">Ubuntu 24.04 + CUDA 13</text>
+
+  <rect x="718" y="222" width="304" height="218" rx="22" fill="#f0fdf4" stroke="#22c55e" stroke-width="3"/>
+  <text x="870" y="270" text-anchor="middle" class="head">Blackwell GPU</text>
+  <text x="870" y="306" text-anchor="middle" class="body">6,144 CUDA cores</text>
+  <text x="870" y="336" text-anchor="middle" class="tiny">5th-gen tensor cores</text>
+  <text x="870" y="362" text-anchor="middle" class="tiny">up to 1 PFLOP FP4 sparse</text>
+  <text x="870" y="396" text-anchor="middle" class="mono">NVIDIA AI stack</text>
+
+  <rect x="512" y="276" width="176" height="72" rx="16" fill="#fff7ed" stroke="#f97316" stroke-width="3"/>
+  <text x="600" y="305" text-anchor="middle" class="body">C2C link</text>
+  <text x="600" y="331" text-anchor="middle" class="tiny">one package</text>
+  <path d="M482 312 L512 312" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+  <path d="M688 312 L718 312" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+
+  <rect x="220" y="478" width="760" height="66" rx="18" fill="#0f172a"/>
+  <text x="600" y="505" text-anchor="middle" font-size="23" font-weight="800" fill="#ffffff">128 GB LPDDR5x unified memory | 273 GB/s</text>
+  <text x="600" y="532" text-anchor="middle" font-size="16" fill="#cbd5e1">CPU and GPU see one shared pool, so large weights do not need to bounce over PCIe.</text>
+  <path d="M330 440 L330 478" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M870 440 L870 478" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+
+  <g transform="translate(154 624)">
+    <rect width="892" height="62" rx="18" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+    <text x="446" y="27" text-anchor="middle" class="body">150 x 150 x 50.5 mm | 1.2 kg | 240W PSU / 140W GB10 SoC TDP</text>
+    <text x="446" y="51" text-anchor="middle" class="tiny">The thesis: Spark's value is capacity. Big models fit on your desk.</text>
+  </g>
+</svg>
