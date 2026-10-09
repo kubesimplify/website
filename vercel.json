@@ -102,6 +102,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/ai-infrastructure-for-platform-engineers",
+      "destination": "https://blog.kubesimplify.com/ai-infrastructure-for-platform-engineers",
+      "permanent": true
+    },
+    {
       "source": "/blog/an-overview-of-gitops-and-argocd",
       "destination": "https://blog.kubesimplify.com/an-overview-of-gitops-and-argocd",
       "permanent": true
@@ -1162,6 +1167,17 @@
     {
       "source": "/about-my-pdf-editor-project",
       "destination": "https://blog.kubesimplify.com/about-my-pdf-editor-project",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/ai-infrastructure-for-platform-engineers",
+      "destination": "https://blog.kubesimplify.com/ai-infrastructure-for-platform-engineers",
       "permanent": true,
       "has": [
         {

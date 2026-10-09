@@ -22,6 +22,7 @@
 /blog/a-simple-way-to-structure-your-terraform-code                                    /a-simple-way-to-structure-your-terraform-code  301!
 /blog/a-simplified-guide-to-yaml                                                       /a-simplified-guide-to-yaml  301!
 /blog/about-my-pdf-editor-project                                                      /about-my-pdf-editor-project  301!
+/blog/ai-infrastructure-for-platform-engineers                                         /ai-infrastructure-for-platform-engineers  301!
 /blog/an-overview-of-gitops-and-argocd                                                 /an-overview-of-gitops-and-argocd  301!
 /blog/announcing-buildsafe                                                             /announcing-buildsafe  301!
 /blog/api-response-in-go                                                               /api-response-in-go  301!
@@ -252,6 +253,7 @@
 /a-simple-way-to-structure-your-terraform-code                                    /blog/a-simple-way-to-structure-your-terraform-code  200!
 /a-simplified-guide-to-yaml                                                       /blog/a-simplified-guide-to-yaml  200!
 /about-my-pdf-editor-project                                                      /blog/about-my-pdf-editor-project  200!
+/ai-infrastructure-for-platform-engineers                                         /blog/ai-infrastructure-for-platform-engineers  200!
 /an-overview-of-gitops-and-argocd                                                 /blog/an-overview-of-gitops-and-argocd  200!
 /announcing-buildsafe                                                             /blog/announcing-buildsafe  200!
 /api-response-in-go                                                               /blog/api-response-in-go  200!
