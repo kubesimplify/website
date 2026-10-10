@@ -66,7 +66,7 @@ The two cards sit at `0000:01:00.0` and `0000:41:00.0`. We hand both to KubeVirt
 
 A PCI function is owned by exactly one driver at a time. KubeVirt can only hand a function to a VM when that driver is `vfio-pci`.
 
-![Two NVIDIA L4 cards on a bare metal host, each passed through by KubeVirt to its own VM: tenant-1 runs Ollama, tenant-2 runs RKE2, the GPU Operator and HAMi](../../public/img/blog/ai-infrastructure-for-platform-engineers/gpu-catalog-architecture.png)
+![Two NVIDIA L4 cards on a bare metal host, each passed through by KubeVirt to its own VM: tenant-1 runs Ollama, tenant-2 runs RKE2, the GPU Operator and HAMi](/img/blog/ai-infrastructure-for-platform-engineers/gpu-catalog-architecture.png)
 
 The host cluster schedules the VMs. It does not run the customer's job. A noisy notebook, a privileged pod or a CUDA upgrade inside one VM stays inside that VM.
 
