@@ -53,7 +53,7 @@ You need root on the GPU node for the first two steps. After that the work runs 
 Both cards are NVIDIA L4s. `lspci` shows them:
 
 ```bash
-[root@utho ~]# spci -nn | grep -i nvidia
+root@utho:~# lspci -nn | grep -i nvidia
 01:00.0 3D controller [0302]: NVIDIA Corporation AD104GL [L4] [10de:27b8] (rev a1)
 41:00.0 3D controller [0302]: NVIDIA Corporation AD104GL [L4] [10de:27b8] (rev a1)
 ```
@@ -115,11 +115,11 @@ utho   Ready    control-plane,etcd   8d    v1.36.4+rke2r1
 If you have no cluster, any distribution will do. We used a single-node RKE2 server. `optional/rke2.sh` installs it and waits for the node to be `Ready`:
 
 ```bash
-root@utho:~# curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION="v1.36.4+rke2r1" sh -
-root@utho:~# systemctl enable --now rke2-server
-root@utho:~# export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
-root@utho:~# export PATH="/var/lib/rancher/rke2/bin:${PATH}"
-root@utho:~# kubectl get nodes
+curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION="v1.36.4+rke2r1" sh -
+systemctl enable --now rke2-server
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+export PATH="/var/lib/rancher/rke2/bin:${PATH}"
+kubectl get nodes
 ```
 
 RKE2 ships its own `kubectl` and writes its kubeconfig to `/etc/rancher/rke2/rke2.yaml`. On another distribution, the equivalent is whatever kubeconfig that distribution gives you.
@@ -151,18 +151,18 @@ You bind by PCI address, not by ID. Both L4s share `10de:27b8`, so a module opti
 `01-bind-card-to-vfio.sh` does the move, as root on the GPU node. It takes a space-separated list in `PCI_ADDRS` and defaults to both cards on this machine:
 
 ```bash
-root@utho:~# PCI_ADDRS="0000:01:00.0 0000:41:00.0"
+PCI_ADDRS="0000:01:00.0 0000:41:00.0"
 
-root@utho:~# apt-get install -y driverctl
-root@utho:~# printf '%s\n' vfio vfio_iommu_type1 vfio_pci > /etc/modules-load.d/vfio.conf
-root@utho:~# modprobe vfio
-root@utho:~# modprobe vfio_iommu_type1
-root@utho:~# modprobe vfio_pci
+apt-get install -y driverctl
+printf '%s\n' vfio vfio_iommu_type1 vfio_pci > /etc/modules-load.d/vfio.conf
+modprobe vfio
+modprobe vfio_iommu_type1
+modprobe vfio_pci
 
 # the persistence daemon holds the NVIDIA bind and makes unbind fail
-root@utho:~# systemctl stop nvidia-persistenced 2>/dev/null || true
+systemctl stop nvidia-persistenced 2>/dev/null || true
 
-root@utho:~# for PCI_ADDR in ${PCI_ADDRS}; do
+for PCI_ADDR in ${PCI_ADDRS}; do
   echo "${PCI_ADDR}" > "/sys/bus/pci/devices/${PCI_ADDR}/driver/unbind"
   echo vfio-pci > "/sys/bus/pci/devices/${PCI_ADDR}/driver_override"
   echo "${PCI_ADDR}" > /sys/bus/pci/drivers/vfio-pci/bind
@@ -195,10 +195,16 @@ root@utho:~# driverctl list-overrides
 KubeVirt here comes from the upstream operator manifest, not a Helm release. `02-kubevirt.sh` applies the operator, waits for it, applies the `KubeVirt` custom resource, and installs CDI, which imports each guest's root disk. It uses whatever cluster your kubeconfig points at, so it is the same on any distribution:
 
 ```bash
-root@utho:~# VERSION=v1.9.0
-root@utho:~# kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-operator.yaml"
-root@utho:~# kubectl -n kubevirt rollout status deploy/virt-operator --timeout=300s
-root@utho:~# kubectl apply -f kubevirt/kubevirt-cr.yaml
+VERSION=v1.9.0
+
+kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-operator.yaml"
+kubectl -n kubevirt rollout status deploy/virt-operator --timeout=300s
+kubectl apply -f kubevirt/kubevirt-cr.yaml
+```
+
+Check that KubeVirt reports `Deployed`:
+
+```bash
 root@utho:~# kubectl get kubevirt -n kubevirt kubevirt
 NAME       AGE   PHASE
 kubevirt   21h   Deployed
@@ -244,8 +250,8 @@ You want `2` next to the GPU node, one per card. If it shows less, a card is not
 The script defaults to `GPU_COUNT=2`, which puts both cards in one VM. That is a valid layout for a customer who needs two cards. For one card per customer, set `GPU_COUNT=1` and run the script once per VM, with its own name and SSH port:
 
 ```bash
-root@utho:~# VM_NAME=tenant-1 NODE_PORT=30022 GPU_COUNT=1 ./03-ubuntu-vm.sh
-root@utho:~# VM_NAME=tenant-2 NODE_PORT=30023 GPU_COUNT=1 ./03-ubuntu-vm.sh
+VM_NAME=tenant-1 NODE_PORT=30022 GPU_COUNT=1 ./03-ubuntu-vm.sh
+VM_NAME=tenant-2 NODE_PORT=30023 GPU_COUNT=1 ./03-ubuntu-vm.sh
 ```
 
 The GPU stanza is the whole change from a normal KubeVirt VM. This is `tenant-1`:
@@ -381,16 +387,22 @@ virtualmachineinstance.kubevirt.io/tenant-2   14h   Running   10.42.0.108   utho
 Then log in to each one and check that the card arrived:
 
 ```bash
-root@utho:~# ssh -p 30022 -i ~/.ssh/id_rsa ubuntu@10.42.0.98    # tenant-1
-root@utho:~# ssh -p 30023 -i ~/.ssh/id_rsa ubuntu@10.42.0.108    # tenant-2
-root@utho:~# lspci | grep -i nvidia
+ssh -p 30022 -i ~/.ssh/id_rsa ubuntu@<IP_OF_THE_GPU_NODE>    # tenant-1
+ssh -p 30023 -i ~/.ssh/id_rsa ubuntu@<IP_OF_THE_GPU_NODE>    # tenant-2
+```
+
+Inside each guest:
+
+```bash
+ubuntu@tenant-1:~$ lspci | grep -i nvidia
+09:00.0 3D controller: NVIDIA Corporation AD104GL [L4] (rev a1)
 ```
 
 If your laptop cannot reach the NodePorts, jump through the GPU node to the VM's IP instead:
 
 ```bash
-root@utho:~# ssh -J root@<IP_OF_THE_GPU_NODE> ubuntu@10.42.0.98    # tenant-1
-root@utho:~# ssh -J root@<IP_OF_THE_GPU_NODE> ubuntu@10.42.0.108    # tenant-2
+ssh -J root@<IP_OF_THE_GPU_NODE> ubuntu@10.42.0.98     # tenant-1
+ssh -J root@<IP_OF_THE_GPU_NODE> ubuntu@10.42.0.108    # tenant-2
 ```
 
 Inside each guest, `lspci` shows one NVIDIA L4. In our guests it sits at `09:00.0`, whichever physical card it is. If it shows nothing, fix it on the host: check that `deviceName` matches the advertised resource and that the card is still on `vfio-pci`.
@@ -403,32 +415,17 @@ This is the simple tier. The customer gets a machine with a whole card and does 
 
 ### Install the NVIDIA driver
 
-A fresh guest has the L4 on its PCI bus and no driver for it. `lsmod` shows only `nvidiafb`, and `nvidia-smi` does not exist. The guest does not inherit anything from the host. VFIO hands over the PCI device, and the guest kernel still needs its own driver.
+A fresh guest has the L4 on its PCI bus and no driver for it. `lsmod` shows no `nvidia` module, and `nvidia-smi` does not exist. The guest does not inherit anything from the host. VFIO hands over the PCI device, and the guest kernel still needs its own driver.
 
 We used the open kernel driver, version `615.71.09`. Copy `01-nvidia-driver.sh` into the VM, then run it as root:
 
 ```bash
-ubuntu@tenant-1:~$ hostname
-tenant-1
-ubuntu@tenant-1:~$ lspci -nnk | grep -A5 -i nvidia
-09:00.0 3D controller [0302]: NVIDIA Corporation AD104GL [L4] [10de:27b8] (rev a1)
-	Subsystem: NVIDIA Corporation AD104GL [L4] [10de:16ca]
-	Kernel driver in use: nvidia
-	Kernel modules: nvidiafb, nvidia_drm, nvidia
-0a:00.0 Unclassified device [00ff]: Red Hat, Inc. Virtio 1.0 memory balloon [1af4:1045] (rev 01)
-	Subsystem: Red Hat, Inc. Virtio 1.0 memory balloon [1af4:1100]
-	Kernel driver in use: virtio-pci
-ubuntu@tenant-1:~$ lsmod | grep -E 'nouveau|nvidia' || true
-nvidia_uvm           2068480  0
-nvidia_modeset       1556480  0
-nvidia              16875520  7 nvidia_uvm,nvidia_modeset
-video                  77824  1 nvidia_modeset
-ecc                    45056  1 nvidia
-ubuntu@tenant-1:~$ df -h /
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda1        96G  7.6G   89G   8% /
+hostname
+lspci -nnk | grep -A5 -i nvidia
+lsmod | grep -E 'nouveau|nvidia' || true
+df -h /
 
-ubuntu@tenant-1:~$ bash 01-nvidia-driver.sh
+bash 01-nvidia-driver.sh
 ```
 
 The first four commands are the starting point: a passed-through L4, no `nvidia` module and plenty of free disk. The script does this:
@@ -446,7 +443,7 @@ DKMS builds `nvidia` for the guest kernel, `6.8.0-142-generic` in our case. You 
 When the guest is back, confirm the L4 belongs to the guest driver:
 
 ```bash
-ubuntu@tenant-1:~$ nvidia-smi
+root@tenant-1:~# nvidia-smi
 Sat Oct 10 09:39:09 2026
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 615.71.09              KMD Version: 615.71.09     CUDA UMD Version: 13.4     |
@@ -468,7 +465,7 @@ Sat Oct 10 09:39:09 2026
 |  No running processes found                                                             |
 +-----------------------------------------------------------------------------------------+
 
-ubuntu@tenant-1:~$ lspci -nnk -d 10de: | grep -A3 '3D controller'
+root@tenant-1:~# lspci -nnk -d 10de: | grep -A3 '3D controller'
 09:00.0 3D controller [0302]: NVIDIA Corporation AD104GL [L4] [10de:27b8] (rev a1)
 	Subsystem: NVIDIA Corporation AD104GL [L4] [10de:16ca]
 	Kernel driver in use: nvidia
@@ -484,21 +481,26 @@ We did not install the NVIDIA Container Toolkit here. Nothing in this guest runs
 Ollama is a small model server that uses the guest's GPU if it finds a driver:
 
 ```bash
-ubuntu@tenant-1:~$ curl -fsSL https://ollama.com/install.sh | sh
-ubuntu@tenant-1:~$ systemctl enable --now ollama
-ubuntu@tenant-1:~$ ollama --version
+curl -fsSL https://ollama.com/install.sh | sh
+systemctl enable --now ollama
+```
+
+Check the version:
+
+```bash
+root@tenant-1:~# ollama --version
 ollama version 0.40.2
 ```
 
 Pull a small model and run it:
 
 ```bash
-ubuntu@tenant-1:~$ ollama pull llama3.2:1b
-ubuntu@tenant-1:~$ ollama run llama3.2:1b --verbose 'In one short sentence, what GPU are you running on if nvidia-smi shows an NVIDIA L4?'
-ubuntu@tenant-1:~$ ollama ps
+root@tenant-1:~# ollama pull llama3.2:1b
+root@tenant-1:~# ollama run llama3.2:1b --verbose 'In one short sentence, what GPU are you running on if nvidia-smi shows an NVIDIA L4?'
+root@tenant-1:~# ollama ps
 NAME           ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL
 llama3.2:1b    baf6a787fdff    1.6 GB    100% GPU     4096       llamacpp    4 minutes from now
-ubuntu@tenant-1:~$ nvidia-smi
+root@tenant-1:~# nvidia-smi
 Sat Oct 10 09:40:32 2026
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 615.71.09              KMD Version: 615.71.09     CUDA UMD Version: 13.4     |
@@ -530,7 +532,7 @@ This is the second tier. The customer gets the same whole card, plus a Kubernete
 First check the GPU inside the tenant-2 vm using `lspci`
 
 ```bash
-ubuntu@tenant-2:~$ lspci | grep -i nvidia
+root@tenant-2:~# lspci | grep -i nvidia
 09:00.0 3D controller: NVIDIA Corporation AD104GL [L4] (rev a1)
 ```
 
@@ -541,22 +543,28 @@ The VM is an ordinary Ubuntu machine with a GPU. Give it its own Kubernetes. RKE
 There is one thing to set before the install. A cluster inside a VM on a cluster is a cluster inside a cluster, and the two must not share address ranges:
 
 ```bash
-ubuntu@tenant-2:~$ mkdir -p /etc/rancher/rke2
-ubuntu@tenant-2:~$ cat > /etc/rancher/rke2/config.yaml <<'EOF'
+mkdir -p /etc/rancher/rke2
+cat > /etc/rancher/rke2/config.yaml <<'EOF'
 cluster-cidr: 10.52.0.0/16
 service-cidr: 10.53.0.0/16
 cluster-dns: 10.53.0.10
 EOF
 
-ubuntu@tenant-2:~$ curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION="v1.36.4+rke2r1" sh -
-ubuntu@tenant-2:~$ systemctl enable --now rke2-server
+curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION="v1.36.4+rke2r1" sh -
+systemctl enable --now rke2-server
 
-ubuntu@tenant-2:~$ export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
-ubuntu@tenant-2:~$ export PATH="/var/lib/rancher/rke2/bin:${PATH}"
-ubuntu@tenant-2:~$ kubectl get nodes
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+export PATH="/var/lib/rancher/rke2/bin:${PATH}"
+
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
+```
+
+Check that the node is `Ready`:
+
+```bash
+root@tenant-2:~# kubectl get nodes
 NAME       STATUS   ROLES                AGE   VERSION
 tenant-2   Ready    control-plane,etcd   15h   v1.36.4+rke2r1
-ubuntu@tenant-2:~$ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
 ```
 
 **Why the** `config.yaml`**.** KubeVirt gives the guest the host cluster's DNS server, `10.43.0.10`, over DHCP. RKE2's default service range is `10.43.0.0/16`, the same as the host's. Left alone, the guest's own `kube-proxy` claims `10.43.0.10`, the guest's DNS lookups get "connection refused", and the node stays `NotReady` with `rke2-canal` stuck in `ImagePullBackOff` because it cannot resolve the registry. We hit exactly that. Moving the guest's pod and service ranges fixes it, and the node was `Ready` in under a minute.
@@ -570,10 +578,10 @@ A loaded kernel module is not enough for containers. The container runtime has t
 Install Helm in the VM, then add the chart repository and install version `v26.3.2`. `guest/02-gpu-operator.sh` does all of it:
 
 ```bash
-ubuntu@tenant-2:~$ helm repo add nvidia https://nvidia.github.io/gpu-operator
-ubuntu@tenant-2:~$ helm repo update
+helm repo add nvidia https://nvidia.github.io/gpu-operator
+helm repo update
 
-ubuntu@tenant-2:~$ helm upgrade --install gpu-operator nvidia/gpu-operator \
+helm upgrade --install gpu-operator nvidia/gpu-operator \
   --version v26.3.2 \
   --namespace gpu-operator --create-namespace \
   -f gpu-operator-values.yaml \
@@ -604,7 +612,7 @@ toolkit:
 When it finishes, the operator pods run in `gpu-operator`, and a `RuntimeClass` named `nvidia` exists:
 
 ```bash
-ubuntu@tenant-2:~$ kubectl -n gpu-operator get pods
+root@tenant-2:~# kubectl -n gpu-operator get pods
 NAME                                                         READY   STATUS      RESTARTS   AGE
 gpu-feature-discovery-zxjzv                                  1/1     Running     0          14h
 gpu-operator-6d8769c57c-grnsv                                1/1     Running     0          15h
@@ -617,7 +625,7 @@ nvidia-dcgm-exporter-mjdjf                                   1/1     Running    
 nvidia-driver-daemonset-5wlbr                                1/1     Running     0          15h
 nvidia-operator-validator-v5s2v                              1/1     Running     0          14h
 
-ubuntu@tenant-2:~$ kubectl get runtimeclass nvidia
+root@tenant-2:~# kubectl get runtimeclass nvidia
 NAME     HANDLER   AGE
 nvidia   nvidia    15h
 ```
@@ -625,7 +633,7 @@ nvidia   nvidia    15h
 The driver lives in a container, not on the VM's own path. To run `nvidia-smi` against it from the VM, go through its root:
 
 ```bash
-ubuntu@tenant-2:~$ sudo chroot /run/nvidia/driver nvidia-smi -L
+root@tenant-2:~# chroot /run/nvidia/driver nvidia-smi -L
 GPU 0: NVIDIA L4 (UUID: GPU-69f37bdd-70f5-800e-2a0d-8249c9b1cb41)
 ```
 
@@ -636,12 +644,12 @@ One L4 is one GPU to Kubernetes. HAMi turns it into many. Its device plugin adve
 HAMi only schedules onto nodes labelled `gpu=on`. `guest/03-hami.sh` labels the node, adds the chart repository and installs `2.10.0`:
 
 ```bash
-ubuntu@tenant-2:~$ kubectl label node --all gpu=on --overwrite
+kubectl label node --all gpu=on --overwrite
 
-ubuntu@tenant-2:~$ helm repo add hami-charts https://project-hami.github.io/HAMi/
-ubuntu@tenant-2:~$ helm repo update
+helm repo add hami-charts https://project-hami.github.io/HAMi/
+helm repo update
 
-ubuntu@tenant-2:~$ helm upgrade --install hami hami-charts/hami \
+helm upgrade --install hami hami-charts/hami \
   --version 2.10.0 \
   --namespace hami-system --create-namespace \
   -f hami-values.yaml \
@@ -690,10 +698,10 @@ Check the host first, then each tenant.
 **The host sees two VMs and nothing else.** On the GPU node:
 
 ```bash
-ubuntu@utho:~$ kubectl -n tenants get vmi
-NAME                                  AGE   PHASE     IP            NODENAME   READY
-tenant-1                               20h   Running   10.42.0.98    utho       True
-tenant-2                               14h   Running   10.42.0.108   utho       True
+root@utho:~# kubectl -n tenants get vmi
+NAME       AGE   PHASE     IP            NODENAME   READY
+tenant-1   20h   Running   10.42.0.98    utho       True
+tenant-2   14h   Running   10.42.0.108   utho       True
 ```
 
 You want `tenant-1` and `tenant-2` both `Running`. The Ollama process, the guest cluster and their GPU memory are invisible to the host cluster. It only knows that two VMs each hold a PCI device.
@@ -705,7 +713,7 @@ You want `tenant-1` and `tenant-2` both `Running`. The Ollama process, the guest
 **tenant-2 advertises ten GPUs from one card.** Inside the VM:
 
 ```bash
-ubuntu@tenant-2:~$ kubectl describe node | grep -A6 Allocatable
+root@tenant-2:~# kubectl describe node | grep -A6 Allocatable
 Allocatable:
   cpu:                8
   ephemeral-storage:  97743690881
@@ -718,7 +726,7 @@ Allocatable:
 **tenant-2 still has one physical card.** `nvidia-smi -L` does not show ten devices. It shows the one L4, because HAMi splits the card in Kubernetes, not in the driver:
 
 ```bash
-ubuntu@tenant-2:~$ sudo chroot /run/nvidia/driver nvidia-smi -L
+root@tenant-2:~# chroot /run/nvidia/driver nvidia-smi -L
 GPU 0: NVIDIA L4 (UUID: GPU-69f37bdd-70f5-800e-2a0d-8249c9b1cb41)
 ```
 
@@ -732,9 +740,9 @@ resources:
 ```
 
 ```bash
-ubuntu@tenant-2:~$ kubectl apply -f guest/gpu-test-pods.yaml
-ubuntu@tenant-2:~$ kubectl wait --for=condition=Ready pod/gpu-test-1 pod/gpu-test-2 --timeout=300s
-ubuntu@tenant-2:~$ kubectl exec gpu-test-1 -- nvidia-smi
+root@tenant-2:~# kubectl apply -f guest/gpu-test-pods.yaml
+root@tenant-2:~# kubectl wait --for=condition=Ready pod/gpu-test-1 pod/gpu-test-2 --timeout=300s
+root@tenant-2:~# kubectl exec gpu-test-1 -- nvidia-smi
 Sat Oct 10 10:14:10 2026
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 580.126.20             Driver Version: 580.126.20     CUDA Version: 13.0     |
@@ -755,7 +763,7 @@ Sat Oct 10 10:14:10 2026
 |=========================================================================================|
 |  No running processes found                                                             |
 +-----------------------------------------------------------------------------------------+
-ubuntu@tenant-2:~$ kubectl exec gpu-test-2 -- nvidia-smi
+root@tenant-2:~# kubectl exec gpu-test-2 -- nvidia-smi
 Sat Oct 10 10:14:44 2026
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 580.126.20             Driver Version: 580.126.20     CUDA Version: 13.0     |
