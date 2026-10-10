@@ -5,6 +5,8 @@ seoDescription: "How a platform team can build an AI factory on Kubernetes and g
 datePublished: 2026-10-06T10:00:00.000Z
 slug: ai-infrastructure-for-platform-engineers
 author: shubham-katara
+draft: false
+cover: /img/blog/ai-infrastructure-for-platform-engineers/cover.png
 tags: ["kubevirt", "kubernetes", "gpu", "nvidia", "hami", "platform-engineering"]
 ---
 
@@ -49,9 +51,10 @@ You need root on the GPU node for the first two steps. After that the work runs 
 
 Both cards are NVIDIA L4s. `lspci` shows them:
 
-```text
-01:00.0 3D controller: NVIDIA Corporation AD104GL [L4] [10de:27b8]
-41:00.0 3D controller: NVIDIA Corporation AD104GL [L4] [10de:27b8]
+```bash
+[root@utho ~]# lspci -nn | grep -i nvidia
+01:00.0 3D controller [0302]: NVIDIA Corporation AD104GL [L4] [10de:27b8] (rev a1)
+41:00.0 3D controller [0302]: NVIDIA Corporation AD104GL [L4] [10de:27b8] (rev a1)
 ```
 
 `10de:27b8` is the L4's PCI ID. Every later step, the KubeVirt allowlist in particular, has to use the ID your machine actually reports, so write it down before you write a manifest.
@@ -62,27 +65,7 @@ The two cards sit at `0000:01:00.0` and `0000:41:00.0`. We hand both to KubeVirt
 
 A PCI function is owned by exactly one driver at a time. KubeVirt can only hand a function to a VM when that driver is `vfio-pci`.
 
-```text
-bare metal, AMD-V + AMD-Vi
-┌──────────────────────────────────────────────┐
-│  L4  0000:01:00.0  vfio-pci                  │
-│  L4  0000:41:00.0  vfio-pci                  │
-│                                              │
-│  Kubernetes                                  │
-│    KubeVirt                                  │
-│      permittedHostDevices  10DE:27B8         │
-└──────────────┬───────────────┬───────────────┘
-               │ PCI           │ PCI
-               ▼               ▼
-     ┌───────────────────┐ ┌───────────────────┐
-     │ tenant-1          │ │ tenant-2          │
-     │ Ubuntu 24.04 VM   │ │ Ubuntu 24.04 VM   │
-     │ sees one real L4  │ │ sees one real L4  │
-     │ NVIDIA driver     │ │ RKE2              │
-     │ Ollama            │ │ GPU Operator      │
-     │   llama3.2:1b     │ │ HAMi: 1 L4 -> 10  │
-     └───────────────────┘ └───────────────────┘
-```
+![Two NVIDIA L4 cards on a bare metal host, each passed through by KubeVirt to its own VM: tenant-1 runs Ollama, tenant-2 runs RKE2, the GPU Operator and HAMi](../../public/img/blog/ai-infrastructure-for-platform-engineers/gpu-catalog-architecture.png)
 
 The host cluster schedules the VMs. It does not run the customer's job. A noisy notebook, a privileged pod or a CUDA upgrade inside one VM stays inside that VM.
 
@@ -91,10 +74,27 @@ The host cluster schedules the VMs. It does not run the customer's job. A noisy 
 KubeVirt needs hardware virtualization, and GPU passthrough additionally needs the IOMMU. On this EPYC box that is AMD-V and AMD-Vi.
 
 ```bash
-grep -m1 -o svm /proc/cpuinfo
-ls -l /dev/kvm
-lsmod | grep kvm
-dmesg | grep -i AMD-Vi | head
+root@utho:~# grep -m1 -o svm /proc/cpuinfo
+svm
+svm
+root@utho:~# ls -l /dev/kvm
+crw-rw---- 1 root kvm 10, 232 Oct  9 18:53 /dev/kvm
+root@utho:~# dmesg | grep -i AMD-Vi | head
+[    1.055072] AMD-Vi: Using global IVHD EFR:0x58f77ef22294ade, EFR2:0x0
+[    2.125230] pci 0000:60:00.2: AMD-Vi: IOMMU performance counters supported
+[    2.141294] pci 0000:40:00.2: AMD-Vi: IOMMU performance counters supported
+[    2.158539] pci 0000:20:00.2: AMD-Vi: IOMMU performance counters supported
+[    2.177095] pci 0000:00:00.2: AMD-Vi: IOMMU performance counters supported
+[    2.196556] pci 0000:e0:00.2: AMD-Vi: IOMMU performance counters supported
+[    2.210361] pci 0000:c0:00.2: AMD-Vi: IOMMU performance counters supported
+[    2.226984] pci 0000:a0:00.2: AMD-Vi: IOMMU performance counters supported
+[    2.246850] pci 0000:80:00.2: AMD-Vi: IOMMU performance counters supported
+[    2.261040] AMD-Vi: Extended features (0x58f77ef22294ade, 0x0): PPR X2APIC NX GT IA GA PC GA_vAPIC
+root@utho:~# lsmod | grep kvm
+kvm_amd               212992  22
+kvm                  1404928  19 kvm_amd
+irqbypass              12288  14 vfio_pci_core,kvm
+ccp                   147456  1 kvm_amd
 ```
 
 You want `svm`, a `/dev/kvm` node, `kvm_amd` in `lsmod` and AMD-Vi lines in `dmesg`.
@@ -169,7 +169,7 @@ for PCI_ADDR in ${PCI_ADDRS}; do
 done
 ```
 
-**Use `driverctl`, not just sysfs.** A `driver_override` written to sysfs is gone after a reboot, and another driver claims the function again. `driverctl set-override` stores the choice per slot. Loading the three `vfio` modules at boot gives that override a driver to bind to.
+**Use** `driverctl`**, not just sysfs.** A `driver_override` written to sysfs is gone after a reboot, and another driver claims the function again. `driverctl set-override` stores the choice per slot. Loading the three `vfio` modules at boot gives that override a driver to bind to.
 
 Confirm both cards are bound before you go further:
 
@@ -181,7 +181,7 @@ driverctl list-overrides
 
 `driverctl list-overrides` should list both addresses:
 
-```text
+```bash
 0000:01:00.0 vfio-pci
 0000:41:00.0 vfio-pci
 ```
@@ -472,7 +472,7 @@ export PATH="/var/lib/rancher/rke2/bin:${PATH}"
 kubectl get nodes
 ```
 
-**Why the `config.yaml`.** KubeVirt gives the guest the host cluster's DNS server, `10.43.0.10`, over DHCP. RKE2's default service range is `10.43.0.0/16`, the same as the host's. Left alone, the guest's own `kube-proxy` claims `10.43.0.10`, the guest's DNS lookups get "connection refused", and the node stays `NotReady` with `rke2-canal` stuck in `ImagePullBackOff` because it cannot resolve the registry. We hit exactly that. Moving the guest's pod and service ranges fixes it, and the node was `Ready` in under a minute.
+**Why the** `config.yaml`**.** KubeVirt gives the guest the host cluster's DNS server, `10.43.0.10`, over DHCP. RKE2's default service range is `10.43.0.0/16`, the same as the host's. Left alone, the guest's own `kube-proxy` claims `10.43.0.10`, the guest's DNS lookups get "connection refused", and the node stays `NotReady` with `rke2-canal` stuck in `ImagePullBackOff` because it cannot resolve the registry. We hit exactly that. Moving the guest's pod and service ranges fixes it, and the node was `Ready` in under a minute.
 
 Wait until the node is `Ready`. This cluster belongs to the customer. The host cluster never sees it.
 
@@ -507,10 +507,10 @@ toolkit:
     - name: CONTAINERD_RUNTIME_CLASS
       value: nvidia
     - name: CONTAINERD_SET_AS_DEFAULT
-      value: 'true'
+      value: "true"
 ```
 
-**Why the `toolkit.env` block.** RKE2 keeps its `containerd` socket and config in its own paths, not the usual ones. RKE2 reuses the k3s socket location, hence `/run/k3s`. These variables point the operator's toolkit at them, name the runtime class `nvidia`, and make it the default runtime.
+**Why the** `toolkit.env` **block.** RKE2 keeps its `containerd` socket and config in its own paths, not the usual ones. RKE2 reuses the k3s socket location, hence `/run/k3s`. These variables point the operator's toolkit at them, name the runtime class `nvidia`, and make it the default runtime.
 
 **Why the device plugin is off.** HAMi brings its own device plugin in the next step. Two plugins advertising the same GPU would fight over it.
 
@@ -529,7 +529,7 @@ chroot /run/nvidia/driver nvidia-smi -L
 
 You want one L4, the card you passed through:
 
-```text
+```bash
 GPU 0: NVIDIA L4 (UUID: GPU-69f37bdd-70f5-800e-2a0d-8249c9b1cb41)
 ```
 
@@ -582,10 +582,10 @@ devicePlugin:
 
 Four lines of it need a reason:
 
-- **`runtimeClassName: "nvidia"`.** The GPU Operator does not set `containerd`'s default runtime name, so HAMi's monitor and its own NVML check need this to get the driver injected by the NVIDIA runtime.
-- **`deviceListStrategy: "cdi-annotations"`.** CDI-based injection through the container toolkit needs this exact value. The plain `"cdi"` is not valid.
-- **`nvidiaDriverRoot: /run/nvidia/driver`.** The GPU Operator installs the driver under that path, not at the root of the filesystem.
-- **`gpuOperatorToolkitReady.enabled: true`.** The HAMi plugin waits for the operator's toolkit before it starts.
+- `runtimeClassName: "nvidia"`**.** The GPU Operator does not set `containerd`'s default runtime name, so HAMi's monitor and its own NVML check need this to get the driver injected by the NVIDIA runtime.
+- `deviceListStrategy: "cdi-annotations"`**.** CDI-based injection through the container toolkit needs this exact value. The plain `"cdi"` is not valid.
+- `nvidiaDriverRoot: /run/nvidia/driver`**.** The GPU Operator installs the driver under that path, not at the root of the filesystem.
+- `gpuOperatorToolkitReady.enabled: true`**.** The HAMi plugin waits for the operator's toolkit before it starts.
 
 ## Step 7: Prove it end to end
 
@@ -635,7 +635,7 @@ kubectl exec gpu-test-2 -- nvidia-smi
 
 Each pod's `nvidia-smi` reports a memory total of 1 GiB, not the 23 GB of the real card:
 
-```text
+```bash
 |   0  NVIDIA L4                      On  |   00000000:09:00.0 Off |                    0 |
 | N/A   51C    P8             17W /   72W |       0MiB /   1024MiB |      0%      Default |
 ```
