@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs><filter id="shadow"><feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter></defs>
+  <rect width="1100" height="520" rx="16" fill="#FAFBFC"/>
+  <text x="550" y="42" text-anchor="middle" font-size="26" font-weight="700" fill="#1a1a2e">Docker Storage: Three Types</text>
+
+  <!-- Volumes -->
+  <rect x="30" y="70" width="330" height="420" rx="14" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="30" y="70" width="330" height="44" rx="14" fill="#1D63ED"/>
+  <text x="195" y="98" text-anchor="middle" font-size="17" font-weight="700" fill="white">Volumes</text>
+
+  <!-- Volume diagram -->
+  <rect x="60" y="135" width="270" height="55" rx="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+  <text x="195" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="#1E40AF">Container: /app/data</text>
+  <text x="195" y="178" text-anchor="middle" font-size="11" fill="#3B82F6">Mounts the volume here</text>
+
+  <text x="195" y="210" text-anchor="middle" font-size="18" fill="#3B82F6">&#x2195;</text>
+
+  <rect x="60" y="220" width="270" height="55" rx="10" fill="#1D63ED"/>
+  <text x="195" y="245" text-anchor="middle" font-size="13" font-weight="600" fill="white">Docker-Managed Storage</text>
+  <text x="195" y="262" text-anchor="middle" font-size="11" fill="#BFDBFE">/var/lib/docker/volumes/</text>
+
+  <rect x="60" y="295" width="270" height="140" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="80" y="318" font-size="12" font-weight="600" fill="#166534">&#x2713; Best for persistent data</text>
+  <text x="80" y="340" font-size="12" font-weight="600" fill="#166534">&#x2713; Docker manages lifecycle</text>
+  <text x="80" y="362" font-size="12" font-weight="600" fill="#166534">&#x2713; Works on all platforms</text>
+  <text x="80" y="384" font-size="12" font-weight="600" fill="#166534">&#x2713; Easy to backup/migrate</text>
+  <text x="80" y="406" font-size="12" font-weight="600" fill="#166534">&#x2713; Can share between containers</text>
+  <text x="80" y="428" font-size="11" fill="#6B7280">-v mydata:/app/data</text>
+
+  <rect x="60" y="445" width="270" height="30" rx="8" fill="#1D63ED"/>
+  <text x="195" y="465" text-anchor="middle" font-size="12" font-weight="700" fill="white">RECOMMENDED for production</text>
+
+  <!-- Bind Mounts -->
+  <rect x="385" y="70" width="330" height="420" rx="14" fill="#F0FDF4" stroke="#22C55E" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="385" y="70" width="330" height="44" rx="14" fill="#16A34A"/>
+  <text x="550" y="98" text-anchor="middle" font-size="17" font-weight="700" fill="white">Bind Mounts</text>
+
+  <rect x="415" y="135" width="270" height="55" rx="10" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="550" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="#166534">Container: /app/src</text>
+  <text x="550" y="178" text-anchor="middle" font-size="11" fill="#15803D">Sees host files directly</text>
+
+  <text x="550" y="210" text-anchor="middle" font-size="18" fill="#22C55E">&#x2195;</text>
+
+  <rect x="415" y="220" width="270" height="55" rx="10" fill="#16A34A"/>
+  <text x="550" y="245" text-anchor="middle" font-size="13" font-weight="600" fill="white">Host Filesystem Path</text>
+  <text x="550" y="262" text-anchor="middle" font-size="11" fill="#BBF7D0">/home/user/project/src</text>
+
+  <rect x="415" y="295" width="270" height="140" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="435" y="318" font-size="12" font-weight="600" fill="#166534">&#x2713; Live code reload (dev)</text>
+  <text x="435" y="340" font-size="12" font-weight="600" fill="#166534">&#x2713; Direct host path access</text>
+  <text x="435" y="362" font-size="12" font-weight="600" fill="#D97706">&#x26A0; Host path must exist</text>
+  <text x="435" y="384" font-size="12" font-weight="600" fill="#D97706">&#x26A0; OS-dependent behavior</text>
+  <text x="435" y="406" font-size="12" font-weight="600" fill="#D97706">&#x26A0; Security: host access</text>
+  <text x="435" y="428" font-size="11" fill="#6B7280">-v /host/path:/container/path</text>
+
+  <rect x="415" y="445" width="270" height="30" rx="8" fill="#16A34A"/>
+  <text x="550" y="465" text-anchor="middle" font-size="12" font-weight="700" fill="white">BEST for development</text>
+
+  <!-- tmpfs -->
+  <rect x="740" y="70" width="330" height="420" rx="14" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2.5" filter="url(#shadow)"/>
+  <rect x="740" y="70" width="330" height="44" rx="14" fill="#D97706"/>
+  <text x="905" y="98" text-anchor="middle" font-size="17" font-weight="700" fill="white">tmpfs Mounts</text>
+
+  <rect x="770" y="135" width="270" height="55" rx="10" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1.5"/>
+  <text x="905" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="#92400E">Container: /tmp</text>
+  <text x="905" y="178" text-anchor="middle" font-size="11" fill="#B45309">In-memory only</text>
+
+  <text x="905" y="210" text-anchor="middle" font-size="18" fill="#F59E0B">&#x2195;</text>
+
+  <rect x="770" y="220" width="270" height="55" rx="10" fill="#D97706"/>
+  <text x="905" y="245" text-anchor="middle" font-size="13" font-weight="600" fill="white">Host Memory (RAM)</text>
+  <text x="905" y="262" text-anchor="middle" font-size="11" fill="#FEF3C7">Never written to disk!</text>
+
+  <rect x="770" y="295" width="270" height="140" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="790" y="318" font-size="12" font-weight="600" fill="#166534">&#x2713; Fastest I/O (RAM speed)</text>
+  <text x="790" y="340" font-size="12" font-weight="600" fill="#166534">&#x2713; Secure - no disk trace</text>
+  <text x="790" y="362" font-size="12" font-weight="600" fill="#166534">&#x2713; Auto-cleared on stop</text>
+  <text x="790" y="384" font-size="12" font-weight="600" fill="#DC2626">&#x2717; Data lost on restart</text>
+  <text x="790" y="406" font-size="12" font-weight="600" fill="#DC2626">&#x2717; Linux only</text>
+  <text x="790" y="428" font-size="11" fill="#6B7280">--tmpfs /tmp</text>
+
+  <rect x="770" y="445" width="270" height="30" rx="8" fill="#D97706"/>
+  <text x="905" y="465" text-anchor="middle" font-size="12" font-weight="700" fill="white">BEST for secrets &amp; temp data</text>
+</svg>
