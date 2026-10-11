@@ -70,6 +70,15 @@ A PCI function is owned by exactly one driver at a time. KubeVirt can only hand 
 
 The host cluster schedules the VMs. It does not run the customer's job. A noisy notebook, a privileged pod or a CUDA upgrade inside one VM stays inside that VM.
 
+## Get the scripts
+
+Every script and manifest in this post lives in one repository. Clone it on the GPU node, and run the steps below from the checkout, so paths like `guest/01-rke2.sh` and `kubevirt/kubevirt-cr.yaml` resolve:
+
+```bash
+git clone https://github.com/shkatara/ai-factory-kubevirt.git
+cd ai-factory-kubevirt
+```
+
 ## Before you start: Prove the host can do passthrough
 
 KubeVirt needs hardware virtualization, and GPU passthrough additionally needs the IOMMU. On this EPYC box that is AMD-V and AMD-Vi.
@@ -245,7 +254,9 @@ You want `2` next to the GPU node, one per card. If it shows less, a card is not
 
 ## Step 4: Boot two VMs, one card each
 
-`03-ubuntu-vm.sh` creates a VM from the Ubuntu 24.04 cloud image. The guests run a driver and a model server in one case, and a Kubernetes cluster with the GPU Operator and HAMi in the other, so both are sized for the bigger job: 8 CPUs, 16 GiB of memory and a 100 GiB disk by default. Override them with `VM_CPU`, `VM_MEMORY` and `DISK_SIZE`. Each root disk is a 100 GiB volume in your StorageClass, so check the free space behind it before you create two.
+`03-ubuntu-vm.sh` creates a VM from the Ubuntu 24.04 cloud image. The guests run a driver and a model server in one case, and a Kubernetes cluster with the GPU Operator and HAMi in the other, so both are sized for the bigger job: 8 CPUs, 16 GiB of memory and a 100 GiB disk by default.
+
+Override them with `VM_CPU`, `VM_MEMORY` and `DISK_SIZE`. Each root disk is a 100 GiB volume in your StorageClass, so check the free space behind it before you create two.
 
 The script defaults to `GPU_COUNT=2`, which puts both cards in one VM. That is a valid layout for a customer who needs two cards. For one card per customer, set `GPU_COUNT=1` and run the script once per VM, with its own name and SSH port:
 
@@ -417,7 +428,7 @@ This is the simple tier. The customer gets a machine with a whole card and does 
 
 A fresh guest has the L4 on its PCI bus and no driver for it. `lsmod` shows no `nvidia` module, and `nvidia-smi` does not exist. The guest does not inherit anything from the host. VFIO hands over the PCI device, and the guest kernel still needs its own driver.
 
-We used the open kernel driver, version `615.71.09`. Copy `01-nvidia-driver.sh` into the VM, then run it as root:
+We used the open kernel driver, version `615.71.09`. Copy `optional/manual-driver/01-nvidia-driver.sh` from the repository into the VM, then run it as root:
 
 ```bash
 hostname
@@ -527,7 +538,7 @@ Sat Oct 10 09:40:32 2026
 
 ## Step 6: tenant-2, a GPU VM with its own Kubernetes and HAMi
 
-This is the second tier. The customer gets the same whole card, plus a Kubernetes cluster of their own. HAMi then cuts that one card into slices, so many small workloads of the same customer can share it. Copy the `guest/` folder into the VM, then run the scripts as root.
+This is the second tier. The customer gets the same whole card, plus a Kubernetes cluster of their own. HAMi then cuts that one card into slices, so many small workloads of the same customer can share it. Copy the repository's `guest/` folder into the VM (`scp -r guest ubuntu@<vm-ip>:`), then run the scripts as root.
 
 First check the GPU inside the tenant-2 vm using `lspci`
 
@@ -860,6 +871,7 @@ A card you give a customer moves to `vfio-pci` and shows up in one KubeVirt VM w
 
 ## Credits and references
 
+- Scripts and manifests for this post: [github.com/shkatara/ai-factory-kubevirt](https://github.com/shkatara/ai-factory-kubevirt)
 - KubeVirt host device assignment: [kubevirt.io/user-guide/compute/host-devices](https://kubevirt.io/user-guide/compute/host-devices/)
 - NVIDIA GPU Operator: [nvidia.github.io/gpu-operator](https://nvidia.github.io/gpu-operator)
 - HAMi: [project-hami.github.io/HAMi](https://project-hami.github.io/HAMi/)
