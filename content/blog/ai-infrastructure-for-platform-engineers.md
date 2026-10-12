@@ -428,7 +428,7 @@ This is the simple tier. The customer gets a machine with a whole card and does 
 
 A fresh guest has the L4 on its PCI bus and no driver for it. `lsmod` shows no `nvidia` module, and `nvidia-smi` does not exist. The guest does not inherit anything from the host. VFIO hands over the PCI device, and the guest kernel still needs its own driver.
 
-We used the open kernel driver, version `615.71.09`. Copy `optional/manual-driver/01-nvidia-driver.sh` from the repository into the VM, then run it as root:
+We used the open kernel driver, version `615.71.09`. Clone the repository inside the VM and use `optional/manual-driver/01-nvidia-driver.sh`. Run it as root:
 
 ```bash
 hostname
@@ -436,7 +436,8 @@ lspci -nnk | grep -A5 -i nvidia
 lsmod | grep -E 'nouveau|nvidia' || true
 df -h /
 
-bash 01-nvidia-driver.sh
+git clone https://github.com/shkatara/ai-factory-kubevirt.git
+sudo bash ai-factory-kubevirt/optional/manual-driver/01-nvidia-driver.sh
 ```
 
 The first four commands are the starting point: a passed-through L4, no `nvidia` module and plenty of free disk. The script does this:
@@ -538,7 +539,7 @@ Sat Oct 10 09:40:32 2026
 
 ## Step 6: tenant-2, a GPU VM with its own Kubernetes and HAMi
 
-This is the second tier. The customer gets the same whole card, plus a Kubernetes cluster of their own. HAMi then cuts that one card into slices, so many small workloads of the same customer can share it. Copy the repository's `guest/` folder into the VM (`scp -r guest ubuntu@<vm-ip>:`), then run the scripts as root.
+This is the second tier. The customer gets the same whole card, plus a Kubernetes cluster of their own. HAMi then cuts that one card into slices, so many small workloads of the same customer can share it. Clone the repository inside the VM (`git clone https://github.com/shkatara/ai-factory-kubevirt.git`), then run the scripts in its `guest/` folder as root.
 
 First check the GPU inside the tenant-2 vm using `lspci`
 
