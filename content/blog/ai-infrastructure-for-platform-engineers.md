@@ -9,6 +9,13 @@ draft: false
 cover: /img/blog/ai-infrastructure-for-platform-engineers/cover.png
 tags:
   ["kubevirt", "kubernetes", "gpu", "nvidia", "hami", "platform-engineering"]
+sponsor:
+  name: Utho
+  url: "https://utho.com/?utm_source=Kubesimplify&utm_medium=docs&utm_campaign=Saiyam"
+  # logoLight = navy mark (shown on light theme); logoDark = white mark (shown on dark theme)
+  logoLight: /img/sponsors/utho-logo-light.png
+  logoDark: /img/sponsors/utho-logo-dark.png
+  blurb: "Every step in this post was run on a two-L4 GPU server from Utho Cloud. If you need GPU infrastructure to build a catalog like this, take a look."
 ---
 
 Buy a few GPUs and you are running a catalog, whether you call it that or not. The first request is easy. The second one is different. One team wants a machine with a GPU and root, and to be left alone. Another team wants a Kubernetes cluster where a dozen small services share a single card. A third wants nothing but a model endpoint.
