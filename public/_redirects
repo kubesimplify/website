@@ -156,6 +156,7 @@
 /blog/managing-your-operating-system-with-package-managers                             /managing-your-operating-system-with-package-managers  301!
 /blog/mastering-kubernetes-costs-from-monitoring-to-automation                         /mastering-kubernetes-costs-from-monitoring-to-automation  301!
 /blog/microservices                                                                    /microservices  301!
+/blog/migrate-ingress-nginx-to-gateway-api-hands-on                                    /migrate-ingress-nginx-to-gateway-api-hands-on  301!
 /blog/mlxcel-rust-native-inference-engine-tested-on-m1-max                             /mlxcel-rust-native-inference-engine-tested-on-m1-max  301!
 /blog/moving-code-between-git-repositories-with-copybara                               /moving-code-between-git-repositories-with-copybara  301!
 /blog/multi-stage-docker-build                                                         /multi-stage-docker-build  301!
@@ -387,6 +388,7 @@
 /managing-your-operating-system-with-package-managers                             /blog/managing-your-operating-system-with-package-managers  200!
 /mastering-kubernetes-costs-from-monitoring-to-automation                         /blog/mastering-kubernetes-costs-from-monitoring-to-automation  200!
 /microservices                                                                    /blog/microservices  200!
+/migrate-ingress-nginx-to-gateway-api-hands-on                                    /blog/migrate-ingress-nginx-to-gateway-api-hands-on  200!
 /mlxcel-rust-native-inference-engine-tested-on-m1-max                             /blog/mlxcel-rust-native-inference-engine-tested-on-m1-max  200!
 /moving-code-between-git-repositories-with-copybara                               /blog/moving-code-between-git-repositories-with-copybara  200!
 /multi-stage-docker-build                                                         /blog/multi-stage-docker-build  200!
