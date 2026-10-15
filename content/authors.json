@@ -642,5 +642,16 @@
       "github": "https://github.com/ekam-walia"
     },
     "postCount": 1
+  },
+  "johan-kuylenstierna": {
+    "handle": "johan-kuylenstierna",
+    "name": "Johan Kuylenstierna",
+    "avatar": null,
+    "bio": "Kubernetes and platform engineer at Agency 42 (agency42.se), Sweden.",
+    "socials": {
+      "linkedin": "https://www.linkedin.com/in/johankuylenstierna/",
+      "github": "https://github.com/Agency-42"
+    },
+    "postCount": 1
   }
 }

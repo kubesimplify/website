@@ -772,6 +772,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/migrate-ingress-nginx-to-gateway-api-hands-on",
+      "destination": "https://blog.kubesimplify.com/migrate-ingress-nginx-to-gateway-api-hands-on",
+      "permanent": true
+    },
+    {
       "source": "/blog/mlxcel-rust-native-inference-engine-tested-on-m1-max",
       "destination": "https://blog.kubesimplify.com/mlxcel-rust-native-inference-engine-tested-on-m1-max",
       "permanent": true
@@ -2641,6 +2646,17 @@
     {
       "source": "/microservices",
       "destination": "https://blog.kubesimplify.com/microservices",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/migrate-ingress-nginx-to-gateway-api-hands-on",
+      "destination": "https://blog.kubesimplify.com/migrate-ingress-nginx-to-gateway-api-hands-on",
       "permanent": true,
       "has": [
         {
