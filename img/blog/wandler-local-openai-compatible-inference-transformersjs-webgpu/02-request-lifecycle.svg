@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Wandler request lifecycle</title>
+  <desc id="desc">Hand drawn style diagram of a chat request flowing through formatting, tokenization, prefill, generation, streaming, and metrics.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111827"/>
+    </marker>
+    <style>
+      .paper { fill: #fffdf7; }
+      .lane { fill: #f7fbff; stroke: #c9dff5; stroke-width: 2; }
+      .box { fill: #ffffff; stroke: #111827; stroke-width: 3; }
+      .ghost { fill: none; stroke: #111827; stroke-width: 1.3; opacity: .45; }
+      .blue { fill: #e8f3ff; }
+      .green { fill: #eaf8ed; }
+      .yellow { fill: #fff1d6; }
+      .pink { fill: #ffe8ef; }
+      .text { font: 24px "Comic Sans MS", "Bradley Hand", "Segoe Print", cursive; fill: #111827; }
+      .small { font: 17px "Comic Sans MS", "Bradley Hand", "Segoe Print", cursive; fill: #374151; }
+      .arrow { fill: none; stroke: #111827; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect class="paper" width="1200" height="720"/>
+  <rect class="lane" x="45" y="70" width="1110" height="560" rx="30"/>
+  <text class="text" x="80" y="115">What happens after the HTTP request arrives?</text>
+
+  <g transform="translate(70 180)">
+    <rect class="box blue" x="0" y="0" width="180" height="110" rx="12"/>
+    <rect class="ghost" x="5" y="-4" width="180" height="110" rx="14"/>
+    <text class="text" x="24" y="42">1. Route</text>
+    <text class="small" x="24" y="72">/v1/chat</text>
+    <text class="small" x="24" y="94">queue limit</text>
+  </g>
+
+  <g transform="translate(300 180)">
+    <rect class="box yellow" x="0" y="0" width="180" height="110" rx="12"/>
+    <rect class="ghost" x="-5" y="5" width="180" height="110" rx="14"/>
+    <text class="text" x="22" y="42">2. Format</text>
+    <text class="small" x="22" y="72">chat template</text>
+    <text class="small" x="22" y="94">tool schema</text>
+  </g>
+
+  <g transform="translate(530 180)">
+    <rect class="box green" x="0" y="0" width="180" height="110" rx="12"/>
+    <rect class="ghost" x="5" y="4" width="180" height="110" rx="14"/>
+    <text class="text" x="22" y="42">3. Tokenize</text>
+    <text class="small" x="22" y="72">input ids</text>
+    <text class="small" x="22" y="94">context check</text>
+  </g>
+
+  <g transform="translate(760 180)">
+    <rect class="box pink" x="0" y="0" width="180" height="110" rx="12"/>
+    <rect class="ghost" x="-4" y="-5" width="180" height="110" rx="14"/>
+    <text class="text" x="22" y="42">4. Prefill</text>
+    <text class="small" x="22" y="72">chunk long prompts</text>
+    <text class="small" x="22" y="94">prefix KV cache</text>
+  </g>
+
+  <g transform="translate(990 180)">
+    <rect class="box blue" x="0" y="0" width="160" height="110" rx="12"/>
+    <rect class="ghost" x="4" y="5" width="160" height="110" rx="14"/>
+    <text class="text" x="20" y="42">5. Generate</text>
+    <text class="small" x="20" y="72">ONNX Runtime</text>
+    <text class="small" x="20" y="94">WebGPU</text>
+  </g>
+
+  <g transform="translate(245 410)">
+    <rect class="box yellow" x="0" y="0" width="230" height="120" rx="12"/>
+    <rect class="ghost" x="6" y="-5" width="230" height="120" rx="14"/>
+    <text class="text" x="24" y="45">Streaming path</text>
+    <text class="small" x="24" y="75">SSE chunks</text>
+    <text class="small" x="24" y="98">usage at the end</text>
+  </g>
+
+  <g transform="translate(575 410)">
+    <rect class="box green" x="0" y="0" width="250" height="120" rx="12"/>
+    <rect class="ghost" x="-6" y="5" width="250" height="120" rx="14"/>
+    <text class="text" x="24" y="45">Profile + metrics</text>
+    <text class="small" x="24" y="75">tokens, latency, memory</text>
+    <text class="small" x="24" y="98">/admin/metrics</text>
+  </g>
+
+  <path class="arrow" d="M250 235 C270 232 280 232 300 235"/>
+  <path class="arrow" d="M480 235 C500 232 510 232 530 235"/>
+  <path class="arrow" d="M710 235 C730 232 740 232 760 235"/>
+  <path class="arrow" d="M940 235 C960 232 970 232 990 235"/>
+  <path class="arrow" d="M1070 292 C1000 390 820 415 825 458"/>
+  <path class="arrow" d="M990 292 C760 350 460 360 360 410"/>
+  <path class="arrow" d="M475 470 C515 468 540 468 575 470"/>
+</svg>
