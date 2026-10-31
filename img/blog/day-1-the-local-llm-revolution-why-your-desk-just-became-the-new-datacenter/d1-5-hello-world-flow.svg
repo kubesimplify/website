@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Your first 30 seconds with a local LLM</title>
+  <desc id="desc">Ollama pull and run flow from download to local chat on DGX Spark.</desc>
+  <style>
+    text{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+    .title{font-size:42px;font-weight:800;fill:#0f172a}
+    .sub{font-size:21px;fill:#475569}
+    .step{font-size:25px;font-weight:800;fill:#0f172a}
+    .body{font-size:18px;fill:#334155}
+    .mono{font-family:Roboto Mono,Menlo,monospace;font-size:18px;fill:#0f172a}
+    .small{font-size:16px;fill:#64748b}
+  </style>
+  <rect width="1200" height="760" rx="30" fill="#ffffff"/>
+  <text x="600" y="76" text-anchor="middle" class="title">Your first 30 seconds with a local LLM</text>
+  <text x="600" y="112" text-anchor="middle" class="sub">Two commands. No API key. No cloud. Just chat.</text>
+
+  <g transform="translate(80 178)">
+    <rect width="290" height="180" rx="22" fill="#ecfeff" stroke="#06b6d4" stroke-width="3"/>
+    <text x="32" y="54" class="step">1. Pull</text>
+    <text x="32" y="94" class="mono">ollama pull</text>
+    <text x="32" y="124" class="mono">nemotron-3-super</text>
+    <text x="32" y="158" class="small">~86 GB download</text>
+  </g>
+  <g transform="translate(455 178)">
+    <rect width="290" height="180" rx="22" fill="#fff7ed" stroke="#f97316" stroke-width="3"/>
+    <text x="32" y="54" class="step">2. Load</text>
+    <text x="32" y="94" class="body">Weights move into</text>
+    <text x="32" y="124" class="body">the 128 GB memory pool.</text>
+    <text x="32" y="158" class="small">roughly a minute</text>
+  </g>
+  <g transform="translate(830 178)">
+    <rect width="290" height="180" rx="22" fill="#f0fdf4" stroke="#22c55e" stroke-width="3"/>
+    <text x="32" y="54" class="step">3. Chat</text>
+    <text x="32" y="94" class="mono">ollama run</text>
+    <text x="32" y="124" class="mono">nemotron-3-super</text>
+    <text x="32" y="158" class="small">frontier-class model, local</text>
+  </g>
+  <path d="M370 268 L455 268" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+  <path d="M435 252 L455 268 L435 284" fill="none" stroke="#64748b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M745 268 L830 268" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+  <path d="M810 252 L830 268 L810 284" fill="none" stroke="#64748b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="118" y="442" width="964" height="212" rx="22" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="154" y="490" class="step">Faster models to try with the same shape:</text>
+  <text x="154" y="532" class="mono">ollama run llama3.1:8b        # ~38 tok/s, 8B q4_K_M</text>
+  <text x="154" y="565" class="mono">ollama run gpt-oss:20b        # ~58 tok/s, 20B MXFP4</text>
+  <text x="154" y="598" class="mono">ollama run deepseek-r1:14b    # ~20 tok/s, 14B q4_K_M</text>
+  <text x="154" y="631" class="mono">ollama run gemma4:26b         # ~58 tok/s, 26B A4B MoE</text>
+  <text x="600" y="706" text-anchor="middle" font-size="20" font-weight="800" fill="#15803d">That's it: you ran a local LLM. The rest is depth, performance, and lab work.</text>
+</svg>
