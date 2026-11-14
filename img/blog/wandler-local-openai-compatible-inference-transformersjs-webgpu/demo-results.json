@@ -1,0 +1,118 @@
+{
+  "date": "2026-06-03",
+  "updated": "2026-06-04",
+  "machine": {
+    "cpu": "Apple M1 Max",
+    "memoryBytes": 68719476736,
+    "memoryGb": 64,
+    "architecture": "arm64",
+    "macOS": "26.2",
+    "node": "v22.5.1",
+    "npm": "10.8.2"
+  },
+  "wandler": {
+    "version": "2.6.4",
+    "model": "LiquidAI/LFM2.5-350M-ONNX:q4",
+    "backend": "wandler",
+    "device": "webgpu",
+    "port": 8123
+  },
+  "startup": {
+    "firstDebugRunLoadSeconds": 29.6,
+    "cachedInfoRunLoadSeconds": 2.4,
+    "cachedInfoRunWarmupMs": 205,
+    "warmupPromptTokens": 139,
+    "warmupCompletionTokens": 8,
+    "contextTokens": 128000,
+    "vocabTokens": 65536,
+    "attentionHeads": 16
+  },
+  "webgpuVerification": {
+    "explicitDeviceWebgpuWorked": true,
+    "debugLogEvidence": [
+      "ONNX Runtime discovered Apple hardware devices.",
+      "ONNX Runtime created a WebGPU execution provider context.",
+      "Some shape/helper nodes were assigned to CPU, which ONNX Runtime warned can be normal."
+    ]
+  },
+  "chatBenchmarkInfoRun": {
+    "promptTokensPerRun": 58,
+    "completionTokensPerRun": 45,
+    "runs": [
+      { "run": 1, "totalMs": 590, "tokPerSec": 76.3 },
+      { "run": 2, "totalMs": 305, "tokPerSec": 147.5 },
+      { "run": 3, "totalMs": 315, "tokPerSec": 142.9 },
+      { "run": 4, "totalMs": 367, "tokPerSec": 122.6 },
+      { "run": 5, "totalMs": 471, "tokPerSec": 95.5 }
+    ],
+    "avgTotalMs": 410,
+    "avgTokPerSec": 117.0
+  },
+  "streamingRequestInfoRun": {
+    "curlTotalSeconds": 0.459354,
+    "serverTotalMs": 455,
+    "promptTokens": 23,
+    "completionTokens": 18
+  },
+  "adminMetricsAfterInfoRun": {
+    "totalRequests": 6,
+    "averageLatencyMs": 400,
+    "streamedRequests": 1,
+    "totalErrors": 0,
+    "rssMb": 738
+  },
+  "gemma4E4BRun": {
+    "date": "2026-06-04",
+    "model": "onnx-community/gemma-4-E4B-it-ONNX:q4",
+    "backend": "wandler",
+    "device": "webgpu",
+    "port": 8124,
+    "cachedLoadSeconds": 40.3,
+    "health": {
+      "status": "ok",
+      "engine": "transformers.js",
+      "backend": "wandler",
+      "device": "webgpu",
+      "llm": "onnx-community/gemma-4-E4B-it-ONNX"
+    },
+    "shortChat": {
+      "curlTotalSeconds": 3.367448,
+      "promptTokens": 52,
+      "completionTokens": 26,
+      "totalTokens": 78,
+      "serverTotalMs": 3365,
+      "generateMs": 3359,
+      "approxTokPerSec": 7.74,
+      "rssAfterGenerateMb": 3189,
+      "output": "* TypeScript server.\n* Runs ONNX models via Transformers.js.\n* Exposes OpenAI-compatible HTTP endpoints."
+    },
+    "longerChat": {
+      "curlTotalSeconds": 14.972033,
+      "promptTokens": 184,
+      "completionTokens": 128,
+      "totalTokens": 312,
+      "serverTotalMs": 14964,
+      "generateMs": 14944,
+      "approxTokPerSec": 8.56,
+      "rssAfterGenerateMb": 3319
+    },
+    "cachePath": "/Users/saiyam/.cache/huggingface/onnx-community/gemma-4-E4B-it-ONNX"
+  },
+  "sttRun": {
+    "date": "2026-06-04",
+    "model": "onnx-community/whisper-tiny:q4",
+    "backend": "wandler",
+    "device": "auto",
+    "port": 8125,
+    "cachedLoadSeconds": 4.1,
+    "input": "/Users/saiyam/Downloads/WhatsApp Audio 2026-06-04 at 07.09.08.opus",
+    "workingInputFormat": "raw 16 kHz mono float32 PCM",
+    "curlTotalSeconds": 0.47719,
+    "transcript": "Hello and welcome to one learn local open AI compatible inference with transformer.js and web GPU",
+    "notes": [
+      "Direct Opus upload failed with a Float32Array byte length error.",
+      "A WAV container was accepted as bytes but transcribed as exclamation marks.",
+      "Raw f32le PCM worked."
+    ]
+  }
+}

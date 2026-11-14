@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A"/>
+      <stop offset="100%" style="stop-color:#1A2E1A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1050" cy="300" r="280" fill="#22C55E" opacity="0.06"/>
+
+  <rect x="60" y="50" width="100" height="40" rx="20" fill="#22C55E"/>
+  <text x="110" y="77" text-anchor="middle" font-size="18" font-weight="800" fill="white">DAY 3</text>
+  <text x="180" y="77" font-size="16" fill="#64748B">7 Days of Docker (2026)</text>
+
+  <text x="60" y="180" font-size="52" font-weight="800" fill="white" letter-spacing="-1.5">Stop Writing</text>
+  <text x="60" y="248" font-size="52" font-weight="800" fill="white" letter-spacing="-1.5">Dockerfiles</text>
+  <text x="60" y="316" font-size="54" font-weight="800" fill="#22C55E" letter-spacing="-1.5">From Scratch</text>
+
+  <rect x="60" y="360" width="170" height="36" rx="18" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+  <text x="145" y="384" text-anchor="middle" font-size="14" font-weight="600" fill="#22C55E">docker init</text>
+  <rect x="250" y="360" width="180" height="36" rx="18" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+  <text x="340" y="384" text-anchor="middle" font-size="14" font-weight="600" fill="#38BDF8">Multi-Stage</text>
+  <rect x="450" y="360" width="180" height="36" rx="18" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+  <text x="540" y="384" text-anchor="middle" font-size="14" font-weight="600" fill="#F59E0B">Build Cache</text>
+  <rect x="650" y="360" width="190" height="36" rx="18" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+  <text x="745" y="384" text-anchor="middle" font-size="14" font-weight="600" fill="#A78BFA">docker debug</text>
+
+  <!-- Size comparison -->
+  <rect x="700" y="130" width="440" height="200" rx="12" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+  <text x="920" y="170" text-anchor="middle" font-size="16" font-weight="700" fill="#94A3B8">Multi-Stage Build Result</text>
+  <rect x="730" y="195" width="380" height="40" rx="8" fill="#DC2626" opacity="0.3"/>
+  <text x="920" y="222" text-anchor="middle" font-size="16" font-weight="700" fill="#FCA5A5">Node app: 143 MB</text>
+  <rect x="730" y="250" width="30" height="40" rx="8" fill="#22C55E"/>
+  <text x="790" y="277" font-size="16" font-weight="700" fill="#86EFAC">Go app: 15.6 MB</text>
+  <text x="920" y="315" text-anchor="middle" font-size="13" fill="#64748B">98% smaller. Same functionality.</text>
+
+  <text x="60" y="560" font-size="18" font-weight="600" fill="#E2E8F0">Saloni Narang</text>
+  <text x="60" y="585" font-size="14" fill="#64748B">Docker Captain  ·  CNCF Ambassador</text>
+  <rect x="60" y="460" width="60" height="4" rx="2" fill="#22C55E"/>
+</svg>

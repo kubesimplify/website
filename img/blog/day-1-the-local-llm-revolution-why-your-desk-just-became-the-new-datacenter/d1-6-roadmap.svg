@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 840" role="img" aria-labelledby="title desc">
+  <title id="title">The 7-day DGX Spark roadmap</title>
+  <desc id="desc">Seven days of DGX Spark topics, from local LLM motivation to a working personal AI lab.</desc>
+  <style>
+    text{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+    .title{font-size:42px;font-weight:800;fill:#0f172a}
+    .sub{font-size:21px;fill:#475569}
+    .day{font-size:23px;font-weight:800;fill:#0f172a}
+    .body{font-size:17px;fill:#334155}
+    .see{font-size:15px;fill:#64748b}
+  </style>
+  <rect width="1200" height="840" rx="30" fill="#f8fafc"/>
+  <text x="600" y="72" text-anchor="middle" class="title">The 7-day journey</text>
+  <text x="600" y="108" text-anchor="middle" class="sub">From why local LLMs matter to a working personal AI lab.</text>
+
+  <g transform="translate(92 150)">
+    <rect width="1016" height="74" rx="18" fill="#ecfeff" stroke="#06b6d4" stroke-width="3"/>
+    <text x="34" y="46" class="day">Day 1</text>
+    <text x="150" y="35" class="body">Why local LLMs, why now, why Spark</text>
+    <text x="150" y="60" class="see">See: Ollama hello-world</text>
+  </g>
+  <g transform="translate(92 238)">
+    <rect width="1016" height="74" rx="18" fill="#f0fdf4" stroke="#22c55e" stroke-width="3"/>
+    <text x="34" y="46" class="day">Day 2</text>
+    <text x="150" y="35" class="body">What happens between prompt and answer</text>
+    <text x="150" y="60" class="see">See: a single request traced through logs</text>
+  </g>
+  <g transform="translate(92 326)">
+    <rect width="1016" height="74" rx="18" fill="#fff7ed" stroke="#f97316" stroke-width="3"/>
+    <text x="34" y="46" class="day">Day 3</text>
+    <text x="150" y="35" class="body">GB10 hardware: cores, memory, sm_121, tensor cores</text>
+    <text x="150" y="60" class="see">See: deviceQuery, nvidia-smi, free -h</text>
+  </g>
+  <g transform="translate(92 414)">
+    <rect width="1016" height="74" rx="18" fill="#fef9c3" stroke="#eab308" stroke-width="3"/>
+    <text x="34" y="46" class="day">Day 4</text>
+    <text x="150" y="35" class="body">Quantization: BF16, FP8, NVFP4, MXFP4, INT4, GGUF</text>
+    <text x="150" y="60" class="see">See: same-model multi-format benchmarks</text>
+  </g>
+  <g transform="translate(92 502)">
+    <rect width="1016" height="74" rx="18" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="3"/>
+    <text x="34" y="46" class="day">Day 5</text>
+    <text x="150" y="35" class="body">Inference engines and which one to pick</text>
+    <text x="150" y="60" class="see">See: Ollama, vLLM, Docker Model Runner side by side</text>
+  </g>
+  <g transform="translate(92 590)">
+    <rect width="1016" height="74" rx="18" fill="#fdf2f8" stroke="#ec4899" stroke-width="3"/>
+    <text x="34" y="46" class="day">Day 6</text>
+    <text x="150" y="35" class="body">The model landscape and automatic model picking</text>
+    <text x="150" y="60" class="see">See: custom leaderboard and llmfit</text>
+  </g>
+  <g transform="translate(92 678)">
+    <rect width="1016" height="74" rx="18" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
+    <text x="34" y="46" class="day">Day 7</text>
+    <text x="150" y="35" class="body">A working personal AI lab: model, agent, and training</text>
+    <text x="150" y="60" class="see">See: Nanochat smoke pretrain and Hermes Agent walkthrough</text>
+  </g>
+</svg>
