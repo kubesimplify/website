@@ -92,6 +92,14 @@ kiac get nodes --name blog
 
 Check for the context `kiac-blog`, three Ready nodes, and distinct node IPs. Kiac v0.13.0 defaults to Kubernetes 1.37. Use `--k8s-version` when a specific supported minor matters to your test.
 
+These are selected columns from `kubectl get nodes` in the recorded two-node K3s run used for the native Metal demo later in this guide.
+
+```text
+NAME                             STATUS   ROLES           VERSION
+kiac-native-demo-control-plane   Ready    control-plane   v1.37.0+k3s1
+kiac-native-demo-worker-1        Ready    <none>          v1.37.0+k3s1
+```
+
 Use `kiac get kubeconfig` when a script or tool needs a standalone config for just this cluster. It writes YAML to stdout and leaves your active context and existing kubeconfig alone. The file contains cluster-admin credentials, so save it privately.
 
 ```bash
@@ -101,16 +109,6 @@ Use `kiac get kubeconfig` when a script or tool needs a standalone config for ju
 )
 KUBECONFIG="$PWD/blog.kubeconfig" kubectl get nodes
 ```
-
-Here is an excerpt from an earlier two-node compatibility run:
-
-```text
-PASS kubeadm: exact local image on 2 nodes, DNS/ClusterIP before+after full VM reboot, both boot IDs changed
-PASS k3s: exact local image on 2 nodes, DNS/ClusterIP before+after full VM reboot, both boot IDs changed
-Container 1.7.1 CPU compatibility passed (both).
-```
-
-Captured on M1 Max/macOS 27.0.1 with Apple/container 1.7.1 during the v0.12.0 validation. This acceptance profile used two nodes and a source-built Kiac binary; it is not a timing or hardware guarantee. See the [runtime compatibility record](https://saiyam1814.github.io/kiac/docs/index.html#requirements).
 
 ## 2. Deploy an application and reach its LoadBalancer IP
 
@@ -128,7 +126,13 @@ curl --noproxy '*' -fsS --connect-timeout 5 --max-time 15 \
   "http://$WEB_IP/"
 ```
 
-The response should be nginx’s welcome page. Kiac-lb assigns an eligible node VM address to the Service; it does not provision a cloud load balancer or a separate virtual IP appliance. Services can share an address when their exposed ports do not conflict.
+The HTML response should include this title. `kubectl get service web` should show the assigned VM address in `EXTERNAL-IP`.
+
+```html
+<title>Welcome to nginx!</title>
+```
+
+Kiac-lb assigns an eligible node VM address to the Service; it does not provision a cloud load balancer or a separate virtual IP appliance. Services can share an address when their exposed ports do not conflict.
 
 The bundled edge proxy handles incoming TCP before forwarding traffic locally, working around a separate Apple vmnet large-upload issue. It is infrastructure, not an ingress controller. Gateway API adds application-level HTTP routing in step 4. See the [networking guide](https://saiyam1814.github.io/kiac/docs/networking.html) for the complete path and limits.
 
@@ -147,7 +151,13 @@ kubectl wait --for=condition=Ready pod/notes-0 --timeout=3m
 kubectl exec notes-0 -- cat /data/note.txt
 ```
 
-Metrics-server supplies `kubectl top`; a fresh cluster may need a sampling interval first. The storage demo should return `hello-kiac` after the StatefulSet recreates its Pod. The default local-path StorageClass provisions storage inside the selected node VM.
+Metrics-server supplies `kubectl top`; a fresh cluster may need a sampling interval first. The PVC should reach `Bound` with the `local-path` StorageClass. After the StatefulSet recreates `notes-0`, expect this output from the last command.
+
+```text
+hello-kiac
+```
+
+The default local-path StorageClass provisions storage inside the selected node VM.
 
 That is local persistence, not replicated storage. A Pod restart is different from losing the node disk, and deleting the cluster deletes its node VMs. A PVC also does not automatically make an application portable to another cluster: moving data requires the application’s backup or migration process.
 
@@ -169,7 +179,14 @@ curl --noproxy '*' -fsS --connect-timeout 5 --max-time 15 \
   -H 'Host: echo.local' "http://$GW_IP/"
 ```
 
-Look for an accepted route, resolved references, and a programmed Gateway. The Host header selects the route without editing your Mac’s hosts file. If the controller is still reconciling, inspect the conditions before retrying the request.
+The echo server should return JSON describing the request. Check the route and Gateway for these conditions.
+
+| Resource | Expected conditions |
+| --- | --- |
+| HTTPRoute `echo` | `Accepted=True`, `ResolvedRefs=True` |
+| Gateway `kiac` | `Programmed=True` |
+
+The Host header selects the route without editing your Mac’s hosts file. If the controller is still reconciling, inspect the conditions before retrying the request.
 
 The observability addon installs Prometheus, Grafana, node-exporter, and kube-state-metrics. Open the provisioned Cluster Overview and Nodes dashboards:
 
@@ -199,6 +216,14 @@ kiac verify cluster --name blog -o json
 ```
 
 After a Mac reboot, use `kiac resume cluster --name blog`. Resume starts the VMs and repairs changed control-plane, node, kubeconfig, and networking addresses. It is designed to be safe to repeat.
+
+An earlier two-node compatibility run on an M1 Max with macOS 27.0.1 and Apple/container 1.7.1 recorded these results during v0.12.0 validation. [Runtime compatibility record](https://saiyam1814.github.io/kiac/docs/index.html#requirements)
+
+```text
+PASS kubeadm: exact local image on 2 nodes, DNS/ClusterIP before+after full VM reboot, both boot IDs changed
+PASS k3s: exact local image on 2 nodes, DNS/ClusterIP before+after full VM reboot, both boot IDs changed
+Container 1.7.1 CPU compatibility passed (both).
+```
 
 Verification is read-only and returns a nonzero exit status when required checks fail. If you need help, `kiac support bundle --name blog` collects a bounded, redacted diagnostic archive. Review it before sharing; names, IPs, events, and system logs remain.
 
@@ -248,6 +273,10 @@ The dashboard displays Apple/container CPU and memory samples separately from Ku
 
 The GPU view shows the Mac’s GPU and Metal capabilities, worker health, and DRA reservations. It explains scheduling failures and labels stale data. The inference preset gives the worker more CPU and memory for the demo. GPU identity, reservation state, and utilization are different measurements. The dashboard reports the first two.
 
+![Kiac’s Mac GPU inventory showing Apple M1 Max and Metal 4 after checking the hardware.](/img/blog/running-kubernetes-macos-apple-containers-kiac/kiac-dashboard-mac-gpu.png)
+
+The Mac GPU panel in `kiac ui` after inspecting the hardware on the M1 Max.
+
 ## 8. Choose K3s, Cilium, or an IPv6 lab
 
 These are separate optional clusters. Run them one at a time if your Mac is short on memory, and restore the intended kubectl context before returning to the main demo.
@@ -296,7 +325,16 @@ kubectl wait --for=jsonpath='{.status.phase}'=Succeeded \
 kubectl logs kiac-gpu-vulkan
 ```
 
-The proof Pod must identify a real `Virtio-GPU Venus` device and print `KIAC_REAL_APPLE_GPU_OK`. The image is pinned; an arbitrary Vulkan container may not contain a compatible guest stack.
+Check the Pod log for the Venus device and the success marker. This output is from the Kiac Vulkan lab on an M1 Max. [Vulkan lab](https://github.com/saiyam1814/kiac/blob/v0.13.0/examples/gpu-lab.md#3-prove-vulkan-reaches-the-apple-gpu)
+
+```text
+deviceName = Virtio-GPU Venus (Apple M1 Max)
+driverName = venus
+driverInfo = Mesa 25.0.7
+KIAC_REAL_APPLE_GPU_OK
+```
+
+The pinned image supplies the compatible Vulkan guest stack.
 
 ### Understand device-plugin versus DRA allocation
 
@@ -348,10 +386,24 @@ The new native alpha is a second execution path. An ordinary Apple/container wor
 
 Native Metal alpha in Kiac v0.13.0. DRA controls access to the host service. GPU execution and the optional model live on macOS, outside the Linux Pod’s isolation boundary.
 
-Use Kiac v0.13.0, Xcode command line tools with `xcrun swiftc`, a Metal-enabled `llama-server`, and a local GGUF model. Kiac compiles its fixed Metal helper on the Mac. This example uses an ordinary K3s cluster on Kubernetes 1.37.
+macOS provides Metal on Apple silicon. The `xcrun swiftc --version` command checks that macOS can find the Swift compiler. Kiac v0.13.0 checks for the compiler when `kiac gpu native serve` starts and builds its bundled Metal helper on the Mac when the helper needs compiling. The Xcode Command Line Tools or a selected full Xcode install provide the compiler and macOS SDK. [Kiac helper build](https://github.com/saiyam1814/kiac/blob/v0.13.0/pkg/nativegpu/engine.go#L216-L255)
+
+If Swift is missing, run `xcode-select --install`, then retry the version check. [Apple’s installation instructions](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools)
 
 ```bash
 xcrun swiftc --version
+```
+
+Here is the compiler output from the demo Mac. The version depends on your installed toolchain.
+
+```text
+swift-driver version: 1.168.6 Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)
+Target: arm64-apple-macosx27.0.0
+```
+
+For the inference example, also have a Metal-enabled `llama-server` and a local GGUF model. Create an ordinary K3s cluster on Kubernetes 1.37.
+
+```bash
 kiac create cluster --name metal-lab --distro k3s --k8s-version 1.37 --workers 1
 container exec kiac-metal-lab-worker-1 ip -4 route show default
 ifconfig
@@ -367,7 +419,13 @@ kiac gpu native serve --listen "$KIAC_METAL_HOST:5181" \
   --model "$KIAC_METAL_MODEL" --server-binary llama-server
 ```
 
-Leave that foreground service running. Open a second terminal and reuse the demo kubeconfig. The manifest comes from the v0.13.0 tag.
+When the service is ready, it prints its HTTPS address. The demo Mac printed this line.
+
+```text
+Native Metal service (alpha): https://192.168.64.1:5181; Ctrl-C to stop
+```
+
+Leave that foreground service running. Open a second terminal and reuse the demo kubeconfig.
 
 ```bash
 export KUBECONFIG="$HOME/.kube/kiac-blog-demo"
@@ -376,6 +434,29 @@ kiac gpu native status
 kiac gpu native self-test --count 65536
 kiac gpu native chat --prompt "Name one benefit of local Kubernetes." \
   --max-tokens 16 --stream
+```
+
+Check `ready` and the layer counts in `kiac gpu native status`. These are selected fields from the recorded TinyLlama run.
+
+```json
+{
+  "backend": "native-metal",
+  "ready": true,
+  "inferenceAvailable": true,
+  "capabilities": {
+    "inference": {
+      "backend": "llama.cpp-metal",
+      "deviceID": "MTL0",
+      "offloadedLayers": 23,
+      "totalLayers": 23
+    }
+  }
+}
+```
+
+Attach the driver and apply the Pod and ResourceClaim from the v0.13.0 manifest.
+
+```bash
 kiac gpu native install --name metal-lab --node worker-1
 kubectl --context kiac-metal-lab apply -f "$KIAC_EXAMPLES/gpu-native-inference.yaml"
 kubectl --context kiac-metal-lab wait --for=jsonpath='{.status.phase}'=Succeeded \
@@ -385,14 +466,26 @@ kubectl --context kiac-metal-lab logs kiac-native-inference
 
 The first host-side commands use temporary leases and release them before the Kubernetes example runs. Streaming chat requires a complete terminal event; a truncated stream is reported as an error. The Pod uses a ResourceClaim that selects the `metal.kiac.dev` DeviceClass. When the driver prepares the claim, it obtains an exclusive lease from the Mac service. The driver injects read-only lease credentials and the public CA through CDI; the client reloads credentials before each request and verifies TLS. The example Pod runs as a non-root user, drops Linux capabilities, and has no Kubernetes service-account token or Linux GPU device.
 
-During the alpha validation on an M1 Max, the [pinned example](https://github.com/saiyam1814/kiac/blob/v0.13.0/examples/gpu-native-inference.yaml) verified all 65,536 vector-add results with zero error and received a 16-token model completion. The snippet shows selected fields from the recorded Pod output.
+In the recorded M1 Max run, the Pod reached `Succeeded`. `kubectl logs` showed these fields, including the GPU time for the vector-add kernel. [Pinned workload manifest](https://github.com/saiyam1814/kiac/blob/v0.13.0/examples/gpu-native-inference.yaml)
 
 ```text
-{"test":"native-metal","device":"Apple M1 Max","verifiedElements":65536,"maximumError":0}
+{"test":"native-metal","device":"Apple M1 Max","verifiedElements":65536,"maximumError":0,"gpuMilliseconds":0.07349997758865356}
 {"test":"native-inference","model":"kiac-native","completionTokens":16}
 ```
 
-Validated profile: M1 Max, macOS 27.0.1, Apple/container 1.7.1, K3s 1.37.0+k3s1, Linux 6.18.35. The checked-in example completed successfully; the native server identified `MTL0` and confirmed 23/23 model layers offloaded through llama.cpp. The same client Pod also ran compute and inference after the DRA driver restarted. A separate host-service restart rotated its mounted credentials: the new credential succeeded and the old credential returned HTTP 401. Deleting the consumer and claim also invalidated its old lease. A separate `restartPolicy: Always` test client retained its Pod UID through a worker VM reboot and reran both operations after its container restarted; the one-shot `Never` example above should be recreated after VM loss. This proves the tested execution and authorization paths, not model-answer quality or a performance advantage.
+![Recorded Kiac demo frame showing Pod completion, 65,536 verified Metal results with zero error, and 23 out of 23 TinyLlama layers offloaded.](/img/blog/running-kubernetes-macos-apple-containers-kiac/native-metal-pod-output.png)
+
+The demo shows the selected Pod output alongside the native service’s layer counts.
+
+#### GPU activity during the Pod run
+
+A second Pod used the same `metal.kiac.dev` DeviceClass and sent eight TinyLlama requests. It generated 2,048 tokens in 19.5 seconds. Whole-Mac GPU utilization averaged 2.0% before the requests and 88.2% during them, with a 95% peak. The macOS `IOAccelerator` device counter includes activity from other Mac applications.
+
+![Measured whole-Mac GPU activity on an M1 Max before, during, and after the eight inference requests. Utilization averaged 2.0 percent before and 88.2 percent during the request interval.](/img/blog/running-kubernetes-macos-apple-containers-kiac/native-metal-gpu-activity.png)
+
+The shaded interval covers the Pod’s requests. GPU activity dropped back near baseline when the requests ended.
+
+Earlier alpha validation used an M1 Max, macOS 27.0.1, Apple/container 1.7.1, K3s 1.37.0+k3s1, and Linux 6.18.35. The same client Pod also ran compute and inference after the DRA driver restarted. A separate host-service restart rotated its mounted credentials. The new credential succeeded and the old credential returned HTTP 401. Deleting the consumer and claim also invalidated its old lease. A separate `restartPolicy: Always` test client retained its Pod UID through a worker VM reboot and reran both operations after its container restarted. Recreate the one-shot `Never` example after VM loss.
 
 The host service admits one exclusive Kiac lease across attached clusters. Other Mac applications still share the physical GPU; the lease does not isolate GPU memory or compute. Requests are bounded, and this alpha exposes specific compute and inference APIs rather than arbitrary Metal programs.
 
