@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 610" role="img" aria-labelledby="title desc">
+  <title id="title">Kiac native Metal alpha: a DRA-authorized Pod calls a native macOS GPU service</title>
+  <desc id="desc">An ordinary Apple/container Kubernetes worker runs an unprivileged Linux Pod. The metal.kiac.dev DRA agent obtains an exclusive host-service lease and injects read-only credentials and a public CA through CDI. The Pod calls the Mac's private HTTPS endpoint with the short-lived lease. The Mac host service executes a fixed Metal compute probe or local llama.cpp inference using Metal on the real Apple GPU. No Linux GPU device, CUDA or Metal runtime is mounted into the Pod. Native execution occurs outside the Linux container boundary.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="m0 0 10 5-10 5z" fill="#3769b2"/></marker></defs>
+  <style>text{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;fill:#142842}.title{font-size:25px;font-weight:700}.label{font-size:19px;font-weight:650}.body{font-size:16px}.small{font-size:14px;fill:#4a5d75}.box{fill:#fff;stroke:#bed0e6;stroke-width:1.5}.line{fill:none;stroke:#3769b2;stroke-width:2;marker-end:url(#arrow)}</style>
+  <rect width="1120" height="610" rx="24" fill="#edf3fb"/>
+  <text class="title" x="36" y="46">Kubernetes authorizes. macOS executes native Metal.</text>
+  <text class="small" x="36" y="77">Native Metal alpha in Kiac v0.13.0 · ordinary Apple/container worker</text>
+  <rect x="36" y="105" width="1048" height="190" rx="16" fill="#dce9fb"/>
+  <text class="small" x="57" y="135">KUBERNETES · one explicitly selected node</text>
+  <rect class="box" x="57" y="154" width="300" height="111" rx="11"/>
+  <text class="label" x="76" y="187">DRA claim + agent</text><text class="body" x="76" y="216">metal.kiac.dev</text><text class="small" x="76" y="243">Obtain and renew the service lease</text>
+  <rect class="box" x="411" y="154" width="280" height="111" rx="11"/>
+  <text class="label" x="430" y="187">CDI credential mount</text><text class="body" x="430" y="216">Short-lived token + public CA</text><text class="small" x="430" y="243">Read-only · reload per request</text>
+  <rect class="box" x="745" y="154" width="318" height="111" rx="11"/>
+  <text class="label" x="764" y="187">Unprivileged Linux Pod</text><text class="body" x="764" y="216">Python / Kiac RPC client</text><text class="small" x="764" y="243">No /dev/dri · no Metal runtime</text>
+  <path class="line" d="M357 210h49"/><path class="line" d="M691 210h49"/>
+  <rect x="692" y="316" width="371" height="44" rx="8" fill="#edf3fb"/><text class="body" x="710" y="344">Authenticated TLS to a private Mac IP</text>
+  <rect x="36" y="380" width="1048" height="165" rx="16" fill="#e2f1eb"/>
+  <text class="small" x="57" y="409">MACOS HOST · execution is outside the Linux container boundary</text>
+  <rect class="box" x="57" y="430" width="280" height="86" rx="11"/>
+  <text class="label" x="76" y="464">Metal → Apple GPU</text><text class="small" x="76" y="493">Real shared physical device</text>
+  <rect class="box" x="391" y="430" width="300" height="86" rx="11"/>
+  <text class="label" x="410" y="464">Native workload</text><text class="small" x="410" y="493">Fixed compute / llama.cpp Metal</text>
+  <rect class="box" x="745" y="430" width="318" height="86" rx="11"/>
+  <text class="label" x="764" y="464">Kiac host service</text><text class="small" x="764" y="493">Validate lease · bound requests</text>
+  <path class="line" d="M904 265v50M904 360v65"/>
+  <path class="line" d="M745 473h-49"/><path class="line" d="M391 473h-49"/>
+  <text class="small" x="36" y="581">One exclusive Kiac service lease. Other Mac applications still share the GPU; this is not physical GPU isolation.</text>
+</svg>

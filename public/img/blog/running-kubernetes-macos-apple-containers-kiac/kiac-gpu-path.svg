@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 540" role="img" aria-labelledby="title desc">
+  <title id="title">The implemented Kiac Apple GPU path: Vulkan in the Pod, Metal on macOS</title>
+  <desc id="desc">Kubernetes schedules a GPU Pod using the Kiac device plugin or DRA driver. In the Linux guest the application uses Vulkan and Mesa Venus through virtio-gpu. The host renderer uses virglrenderer and MoltenVK, which submits Metal work to the physical Apple GPU. This is a shared GPU path, not CUDA or direct Metal inside Linux.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="m0 0 10 5-10 5z" fill="#3769b2"/></marker></defs>
+  <style>text{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;fill:#142842}.title{font-size:25px;font-weight:700}.label{font-size:19px;font-weight:650}.body{font-size:16px}.small{font-size:14px;fill:#4a5d75}.box{fill:#fff;stroke:#bed0e6;stroke-width:1.5}.line{fill:none;stroke:#3769b2;stroke-width:2;marker-end:url(#arrow)}</style>
+  <rect width="1120" height="540" rx="24" fill="#edf3fb"/>
+  <text class="title" x="36" y="46">Real Apple GPU work. A Vulkan API inside Linux.</text><text class="small" x="36" y="76">Implemented GPU beta · entire cluster uses krunkit + vmnet-helper</text>
+  <rect class="box" x="36" y="104" width="1048" height="70" rx="12"/><text class="label" x="59" y="134">Kubernetes scheduling</text><text class="body" x="59" y="158">kiac.dev/gpu resource · device plugin OR DRA claims and gpu.kiac.dev DeviceClass</text>
+  <path class="line" d="M560 174v33"/>
+  <rect x="36" y="211" width="1048" height="120" rx="16" fill="#dce9fb"/><text class="small" x="57" y="237">LINUX GPU WORKER VM · designated -gpu-N nodes</text>
+  <rect class="box" x="57" y="252" width="272" height="56" rx="9"/><text class="label" x="79" y="287">Pod: Vulkan application</text>
+  <rect class="box" x="373" y="252" width="296" height="56" rx="9"/><text class="label" x="394" y="287">Mesa Venus driver</text>
+  <rect class="box" x="713" y="252" width="350" height="56" rx="9"/><text class="label" x="734" y="287">virtio-gpu / render device</text>
+  <path class="line" d="M329 280h39"/><path class="line" d="M669 280h39"/><path class="line" d="M889 309v45"/>
+  <rect x="36" y="357" width="1048" height="120" rx="16" fill="#e2f1eb"/><text class="small" x="57" y="382">MACOS HOST · shared physical device</text>
+  <rect class="box" x="57" y="397" width="267" height="56" rx="9"/><text class="label" x="79" y="431">Apple GPU ← Metal</text>
+  <rect class="box" x="371" y="397" width="298" height="56" rx="9"/><text class="label" x="393" y="431">MoltenVK</text>
+  <rect class="box" x="713" y="397" width="350" height="56" rx="9"/><text class="label" x="734" y="431">virglrenderer</text>
+  <path class="line" d="M889 357v35"/><path class="line" d="M713 425h-39"/><path class="line" d="M371 425h-42"/>
+  <text class="small" x="36" y="510">DRA memory is VM-window accounting. It does not partition physical unified memory or reserve a percentage of GPU compute.</text>
+  <text class="small" x="36" y="532">CUDA, NVML, Metal and MLX are not guest APIs in this path.</text>
+</svg>

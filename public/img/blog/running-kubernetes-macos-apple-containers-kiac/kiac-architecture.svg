@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">Kiac architecture: one lightweight Linux VM for every Kubernetes node</title>
+  <desc id="desc">On an Apple silicon Mac, Kiac calls Apple container to create a control plane VM and two worker VMs. Every VM has its own Linux kernel, kubelet and containerd. The control plane runs the Kubernetes API and etcd. A CNI connects Pods across worker VMs. kubectl uses the Kubernetes API; a browser reaches LoadBalancer services through the node edge proxy. GPU clusters use a separate krunkit backend.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="m0 0 10 5-10 5z" fill="#3769b2"/></marker></defs>
+  <style>text{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;fill:#142842}.title{font-size:25px;font-weight:700}.label{font-size:19px;font-weight:650}.body{font-size:16px}.small{font-size:14px;fill:#4a5d75}.box{fill:#fff;stroke:#bed0e6;stroke-width:1.5}.line{fill:none;stroke:#3769b2;stroke-width:2;marker-end:url(#arrow)}</style>
+  <rect width="1120" height="620" rx="24" fill="#edf3fb"/>
+  <text class="title" x="36" y="45">An Apple silicon Mac. Three real node VMs.</text>
+  <text class="small" x="36" y="74">Ordinary Kiac clusters · Apple/container backend · kubeadm shown</text>
+  <rect class="box" x="36" y="104" width="235" height="76" rx="12"/><text class="label" x="55" y="136">Kiac CLI / dashboard</text><text class="small" x="55" y="161">Create · inspect · stop · resume</text>
+  <rect class="box" x="329" y="104" width="225" height="76" rx="12"/><text class="label" x="350" y="136">Apple/container</text><text class="small" x="350" y="161">VM lifecycle + vmnet network</text>
+  <path class="line" d="M271 141H325"/>
+  <rect class="box" x="612" y="104" width="200" height="76" rx="12"/><text class="label" x="633" y="137">kubectl</text><text class="small" x="633" y="162">Kubernetes API client</text>
+  <rect class="box" x="848" y="104" width="236" height="76" rx="12"/><text class="label" x="870" y="137">Browser / curl</text><text class="small" x="870" y="162">LoadBalancer · Gateway</text>
+  <path class="line" d="M441 180v35H208v31"/>
+  <path class="line" d="M441 215h119v31"/>
+  <path class="line" d="M560 215h352v31"/>
+  <path class="line" d="M712 180v46H320v52"/>
+  <path class="line" d="M965 180v67"/>
+  <rect class="box" x="36" y="251" width="344" height="239" rx="16"/>
+  <text class="label" x="57" y="284">Control plane VM</text><text class="body" x="57" y="315">API server · scheduler · etcd</text><text class="body" x="57" y="344">Kubelet · containerd</text>
+  <rect x="56" y="363" width="304" height="49" rx="8" fill="#e4edfb"/><text class="body" x="72" y="394">Dedicated Linux kernel</text>
+  <text class="small" x="57" y="448">Own boot ID, cgroups and node IP</text><text class="small" x="57" y="473">kiac-lb reconciles service addresses</text>
+  <rect class="box" x="388" y="251" width="344" height="239" rx="16"/>
+  <text class="label" x="410" y="284">Worker VM 1</text><text class="body" x="410" y="315">Application Pods</text><text class="body" x="410" y="344">Kubelet · containerd · edge proxy</text>
+  <rect x="408" y="363" width="304" height="49" rx="8" fill="#e4edfb"/><text class="body" x="424" y="394">Dedicated Linux kernel</text>
+  <text class="small" x="410" y="448">Own boot ID, cgroups and node IP</text><text class="small" x="410" y="473">Node-local persistent volumes</text>
+  <rect class="box" x="740" y="251" width="344" height="239" rx="16"/>
+  <text class="label" x="761" y="284">Worker VM 2</text><text class="body" x="761" y="315">Application Pods</text><text class="body" x="761" y="344">Kubelet · containerd · edge proxy</text>
+  <rect x="760" y="363" width="304" height="49" rx="8" fill="#e4edfb"/><text class="body" x="776" y="394">Dedicated Linux kernel</text>
+  <text class="small" x="761" y="448">Own boot ID, cgroups and node IP</text><text class="small" x="761" y="473">Node-local persistent volumes</text>
+  <rect x="36" y="515" width="1048" height="60" rx="12" fill="#d9e8fb"/><text class="label" x="59" y="551">CNI connects Pods across nodes</text><text class="body" x="452" y="551">kindnet by default · optional Cilium / Flannel</text>
+  <text class="small" x="36" y="603">Each node has a VM boundary. All nodes still share one physical Mac, its memory, networking and availability.</text>
+</svg>
