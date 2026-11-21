@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Honest DGX Spark tradeoffs at a glance</title>
+  <desc id="desc">Spark's strengths, limitations, and the core capacity thesis.</desc>
+  <style>
+    text{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+    .title{font-size:42px;font-weight:800;fill:#0f172a}
+    .sub{font-size:21px;fill:#475569}
+    .head{font-size:28px;font-weight:800;fill:#0f172a}
+    .body{font-size:20px;fill:#1f2937}
+    .note{font-size:16px;fill:#64748b}
+  </style>
+  <rect width="1200" height="760" rx="30" fill="#ffffff"/>
+  <text x="600" y="76" text-anchor="middle" class="title">Honest tradeoffs at a glance</text>
+  <text x="600" y="112" text-anchor="middle" class="sub">What Spark is great at, what it is not, and what to expect on early hardware.</text>
+
+  <g transform="translate(88 172)">
+    <rect width="486" height="334" rx="22" fill="#f0fdf4" stroke="#22c55e" stroke-width="3"/>
+    <text x="34" y="54" class="head">What Spark is great at</text>
+    <text x="34" y="106" class="body">+ 128 GB unified memory</text>
+    <text x="34" y="146" class="body">+ 70B-120B class models fit</text>
+    <text x="34" y="186" class="body">+ Private, offline-capable workflows</text>
+    <text x="34" y="226" class="body">+ Long context experiments</text>
+    <text x="34" y="266" class="body">+ Multi-user batching with vLLM</text>
+    <text x="34" y="306" class="body">+ Real local AI lab energy</text>
+  </g>
+
+  <g transform="translate(626 172)">
+    <rect width="486" height="334" rx="22" fill="#fff7ed" stroke="#f97316" stroke-width="3"/>
+    <text x="34" y="54" class="head">What it is not</text>
+    <text x="34" y="106" class="body">- Not the fastest single-user tok/s</text>
+    <text x="54" y="134" class="note">an RTX 5090 wins when the model fits 32 GB</text>
+    <text x="34" y="180" class="body">- Not a mature datacenter platform</text>
+    <text x="54" y="208" class="note">sm_121 support is still young in places</text>
+    <text x="34" y="254" class="body">- Not unlimited memory</text>
+    <text x="54" y="282" class="note">long context still eats working memory</text>
+  </g>
+
+  <g transform="translate(148 574)">
+    <rect width="904" height="96" rx="22" fill="#0f172a"/>
+    <text x="452" y="38" text-anchor="middle" font-size="25" font-weight="800" fill="#ffffff">The thesis to keep returning to</text>
+    <text x="452" y="70" text-anchor="middle" font-size="20" fill="#bbf7d0">Spark's value is capacity, not raw speed. Big models fit on your desk.</text>
+  </g>
+</svg>
