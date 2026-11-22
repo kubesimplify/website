@@ -150,7 +150,7 @@ Each rule matches the start of a request path and names the database that gets t
 
 The rules for `/traces` come next in the file, and they work like the ones for logs.
 
-The docs write these rules another way. The [access control page](https://docs.victoriametrics.com/victoriastack/access-control/) matches `/metrics/.*` and removes one part, so there the same query goes to `/metrics/prometheus/api/v1/query`, with no `select` in the path. Both ways work. Pick one and stay with it.
+The docs write these rules another way. The [access control page](https://docs.victoriametrics.com/victoriastack/access-control/) matches `/metrics/.*` and removes one part, so the same query goes to `/metrics/prometheus/api/v1/query`, with no `select` in the path. Both ways work. Pick one and stay with it.
 
 There are no users or passwords in this file. In a real setup, vmauth is where you add them, and the same access control page shows how.
 
@@ -206,7 +206,7 @@ traces_endpoint: http://vmstack:8427/traces/insert/opentelemetry/v1/traces
 
 Every endpoint has the same host and port. `vmstack:8427` is vmauth inside the Compose network, and again, the path picks the database.
 
-The logs endpoint is listed twice because the demo sends the logs a second time, to another tenant. A [tenant](https://docs.victoriametrics.com/victoriastack/multitenancy/) is a separate space for data inside the same database, for example one for each team or customer. A request picks its tenant with two HTTP headers, `AccountID` and `ProjectID`, and a query for one tenant never returns the data of another. Without the headers, a request gets tenant `0:0`, which is why our helpers need none. The demo writes its logs to tenants `0:0` and `1:0`, and we will read the second copy in Step 4.
+The logs endpoint is listed twice because the demo sends the logs a second time, to another tenant. A [tenant](https://docs.victoriametrics.com/victoriastack/multitenancy/) is a separate space for data inside the same database, for example, one for each team or customer. A request picks its tenant from two HTTP headers, `AccountID` and `ProjectID`, and a query for one tenant never returns data from another. Without the headers, a request gets tenant `0:0`, which is why our helpers need none. The demo writes its logs to tenants `0:0` and `1:0`, and we will read the second copy in Step 4.
 
 If you already run a Collector, this is the part you add to your own setup: one exporter for each database.
 
@@ -246,6 +246,8 @@ $ curl -s -H 'AccountID: 1' $V/logs/select/logsql/query --data-urlencode 'query=
 ```
 
 The same three lines come back, this time from the other tenant. (The counts are one higher only because this query ran five seconds later.)
+
+Here we picked the tenant ourselves, just by setting a header. That works because vmauth in this demo has no users, so any client can read any tenant. In a real setup, the client doesn't choose because vmauth sets `AccountID` and `ProjectID` for each user, so the credentials decide which tenant a request reaches. The [access control docs](https://docs.victoriametrics.com/victoriastack/access-control/#multitenancy) show how.
 
 The demo also turns logs into a metric. One of its vmalert rules counts the log records of each service every minute and saves the result in VictoriaMetrics:
 
@@ -321,7 +323,7 @@ $ lq 'service.name:=quote | sort by (_time desc) | limit 1 | fields _time, _msg'
 {"_time":"2026-11-20T01:54:54.813445Z","_msg":"Calculated quote"}
 ```
 
-That is the last request before we stopped the container. So the logs tell us when the trouble started and which service went quiet. But there is no error in them. `shipping` logs nothing about the failure, so we still don't know why its requests fail. To find out, we have to look inside one request, and that is what traces are for.
+That is the last request before we stopped the container. So the logs tell us when the trouble started and which service went quiet. But there is no error in them. `shipping` logs show nothing about the failure, so we still don't know why its requests fail. To find out, we have to look inside one request, and that is what traces are for.
 
 ### What do the traces say?
 
@@ -337,13 +339,16 @@ There are two kinds of failed spans. `POST /get-quote` is the request that `ship
 
 Now let's look at one of these traces in the VictoriaTraces interface:
 
-1. Open `http://localhost:8427/traces/select/vmui/`. The first screen is the Trace Explorer, with the traces of the last five minutes. During the incident, every new row has a red mark and a 2 in the **Errors** column.
+1. Open `http://localhost:8427/traces/select/vmui/`. The first screen is the Trace Explorer, showing traces from the last five minutes. During the incident, every new row has a red mark and a 2 in the **Errors** column.
 2. Click one of these rows. A preview opens on the right.
-3. Click **View full trace** in the preview.
+3. Press **View full trace** in the preview. The trace page opens.
+4. On the trace page, click the `POST quote` span. Its fields open on the right.
+
+This is the preview from step 2, with the **View full trace** button:
 
 ![The Trace Explorer of VictoriaTraces during the incident. One trace of shipping, POST /get-quote, is selected in the list. A Trace preview panel on the right shows 2 spans, a View full trace button, and two errors: POST quote and POST /get-quote.](/img/blog/hands-on-with-victoriastack/02-trace-preview.png)
 
-4. On the trace page, click the `POST quote` span. Its fields open on the right.
+And this is the trace page after step 4:
 
 ![The trace page of VictoriaTraces with two spans, POST /get-quote and POST quote, both marked as errors. The POST quote span is selected. Its fields show error true, an error.type that starts with Connect(Resolver, server.address quote, and url.full http://quote:8080/getquote.](/img/blog/hands-on-with-victoriastack/03-failing-trace.png)
 
@@ -367,7 +372,7 @@ So each signal gave us one part of the answer:
 
 - The metrics and the alert said **what** is wrong: every request to `shipping` fails.
 - The logs said **when** it started and which service went quiet: `quote` wrote its last record at 01:54:54 UTC.
-- The trace said **why**: the call to `quote` fails, because the name `quote` cannot be found.
+- The trace said **why**: the call to `quote` fails because the name `quote` cannot be found.
 
 ![One outage, three signals. Metrics said what: every request fails with status 500, and the alert fired. Logs said when: the last record of quote is at 01:54:54, then nothing, and no error. A trace said why: the call POST quote fails because the name is not known.](/img/blog/hands-on-with-victoriastack/05-one-outage-three-signals.png)
 
@@ -377,7 +382,7 @@ The demo's Grafana has a data source for each database, so the same trace opens 
 
 1. Open `http://localhost:3000/explore`, log in with `admin` and `admin`, and click **Skip** when Grafana asks for a new password.
 2. Pick **VictoriaTraces Jaeger** in the data source list at the top.
-3. The query type is **TraceID** already. Paste a trace ID into the **Trace ID** box and press Shift+Enter. You can copy the ID from the **TraceID** box of the VictoriaTraces trace page.
+3. The query type is **TraceID** already. Paste a trace ID into the **Trace ID** box and press Shift+Enter. You can copy the ID from the **TraceID** box on the VictoriaTraces trace page.
 4. Click the `POST quote` span to open its details.
 
 ![Grafana Explore with the VictoriaTraces Jaeger data source and a trace ID. The trace of shipping, POST /get-quote, has status 500 and two spans. The POST quote span is open. Under Span attributes, the Error group shows error.type with the full message.](/img/blog/hands-on-with-victoriastack/06-grafana-span.png)
@@ -388,7 +393,7 @@ Under **Span attributes**, the **Error** group shows `error.type` with the full 
 Connect(Resolver(Custom { kind: Uncategorized, error: "failed to lookup address information: Name or service not known" }))
 ```
 
-Read it from the inside out. A name could not be looked up, so the resolver failed, so the connection failed. `shipping` tried to connect to `quote`, and nothing on the network answers to that name any more, because we stopped the container.
+Read it from the inside out. A name could not be looked up, so the resolver failed, so the connection failed. `shipping` tried to connect to `quote`, and nothing on the network answers to that name anymore, because we stopped the container.
 
 ### Fix it
 
@@ -424,7 +429,7 @@ You can also do it by hand. Open `http://localhost:8427/metrics/select/vmui/`, p
 
 ![A VMUI graph of requests per second by HTTP status code over the last 30 minutes. The red line for status 200 drops from 0.5 to 0 at 01:55, when quote is stopped, and a blue line for status 500 appears at 0.5. At 02:02, when quote is started again, they switch back.](/img/blog/hands-on-with-victoriastack/07-requests-by-status.png)
 
-The red line is status 200, and the blue line is status 500. When `quote` stops, the red line drops to zero and the blue line takes its place. When `quote` is back, they switch again.
+The red line is status 200, and the blue line is status 500. When `quote` stops, the red line drops to zero, and the blue line takes its place. When `quote` is back, they switch again.
 
 The alert cleared about five and a half minutes after we started `quote` again. When you are done, stop the stack and delete its data:
 
@@ -570,15 +575,20 @@ grafana:
     - victoriametrics-logs-datasource
 ```
 
-The `url_map` gives vmauth the same three path prefixes as in the Compose demo, and the same rule as in Step 2: two parts are removed for metrics, and one for logs and traces. Like the demo, it has no users or passwords, so keep it on a local cluster. Now add the chart repository and install the chart:
+The `url_map` gives vmauth the same three path prefixes as in the Compose demo, and the same rule as in Step 2: two parts are removed for metrics, and one for logs and traces. Like the demo, it has no users or passwords, so keep it on a local cluster. Now add the chart repository, update helm's list of charts, and install the chart:
 
 ```console
 $ helm repo add vm https://victoriametrics.github.io/helm-charts/
 "vm" has been added to your repositories
 
+$ helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "vm" chart repository
+Update Complete. ⎈Happy Helming!⎈
+
 $ helm install stack vm/victoria-metrics-k8s-stack --version 0.98.1 --namespace monitoring --create-namespace -f values.yaml
 NAME: stack
-LAST DEPLOYED: Fri Nov 20 07:37:52 2026
+LAST DEPLOYED: Sun Nov 22 22:45:23 2026
 NAMESPACE: monitoring
 STATUS: deployed
 REVISION: 1
@@ -586,33 +596,33 @@ DESCRIPTION: Install complete
 NOTES:
 ```
 
-In this run, the pods were running after about two minutes:
+In this run, the pods were running after about four minutes:
 
 ```console
 $ kubectl get pods -n monitoring
 NAME                                               READY   STATUS      RESTARTS   AGE
-stack-grafana-7c74dcc857-xnbjg                     3/3     Running     0          2m10s
-stack-kube-state-metrics-f8df5896c-f4fhv           1/1     Running     0          2m10s
-stack-prometheus-node-exporter-gxlp6               1/1     Running     0          2m10s
-stack-sync-job-cxvjv                               0/1     Completed   0          2m8s
-stack-victoria-metrics-operator-566fd744c4-bb79k   1/1     Running     0          2m10s
-vlagent-stack-vfbqz                                1/1     Running     0          111s
-vlsingle-stack-79b6bb6f44-jhqbz                    1/1     Running     0          106s
-vmagent-stack-9cb5cd47f-fndm4                      2/2     Running     0          111s
-vmalert-stack-7d65c4966-9fhnh                      2/2     Running     0          111s
-vmalertmanager-stack-0                             2/2     Running     0          111s
-vmauth-stack-559ffb4649-vw7pk                      2/2     Running     0          111s
-vmauth-stack-internal-5476f786f9-62d6b             2/2     Running     0          111s
-vmsingle-stack-746794f864-tzcqd                    1/1     Running     0          106s
-vtsingle-stack-65b657f49f-2rjlq                    1/1     Running     0          111s
+stack-grafana-564d767687-wfnhv                     3/3     Running     0          4m12s
+stack-kube-state-metrics-f8df5896c-lb6dm           1/1     Running     0          4m12s
+stack-prometheus-node-exporter-xwcjz               1/1     Running     0          4m12s
+stack-sync-job-lzjxp                               0/1     Completed   0          4m11s
+stack-victoria-metrics-operator-566fd744c4-kscvs   1/1     Running     0          4m12s
+vlagent-stack-t22vv                                1/1     Running     0          3m50s
+vlsingle-stack-79b6bb6f44-pnpkc                    1/1     Running     0          3m45s
+vmagent-stack-9cb5cd47f-z7nn7                      2/2     Running     0          3m50s
+vmalert-stack-7d65c4966-qzkwx                      2/2     Running     0          3m50s
+vmalertmanager-stack-0                             2/2     Running     0          3m50s
+vmauth-stack-559ffb4649-nqttm                      2/2     Running     0          3m50s
+vmauth-stack-internal-5476f786f9-wn2f7             2/2     Running     0          3m50s
+vmsingle-stack-746794f864-hjmfd                    1/1     Running     0          3m45s
+vtsingle-stack-65b657f49f-g5mdf                    1/1     Running     0          3m50s
 ```
 
 The three databases are `vmsingle`, `vlsingle`, and `vtsingle`, and `vmauth-stack` is our entry point. `vmauth-stack-internal` is a second vmauth that the chart adds for vmalert. Now let's look at the Service for vmauth:
 
 ```console
 $ kubectl get svc -n monitoring vmauth-stack
-NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-vmauth-stack   ClusterIP   10.96.187.182   <none>        8427/TCP   111s
+NAME           TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+vmauth-stack   ClusterIP   10.96.19.117   <none>        8427/TCP   3m50s
 ```
 
 It is a ClusterIP Service, so only pods inside the cluster can reach it. To reach it from your machine, forward port 8427 in a second terminal and leave it running. The Compose demo must be stopped by now, because it uses the same port:
@@ -629,7 +639,7 @@ The entry point is at `http://localhost:8427` again, the same address as with Co
 $ source helpers.sh
 ```
 
-There is no demo app in this cluster, but there is data already. vmagent collects the metrics of the cluster, and vlagent collects the logs of every pod:
+There is no demo app in this cluster, but there is data already there. vmagent collects the metrics of the cluster, and vlagent collects the logs of every pod:
 
 ```console
 $ mq 'count(kube_pod_info) by (namespace)'
@@ -638,9 +648,8 @@ $ mq 'count(kube_pod_info) by (namespace)'
 {"metric":{"namespace":"monitoring"},"value":"14"}
 
 $ lq '_time:5m | stats by (kubernetes.pod_namespace) count() as logs'
-{"kubernetes.pod_namespace":"local-path-storage","logs":"28"}
-{"kubernetes.pod_namespace":"monitoring","logs":"3101"}
-{"kubernetes.pod_namespace":"kube-system","logs":"839"}
+{"kubernetes.pod_namespace":"monitoring","logs":"2791"}
+{"kubernetes.pod_namespace":"kube-system","logs":"72"}
 ```
 
 For traces, we need something that sends spans. Let's send 20 test traces with `telemetrygen`, a test tool from the OpenTelemetry project:
@@ -648,9 +657,9 @@ For traces, we need something that sends spans. Let's send 20 test traces with `
 ```console
 $ kubectl run telemetrygen -n monitoring --rm -i --restart=Never --image=ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.165.0 -- traces --otlp-http --otlp-insecure --otlp-endpoint vmauth-stack:8427 --otlp-http-url-path /traces/insert/opentelemetry/v1/traces --service hello-from-kind --traces 20
 ...
-2026-11-20T02:12:22.050Z	INFO	traces/worker.go:180	traces generated	{"worker": 0, "traces": 20}
-2026-11-20T02:12:22.050Z	INFO	traces/traces.go:75	stop the batch span processor
-2026-11-20T02:12:22.051Z	INFO	traces/traces.go:65	stopping the exporter
+2026-11-22T17:21:58.767Z	INFO	traces/worker.go:180	traces generated	{"worker": 0, "traces": 20}
+2026-11-22T17:21:58.767Z	INFO	traces/traces.go:75	stop the batch span processor
+2026-11-22T17:21:58.768Z	INFO	traces/traces.go:65	stopping the exporter
 pod "telemetrygen" deleted from monitoring namespace
 
 $ curl -s $V/traces/select/jaeger/api/services
@@ -661,8 +670,8 @@ VictoriaTraces shows new spans after about 30 seconds (more on that at the end).
 
 ```console
 $ tq '_time:5m name:* | stats by (name) count() as spans'
-{"name":"lets-go","spans":"20"}
 {"name":"okey-dokey-0","spans":"20"}
+{"name":"lets-go","spans":"20"}
 ```
 
 All three signals answer on Kubernetes, through the same three paths as with Compose. The three web interfaces from Step 2 are at the same addresses too. When you are done, stop the port-forward with Ctrl+C and delete the cluster:
@@ -675,19 +684,18 @@ Deleted nodes: ["victoriastack-control-plane"]
 
 ## A few things to know
 
-Here are five things we noticed during the runs. Knowing them can save you a few minutes.
+Here are four things we noticed during the runs. Knowing them can save you a few minutes.
 
 - **`HighRequestLatency` fires on a healthy system.** Its threshold is 1 ms, which any traffic crosses. Ignore it here, and don't copy it as it is.
 - **Grafana can be slow on a fresh start.** It downloads a plugin of about 79 MB before it opens port 3000, so the time depends on your connection. In one of the runs, it took two and a half minutes. If the download fails, the Grafana container exits. Look at `docker logs deployment-grafana-1`, and run `make otel-single-up` again.
-- **New spans show up after 30 seconds.** Most query APIs of VictoriaTraces [leave the newest 30 seconds out](https://docs.victoriametrics.com/victoriatraces/querying/#search-latency) by default. That is why we waited before counting the test spans.
+- **The newest 30 seconds are left out of query results.** Most query APIs of VictoriaTraces [leave them out](https://docs.victoriametrics.com/victoriatraces/querying/#search-latency) by default, so that a trace is complete before you see it. VictoriaMetrics has the same 30-second default for metrics. That is why we waited before counting the test spans.
 - **The `shippingSlowdown` feature flag does nothing.** The demo defines this flag, but the `shipping` service in this image does not read it. That is why we stopped a container to create our incident.
-- **`helm install` may need a second try.** On a new cluster, it can stop with `ensure CRDs are installed first`. It happened to us once. Run the same command again, and it goes through.
 
 ## Wrapping up
 
 We started VictoriaStack with two commands, queried metrics, logs, and traces through one port, and then stopped a service and found the cause using all three signals. We also ran the same stack as a cluster and on Kubernetes with kind.
 
-Overall, VictoriaStack is a simple way to run metrics, logs, and traces together, and what I like the most is that nothing is hidden. It is three databases and a proxy, and you can read the config files that connect them in a few minutes. My favourite part is the single entry point with `/metrics`, `/logs`, and `/traces`. Just keep in mind that VictoriaTraces has not reached version 1.0 yet, and for a single view across all three signals you need Grafana for now.
+Overall, VictoriaStack is a simple way to run metrics, logs, and traces together, and what I like the most is that nothing is hidden. It is three databases and a proxy, and you can read the config files that connect them in a few minutes. My favorite part is the single entry point with `/metrics`, `/logs`, and `/traces`. VictoriaTraces has not reached version 1.0 yet, but the VictoriaMetrics team considers it production ready: their docs call each of the three databases [battle-tested in production](https://docs.victoriametrics.com/victoriastack/#why-victoriastack). For a single view across all three signals, you need Grafana or Perses for now.
 
 Give it a try on your laptop and let me know how you find it.
 
