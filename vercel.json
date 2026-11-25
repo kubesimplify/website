@@ -317,6 +317,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/devin-bot-kubecon-map",
+      "destination": "https://blog.kubesimplify.com/devin-bot-kubecon-map",
+      "permanent": true
+    },
+    {
       "source": "/blog/devin-outposts-on-kubernetes",
       "destination": "https://blog.kubesimplify.com/devin-outposts-on-kubernetes",
       "permanent": true
@@ -1640,6 +1645,17 @@
     {
       "source": "/deploying-java-application-using-docker-and-kubernetes-devops-project",
       "destination": "https://blog.kubesimplify.com/deploying-java-application-using-docker-and-kubernetes-devops-project",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/devin-bot-kubecon-map",
+      "destination": "https://blog.kubesimplify.com/devin-bot-kubecon-map",
       "permanent": true,
       "has": [
         {
