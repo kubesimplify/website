@@ -90,6 +90,7 @@
 /blog/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide /github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide  301!
 /blog/gitops-demystified                                                               /gitops-demystified  301!
 /blog/ha-kubernetes                                                                    /ha-kubernetes  301!
+/blog/hands-on-with-victoriastack                                                      /hands-on-with-victoriastack  301!
 /blog/how-a-kubernetes-service-actually-works-and-all-5-types-you-need                 /how-a-kubernetes-service-actually-works-and-all-5-types-you-need  301!
 /blog/how-get-started-with-hashicorp-vault                                             /how-get-started-with-hashicorp-vault  301!
 /blog/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die         /how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die  301!
@@ -321,6 +322,7 @@
 /github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide /blog/github-actions-101-what-are-github-actions-and-how-to-use-them-a-beginners-guide  200!
 /gitops-demystified                                                               /blog/gitops-demystified  200!
 /ha-kubernetes                                                                    /blog/ha-kubernetes  200!
+/hands-on-with-victoriastack                                                      /blog/hands-on-with-victoriastack  200!
 /how-a-kubernetes-service-actually-works-and-all-5-types-you-need                 /blog/how-a-kubernetes-service-actually-works-and-all-5-types-you-need  200!
 /how-get-started-with-hashicorp-vault                                             /blog/how-get-started-with-hashicorp-vault  200!
 /how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die         /blog/how-kubernetes-endpointslices-actually-work-and-why-endpoints-had-to-die  200!

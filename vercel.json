@@ -442,6 +442,11 @@
       "permanent": true
     },
     {
+      "source": "/blog/hands-on-with-victoriastack",
+      "destination": "https://blog.kubesimplify.com/hands-on-with-victoriastack",
+      "permanent": true
+    },
+    {
       "source": "/blog/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
       "destination": "https://blog.kubesimplify.com/how-a-kubernetes-service-actually-works-and-all-5-types-you-need",
       "permanent": true
@@ -1915,6 +1920,17 @@
     {
       "source": "/ha-kubernetes",
       "destination": "https://blog.kubesimplify.com/ha-kubernetes",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "kubesimplify.com"
+        }
+      ]
+    },
+    {
+      "source": "/hands-on-with-victoriastack",
+      "destination": "https://blog.kubesimplify.com/hands-on-with-victoriastack",
       "permanent": true,
       "has": [
         {
