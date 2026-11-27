@@ -39,9 +39,14 @@ Metrics, logs, and traces are often called the three signals. They all arrive as
 - **Logs** are large pieces of text. The hard part is writing them fast and searching for words across weeks of data.
 - **Traces** are trees of spans spread over many services. The hard part is the write volume and finding one trace quickly.
 
-One general-purpose database would need a single storage format for all three, and it would suit none of them well. You would pay for it in memory, disk, and query time. So each signal gets its own database, with storage and a query engine built for how that data is written and read.
+So is one database better, or three? There is no answer that fits every team. One database has one real advantage: your engineers learn to run and maintain a single system. Two more are often claimed, but they don't hold up:
 
-On top of three separate databases, the stack adds three things:
+- **"All signals in one place is more convenient."** The three signals are used in very different ways, and metrics alone can need more resources than traces. In one database, the load of one signal slows down the others, which is called the noisy neighbor problem. With separate databases, a cardinality explosion in metrics (a sudden jump in the number of series) does not touch your logs.
+- **"One database is better for AI."** An AI agent follows instructions at machine speed. It doesn't mind switching between databases or query languages. One database made life easier for human operators, but agents don't need it.
+
+And one database has a real downside: it can never be equally good at three different jobs. VictoriaMetrics, VictoriaLogs, and VictoriaTraces are each built for one signal. VictoriaLogs even began inside the VictoriaMetrics repository. In July 2025, it moved to [a repository of its own](https://github.com/VictoriaMetrics/VictoriaLogs): as the team puts it, logs needed too many changes that did not apply to metrics. You can use a Swiss Army knife as a screwdriver, but a screwdriver is simply better at it.
+
+VictoriaStack keeps the three databases separate, so each one stays good at its job. What it changes is how much there is to learn. The three are built alike: each has the same kind of web interface and the same cluster layout, and logs and traces share one query language, LogsQL. On top of them, the stack adds three things:
 
 1. **One entry point.** [vmauth](https://docs.victoriametrics.com/victoriametrics/vmauth/), a small proxy, sits in front and sends each request to the right database by its path.
 2. **One pipeline.** All three databases accept OTLP, the OpenTelemetry protocol. So one OpenTelemetry Collector can send data to all of them.
@@ -59,7 +64,7 @@ You need:
 - Docker with Compose
 - for the Kubernetes part: [kind](https://kind.sigs.k8s.io/), kubectl, and Helm
 
-The commands in this post were run on a MacBook Pro (Apple M1 Max) with Docker Desktop 4.75.0. The VictoriaStack repo was at commit `5c1df0b`. Its single-node Compose file uses VictoriaMetrics v1.156.0, VictoriaLogs v1.54.0, and VictoriaTraces v0.13.0.
+The commands in this post were run on a MacBook Pro (Apple M1 Max) with Docker Desktop 4.75.0. The VictoriaStack repo was at commit `7e42e81`. Its single-node Compose file uses VictoriaMetrics v1.156.0, VictoriaLogs v1.54.0, and VictoriaTraces v0.13.0.
 
 ## Step 1: Start the stack
 
@@ -91,16 +96,16 @@ $ docker ps --filter name=deployment --format 'table {{.Names}}\t{{.Image}}\t{{.
 NAMES                          IMAGE                                         STATUS
 deployment-traffic-1           curlimages/curl:8.12.1                        Up 5 seconds
 deployment-shipping-1          ghcr.io/open-telemetry/demo:3.0.0-shipping    Up 5 seconds
-deployment-victorialogs-1      victoriametrics/victoria-logs:v1.54.0         Up 6 seconds
-deployment-flagd-1             ghcr.io/open-feature/flagd:v0.16.0            Up 5 seconds
-deployment-quote-1             ghcr.io/open-telemetry/demo:3.0.0-quote       Up 6 seconds
-deployment-vmstack-1           victoriametrics/vmauth:v1.156.0               Up 5 seconds
-deployment-victoriatraces-1    victoriametrics/victoria-traces:v0.13.0       Up 5 seconds
-deployment-victoriametrics-1   victoriametrics/victoria-metrics:v1.156.0     Up 5 seconds
-deployment-rules-metrics-1     victoriametrics/vmalert:v1.156.0              Up 5 seconds
-deployment-rules-logs-1        victoriametrics/vmalert:v1.156.0              Up 6 seconds
-deployment-grafana-1           grafana/grafana:latest                        Up 6 seconds
-deployment-otelcol-1           otel/opentelemetry-collector-contrib:latest   Up 5 seconds
+deployment-victorialogs-1      victoriametrics/victoria-logs:v1.54.0         Up 7 seconds
+deployment-quote-1             ghcr.io/open-telemetry/demo:3.0.0-quote       Up 7 seconds
+deployment-flagd-1             ghcr.io/open-feature/flagd:v0.16.0            Up 7 seconds
+deployment-victoriatraces-1    victoriametrics/victoria-traces:v0.13.0       Up 7 seconds
+deployment-rules-logs-1        victoriametrics/vmalert:v1.156.0              Up 7 seconds
+deployment-rules-metrics-1     victoriametrics/vmalert:v1.156.0              Up 7 seconds
+deployment-victoriametrics-1   victoriametrics/victoria-metrics:v1.156.0     Up 7 seconds
+deployment-vmstack-1           victoriametrics/vmauth:v1.156.0               Up 7 seconds
+deployment-grafana-1           grafana/grafana:latest                        Up 7 seconds
+deployment-otelcol-1           otel/opentelemetry-collector-contrib:latest   Up 7 seconds
 ```
 
 There are 12 containers:
@@ -116,43 +121,39 @@ Wait three or four minutes before the next step, so that there is some data to q
 
 ## Step 2: One entry point for three databases
 
-Everything goes through `http://localhost:8427`, which is vmauth. Its config file says where each request goes. Let's look at the first 21 lines:
+Everything goes through `http://localhost:8427`, which is vmauth. Its config file says where each request goes. It is short, so let's look at all of it:
 
 ```console
-$ sed -n '1,21p' deployment/config/vmauth/single-node.yml
+$ cat deployment/config/vmauth/single-node.yml
 unauthorized_user:
   url_map:
     # VictoriaMetrics access
-    - src_paths: ["/metrics/select/.*"]
-      drop_src_path_prefix_parts: 2
-      url_prefix:
-        - "http://victoriametrics:8428"
-    - src_paths: ["/metrics/insert/.*"]
+    - src_paths: ["/metrics/(select|insert)/.*"]
+      # VictoriaMetrics single-node doesn't have /insert or /select prefixes,
+      # so we need to drop them.
       drop_src_path_prefix_parts: 2
       url_prefix:
         - "http://victoriametrics:8428"
 
     # VictoriaLogs access
-    - src_paths: ["/logs/select/.*"]
+    - src_paths: ["/logs/(select|insert)/.*"]
       drop_src_path_prefix_parts: 1
       url_prefix:
         - "http://victorialogs:9428"
-    - src_paths: ["/logs/insert/.*"]
+
+    # VictoriaTraces access
+    - src_paths: [ "/traces/(select|insert)/.*" ]
       drop_src_path_prefix_parts: 1
       url_prefix:
-        - "http://victorialogs:9428"
+        - "http://victoriatraces:10428"
 ```
 
-Each rule matches the start of a request path and names the database that gets the request. `select` is for reading data, and `insert` is for writing it. Before vmauth passes a request on, `drop_src_path_prefix_parts` removes that many parts from the front of its path. The number is not the same for every database:
+There is one rule for each database. A rule matches the start of a request path, such as `/logs/select/` or `/logs/insert/`, and names the database that gets the request. `select` is for reading data, and `insert` is for writing it. Before vmauth passes a request on, `drop_src_path_prefix_parts` removes that many parts from the front of its path. The number is not the same for every database:
 
 - For metrics, it is 2. VictoriaMetrics serves its API from the root, so both `/metrics` and `/select` are removed. A query sent to `/metrics/select/prometheus/api/v1/query` reaches VictoriaMetrics as `/prometheus/api/v1/query`.
-- For logs, it is 1. VictoriaLogs has `/select` and `/insert` in its own API paths, so only `/logs` is removed. A query sent to `/logs/select/logsql/query` reaches VictoriaLogs as `/select/logsql/query`.
+- For logs and traces, it is 1. VictoriaLogs and VictoriaTraces have `/select` and `/insert` in their own API paths, so only `/logs` or `/traces` is removed. A query sent to `/logs/select/logsql/query` reaches VictoriaLogs as `/select/logsql/query`.
 
-The rules for `/traces` come next in the file, and they work like the ones for logs.
-
-The docs write these rules another way. The [access control page](https://docs.victoriametrics.com/victoriastack/access-control/) matches `/metrics/.*` and removes one part, so the same query goes to `/metrics/prometheus/api/v1/query`, with no `select` in the path. Both ways work. Pick one and stay with it.
-
-There are no users or passwords in this file. In a real setup, vmauth is where you add them, and the same access control page shows how.
+There are no users or passwords in this file. In a real setup, vmauth is where you add them, and the [access control page](https://docs.victoriametrics.com/victoriastack/access-control/) shows how.
 
 To keep the commands short, let's save three small helpers in a file called `helpers.sh`:
 
@@ -200,13 +201,10 @@ Now let's see how the data gets in. The demo app sends everything to the OpenTel
 $ grep -o '[a-z]*_endpoint: [^ ,]*' deployment/config/otelcollector/config.yml
 metrics_endpoint: http://vmstack:8427/metrics/insert/opentelemetry/v1/metrics
 logs_endpoint: http://vmstack:8427/logs/insert/opentelemetry/v1/logs
-logs_endpoint: http://vmstack:8427/logs/insert/opentelemetry/v1/logs
 traces_endpoint: http://vmstack:8427/traces/insert/opentelemetry/v1/traces
 ```
 
 Every endpoint has the same host and port. `vmstack:8427` is vmauth inside the Compose network, and again, the path picks the database.
-
-The logs endpoint is listed twice because the demo sends the logs a second time, to another tenant. A [tenant](https://docs.victoriametrics.com/victoriastack/multitenancy/) is a separate space for data inside the same database, for example, one for each team or customer. A request picks its tenant from two HTTP headers, `AccountID` and `ProjectID`, and a query for one tenant never returns data from another. Without the headers, a request gets tenant `0:0`, which is why our helpers need none. The demo writes its logs to tenants `0:0` and `1:0`, and we will read the second copy in Step 4.
 
 If you already run a Collector, this is the part you add to your own setup: one exporter for each database.
 
@@ -218,10 +216,10 @@ MetricsQL is the query language of VictoriaMetrics. It is [backward-compatible w
 
 ```console
 $ mq 'sum(rate(http.server.request.duration_count[1m])) by (http.route)'
-{"metric":{"http.route":"/get-quote"},"value":"0.4999333422210372"}
+{"metric":{"http.route":"/get-quote"},"value":"0.48328500483285003"}
 ```
 
-Half a request per second, because `traffic` calls `shipping` every two seconds. The metric name has dots in it because it comes from OpenTelemetry, and VictoriaMetrics keeps such names as they are. Writing them without quotes is something MetricsQL adds. PromQL does not accept it, so this query would fail in Prometheus. There, a name with dots has to be quoted, as in `{__name__="http.server.request.duration_count"}`, which MetricsQL accepts too.
+About half a request per second, because `traffic` calls `shipping` every two seconds. The metric name has dots in it because it comes from OpenTelemetry, and VictoriaMetrics keeps such names as they are. Writing them without quotes is something MetricsQL adds. PromQL does not accept it, so this query would fail in Prometheus. There, a name with dots has to be quoted, as in `{__name__="http.server.request.duration_count"}`, which MetricsQL accepts too.
 
 ### Logs
 
@@ -236,28 +234,15 @@ $ lq '_time:2m | stats by (service.name, _msg) count() as logs'
 
 For every request, `shipping` writes "Requesting quote" and "Sending Quote", and `quote` writes "Calculated quote". Remember these three lines. We will come back to them in Step 5.
 
-In Step 3, we saw that the demo also writes its logs to tenant `1:0`. To read that copy, we send the same query with the `AccountID` header:
-
-```console
-$ curl -s -H 'AccountID: 1' $V/logs/select/logsql/query --data-urlencode 'query=_time:2m | stats by (service.name, _msg) count() as logs'
-{"service.name":"quote","_msg":"Calculated quote","logs":"59"}
-{"service.name":"shipping","_msg":"Sending Quote","logs":"59"}
-{"service.name":"shipping","_msg":"Requesting quote","logs":"59"}
-```
-
-The same three lines come back, this time from the other tenant. (The counts are one higher only because this query ran five seconds later.)
-
-Here we picked the tenant ourselves, just by setting a header. That works because vmauth in this demo has no users, so any client can read any tenant. In a real setup, the client doesn't choose because vmauth sets `AccountID` and `ProjectID` for each user, so the credentials decide which tenant a request reaches. The [access control docs](https://docs.victoriametrics.com/victoriastack/access-control/#multitenancy) show how.
-
 The demo also turns logs into a metric. One of its vmalert rules counts the log records of each service every minute and saves the result in VictoriaMetrics:
 
 ```console
 $ mq 'service_name:logs_count:1m'
-{"metric":{"__name__":"service_name:logs_count:1m","service.name":"quote","stats_result":"count(*)"},"value":"30"}
-{"metric":{"__name__":"service_name:logs_count:1m","service.name":"shipping","stats_result":"count(*)"},"value":"60"}
+{"metric":{"__name__":"service_name:logs_count:1m","service.name":"quote","stats_result":"count(*)"},"value":"29"}
+{"metric":{"__name__":"service_name:logs_count:1m","service.name":"shipping","stats_result":"count(*)"},"value":"58"}
 ```
 
-That is 30 records a minute from `quote` and 60 from `shipping`.
+That is 29 records a minute from `quote` and 58 from `shipping`.
 
 ### Traces
 
@@ -272,12 +257,12 @@ VictoriaTraces also understands LogsQL. A trace is made of spans (a span is one 
 
 ```console
 $ tq '_time:5m name:* | stats by (name) count() as spans'
-{"name":"calculate-quote","spans":"128"}
+{"name":"calculate-quote","spans":"125"}
 {"name":"flagSync","spans":"1"}
-{"name":"{closure}","spans":"128"}
-{"name":"POST /getquote","spans":"128"}
-{"name":"POST /get-quote","spans":"128"}
-{"name":"POST quote","spans":"128"}
+{"name":"{closure}","spans":"125"}
+{"name":"POST /getquote","spans":"125"}
+{"name":"POST /get-quote","spans":"125"}
+{"name":"POST quote","spans":"125"}
 ```
 
 ## Step 5: Break something and find the cause
@@ -294,10 +279,10 @@ Wait two minutes, and then look at the requests by HTTP status code:
 ```console
 $ mq 'sum(rate(http.server.request.duration_count[1m])) by (http.response.status_code)'
 {"metric":{"http.response.status_code":"200"},"value":"0"}
-{"metric":{"http.response.status_code":"500"},"value":"0.4999333422210372"}
+{"metric":{"http.response.status_code":"500"},"value":"0.4832527912014664"}
 ```
 
-The rate of status 200 is zero, and status 500 is at half a request per second. So every request now fails. The demo comes with alert rules, so let's see what they say:
+The rate of status 200 is zero, and status 500 is at about half a request per second. So every request now fails. The demo comes with alert rules, so let's see what they say:
 
 ```console
 $ curl -s $V/metrics/select/prometheus/api/v1/alerts | jq -c '.data.alerts[] | {alert: .labels.alertname, state}'
@@ -320,7 +305,7 @@ Two of the three lines are gone. `quote` writes nothing at all. `shipping` still
 
 ```console
 $ lq 'service.name:=quote | sort by (_time desc) | limit 1 | fields _time, _msg'
-{"_time":"2026-11-20T01:54:54.813445Z","_msg":"Calculated quote"}
+{"_time":"2026-11-27T03:37:00.668306Z","_msg":"Calculated quote"}
 ```
 
 That is the last request before we stopped the container. So the logs tell us when the trouble started and which service went quiet. But there is no error in them. `shipping` logs show nothing about the failure, so we still don't know why its requests fail. To find out, we have to look inside one request, and that is what traces are for.
@@ -371,10 +356,10 @@ The VictoriaMetrics interface shows the alerts too. Open `http://localhost:8427/
 So each signal gave us one part of the answer:
 
 - The metrics and the alert said **what** is wrong: every request to `shipping` fails.
-- The logs said **when** it started and which service went quiet: `quote` wrote its last record at 01:54:54 UTC.
+- The logs said **when** it started and which service went quiet: `quote` wrote its last record at 03:37:00 UTC.
 - The trace said **why**: the call to `quote` fails because the name `quote` cannot be found.
 
-![One outage, three signals. Metrics said what: every request fails with status 500, and the alert fired. Logs said when: the last record of quote is at 01:54:54, then nothing, and no error. A trace said why: the call POST quote fails because the name is not known.](/img/blog/hands-on-with-victoriastack/05-one-outage-three-signals.png)
+![One outage, three signals. Metrics said what: every request fails with status 500, and the alert fired. Logs said when: the last record of quote is at 03:37:00, then nothing, and no error. A trace said why: the call POST quote fails because the name is not known.](/img/blog/hands-on-with-victoriastack/05-one-outage-three-signals.png)
 
 ### The same trace in Grafana
 
@@ -408,16 +393,16 @@ Two minutes later, run the same two queries as before:
 
 ```console
 $ mq 'sum(rate(http.server.request.duration_count[1m])) by (http.response.status_code)'
-{"metric":{"http.response.status_code":"200"},"value":"0.49985004498650404"}
+{"metric":{"http.response.status_code":"200"},"value":"0.4832527912014664"}
 {"metric":{"http.response.status_code":"500"},"value":"0"}
 
 $ lq '_time:2m | stats by (service.name, _msg) count() as logs'
-{"service.name":"shipping","_msg":"Sending Quote","logs":"58"}
 {"service.name":"quote","_msg":"Calculated quote","logs":"59"}
-{"service.name":"shipping","_msg":"Requesting quote","logs":"58"}
+{"service.name":"shipping","_msg":"Sending Quote","logs":"59"}
+{"service.name":"shipping","_msg":"Requesting quote","logs":"59"}
 ```
 
-Compare this with the output during the incident. The two metric lines have swapped their values: status 200 is back at half a request per second, and status 500 is at zero. In the logs, all three messages are back.
+Compare this with the output during the incident. The two metric lines have swapped their values: status 200 is back at about half a request per second, and status 500 is at zero. In the logs, all three messages are back.
 
 Here is the whole incident as a graph in the VictoriaMetrics interface. This link opens the same query on the **Graph** tab, with the time range set to the last 30 minutes:
 
@@ -427,11 +412,11 @@ http://localhost:8427/metrics/select/vmui/#/?g0.expr=sum%28rate%28http.server.re
 
 You can also do it by hand. Open `http://localhost:8427/metrics/select/vmui/`, paste the query into the **Query** box, and click **Execute**. The time range button is at the top right. If your incident is older than 30 minutes, pick a longer range there.
 
-![A VMUI graph of requests per second by HTTP status code over the last 30 minutes. The red line for status 200 drops from 0.5 to 0 at 01:55, when quote is stopped, and a blue line for status 500 appears at 0.5. At 02:02, when quote is started again, they switch back.](/img/blog/hands-on-with-victoriastack/07-requests-by-status.png)
+![A VMUI graph of requests per second by HTTP status code over the last 30 minutes. The red line for status 200 drops from 0.5 to 0 after quote is stopped at 03:37, and a blue line for status 500 appears at 0.5. After quote is started again at 03:43, they switch back.](/img/blog/hands-on-with-victoriastack/07-requests-by-status.png)
 
 The red line is status 200, and the blue line is status 500. When `quote` stops, the red line drops to zero, and the blue line takes its place. When `quote` is back, they switch again.
 
-The alert cleared about five and a half minutes after we started `quote` again. When you are done, stop the stack and delete its data:
+The alert cleared almost six minutes after we started `quote` again. When you are done, stop the stack and delete its data:
 
 ```console
 $ make otel-single-down
@@ -493,12 +478,12 @@ For the person who queries, nothing changes. vmauth now knows two addresses for 
 
 ```console
 $ mq 'sum(rate(http.server.request.duration_count[1m])) by (http.route)'
-{"metric":{"http.route":"/get-quote"},"value":"0.49995000499950004"}
+{"metric":{"http.route":"/get-quote"},"value":"0.49992501124831273"}
 
 $ lq '_time:2m | stats by (service.name, _msg) count() as logs'
-{"service.name":"shipping","_msg":"Sending Quote","logs":"59"}
-{"service.name":"quote","_msg":"Calculated quote","logs":"59"}
-{"service.name":"shipping","_msg":"Requesting quote","logs":"59"}
+{"service.name":"quote","_msg":"Calculated quote","logs":"58"}
+{"service.name":"shipping","_msg":"Sending Quote","logs":"58"}
+{"service.name":"shipping","_msg":"Requesting quote","logs":"58"}
 
 $ curl -s $V/traces/select/jaeger/api/services
 {"data":["flagd","quote","shipping"],"errors": null,"limit": 0,"offset": 0,"total":3}
@@ -558,14 +543,14 @@ vmauth:
     unauthorizedUserAccessSpec:
       url_map:
         # VictoriaMetrics serves its API from the root, so two parts are removed: /metrics and /select (or /insert).
-        - src_paths: ["/metrics/select/.*", "/metrics/insert/.*"]
+        - src_paths: ["/metrics/(select|insert)/.*"]
           drop_src_path_prefix_parts: 2
           url_prefix: ["http://vmsingle-stack:8428"]
         # VictoriaLogs and VictoriaTraces have /select and /insert in their own paths, so only one part is removed.
-        - src_paths: ["/logs/select/.*", "/logs/insert/.*"]
+        - src_paths: ["/logs/(select|insert)/.*"]
           drop_src_path_prefix_parts: 1
           url_prefix: ["http://vlsingle-stack:9428"]
-        - src_paths: ["/traces/select/.*", "/traces/insert/.*"]
+        - src_paths: ["/traces/(select|insert)/.*"]
           drop_src_path_prefix_parts: 1
           url_prefix: ["http://vtsingle-stack:10428"]
 
@@ -588,7 +573,7 @@ Update Complete. ⎈Happy Helming!⎈
 
 $ helm install stack vm/victoria-metrics-k8s-stack --version 0.98.1 --namespace monitoring --create-namespace -f values.yaml
 NAME: stack
-LAST DEPLOYED: Sun Nov 22 22:45:23 2026
+LAST DEPLOYED: Fri Nov 27 09:25:07 2026
 NAMESPACE: monitoring
 STATUS: deployed
 REVISION: 1
@@ -596,25 +581,25 @@ DESCRIPTION: Install complete
 NOTES:
 ```
 
-In this run, the pods were running after about four minutes:
+In this run, the pods were running after about two and a half minutes:
 
 ```console
 $ kubectl get pods -n monitoring
 NAME                                               READY   STATUS      RESTARTS   AGE
-stack-grafana-564d767687-wfnhv                     3/3     Running     0          4m12s
-stack-kube-state-metrics-f8df5896c-lb6dm           1/1     Running     0          4m12s
-stack-prometheus-node-exporter-xwcjz               1/1     Running     0          4m12s
-stack-sync-job-lzjxp                               0/1     Completed   0          4m11s
-stack-victoria-metrics-operator-566fd744c4-kscvs   1/1     Running     0          4m12s
-vlagent-stack-t22vv                                1/1     Running     0          3m50s
-vlsingle-stack-79b6bb6f44-pnpkc                    1/1     Running     0          3m45s
-vmagent-stack-9cb5cd47f-z7nn7                      2/2     Running     0          3m50s
-vmalert-stack-7d65c4966-qzkwx                      2/2     Running     0          3m50s
-vmalertmanager-stack-0                             2/2     Running     0          3m50s
-vmauth-stack-559ffb4649-nqttm                      2/2     Running     0          3m50s
-vmauth-stack-internal-5476f786f9-wn2f7             2/2     Running     0          3m50s
-vmsingle-stack-746794f864-hjmfd                    1/1     Running     0          3m45s
-vtsingle-stack-65b657f49f-g5mdf                    1/1     Running     0          3m50s
+stack-grafana-694b965995-zhcht                     3/3     Running     0          2m36s
+stack-kube-state-metrics-f8df5896c-pj8g2           1/1     Running     0          2m36s
+stack-prometheus-node-exporter-j4v46               1/1     Running     0          2m36s
+stack-sync-job-ntgvv                               0/1     Completed   0          2m36s
+stack-victoria-metrics-operator-566fd744c4-bxtln   1/1     Running     0          2m36s
+vlagent-stack-m6pmp                                1/1     Running     0          113s
+vlsingle-stack-79b6bb6f44-86nfc                    1/1     Running     0          108s
+vmagent-stack-9cb5cd47f-dck9k                      2/2     Running     0          112s
+vmalert-stack-7d65c4966-gz8j2                      2/2     Running     0          113s
+vmalertmanager-stack-0                             2/2     Running     0          113s
+vmauth-stack-559ffb4649-j7vhf                      2/2     Running     0          113s
+vmauth-stack-internal-5476f786f9-7t2wk             2/2     Running     0          113s
+vmsingle-stack-746794f864-2wnst                    1/1     Running     0          113s
+vtsingle-stack-65b657f49f-mh9ct                    1/1     Running     0          113s
 ```
 
 The three databases are `vmsingle`, `vlsingle`, and `vtsingle`, and `vmauth-stack` is our entry point. `vmauth-stack-internal` is a second vmauth that the chart adds for vmalert. Now let's look at the Service for vmauth:
@@ -622,7 +607,7 @@ The three databases are `vmsingle`, `vlsingle`, and `vtsingle`, and `vmauth-stac
 ```console
 $ kubectl get svc -n monitoring vmauth-stack
 NAME           TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
-vmauth-stack   ClusterIP   10.96.19.117   <none>        8427/TCP   3m50s
+vmauth-stack   ClusterIP   10.96.38.111   <none>        8427/TCP   113s
 ```
 
 It is a ClusterIP Service, so only pods inside the cluster can reach it. To reach it from your machine, forward port 8427 in a second terminal and leave it running. The Compose demo must be stopped by now, because it uses the same port:
@@ -648,8 +633,9 @@ $ mq 'count(kube_pod_info) by (namespace)'
 {"metric":{"namespace":"monitoring"},"value":"14"}
 
 $ lq '_time:5m | stats by (kubernetes.pod_namespace) count() as logs'
-{"kubernetes.pod_namespace":"monitoring","logs":"2791"}
-{"kubernetes.pod_namespace":"kube-system","logs":"72"}
+{"kubernetes.pod_namespace":"monitoring","logs":"3111"}
+{"kubernetes.pod_namespace":"kube-system","logs":"881"}
+{"kubernetes.pod_namespace":"local-path-storage","logs":"28"}
 ```
 
 For traces, we need something that sends spans. Let's send 20 test traces with `telemetrygen`, a test tool from the OpenTelemetry project:
@@ -657,9 +643,9 @@ For traces, we need something that sends spans. Let's send 20 test traces with `
 ```console
 $ kubectl run telemetrygen -n monitoring --rm -i --restart=Never --image=ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.165.0 -- traces --otlp-http --otlp-insecure --otlp-endpoint vmauth-stack:8427 --otlp-http-url-path /traces/insert/opentelemetry/v1/traces --service hello-from-kind --traces 20
 ...
-2026-11-22T17:21:58.767Z	INFO	traces/worker.go:180	traces generated	{"worker": 0, "traces": 20}
-2026-11-22T17:21:58.767Z	INFO	traces/traces.go:75	stop the batch span processor
-2026-11-22T17:21:58.768Z	INFO	traces/traces.go:65	stopping the exporter
+2026-11-27T04:00:07.663Z	INFO	traces/worker.go:180	traces generated	{"worker": 0, "traces": 20}
+2026-11-27T04:00:07.663Z	INFO	traces/traces.go:75	stop the batch span processor
+2026-11-27T04:00:07.664Z	INFO	traces/traces.go:65	stopping the exporter
 pod "telemetrygen" deleted from monitoring namespace
 
 $ curl -s $V/traces/select/jaeger/api/services
